@@ -46,8 +46,10 @@ public class MavenMarkerResolutionGenerator implements IMarkerResolutionGenerato
         return new IMarkerResolution[] {new XMLSchemaMarkerResolution()};
       }
       if ("parent_version".equals(hint)) {
+        return new IMarkerResolution[] {new PomQuickAssistProcessor.IdPartRemovalProposal(marker, true) };
       }
       if ("parent_groupid".equals(hint)) {
+        return new IMarkerResolution[] {new PomQuickAssistProcessor.IdPartRemovalProposal(marker, false) };
       }
     }
     return new IMarkerResolution[0];

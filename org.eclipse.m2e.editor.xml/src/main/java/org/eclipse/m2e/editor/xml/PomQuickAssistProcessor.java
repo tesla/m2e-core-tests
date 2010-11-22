@@ -11,6 +11,7 @@
 
 package org.eclipse.m2e.editor.xml;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -19,11 +20,15 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.Text;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.contentassist.ContextInformation;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension5;
 import org.eclipse.jface.text.contentassist.IContextInformation;
@@ -36,12 +41,14 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.text.edits.DeleteEdit;
 import org.eclipse.text.edits.InsertEdit;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IMarkerResolution;
 import org.eclipse.ui.internal.WorkbenchPlugin;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IndexedRegion;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
 import org.eclipse.wst.sse.core.utils.StringUtils;
+import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
 
 import org.eclipse.m2e.core.core.IMavenConstants;
@@ -62,15 +69,12 @@ public class PomQuickAssistProcessor implements IQuickAssistProcessor {
   }
 
   public boolean canFix(Annotation an) {
-    
+
     if (an instanceof MarkerAnnotation) {
       MarkerAnnotation mark = (MarkerAnnotation) an;
       try {
-        if (IMavenConstants.MARKER_HINT_ID.equals(mark.getMarker().getType())) {
-          String hint = mark.getMarker().getAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, ""); //$NON-NLS-1$
-          if (!hint.equals("")) { //$NON-NLS-1$
-            return true;
-          }
+        if (mark.getMarker().isSubtypeOf(IMavenConstants.MARKER_HINT_ID)) {
+          return true;
         }
       } catch(CoreException e) {
         // TODO Auto-generated catch block
@@ -92,7 +96,7 @@ public class PomQuickAssistProcessor implements IQuickAssistProcessor {
          int lineNum = context.getSourceViewer().getDocument().getLineOfOffset(position.getOffset()) + 1;
          int currentLineNum = context.getSourceViewer().getDocument().getLineOfOffset(context.getOffset()) + 1;
          if (currentLineNum == lineNum) {
-           if (IMavenConstants.MARKER_HINT_ID.equals(mark.getMarker().getType())) {
+           if (mark.getMarker().isSubtypeOf(IMavenConstants.MARKER_HINT_ID)) {
              String hint = mark.getMarker().getAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, ""); //$NON-NLS-1$
              if (hint.equals("parent_groupid")) { //$NON-NLS-1$
                proposals.add(new IdPartRemovalProposal(context, false, mark));
@@ -173,6 +177,7 @@ class SchemaCompletionProposal implements ICompletionProposal, ICompletionPropos
   }
 
   public String getAdditionalProposalInfo() {
+    //NOT TO BE REALLY IMPLEMENTED, we have the other method
     return null;
   }
 
@@ -200,54 +205,86 @@ class SchemaCompletionProposal implements ICompletionProposal, ICompletionPropos
 }
 
 
-class IdPartRemovalProposal implements ICompletionProposal, ICompletionProposalExtension5 {
+static class IdPartRemovalProposal implements ICompletionProposal, ICompletionProposalExtension5, IMarkerResolution {
 
-  IQuickAssistInvocationContext context;
+  private IQuickAssistInvocationContext context;
   private boolean isVersion;
-  private MarkerAnnotation annotation;
-  public IdPartRemovalProposal(IQuickAssistInvocationContext context, boolean version, MarkerAnnotation mark){
+  private IMarker marker;
+  public IdPartRemovalProposal(IQuickAssistInvocationContext context, boolean version, MarkerAnnotation mark) {
     this.context = context;
     isVersion = version;
-    annotation = mark;
+    marker = mark.getMarker();
   }
   
-  public void apply(IDocument doc) {
+  public IdPartRemovalProposal(IMarker marker, boolean version) {
+    this.marker = marker;
+    isVersion = version;
+  }
+  
+  private Element getRootElement(IDocument doc) {
     IDOMModel domModel = null;
     try {
       domModel = (IDOMModel) StructuredModelManager.getModelManager().getExistingModelForRead(doc);
       IStructuredDocument document = domModel.getStructuredDocument();
       Element root = domModel.getDocument().getDocumentElement();
-
-      //now check parent version and groupid against the current project's ones..
-      if (root.getNodeName().equals(PomQuickAssistProcessor.PROJECT_NODE)) { //$NON-NLS-1$
-        Element value = MavenMarkerManager.findChildElement(root, isVersion ? VERSION_NODE : GROUP_ID_NODE); //$NON-NLS-1$ //$NON-NLS-2$
-        if (value != null && value instanceof IndexedRegion) {
-          IndexedRegion off = (IndexedRegion) value;
-
-          int offset = off.getStartOffset();
-          if (offset <= 0) {
-            return;
-          }
-          Node prev = value.getNextSibling();
-          if (prev instanceof Text) {
-            //check the content as well??
-            off = ((IndexedRegion) prev);
-          }
-          DeleteEdit edit = new DeleteEdit(offset, off.getEndOffset() - offset);
-          try {
-            edit.apply(doc);
-            annotation.getMarker().delete();
-          } catch(Exception e) {
-            MavenLogger.log("Unable to remove the element", e); //$NON-NLS-1$
-          }
-        }
-      }
+      return root;
     } finally {
       if (domModel != null) {
         domModel.releaseFromRead();
       }
     }
+  }
+  
+  private IStructuredDocument getDocument(IMarker marker) {
+    if (marker.getResource().getType() == IResource.FILE)
+    {
+      IDOMModel domModel = null;
+      try {
+        domModel = (IDOMModel)StructuredModelManager.getModelManager().getModelForEdit((IFile)marker.getResource());
+        return domModel.getStructuredDocument();
+      } catch(Exception e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      } finally {
+        if (domModel != null) {
+          domModel.releaseFromRead();
+        }
+      }
+    }
+    return null;
+  }  
+  
+  public void apply(IDocument doc) {
+    Element root = getRootElement(doc);
+    processFix(doc, root, isVersion, marker);
 
+  }
+
+  private void processFix(IDocument doc, Element root, boolean isversion, IMarker marker) {
+    //now check parent version and groupid against the current project's ones..
+    if (root.getNodeName().equals(PomQuickAssistProcessor.PROJECT_NODE)) { //$NON-NLS-1$
+      Element value = MavenMarkerManager.findChildElement(root, isversion ? VERSION_NODE : GROUP_ID_NODE); //$NON-NLS-1$ //$NON-NLS-2$
+      if (value != null && value instanceof IndexedRegion) {
+        IndexedRegion off = (IndexedRegion) value;
+
+        int offset = off.getStartOffset();
+        if (offset <= 0) {
+          return;
+        }
+        Node prev = value.getNextSibling();
+        if (prev instanceof Text) {
+          //check the content as well??
+          off = ((IndexedRegion) prev);
+        }
+        DeleteEdit edit = new DeleteEdit(offset, off.getEndOffset() - offset);
+        try {
+          edit.apply(doc);
+          marker.delete();
+        } catch(Exception e) {
+          MavenLogger.log("Unable to remove the element", e); //$NON-NLS-1$
+        }
+      }
+    }
   }
 
   public String getAdditionalProposalInfo() {
@@ -271,11 +308,15 @@ class IdPartRemovalProposal implements ICompletionProposal, ICompletionProposalE
   }
 
   public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
+    if (context == null) {
+      //no context in markerresolution, just to be sure..
+      return null;
+    }
     IDocument doc = context.getSourceViewer().getDocument();
     IDOMModel domModel = null;
     try {
       domModel = (IDOMModel) StructuredModelManager.getModelManager().getExistingModelForRead(doc);
-      IStructuredDocument document = domModel.getStructuredDocument();
+//      IStructuredDocument document = domModel.getStructuredDocument();
       Element root = domModel.getDocument().getDocumentElement();
 
       //now check parent version and groupid against the current project's ones..
@@ -306,6 +347,17 @@ class IdPartRemovalProposal implements ICompletionProposal, ICompletionProposalE
     }      
     return Messages.PomQuickAssistProcessor_remove_hint;
   }
-  
+
+  public String getLabel() {
+    return getDisplayString();
+  }
+
+  public void run(IMarker marker) {
+    IStructuredDocument doc = getDocument(marker);
+    if (doc != null) {
+      Element root = getRootElement(doc);
+      processFix(doc, root, isVersion, marker);
+    }
+  } 
 }
 }
