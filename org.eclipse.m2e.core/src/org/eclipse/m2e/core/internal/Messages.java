@@ -821,9 +821,8 @@ public class Messages extends NLS {
 
   public static String OpenPomAction_open_title;
 
-  public static String OpenPomAction_title_class;
-
   public static String OpenPomAction_title_pom;
+  
   public static String OpenUrlAction_browser_title;
 
   public static String OpenUrlAction_error_no_ci;

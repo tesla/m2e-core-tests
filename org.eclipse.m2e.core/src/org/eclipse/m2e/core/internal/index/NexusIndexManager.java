@@ -29,7 +29,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.WeakHashMap;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IProject;
@@ -314,10 +313,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
    */
   public Map<String, IndexedArtifact> search(IRepository repository, String term, String type, int classifier) throws CoreException {
     Query query;
-    if(IIndex.SEARCH_CLASS_NAME.equals(type)) {
-      query = getIndexer().constructQuery(ArtifactInfo.NAMES, term + "$"); //$NON-NLS-1$
-      
-    } else if(IIndex.SEARCH_GROUP.equals(type)) {
+    if(IIndex.SEARCH_GROUP.equals(type)) {
       query = new TermQuery(new Term(ArtifactInfo.GROUP_ID, term));
       //query = new PrefixQuery(new Term(ArtifactInfo.GROUP_ID, term));
 
@@ -388,30 +384,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
         Pattern p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
 
         for(ArtifactInfo artifactInfo : response.getResults()) {
-          IndexedArtifactFile af = getIndexedArtifactFile(artifactInfo);
-
-          if(!IIndex.SEARCH_CLASS_NAME.equals(type) || term.length() < IndexManager.MIN_CLASS_QUERY_LENGTH) {
-            addArtifactFile(result, af, null, null, artifactInfo.packaging);
-
-          } else {
-            String classNames = artifactInfo.classNames;
-
-            Matcher matcher = p.matcher(classNames);
-            while(matcher.find()) {
-              String value = matcher.group();
-              int n = value.lastIndexOf('/');
-              String className;
-              String packageName;
-              if(n < 0) {
-                packageName = ""; //$NON-NLS-1$
-                className = value;
-              } else {
-                packageName = value.substring(0, n).replace('/', '.');
-                className = value.substring(n + 1);
-              }
-              addArtifactFile(result, af, className, packageName, artifactInfo.packaging);
-            }
-          }
+          addArtifactFile(result, getIndexedArtifactFile(artifactInfo), null, null, artifactInfo.packaging);
         }
 
         // https://issues.sonatype.org/browse/MNGECLIPSE-1630

@@ -97,9 +97,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
    * @see org.eclipse.core.runtime.IExecutableExtension#setInitializationData(org.eclipse.core.runtime.IConfigurationElement, java.lang.String, java.lang.Object)
    */
   public void setInitializationData(IConfigurationElement config, String propertyName, Object data) {
-    if("class".equals(data)) { //$NON-NLS-1$
-      this.type = IIndex.SEARCH_CLASS_NAME;
-    } else if("plugins".equals(data)) { //$NON-NLS-1$
+    if("plugins".equals(data)) { //$NON-NLS-1$
       this.type = IIndex.SEARCH_PACKAGING;
     } else {
       this.type = IIndex.SEARCH_ARTIFACT;
@@ -144,26 +142,16 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
       }
     }
 
-    String title;
-    if(IIndex.SEARCH_CLASS_NAME.equals(type)) {
-      title = Messages.OpenPomAction_title_class;
-    } else {
-      title = Messages.OpenPomAction_title_pom;
-    }
+    String title = Messages.OpenPomAction_title_pom;
 
     Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
     MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(shell, title, type, Collections
         .<ArtifactKey> emptySet());
     if(dialog.open() == Window.OK) {
       final IndexedArtifactFile iaf = (IndexedArtifactFile) dialog.getFirstResult();
-      final IndexedArtifact indexedArtifact = dialog.getSelectedIndexedArtifact();
       new Job(Messages.OpenPomAction_job_opening) {
         protected IStatus run(IProgressMonitor monitor) {
-          if(IIndex.SEARCH_CLASS_NAME.equals(type)) {
-            if(indexedArtifact != null) {
-              openEditor(indexedArtifact, iaf, monitor);
-            }
-          } else if(iaf != null) {
+          if(iaf != null) {
             openEditor(iaf.group, iaf.artifact, iaf.version, monitor);
           }
           return Status.OK_STATUS;
