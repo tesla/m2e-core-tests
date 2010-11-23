@@ -371,11 +371,7 @@ public class MavenPomSelectionComponent extends Composite {
         try {
           setResult(IStatus.OK, NLS.bind(Messages.MavenPomSelectionComponent_searching , activeQuery.toLowerCase()), null);
           Map<String, IndexedArtifact> res = indexManager.search(activeQuery, field, classifier);
-          if(IIndex.SEARCH_CLASS_NAME.equals(field) && activeQuery.length() < IndexManager.MIN_CLASS_QUERY_LENGTH) {
-            setResult(IStatus.WARNING, NLS.bind(Messages.MavenPomSelectionComponent_tooshort, activeQuery), Collections.<String, IndexedArtifact>emptyMap());
-          } else {
-            setResult(IStatus.OK, NLS.bind(Messages.MavenPomSelectionComponent_results, activeQuery, res.size()), res);
-          }
+          setResult(IStatus.OK, NLS.bind(Messages.MavenPomSelectionComponent_results, activeQuery, res.size()), res);
         } catch(BooleanQuery.TooManyClauses ex){
           setResult(IStatus.ERROR, Messages.MavenPomSelectionComponent_toomany, Collections.<String, IndexedArtifact>emptyMap());
         } catch(final RuntimeException ex) {
@@ -454,21 +450,12 @@ public class MavenPomSelectionComponent extends Composite {
     public Image getImage(Object element) {
       if(element instanceof IndexedArtifactFile) {
         IndexedArtifactFile f = (IndexedArtifactFile) element;
-        if(IIndex.SEARCH_CLASS_NAME.equals(queryType)) {
-          if(f.sourcesExists==IIndex.PRESENT) {
-            return MavenImages.IMG_JAVA_SRC;
-          }
-          return MavenImages.IMG_JAVA;
-        }
         if(f.sourcesExists==IIndex.PRESENT) {
           return MavenImages.IMG_VERSION_SRC;
         }
         return MavenImages.IMG_VERSION;
       } else if(element instanceof IndexedArtifact) {
         // IndexedArtifact i = (IndexedArtifact) element;
-        if(IIndex.SEARCH_CLASS_NAME.equals(queryType)) {
-          return MavenImages.IMG_JAVA;
-        }
         return MavenImages.IMG_JAR;
       }
       return null;

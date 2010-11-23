@@ -272,11 +272,6 @@
                categoryId="org.eclipse.ui.category.navigate"
                name="%m2.shortcut.open.pom"/>
       <command
-            categoryId="org.eclipse.ui.category.navigate"
-            description="%command.opentype.description"
-            id="org.eclipse.m2e.core.ui.command.openType"
-            name="%m2.shortcut.open.type"/>
-      <command
             categoryId="org.eclipse.ui.category.edit"
             description="%command.adddependency.description"
             id="org.eclipse.m2e.core.ui.command.addDependency"
@@ -446,14 +441,6 @@
    <extension point="org.eclipse.ui.actionSets">
      <actionSet id="org.eclipse.m2e.core.ui.navigation"
                 label="%actionSet.navigation.label" visible="true">
-       <action id="org.eclipse.m2e.core.ui.open.pom"
-               class="org.eclipse.m2e.core.actions.OpenPomAction:class"
-               definitionId="org.eclipse.m2e.core.ui.command.openType"
-               label="%action.open.label"
-               icon="icons/open_pom.gif"
-               style="push"
-               menubarPath="navigate/open.ext"
-               tooltip="%action.open.tooltip"/>
        <action
              class="org.eclipse.m2e.core.actions.OpenPomAction:artifact"
              definitionId="org.eclipse.m2e.core.ui.command.openPom"

@@ -76,13 +76,6 @@
       </factory>
    </extension>
 
-   <extension point="org.eclipse.jdt.ui.quickAssistProcessors">
-      <quickAssistProcessor
-            class="org.eclipse.m2e.jdt.internal.actions.MavenDependencyResolver"
-            name="org.eclipse.m2e.actions.Maven2DependencyResolver"
-            id="org.eclipse.m2e.quickAssistProcessor"/>
-   </extension>
-
    <extension point="org.eclipse.jdt.core.compilationParticipant">
       <compilationParticipant
             id="org.eclipse.m2e.compilationParticipant"
@@ -120,18 +113,6 @@
       <factory class="org.eclipse.m2e.jdt.internal.ui.MavenJdtMenuCreator"/>
    </extension>
 
-   <!--
-   <extension
-         point="org.eclipse.jdt.ui.queryParticipants">
-      <queryParticipant
-            class="org.eclipse.m2e.ui.internal.search.MavenQueryParticipant"
-            id="org.eclipse.m2e.MavenQueryParticipantJava"
-            name="Maven Respository Search"
-            nature="org.eclipse.jdt.core.javanature">
-      </queryParticipant>
-   </extension>
-   -->
-   
    <extension point="org.eclipse.jdt.ui.javaElementFilters">
       <filter id="org.eclipse.m2e.MavenModuleFilter"
           targetId="org.eclipse.jdt.ui.PackageExplorer"
