@@ -33,6 +33,7 @@ public class InsertExpressionProposal implements ICompletionProposal, ICompletio
   private int len = 0;
 
   public InsertExpressionProposal(ISourceViewer sourceViewer, Region region, String key, IMavenProjectFacade mvnproject) {
+    assert project != null;
     this.sourceViewer = sourceViewer;
     this.region = region;
     this.key = key;

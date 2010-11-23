@@ -169,33 +169,33 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
                 }
               }
             }
-          }
-          //add a few hardwired values as well
-          if ("${basedir}".startsWith(realExpressionPrefix)) { //$NON-NLS-1$
-            collect.add("basedir"); //$NON-NLS-1$
-          }
-          if ("${project.version}".startsWith(realExpressionPrefix)) { //$NON-NLS-1$
-            collect.add("project.version"); //$NON-NLS-1$
-          }
-          if ("${project.groupId}".startsWith(realExpressionPrefix)) { //$NON-NLS-1$
-            collect.add("project.groupId"); //$NON-NLS-1$
-          }
-          if ("${project.artifactId}".startsWith(realExpressionPrefix)) { //$NON-NLS-1$
-            collect.add("project.artifactId"); //$NON-NLS-1$
-          }
-          if ("${project.build.directory}".startsWith(realExpressionPrefix)) { //$NON-NLS-1$
-            collect.add("project.build.directory"); //$NON-NLS-1$
-          }
-          if ("${project.build.sourceEncoding}".startsWith(realExpressionPrefix)) { //$NON-NLS-1$
-            collect.add("project.build.sourceEncoding"); //$NON-NLS-1$
-          }
-          Collections.sort(collect);
-          for (String key : collect) {
-            ICompletionProposal proposal = new InsertExpressionProposal(sourceViewer, region, key, mvnproject); 
-            if(request.shouldSeparate()) {
-              request.addMacro(proposal);
-            } else {
-              request.addProposal(proposal);
+            //add a few hardwired values as well
+            if ("${basedir}".startsWith(realExpressionPrefix)) { //$NON-NLS-1$
+              collect.add("basedir"); //$NON-NLS-1$
+            }
+            if ("${project.version}".startsWith(realExpressionPrefix)) { //$NON-NLS-1$
+              collect.add("project.version"); //$NON-NLS-1$
+            }
+            if ("${project.groupId}".startsWith(realExpressionPrefix)) { //$NON-NLS-1$
+              collect.add("project.groupId"); //$NON-NLS-1$
+            }
+            if ("${project.artifactId}".startsWith(realExpressionPrefix)) { //$NON-NLS-1$
+              collect.add("project.artifactId"); //$NON-NLS-1$
+            }
+            if ("${project.build.directory}".startsWith(realExpressionPrefix)) { //$NON-NLS-1$
+              collect.add("project.build.directory"); //$NON-NLS-1$
+            }
+            if ("${project.build.sourceEncoding}".startsWith(realExpressionPrefix)) { //$NON-NLS-1$
+              collect.add("project.build.sourceEncoding"); //$NON-NLS-1$
+            }
+            Collections.sort(collect);
+            for (String key : collect) {
+              ICompletionProposal proposal = new InsertExpressionProposal(sourceViewer, region, key, mvnproject); 
+              if(request.shouldSeparate()) {
+                request.addMacro(proposal);
+              } else {
+                request.addProposal(proposal);
+              }
             }
           }
         }
