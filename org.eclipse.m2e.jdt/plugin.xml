@@ -52,11 +52,6 @@
 
    <extension point="org.eclipse.m2e.core.projectConfigurators">
       <configurator
-            class="org.eclipse.m2e.jdt.internal.GenericJavaProjectConfigurator"
-            id="org.eclipse.m2e.jdt.genericJava"
-            name="%configurator.genericjdt.name"
-            priority="10"/>
-      <configurator
             class="org.eclipse.m2e.jdt.internal.JavaProjectConfigurator"
             generic="false"
             id="org.eclipse.m2e.jdt.javaConfigurator"
