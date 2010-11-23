@@ -10,7 +10,11 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.jface.text,
  org.eclipse.wst.xml.core,
  org.eclipse.wst.xml.ui,
- org.eclipse.m2e.core
+ org.eclipse.m2e.core,
+ org.eclipse.ui.editors,
+ org.eclipse.ui,
+ org.eclipse.wst.sse.ui,
+ org.eclipse.wst.sse.core
 Bundle-Name: %Bundle-Name
 Bundle-Version: 0.13.0.qualifier
 MavenArtifact-ArtifactId: org.eclipse.m2e.editor.xml.tests
