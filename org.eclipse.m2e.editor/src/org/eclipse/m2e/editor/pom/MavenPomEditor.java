@@ -74,6 +74,10 @@ import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.ITextListener;
 import org.eclipse.jface.text.TextEvent;
 import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.jface.text.source.IVerticalRulerInfo;
+import org.eclipse.jface.text.source.IVerticalRulerInfoExtension;
+import org.eclipse.jface.text.source.IVerticalRulerListener;
+import org.eclipse.jface.text.source.VerticalRulerEvent;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.actions.OpenPomAction.MavenPathStorageEditorInput;
 import org.eclipse.m2e.core.actions.OpenPomAction.MavenStorageEditorInput;
@@ -97,7 +101,9 @@ import org.eclipse.m2e.model.edit.pom.util.PomResourceFactoryImpl;
 import org.eclipse.m2e.model.edit.pom.util.PomResourceImpl;
 import org.eclipse.search.ui.text.ISearchEditorAccess;
 import org.eclipse.search.ui.text.Match;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -679,6 +685,37 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   protected class StructuredSourceTextEditor extends StructuredTextEditor {
     private long fModificationStamp = -1;
 
+    @Override
+    public void createPartControl(Composite parent) {
+      super.createPartControl(parent);
+      IVerticalRulerInfo service= (IVerticalRulerInfo) sourcePage.getAdapter(IVerticalRulerInfo.class);
+      System.out.println("service=" + service);
+      if (service instanceof IVerticalRulerInfoExtension) {
+        System.out.println("have vertical ruler info");
+        ((IVerticalRulerInfoExtension) service).addVerticalRulerListener(new IVerticalRulerListener() {
+          
+          public void annotationSelected(VerticalRulerEvent event) {
+            // TODO Auto-generated method stub
+            System.out.println("selecte#######");
+            
+          }
+          
+          public void annotationDefaultSelected(VerticalRulerEvent event) {
+            // TODO Auto-generated method stub
+            System.out.println("selecte#######");
+            
+          }
+          
+          public void annotationContextMenuAboutToShow(VerticalRulerEvent event, Menu menu) {
+            // TODO Auto-generated method stub
+            System.out.println("selecte#######");
+            
+          }
+        });
+      }
+      
+      
+    }
     protected void updateModificationStamp() {
       IDocumentProvider p= getDocumentProvider();
       if (p == null)
@@ -755,6 +792,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       sourcePageIndex = addPage(sourcePage, getEditorInput());
       setPageText(sourcePageIndex, POM_XML);
       sourcePage.update();
+
       
       IDocument doc = sourcePage.getDocumentProvider().getDocument(getEditorInput());
       

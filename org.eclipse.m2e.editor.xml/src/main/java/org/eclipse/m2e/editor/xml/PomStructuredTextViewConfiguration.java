@@ -11,16 +11,23 @@
 
 package org.eclipse.m2e.editor.xml;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.text.information.IInformationProvider;
 import org.eclipse.jface.text.quickassist.IQuickAssistAssistant;
 import org.eclipse.jface.text.source.Annotation;
+import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.swt.SWT;
+import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.wst.sse.core.text.IStructuredPartitions;
+import org.eclipse.wst.sse.ui.internal.StructuredTextAnnotationHover;
 import org.eclipse.wst.xml.core.text.IXMLPartitions;
 import org.eclipse.wst.xml.ui.StructuredTextViewerConfigurationXML;
+
+import org.eclipse.m2e.core.core.IMavenConstants;
 
 /**
  * @author Lukas Krecan
@@ -55,7 +62,9 @@ public class PomStructuredTextViewConfiguration extends StructuredTextViewerConf
   }
 
   public IQuickAssistAssistant getQuickAssistAssistant(ISourceViewer sourceViewer) {
-    // TODO Auto-generated method stub
+    //not explicitly setting processor results in having a bunch of generic quick fixes around..
+    //also see org.eclipse.wst.sse.ui.quickFixProcessor extension point regarding the way to declaratively
+    //register the pomquickassistprocessor
     IQuickAssistAssistant quickAssistAssistant = super.getQuickAssistAssistant(sourceViewer);
     quickAssistAssistant.setQuickAssistProcessor(new PomQuickAssistProcessor());
     return quickAssistAssistant;

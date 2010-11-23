@@ -143,6 +143,7 @@ public class MavenMarkerManager implements IMavenMarkerManager {
                 mark.setAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, "parent_groupid"); //$NON-NLS-1$ //$NON-NLS-2$
                 mark.setAttribute(IMarker.CHAR_START, off.getStartOffset());
                 mark.setAttribute(IMarker.CHAR_END, off.getEndOffset());
+                mark.setAttribute("problemType", "pomhint"); //only imporant in case we enable the generic xml quick fixes
               }
             }
           }
@@ -162,6 +163,7 @@ public class MavenMarkerManager implements IMavenMarkerManager {
                 mark.setAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, "parent_version"); //$NON-NLS-1$ //$NON-NLS-2$
                 mark.setAttribute(IMarker.CHAR_START, off.getStartOffset());
                 mark.setAttribute(IMarker.CHAR_END, off.getEndOffset());
+                mark.setAttribute("problemType", "pomhint"); //only imporant in case we enable the generic xml quick fixes
               }
             }
           }
@@ -239,6 +241,7 @@ public class MavenMarkerManager implements IMavenMarkerManager {
                   marker.setAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, "schema"); //$NON-NLS-1$ 
                   marker.setAttribute(IMarker.CHAR_START, documentRegion.getStartOffset());
                   marker.setAttribute(IMarker.CHAR_END, documentRegion.getEndOffset());
+                  marker.setAttribute("problemType", "pomhint"); //only imporant in case we enable the generic xml quick fixes
                 }
               }
               // there could only be one project tag
