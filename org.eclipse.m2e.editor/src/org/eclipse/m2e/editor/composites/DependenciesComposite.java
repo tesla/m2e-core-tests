@@ -14,11 +14,14 @@ package org.eclipse.m2e.editor.composites;
 import static org.eclipse.m2e.editor.pom.FormUtils.nvl;
 import static org.eclipse.m2e.editor.pom.FormUtils.setText;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.project.MavenProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -39,23 +42,30 @@ import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
+import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.actions.OpenUrlAction;
 import org.eclipse.m2e.core.core.MavenLogger;
 import org.eclipse.m2e.core.embedder.ArtifactKey;
+import org.eclipse.m2e.core.embedder.IMaven;
 import org.eclipse.m2e.core.index.IIndex;
 import org.eclipse.m2e.core.index.IndexedArtifactFile;
+import org.eclipse.m2e.core.project.IMavenProjectFacade;
+import org.eclipse.m2e.core.project.MavenProjectManager;
 import org.eclipse.m2e.core.ui.dialogs.AddDependencyDialog;
 import org.eclipse.m2e.core.ui.dialogs.MavenRepositorySearchDialog;
 import org.eclipse.m2e.core.util.M2EUtils;
 import org.eclipse.m2e.core.util.ProposalUtil;
 import org.eclipse.m2e.core.util.search.Packaging;
 import org.eclipse.m2e.editor.MavenEditorImages;
+import org.eclipse.m2e.editor.MavenEditorPlugin;
+import org.eclipse.m2e.editor.dialogs.ManageDependenciesDialog;
 import org.eclipse.m2e.editor.internal.Messages;
 import org.eclipse.m2e.editor.pom.FormUtils;
 import org.eclipse.m2e.editor.pom.MavenPomEditor;
@@ -83,6 +93,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Section;
@@ -140,6 +151,7 @@ public class DependenciesComposite extends Composite {
   boolean changingSelection = false;
 
   Model model;
+  MavenProject mavenProject;
   ValueProvider<DependencyManagement> dependencyManagementProvider;
 
   DependencyLabelProvider dependencyLabelProvider = new DependencyLabelProvider();
@@ -257,6 +269,7 @@ public class DependenciesComposite extends Composite {
     
     dependenciesEditor.setSelectListener(new SelectionAdapter(){
       public void widgetSelected(SelectionEvent e) {
+        
         final AddDependencyDialog addDepDialog = new AddDependencyDialog(getShell(), false, editorPage.getProject());
         
         /*
@@ -297,6 +310,8 @@ public class DependenciesComposite extends Composite {
           dependencyDetailComposite.setFocus();
         }
       }
+
+      
     });
 //    dependencyAddAction = new Action("Add Dependency", MavenEditorImages.ADD_ARTIFACT) {
 //      public void run() {
@@ -873,16 +888,35 @@ public class DependenciesComposite extends Composite {
 
         // XXX event is not received when <dependencies> is deleted in XML
         if(object instanceof Model) {
+          Model model2 = (Model) object;
+          
+          if (model2.getDependencyManagement() != null && dependencyManagementEditor.getInput() == null) {
+            dependencyManagementEditor.setInput(model2.getDependencyManagement().getDependencies());
+          } else if (model2.getDependencyManagement() == null) {
+            dependencyManagementEditor.setInput(null);
+          }
+          
+          if (model2.getDependencies() != null && dependenciesEditor.getInput() == null) {
+            dependenciesEditor.setInput(model2.getDependencies());
+          } else if (model2.getDependencies() == null) {
+            dependenciesEditor.setInput(null);
+          }
+          
           dependenciesEditor.refresh();
           dependencyManagementEditor.refresh();
         }
         
         if(object instanceof DependencyManagement) {
+          if (dependenciesEditor.getInput() == null) {
+            dependenciesEditor.setInput(((DependencyManagement) object).getDependencies());
+          }
           dependencyManagementEditor.refresh();
         }
         
         Object notificationObject = MavenPomEditorPage.getFromNotification(notification);
         if(object instanceof Dependency) {
+          Dependency dependency = (Dependency) object;
+
           dependenciesEditor.refresh();
           dependencyManagementEditor.refresh();
           
@@ -1058,5 +1092,50 @@ public class DependenciesComposite extends Composite {
 //    return newSelection;
 //  }
 
+  private void openManageDependenciesDialog() {
+    /*
+     * A linked list representing the path from child to root parent pom.
+     * The head is the child, the tail is the root pom
+     */
+    final LinkedList<MavenProject> hierarchy = new LinkedList<MavenProject>();
+    
+    IRunnableWithProgress projectLoader = new IRunnableWithProgress() {
+      
+      public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+        try {
+          IMaven maven = MavenPlugin.getDefault().getMaven();
+          MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
+          mavenProject = pomEditor.readMavenProject(false, monitor);
+          maven.detachFromSession(mavenProject);
+          
+          hierarchy.addFirst(mavenProject);
+          
+          MavenProject project = mavenProject;
+          while (project.getModel().getParent() != null) {
+            IMavenProjectFacade projectFacade = projectManager.create(pomEditor.getPomFile(), true, monitor);
+            MavenExecutionRequest request = projectManager.createExecutionRequest(projectFacade, monitor);
+            project = maven.resolveParentProject(request, project, monitor);
+            hierarchy.add(project);
+          }
+        } catch(CoreException e) {
+          MavenEditorPlugin.getDefault().getLog().log(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, "Unable to resolve POMs: " + e));
+        }
+      }
+    };
+    
+    try {
+      PlatformUI.getWorkbench().getProgressService().run(true, true, projectLoader);
+    } catch(InvocationTargetException e1) {
+      MavenEditorPlugin.getDefault().getLog().log(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, "Unable to resolve POMs: " + e1));
+      return;
+    } catch(InterruptedException e1) {
+      MavenEditorPlugin.getDefault().getLog().log(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, "Unable to resolve POMs: " + e1));
+      return;
+    }
+    
+    
+    final ManageDependenciesDialog manageDepDialog = new ManageDependenciesDialog(getShell(), model, hierarchy, pomEditor);
+    manageDepDialog.open();
+  }
 }
 

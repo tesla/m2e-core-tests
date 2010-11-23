@@ -130,6 +130,10 @@ public class ListEditorComposite<T> extends Composite {
     viewer.setInput(input);
     viewer.setSelection(new StructuredSelection());
   }
+  
+  public Object getInput() {
+    return viewer.getInput();
+  }
 
   public void setOpenListener(IOpenListener listener) {
     viewer.addOpenListener(listener);
