@@ -197,7 +197,7 @@ public enum PomTemplateContext {
             if (props != null) {
               for (Object key : props.keySet()) {
                 //only add the properties following the .version convention
-                if (key.toString().endsWith(".version")) { //$NON-NLS-1$
+                if (key.toString().endsWith(".version") || key.toString().endsWith("Version")) { //$NON-NLS-1$ //$NON-NLS-2$
                   keys.add(key.toString());
                 }
               }
