@@ -92,8 +92,6 @@ public class ProjectRegistryManager {
   public static boolean DEBUG = MavenPlugin.getDefault().isDebugging()
       & Boolean.parseBoolean(Platform.getDebugOption(IMavenConstants.PLUGIN_ID + "/debug/projectManager")); //$NON-NLS-1$
 
-  private static final String DEFAULT_LIFECYCLE_MAPPING_ID = "generic"; //$NON-NLS-1$
-
   static final String ARTIFACT_TYPE_POM = "pom"; //$NON-NLS-1$
   static final String ARTIFACT_TYPE_JAR = "jar"; //$NON-NLS-1$
   public static final String ARTIFACT_TYPE_JAVA_SOURCE = "java-source"; //$NON-NLS-1$
@@ -804,11 +802,10 @@ public class ProjectRegistryManager {
       mappingId = getDefaultLifecycleMappingId(project.getPackaging());
     }
 
-    if (mappingId == null || mappingId.length() <= 0) {
-      mappingId = DEFAULT_LIFECYCLE_MAPPING_ID;
+    ILifecycleMapping lifecycleMapping = null;
+    if(mappingId != null && mappingId.length() > 0) {
+      lifecycleMapping = getLifecycleMapping(mappingId);
     }
-
-    ILifecycleMapping lifecycleMapping = getLifecycleMapping(mappingId);
 
     if (lifecycleMapping == null) {
       // TODO create error marker

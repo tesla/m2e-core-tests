@@ -54,10 +54,14 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
   
   public static final String ATTR_CLASS = "class"; //$NON-NLS-1$
   
+  public static final String ATTR_REQUIRES_EXPLICIT_ENABLEMENT = "requiresExplicitEnablement"; //$NON-NLS-1$
+
   private int priority;
   private String id;
   private String name;
   private boolean generic;
+
+  private boolean requiresExplicitEnablement;
 
   protected MavenProjectManager projectManager;
   protected IMavenConfiguration mavenConfiguration;
@@ -144,7 +148,6 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
   }
 
   // IExecutableExtension  
-  
   public void setInitializationData(IConfigurationElement config, String propertyName, Object data) {
     this.id = config.getAttribute(ATTR_ID);
     this.name = config.getAttribute(ATTR_NAME);
@@ -155,6 +158,7 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
     } catch (Exception ex) {
       priority = Integer.MAX_VALUE;
     }
+    this.requiresExplicitEnablement = parseBoolean(config.getAttribute(ATTR_REQUIRES_EXPLICIT_ENABLEMENT), true);
   }
 
   private boolean parseBoolean(String value, boolean defaultValue) {
@@ -204,5 +208,9 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
   
   public boolean isSupportedExecution(MojoExecution mojoExecution) {
     return getBuildParticipant(mojoExecution) != null;
+  }
+
+  public boolean requiresExplicitEnablement() {
+    return this.requiresExplicitEnablement;
   }
 }

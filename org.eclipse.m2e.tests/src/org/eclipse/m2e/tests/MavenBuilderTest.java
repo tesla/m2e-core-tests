@@ -18,7 +18,6 @@ import java.util.Properties;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.CoreException;
@@ -158,22 +157,6 @@ public class MavenBuilderTest extends AbstractMavenProjectTestCase {
     properties = loadProperties(a.getFullPath());
     assertEquals("1.0-SNAPSHOT.123456789", properties.getProperty("buildVersion"));
 
-  }
-
-  public void test007_fullBuild() throws Exception {
-    deleteProject("resourcefiltering-p007");
-    IProject project = createExisting("resourcefiltering-p007", "projects/resourcefiltering/p007");
-    waitForJobsToComplete();
-
-    project.build(IncrementalProjectBuilder.CLEAN_BUILD, monitor);
-    waitForJobsToComplete();
-
-    IFolder outputFolder = project.getFolder("target/classes");
-    assertNull(outputFolder.findMember("META-INF/plexus/components.xml"));
-
-    project.build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
-    IResource componentsXML = outputFolder.findMember("META-INF/plexus/components.xml");
-    assertTrue(componentsXML.isAccessible());
   }
 
   // the test is disabled due to http://jira.codehaus.org/browse/MNGECLIPSE-839

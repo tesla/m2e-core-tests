@@ -516,12 +516,6 @@
   <extension 
     point="org.eclipse.m2e.core.lifecycleMappingPropertyPage">
     <lifecycleMappingPropertyPage
-      class="org.eclipse.m2e.core.ui.internal.preferences.GenericLifecycleMappingPropertyPage"
-      id="genericPropertyPage"
-      lifecycleMappingId="generic"
-      name="Generic Lifecycle Mapping">
-    </lifecycleMappingPropertyPage>
-    <lifecycleMappingPropertyPage
       class="org.eclipse.m2e.core.ui.internal.preferences.EmptyLifecycleMappingPropertyPage"
       id = "emptyPropertyPage"
       lifecycleMappingId = "NULL"
@@ -543,11 +537,6 @@
   
    <extension
          point="org.eclipse.m2e.core.lifecycleMappings">
-      <lifecycleMapping
-            class="org.eclipse.m2e.core.internal.project.GenericLifecycleMapping"
-            id="generic"
-            name="%lifecycleMapping.generic.name">
-      </lifecycleMapping>
       <lifecycleMapping
             class="org.eclipse.m2e.core.internal.project.CustomizableLifecycleMapping"
             id="customizable"
@@ -594,5 +583,15 @@
             searchResultClass="org.eclipse.m2e.core.ui.internal.search.MavenSearchResult"/>
    </extension>
    -->
-
+   
+   <extension
+         point="org.eclipse.m2e.core.projectConfigurators">
+      <configurator
+            class="org.eclipse.m2e.core.project.configurator.MavenResourcesProjectConfigurator"
+            generic="false"
+            id="org.eclipse.m2e.core.project.configurator.MavenResourcesProjectConfigurator"
+            name="Maven Resources Project Configurator"
+            requiresExplicitEnablement="false">
+      </configurator>
+   </extension>
 </plugin>

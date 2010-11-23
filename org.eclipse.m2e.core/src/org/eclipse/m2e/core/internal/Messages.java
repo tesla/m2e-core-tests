@@ -150,30 +150,6 @@ public class Messages extends NLS {
 
   public static String EnableNatureAction_wizard_shell;
 
-  public static String GenericLifecycleMappingPropertyPage_btnChanged;
-
-  public static String GenericLifecycleMappingPropertyPage_btnClean;
-
-  public static String GenericLifecycleMappingPropertyPage_btnSkip;
-
-  public static String GenericLifecycleMappingPropertyPage_desc;
-
-  public static String GenericLifecycleMappingPropertyPage_generic;
-
-  public static String GenericLifecycleMappingPropertyPage_job;
-
-  public static String GenericLifecycleMappingPropertyPage_lblChanged;
-
-  public static String GenericLifecycleMappingPropertyPage_lblClean;
-
-  public static String GenericLifecycleMappingPropertyPage_lblConfigurators;
-
-  public static String GenericLifecycleMappingPropertyPage_message;
-
-  public static String GenericLifecycleMappingPropertyPage_settings_message;
-
-  public static String GenericLifecycleMappingPropertyPage_settings_title;
-
   public static String GlobalRepositoriesNode_name;
 
   public static String IndexedArtifactNode_no_pack;

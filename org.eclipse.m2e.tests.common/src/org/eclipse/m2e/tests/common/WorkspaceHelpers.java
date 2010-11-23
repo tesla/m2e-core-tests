@@ -142,9 +142,8 @@ public class WorkspaceHelpers {
   }
 
   public static void assertNoErrors(IProject project) throws CoreException {
-    int severity = project.findMaxProblemSeverity(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
-    IMarker[] markers = project.findMarkers(null, true, IResource.DEPTH_INFINITE);
-    Assert.assertTrue("Unexpected error markers " + toString(markers), severity < IMarker.SEVERITY_ERROR);
+    List<IMarker> markers = findErrorMarkers(project);
+    Assert.assertEquals("Unexpected error markers " + toString(markers), 0, markers.size());
   }
 
 }

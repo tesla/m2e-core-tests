@@ -40,7 +40,8 @@ public class MojoExecutionProjectConfigurator extends AbstractProjectConfigurato
   private final Set<String> goals;
   private final boolean runOnIncremental;
 
-  MojoExecutionProjectConfigurator(String groupId, String artifactId, VersionRange range, Set<String> goals, boolean runOnIncremental) {
+  protected MojoExecutionProjectConfigurator(String groupId, String artifactId, VersionRange range, Set<String> goals,
+      boolean runOnIncremental) {
     this.groupId = groupId;
     this.artifactId = artifactId;
     this.range = range;

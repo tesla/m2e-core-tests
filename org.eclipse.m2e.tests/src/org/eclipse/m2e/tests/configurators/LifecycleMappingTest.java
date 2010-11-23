@@ -18,25 +18,34 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.m2e.core.internal.project.CustomizableLifecycleMapping;
-import org.eclipse.m2e.core.internal.project.GenericLifecycleMapping;
 import org.eclipse.m2e.core.internal.project.MissingLifecycleMapping;
 import org.eclipse.m2e.core.internal.project.MojoExecutionProjectConfigurator;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.configurator.AbstractProjectConfigurator;
 import org.eclipse.m2e.core.project.configurator.ILifecycleMapping;
+import org.eclipse.m2e.core.project.configurator.MavenResourcesProjectConfigurator;
+import org.eclipse.m2e.jdt.internal.JarLifecycleMapping;
 import org.eclipse.m2e.jdt.internal.JavaProjectConfigurator;
 import org.eclipse.m2e.tests.common.AbstractLifecycleMappingTest;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
 @SuppressWarnings("restriction")
 public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
-  public void testGenericMapping() throws Exception {
-    IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping", "generic/pom.xml");
+  public void testJarLifecycleMapping() throws Exception {
+    IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping", "jar/pom.xml");
 
     ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade, monitor);
 
-    assertTrue( lifecycleMapping instanceof GenericLifecycleMapping );
-    assertEquals(0, lifecycleMapping.getNotCoveredMojoExecutions(facade, monitor).size());
+    assertTrue(lifecycleMapping instanceof JarLifecycleMapping);
+
+    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
+    assertEquals(2, configurators.size());
+    assertTrue(configurators.get(0) instanceof MavenResourcesProjectConfigurator);
+    assertTrue(configurators.get(1) instanceof JavaProjectConfigurator);
+
+    List<MojoExecution> notCoveredMojoExecutions = lifecycleMapping.getNotCoveredMojoExecutions(facade, monitor);
+    assertEquals(notCoveredMojoExecutions.toString(), 0, lifecycleMapping.getNotCoveredMojoExecutions(facade, monitor)
+        .size());
   }
 
   public void testCustomizableMapping() throws Exception {

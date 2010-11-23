@@ -91,7 +91,14 @@
          <attribute name="generic" type="boolean" use="default" value="false">
             <annotation>
                <documentation>
-                  If set to true (the default), this project configurator will be considered by generic Maven build lifecycle mapping.
+                  If set to true, this project configurator will be considered by generic Maven build lifecycle mapping.
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="requiresExplicitEnablement" type="boolean" use="default" value="true">
+            <annotation>
+               <documentation>
+                  If set to true (the default), this project configurator requires explicit enablement/configuration in the lifecycle mapping configuration.
                </documentation>
             </annotation>
          </attribute>
