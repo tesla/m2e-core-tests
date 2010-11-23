@@ -1,6 +1,7 @@
 package org.eclipse.m2e.editor.xml;
 
 import org.apache.maven.model.InputLocation;
+import org.apache.maven.model.InputSource;
 import org.apache.maven.model.Model;
 import org.apache.maven.project.MavenProject;
 
@@ -44,10 +45,17 @@ public class InsertExpressionProposal implements ICompletionProposal, ICompletio
     String loc = null;
     if (mavprj != null) {
       Model mdl = mavprj.getModel();
-      if (mdl.getProperties().containsKey(key)) {
-        InputLocation location = mdl.getLocation("properties").getLocation(key); //$NON-NLS-1$
-        if (location != null) {
-          loc = location.getSource().getModelId();
+      if (mdl.getProperties() != null && mdl.getProperties().containsKey(key)) {
+        if (mdl.getLocation("properties") != null) {
+          InputLocation location = mdl.getLocation("properties").getLocation(key); //$NON-NLS-1$
+          if (location != null) {
+            //MNGECLIPSE-2539 apparently you can have an InputLocation with null input source.
+            // check!
+            InputSource source = location.getSource();
+            if (source != null) {
+              loc = source.getModelId();
+            }
+          }
         }
       }
     }

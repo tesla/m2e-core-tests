@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.InputLocation;
+import org.apache.maven.model.InputSource;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginManagement;
@@ -39,10 +40,17 @@ public class PomTextHover implements ITextHover {
           String value = PomTemplateContext.simpleInterpolate(region.project, "${" + region.property + "}"); //$NON-NLS-1$ //$NON-NLS-2$
           String loc = null;
           Model mdl = mavprj.getModel();
-          if (mdl.getProperties().containsKey(region.property)) {
-            InputLocation location = mdl.getLocation("properties").getLocation(region.property); //$NON-NLS-1$
-            if (location != null) {
-              loc = location.getSource().getModelId();
+          if (mdl.getProperties() != null && mdl.getProperties().containsKey(region.property)) {
+            if (mdl.getLocation("properties") != null) {
+              InputLocation location = mdl.getLocation("properties").getLocation(region.property); //$NON-NLS-1$
+              if (location != null) {
+                //MNGECLIPSE-2539 apparently you can have an InputLocation with null input source.
+                // check!
+                InputSource source = location.getSource();
+                if (source != null) {
+                  loc = source.getModelId();
+                }
+              }
             }
           }
           String ret = NLS.bind(Messages.PomTextHover_eval1, 
@@ -56,7 +64,6 @@ public class PomTextHover implements ITextHover {
       if (mvnproject != null) {
         MavenProject mavprj = mvnproject.getMavenProject();
         if (mavprj != null) {
-          InputLocation openLocation = PomHyperlinkDetector.findLocationForManagedArtifact(region, mavprj);
           String version = null;
           if (region.isDependency) {
             DependencyManagement dm = mavprj.getDependencyManagement();
@@ -96,8 +103,14 @@ public class PomTextHover implements ITextHover {
             ret.append(Messages.PomTextHover_managed_version_missing);
           }
           ret.append("<br>"); //$NON-NLS-1$
+          InputLocation openLocation = PomHyperlinkDetector.findLocationForManagedArtifact(region, mavprj);
           if (openLocation != null) {
-            ret.append(NLS.bind(Messages.PomTextHover_managed_location, openLocation.getSource().getModelId()));
+            //MNGECLIPSE-2539 apparently you can have an InputLocation with null input source.
+            // check!
+            InputSource source = openLocation.getSource();
+            if (source != null) {
+              ret.append(NLS.bind(Messages.PomTextHover_managed_location, source.getModelId()));
+            }
           } else {
             ret.append(Messages.PomTextHover_managed_location_missing);
           }

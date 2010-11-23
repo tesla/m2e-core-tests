@@ -19,6 +19,7 @@ import org.apache.maven.model.Build;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.InputLocation;
+import org.apache.maven.model.InputSource;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginManagement;
@@ -244,10 +245,15 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
               if (mavprj != null) {
                 InputLocation openLocation = findLocationForManagedArtifact(region, mavprj);
                 if (openLocation != null) {
-                  String loc = openLocation.getSource().getLocation();
-                  File file = new File(loc);
-                  IFileStore fileStore = EFS.getLocalFileSystem().getStore(file.toURI());
-                  openXmlEditor(fileStore, openLocation.getLineNumber(), openLocation.getColumnNumber());
+                  InputSource source = openLocation.getSource();
+                  if (source != null) {
+                    String loc = source.getLocation();
+                    if (loc != null) {
+                      File file = new File(loc);
+                      IFileStore fileStore = EFS.getLocalFileSystem().getStore(file.toURI());
+                      openXmlEditor(fileStore, openLocation.getLineNumber(), openLocation.getColumnNumber());
+                    }
+                  }
                 }
               }
             }
@@ -274,6 +280,7 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
                //when would this be null?
                if (location != null) {
                  openLocation = location;
+                 break;
                }
              }
            }
@@ -294,6 +301,7 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
                  //when would this be null?
                  if (location != null) {
                    openLocation = location;
+                   break;
                  }
                }
              }
@@ -384,12 +392,17 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
                 if (mdl.getProperties().containsKey(region.property)) {
                   InputLocation location = mdl.getLocation( "properties" ).getLocation( region.property ); //$NON-NLS-1$
                   if (location != null) {
-                    String loc = location.getSource().getLocation();
-                    File file = new File(loc);
-                    IFileStore fileStore = EFS.getLocalFileSystem().getStore(file.toURI());
-                       
-                    
-                    openXmlEditor(fileStore, location.getLineNumber(), location.getColumnNumber());
+                    InputSource source = location.getSource();
+                    //MNGECLIPSE-2539 apparently you can have an InputLocation with null input source.
+                    // check!
+                    if (source != null) {
+                      String loc = source.getLocation();
+                      if (loc != null) {
+                        File file = new File(loc);
+                        IFileStore fileStore = EFS.getLocalFileSystem().getStore(file.toURI());
+                        openXmlEditor(fileStore, location.getLineNumber(), location.getColumnNumber());
+                      }
+                    }
                   }
                 }
               }
