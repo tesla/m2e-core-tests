@@ -685,37 +685,6 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   protected class StructuredSourceTextEditor extends StructuredTextEditor {
     private long fModificationStamp = -1;
 
-    @Override
-    public void createPartControl(Composite parent) {
-      super.createPartControl(parent);
-      IVerticalRulerInfo service= (IVerticalRulerInfo) sourcePage.getAdapter(IVerticalRulerInfo.class);
-      System.out.println("service=" + service);
-      if (service instanceof IVerticalRulerInfoExtension) {
-        System.out.println("have vertical ruler info");
-        ((IVerticalRulerInfoExtension) service).addVerticalRulerListener(new IVerticalRulerListener() {
-          
-          public void annotationSelected(VerticalRulerEvent event) {
-            // TODO Auto-generated method stub
-            System.out.println("selecte#######");
-            
-          }
-          
-          public void annotationDefaultSelected(VerticalRulerEvent event) {
-            // TODO Auto-generated method stub
-            System.out.println("selecte#######");
-            
-          }
-          
-          public void annotationContextMenuAboutToShow(VerticalRulerEvent event, Menu menu) {
-            // TODO Auto-generated method stub
-            System.out.println("selecte#######");
-            
-          }
-        });
-      }
-      
-      
-    }
     protected void updateModificationStamp() {
       IDocumentProvider p= getDocumentProvider();
       if (p == null)
