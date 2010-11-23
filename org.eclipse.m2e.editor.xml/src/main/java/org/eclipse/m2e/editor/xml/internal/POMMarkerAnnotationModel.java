@@ -28,6 +28,8 @@ public class POMMarkerAnnotationModel extends StructuredResourceMarkerAnnotation
     try {
       if (marker.isSubtypeOf(IMavenConstants.MARKER_HINT_ID)) {
         MarkerAnnotation ann = new MarkerAnnotation(marker);
+        //this assumes *all* of our markers are quick fixable but that might not be the case eventually.
+        //the non fixable bunch shall probably use the IMavenConstants.MARKER_ID type
         ann.setQuickFixable(true);
         return ann;
       }
