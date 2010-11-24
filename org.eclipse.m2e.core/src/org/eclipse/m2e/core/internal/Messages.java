@@ -42,6 +42,42 @@ public class Messages extends NLS {
 
   public static String AddDependencyAction_searchDialog_title;
 
+  public static String AddDependencyDialog_artifactId_label;
+
+  public static String AddDependencyDialog_groupId_label;
+
+  public static String AddDependencyDialog_info_label;
+
+  public static String AddDependencyDialog_info_transitive;
+
+  public static String AddDependencyDialog_itemsSelected;
+
+  public static String AddDependencyDialog_multipleValuesSelected;
+
+  public static String AddDependencyDialog_results_label;
+
+  public static String AddDependencyDialog_scope_label;
+
+  public static String AddDependencyDialog_search_label;
+
+  public static String AddDependencyDialog_search_message;
+
+  public static String AddDependencyDialog_searchDone;
+
+  public static String AddDependencyDialog_searchError;
+
+  public static String AddDependencyDialog_searching;
+
+  public static String AddDependencyDialog_searchingFor;
+
+  public static String AddDependencyDialog_title;
+
+  public static String AddDependencyDialog_tooManyResults;
+
+  public static String AddDependencyDialog_transitive_dependency;
+
+  public static String AddDependencyDialog_version_label;
+
   public static String AddPluginAction_searchDialog_title;
 
   public static String ArchetypeCatalogFactory_default_local;

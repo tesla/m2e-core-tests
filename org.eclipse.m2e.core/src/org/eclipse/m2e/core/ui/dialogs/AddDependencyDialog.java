@@ -25,6 +25,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.KeyAdapter;
@@ -32,9 +33,6 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.layout.FormAttachment;
-import org.eclipse.swt.layout.FormData;
-import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -59,9 +57,11 @@ import org.eclipse.m2e.core.index.IIndex;
 import org.eclipse.m2e.core.index.IndexManager;
 import org.eclipse.m2e.core.index.IndexedArtifact;
 import org.eclipse.m2e.core.index.IndexedArtifactFile;
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.util.ProposalUtil;
 import org.eclipse.m2e.core.util.search.Packaging;
 import org.eclipse.m2e.core.wizards.MavenPomSelectionComponent;
+import org.eclipse.m2e.core.wizards.WidthGroup;
 import org.eclipse.m2e.model.edit.pom.Dependency;
 import org.eclipse.m2e.model.edit.pom.PomFactory;
 
@@ -74,13 +74,13 @@ import org.eclipse.m2e.model.edit.pom.PomFactory;
  */
 public class AddDependencyDialog extends AbstractMavenDialog {
 
-  protected static final String[] SCOPES = new String[] {"compile", "provided", "runtime", "test", "system"};
+  protected static final String[] SCOPES = new String[] {"compile", "provided", "runtime", "test", "system"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 
   /*
    * dependencies under dependencyManagement are permitted to use an the extra "import" scope
    */
-  protected static final String[] DEP_MANAGEMENT_SCOPES = new String[] {"compile", "provided", "runtime", "test",
-      "system", "import"};
+  protected static final String[] DEP_MANAGEMENT_SCOPES = new String[] {"compile", "provided", "runtime", "test", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+      "system", "import"}; //$NON-NLS-1$ //$NON-NLS-2$
 
   protected static final String DIALOG_SETTINGS = AddDependencyDialog.class.getName();
 
@@ -103,6 +103,8 @@ public class AddDependencyDialog extends AbstractMavenDialog {
   protected List scopeList;
 
   protected java.util.List<Dependency> dependencies;
+
+  protected WidthGroup widthGroup;
 
   /*
    * Stores selected files from the results viewer. These are later
@@ -138,7 +140,7 @@ public class AddDependencyDialog extends AbstractMavenDialog {
     this.project = project;
 
     setShellStyle(getShellStyle() | SWT.RESIZE);
-    setTitle("Add Dependency");
+    setTitle(Messages.AddDependencyDialog_title);
 
     if(!isForDependencyManagement) {
       this.scopes = SCOPES;
@@ -155,8 +157,11 @@ public class AddDependencyDialog extends AbstractMavenDialog {
 
     Composite composite = (Composite) super.createDialogArea(parent);
 
+    widthGroup = new WidthGroup();
+    composite.addControlListener(widthGroup);
+
     Composite gavControls = createGAVControls(composite);
-    gavControls.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    gavControls.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 
     new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL).setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
@@ -164,7 +169,7 @@ public class AddDependencyDialog extends AbstractMavenDialog {
     searchControls.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
     Display.getDefault().asyncExec(this.onLoad);
-    
+
     return composite;
   }
 
@@ -173,59 +178,59 @@ public class AddDependencyDialog extends AbstractMavenDialog {
    */
   private Composite createGAVControls(Composite parent) {
     Composite composite = new Composite(parent, SWT.NONE);
-    GridData gridData = null;
 
     GridLayout gridLayout = new GridLayout(4, false);
+    gridLayout.marginWidth = 0;
     composite.setLayout(gridLayout);
 
     Label groupIDlabel = new Label(composite, SWT.NONE);
-    groupIDlabel.setText("Group ID:");
+    groupIDlabel.setText(Messages.AddDependencyDialog_groupId_label);
+    widthGroup.addControl(groupIDlabel);
 
     groupIDtext = new Text(composite, SWT.BORDER);
-    groupIDtext.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    groupIDtext.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
     Label scopeLabel = new Label(composite, SWT.NONE);
-    scopeLabel.setText("Scope: ");
-    gridData = new GridData();
-    gridData.verticalSpan = 3;
-    gridData.verticalAlignment = SWT.TOP;
-    scopeLabel.setLayoutData(gridData);
+    scopeLabel.setText(Messages.AddDependencyDialog_scope_label);
 
     scopeList = new List(composite, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL);
     scopeList.setItems(scopes);
-    gridData = new GridData();
-    gridData.grabExcessVerticalSpace = true;
-    gridData.verticalAlignment = SWT.TOP;
-    gridData.verticalSpan = 3;
-    scopeList.setLayoutData(gridData);
+    GridData scopeListData = new GridData(SWT.LEFT, SWT.FILL, false, true, 1, 3);
+    scopeListData.heightHint = 20;
+    scopeListData.widthHint = 100;
+    scopeList.setLayoutData(scopeListData);
     scopeList.setSelection(0);
 
     Label artifactIDlabel = new Label(composite, SWT.NONE);
-    artifactIDlabel.setText("Artifact ID:");
+    artifactIDlabel.setText(Messages.AddDependencyDialog_artifactId_label);
+    widthGroup.addControl(artifactIDlabel);
 
     artifactIDtext = new Text(composite, SWT.BORDER);
-    artifactIDtext.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    artifactIDtext.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+
+    Label filler = new Label(composite, SWT.NONE);
+    filler.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 2));
 
     Label versionLabel = new Label(composite, SWT.NONE);
-    versionLabel.setText("Version: ");
-    versionLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+    versionLabel.setText(Messages.AddDependencyDialog_version_label);
+    widthGroup.addControl(versionLabel);
 
     versionText = new Text(composite, SWT.BORDER);
-    versionText.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+    versionText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
     ProposalUtil.addGroupIdProposal(project, groupIDtext, Packaging.ALL);
     ProposalUtil.addArtifactIdProposal(project, groupIDtext, artifactIDtext, Packaging.ALL);
     ProposalUtil.addVersionProposal(project, groupIDtext, artifactIDtext, versionText, Packaging.ALL);
-    
+
     artifactIDtext.addModifyListener(new ModifyListener() {
-      
+
       public void modifyText(ModifyEvent e) {
         updateInfo();
       }
     });
-    
+
     groupIDtext.addModifyListener(new ModifyListener() {
-      
+
       public void modifyText(ModifyEvent e) {
         updateInfo();
       }
@@ -233,32 +238,32 @@ public class AddDependencyDialog extends AbstractMavenDialog {
 
     return composite;
   }
-  
+
   void updateInfo() {
-    infoTextarea.setText("");
-    if (dependencyNode == null) {
+    infoTextarea.setText(""); //$NON-NLS-1$
+    if(dependencyNode == null) {
       return;
     }
     dependencyNode.accept(new DependencyVisitor() {
-      
+
       public boolean visitLeave(DependencyNode node) {
-        if (node.getDependency() != null && node.getDependency().getArtifact() != null) {
+        if(node.getDependency() != null && node.getDependency().getArtifact() != null) {
           Artifact artifact = node.getDependency().getArtifact();
-          if (artifact.getGroupId().equalsIgnoreCase(groupIDtext.getText().trim()) 
+          if(artifact.getGroupId().equalsIgnoreCase(groupIDtext.getText().trim())
               && artifact.getArtifactId().equalsIgnoreCase(artifactIDtext.getText().trim())) {
-            infoTextarea.setText(artifact.getGroupId() + "-" + artifact.getArtifactId() + "-" + artifact.getVersion()
-                + " is already a transitive dependency.\n");
+            infoTextarea.setText(NLS.bind(Messages.AddDependencyDialog_info_transitive,
+                new String[] {artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion()}));
           }
           return false;
         }
         return true;
       }
-      
+
       public boolean visitEnter(DependencyNode node) {
         return true;
       }
     });
-    
+
   }
 
   private Composite createSearchControls(Composite parent) {
@@ -266,60 +271,44 @@ public class AddDependencyDialog extends AbstractMavenDialog {
     sashForm.setLayout(new FillLayout());
 
     Composite resultsComposite = new Composite(sashForm, SWT.NONE);
-    FormData data = null;
-
-    resultsComposite.setLayout(new FormLayout());
+    GridLayout resultsLayout = new GridLayout(2, false);
+    resultsLayout.marginWidth = 0;
+    resultsComposite.setLayout(resultsLayout);
 
     Label queryLabel = new Label(resultsComposite, SWT.NONE);
-    queryLabel.setText("Query:");
-    data = new FormData();
-    data.left = new FormAttachment(0, 0);
-    queryLabel.setLayoutData(data);
+    queryLabel.setText(Messages.AddDependencyDialog_search_label);
+    widthGroup.addControl(queryLabel);
 
     queryText = new Text(resultsComposite, SWT.BORDER | SWT.SEARCH | SWT.ICON_SEARCH);
-    data = new FormData();
-    data.left = new FormAttachment(10, 0);
-    data.right = new FormAttachment(100, -5);
-    queryText.setLayoutData(data);
-
-    Label hint = new Label(resultsComposite, SWT.NONE);
-    hint.setText("(coordinate, sha1 prefix, project name)");
-    data = new FormData();
-    data.left = new FormAttachment(10, 0);
-    data.top = new FormAttachment(queryText, 5);
-    hint.setLayoutData(data);
+    queryText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    queryText.setMessage(Messages.AddDependencyDialog_search_message);
 
     Label resultsLabel = new Label(resultsComposite, SWT.NONE);
-    resultsLabel.setText("Results:");
-    data = new FormData();
-    data.left = new FormAttachment(0, 0);
-    data.top = new FormAttachment(hint, 5);
-    resultsLabel.setLayoutData(data);
+    resultsLabel.setText(Messages.AddDependencyDialog_results_label);
+    resultsLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+    widthGroup.addControl(resultsLabel);
 
-    Tree resultsTree = new Tree(resultsComposite, SWT.MULTI | SWT.BORDER);
-    data = new FormData();
-    data.left = new FormAttachment(10, 0);
-    data.top = new FormAttachment(hint, 5);
-    data.right = new FormAttachment(100, -5);
-    data.bottom = new FormAttachment(100, -5);
-    resultsTree.setLayoutData(data);
+    Tree resultsTree = new Tree(resultsComposite, SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
+    GridData treeData = new GridData(SWT.FILL, SWT.FILL, true, true);
+    treeData.heightHint = 140;
+    treeData.widthHint = 100;
+    resultsTree.setLayoutData(treeData);
 
     Composite infoComposite = new Composite(sashForm, SWT.NONE);
-    infoComposite.setLayout(new FormLayout());
+    GridLayout infoLayout = new GridLayout(2, false);
+    infoLayout.marginWidth = 0;
+    infoComposite.setLayout(infoLayout);
 
     Label infoLabel = new Label(infoComposite, SWT.NONE);
-    FormData formData = new FormData();
-    formData.left = new FormAttachment(0, 0);
-    infoLabel.setLayoutData(formData);
-    infoLabel.setText("Info: ");
+    infoLabel.setText(Messages.AddDependencyDialog_info_label);
+    infoLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+    widthGroup.addControl(infoLabel);
 
     infoTextarea = new Text(infoComposite, SWT.MULTI | SWT.READ_ONLY | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
-    formData = new FormData();
-    formData.left = new FormAttachment(10, 0);
-    formData.bottom = new FormAttachment(100, -5);
-    formData.top = new FormAttachment(0, 0);
-    formData.right = new FormAttachment(100, -5);
-    infoTextarea.setLayoutData(formData);
+    GridData infoData = new GridData(SWT.FILL, SWT.FILL, true, true);
+    infoData.heightHint = 60;
+    infoData.widthHint = 100;
+    infoTextarea.setLayoutData(infoData);
 
     sashForm.setWeights(new int[] {70, 30});
 
@@ -370,7 +359,7 @@ public class AddDependencyDialog extends AbstractMavenDialog {
     if(current == null) {
       return newValue;
     } else if(!current.equals(newValue)) {
-      return "(multiple values selected)";
+      return Messages.AddDependencyDialog_multipleValuesSelected;
     }
     return current;
   }
@@ -396,13 +385,14 @@ public class AddDependencyDialog extends AbstractMavenDialog {
         }
 
         public boolean visitLeave(DependencyNode node) {
-          if (node.getDependency() == null || node.getDependency().getArtifact() == null) {
+          if(node.getDependency() == null || node.getDependency().getArtifact() == null) {
             return true;
           }
           Artifact artifact = node.getDependency().getArtifact();
-          if(artifact.getGroupId().equalsIgnoreCase(file.group) && artifact.getArtifactId().equalsIgnoreCase(file.artifact)) {
-            buffer.append("  + " + artifact.getGroupId() + "-" + artifact.getArtifactId() + "-" + artifact.getVersion()
-                + " is already a transitive dependency.\n");
+          if(artifact.getGroupId().equalsIgnoreCase(file.group)
+              && artifact.getArtifactId().equalsIgnoreCase(file.artifact)) {
+            buffer.append(NLS.bind(Messages.AddDependencyDialog_transitive_dependency,
+                new String[] {artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion()}));
             /*
              * DependencyNodes don't know their parents. Determining which transitive dependency 
              * is using the selected dependency is non trivial :(
@@ -437,14 +427,14 @@ public class AddDependencyDialog extends AbstractMavenDialog {
    * This is called when OK is pressed. There's no obligation to do anything.
    */
   protected void computeResult() {
-    String scope = "";
+    String scope = ""; //$NON-NLS-1$
     if(scopeList.getSelection().length != 0) {
       scope = scopeList.getSelection()[0];
     }
 
     if(artifactFiles == null || artifactFiles.size() == 1) {
       Dependency dependency = createDependency(groupIDtext.getText().trim(), artifactIDtext.getText().trim(),
-          versionText.getText().trim(), scope, "");
+          versionText.getText().trim(), scope, ""); //$NON-NLS-1$
       this.dependencies = Collections.singletonList(dependency);
     } else {
       this.dependencies = new LinkedList<Dependency>();
@@ -466,8 +456,8 @@ public class AddDependencyDialog extends AbstractMavenDialog {
      * This reduces clutter in the XML file (although forces people who don't
      * know what the defaults are to look them up).
      */
-    dependency.setScope("compile".equals(scope) ? "" : scope);
-    dependency.setType("jar".equals(type) ? "" : type);
+    dependency.setScope("compile".equals(scope) ? "" : scope); //$NON-NLS-1$ //$NON-NLS-2$
+    dependency.setType("jar".equals(type) ? "" : type); //$NON-NLS-1$ //$NON-NLS-2$
 
     return dependency;
   }
@@ -484,7 +474,7 @@ public class AddDependencyDialog extends AbstractMavenDialog {
     public void selectionChanged(SelectionChangedEvent event) {
       IStructuredSelection selection = (IStructuredSelection) event.getSelection();
       if(selection.isEmpty()) {
-        infoTextarea.setText("");
+        infoTextarea.setText(""); //$NON-NLS-1$
         artifactFiles = null;
       } else {
         String artifact = null;
@@ -497,21 +487,21 @@ public class AddDependencyDialog extends AbstractMavenDialog {
         while(iter.hasNext()) {
           Object obj = iter.next();
           IndexedArtifactFile file = null;
-          
+
           if(obj instanceof IndexedArtifact) {
             file = ((IndexedArtifact) obj).getFiles().iterator().next();
           } else {
             file = (IndexedArtifactFile) obj;
           }
-          
+
           appendFileInfo(buffer, file);
           artifactFiles.add(file);
-          
+
           artifact = chooseWidgetText(artifact, file.artifact);
           group = chooseWidgetText(group, file.group);
           version = chooseWidgetText(version, file.version);
         }
-        setInfo(OK, artifactFiles.size() + " items selected.");
+        setInfo(OK, NLS.bind(Messages.AddDependencyDialog_itemsSelected, artifactFiles.size()));
         infoTextarea.setText(buffer.toString());
         artifactIDtext.setText(artifact);
         groupIDtext.setText(group);
@@ -534,7 +524,7 @@ public class AddDependencyDialog extends AbstractMavenDialog {
     private boolean cancelled = false;
 
     public SearchJob(String query, IndexManager indexManager) {
-      super("Searching for " + query);
+      super(NLS.bind(Messages.AddDependencyDialog_searchingFor, query));
       this.query = query;
       this.indexManager = indexManager;
     }
@@ -549,17 +539,17 @@ public class AddDependencyDialog extends AbstractMavenDialog {
       }
 
       try {
-        setResults(IStatus.OK, "Searching...", Collections.<String, IndexedArtifact> emptyMap());
+        setResults(IStatus.OK, Messages.AddDependencyDialog_searching, Collections.<String, IndexedArtifact> emptyMap());
         Map<String, IndexedArtifact> results = indexManager.search(query, IIndex.SEARCH_ARTIFACT, IIndex.SEARCH_ALL);
-        setResults(IStatus.OK, "Done. " + results.size() + " results found.", results);
+        setResults(IStatus.OK, NLS.bind(Messages.AddDependencyDialog_searchDone, results.size()), results);
       } catch(BooleanQuery.TooManyClauses exception) {
-        setResults(IStatus.ERROR, "Too many results. Please refine your search.",
+        setResults(IStatus.ERROR, Messages.AddDependencyDialog_tooManyResults,
             Collections.<String, IndexedArtifact> emptyMap());
       } catch(RuntimeException exception) {
-        setResults(IStatus.ERROR, "Error while searching: " + exception.toString(),
+        setResults(IStatus.ERROR, NLS.bind(Messages.AddDependencyDialog_searchError, exception.toString()),
             Collections.<String, IndexedArtifact> emptyMap());
       } catch(CoreException ex) {
-        setResults(IStatus.ERROR, "Error while searching: " + ex.getMessage(),
+        setResults(IStatus.ERROR, NLS.bind(Messages.AddDependencyDialog_searchError, ex.getMessage()),
             Collections.<String, IndexedArtifact> emptyMap());
         MavenLogger.log(ex);
       }
@@ -599,12 +589,9 @@ public class AddDependencyDialog extends AbstractMavenDialog {
   }
 
   /**
-   * The provided runnable will be called after createDialogArea is done,
-   * but before it returns. This provides a way for long running operations to 
-   * be executed in such a way as to not block the UI.
-   * 
-   * This is primarily intended to allow the loading of the dependencyTree.
-   * The runnable should load the tree and then call setDependencyNode()
+   * The provided runnable will be called after createDialogArea is done, but before it returns. This provides a way for
+   * long running operations to be executed in such a way as to not block the UI. This is primarily intended to allow
+   * the loading of the dependencyTree. The runnable should load the tree and then call setDependencyNode()
    * 
    * @param runnable
    */
