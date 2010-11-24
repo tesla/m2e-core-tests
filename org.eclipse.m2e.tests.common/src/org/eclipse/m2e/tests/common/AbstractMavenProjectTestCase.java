@@ -61,6 +61,7 @@ import org.eclipse.m2e.core.embedder.IMavenConfiguration;
 import org.eclipse.m2e.core.embedder.MavenModelManager;
 import org.eclipse.m2e.core.internal.embedder.MavenImpl;
 import org.eclipse.m2e.core.internal.project.registry.ProjectRegistryRefreshJob;
+import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.IMavenProjectImportResult;
 import org.eclipse.m2e.core.project.MavenProjectInfo;
 import org.eclipse.m2e.core.project.ProjectImportConfiguration;
@@ -302,8 +303,15 @@ public abstract class AbstractMavenProjectTestCase extends TestCase {
       assertSame(projectInfos.get(i), importResult.getMavenProjectInfo());
       projects[i] = importResult.getProject();
       assertNotNull("Failed to import project " + projectInfos, projects[i]);
+      
+      /*
+       * Sanity check: make sure they were all imported
+       */
+      Model model = projectInfos.get(0).getModel();
+      IMavenProjectFacade facade = plugin.getMavenProjectManager().getMavenProject(model.getGroupId(), model.getArtifactId(), model.getVersion());
+      assertNotNull("Project " + model.getGroupId()+"-"+model.getArtifactId()+"-"+model.getVersion()+" was not imported.", facade);
     }
-
+    
     return projects;
   }
 
