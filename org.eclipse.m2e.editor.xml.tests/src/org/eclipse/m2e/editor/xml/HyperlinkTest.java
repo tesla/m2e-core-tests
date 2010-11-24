@@ -17,6 +17,9 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
+import org.eclipse.m2e.editor.pom.MavenPomEditor;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.internal.UIPlugin;
 
 public class HyperlinkTest extends AbstractPOMEditorTestCase {
 
@@ -35,5 +38,10 @@ public class HyperlinkTest extends AbstractPOMEditorTestCase {
     IRegion region = new Region(476+17, 10);
     IHyperlink[] links = new PomHyperlinkDetector().detectHyperlinks(sourceViewer, region, true);
     assertEquals(1, links.length);
+    assertNotNull(links[0].getHyperlinkText());
+    assertTrue(links[0].getHyperlinkText().contains("aProperty"));
+//    links[0].open();
+//    IWorkbench wbch  = UIPlugin.getDefault().getWorkbench();
+//    assertTrue(wbch.getWorkbenchWindows()[0].getActivePage().getActiveEditor() instanceof MavenPomEditor);
   }
 }
