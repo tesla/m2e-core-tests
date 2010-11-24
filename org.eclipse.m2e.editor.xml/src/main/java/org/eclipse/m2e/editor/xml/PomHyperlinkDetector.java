@@ -73,7 +73,7 @@ import org.eclipse.m2e.editor.xml.internal.Messages;
  * @author Eugene Kuleshov
  * @author Milos Kleint
  */
-class PomHyperlinkDetector implements IHyperlinkDetector {
+public class PomHyperlinkDetector implements IHyperlinkDetector {
 
   private final String[] versioned = new String[] {
       "dependency>", //$NON-NLS-1$
