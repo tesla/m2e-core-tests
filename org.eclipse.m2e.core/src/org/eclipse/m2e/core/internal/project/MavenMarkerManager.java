@@ -505,6 +505,11 @@ public class MavenMarkerManager implements IMavenMarkerManager {
     IMarker marker = null;
     try {
       if(resource.isAccessible()) {
+        marker = findMarker(resource, type, message, lineNumber, severity, isTransient);
+        if(marker != null) {
+          // This marker already exists
+          return marker;
+        }
         marker= resource.createMarker(type);
         marker.setAttribute(IMarker.MESSAGE, message);
         marker.setAttribute(IMarker.SEVERITY, severity);
@@ -519,6 +524,32 @@ public class MavenMarkerManager implements IMavenMarkerManager {
       console.logError("Unable to add marker; " + ex.toString()); //$NON-NLS-1$
     }
     return marker;
+  }
+
+  private static <T> boolean eq(T a, T b) {
+    if(a == null) {
+      if(b == null) {
+        return true;
+      }
+      return false;
+    }
+    return a.equals(b);
+  }
+
+  private IMarker findMarker(IResource resource, String type, String message, int lineNumber, int severity,
+      boolean isTransient) throws CoreException {
+    IMarker[] markers = resource.findMarkers(type, false /*includeSubtypes*/, IResource.DEPTH_ZERO);
+    if(markers == null || markers.length == 0) {
+      return null;
+    }
+    for(IMarker marker : markers) {
+      if(eq(message, marker.getAttribute(IMarker.MESSAGE)) && eq(lineNumber, marker.getAttribute(IMarker.LINE_NUMBER))
+          && eq(severity, marker.getAttribute(IMarker.SEVERITY))
+          && eq(isTransient, marker.getAttribute(IMarker.TRANSIENT))) {
+        return marker;
+      }
+    }
+    return null;
   }
 
   private void handleProjectBuildingException(IResource pomFile, ProjectBuildingException ex) {

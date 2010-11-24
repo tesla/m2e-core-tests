@@ -196,6 +196,8 @@ public class Messages extends NLS {
 
   public static String LifecycleConfigurationMojoExecutionNotCovered;
 
+  public static String LifecycleMissing;
+
   public static String LocalArchetypeCatalogDialog_btnBrowse;
 
   public static String LocalArchetypeCatalogDialog_dialog_title;

@@ -100,5 +100,34 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertEquals("unknown-or-missing", ((MissingLifecycleMapping) lifecycleMapping).getMissingMappingId());
 
     assertEquals(0, lifecycleMapping.getNotCoveredMojoExecutions(facade, monitor).size());
+
+    IProject project = facade.getProject();
+    project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+    waitForJobsToComplete();
+    List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
+    assertNotNull(errorMarkers);
+    assertEquals(WorkspaceHelpers.toString(errorMarkers), 1, errorMarkers.size());
+    assertEquals("Unknown or missing lifecycle mapping with id=\"MISSING\" (project packaging type=\"jar\")",
+        errorMarkers.get(0).getAttribute(IMarker.MESSAGE));
+  }
+
+  public void testUnknownPackagingType() throws Exception {
+    IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping", "unknownPackagingType/pom.xml");
+    assertNotNull("Expected not null MavenProjectFacade", facade);
+
+    ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade, monitor);
+
+    assertTrue(lifecycleMapping instanceof MissingLifecycleMapping);
+
+    assertEquals(0, lifecycleMapping.getNotCoveredMojoExecutions(facade, monitor).size());
+
+    IProject project = facade.getProject();
+    project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+    waitForJobsToComplete();
+    List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
+    assertNotNull(errorMarkers);
+    assertEquals(WorkspaceHelpers.toString(errorMarkers), 1, errorMarkers.size());
+    assertEquals("Unknown or missing lifecycle mapping with id=\"MISSING\" (project packaging type=\"war\")",
+        errorMarkers.get(0).getAttribute(IMarker.MESSAGE));
   }
 }
