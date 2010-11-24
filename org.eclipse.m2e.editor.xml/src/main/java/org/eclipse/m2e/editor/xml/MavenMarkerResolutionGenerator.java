@@ -19,6 +19,7 @@ import org.eclipse.ui.IMarkerResolutionGenerator2;
 
 import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.core.MavenLogger;
+import org.eclipse.m2e.editor.xml.PomQuickAssistProcessor.ManagedVersionRemovalProposal;
 
 
 /**
@@ -51,6 +52,15 @@ public class MavenMarkerResolutionGenerator implements IMarkerResolutionGenerato
       if ("parent_groupid".equals(hint)) {
         return new IMarkerResolution[] {new PomQuickAssistProcessor.IdPartRemovalProposal(marker, false) };
       }
+      if (hint.equals("managed_dependency_override")) { //$NON-NLS-1$
+        return new IMarkerResolution[] {new PomQuickAssistProcessor.ManagedVersionRemovalProposal(marker, true) };
+        //TODO add a proposal to ignore the marker
+      }
+      if (hint.equals("managed_plugin_override")) { //$NON-NLS-1$
+        return new IMarkerResolution[] {new PomQuickAssistProcessor.ManagedVersionRemovalProposal(marker, false) };
+        //TODO add a proposal to ignore the marker
+      }
+      
     }
     return new IMarkerResolution[0];
   }

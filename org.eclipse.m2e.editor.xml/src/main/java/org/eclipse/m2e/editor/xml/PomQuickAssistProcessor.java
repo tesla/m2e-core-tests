@@ -104,6 +104,14 @@ public class PomQuickAssistProcessor implements IQuickAssistProcessor {
              if (hint.equals("parent_version")) { //$NON-NLS-1$
                proposals.add(new IdPartRemovalProposal(context, true, mark));
              }
+             if (hint.equals("managed_dependency_override")) { //$NON-NLS-1$
+               proposals.add(new ManagedVersionRemovalProposal(context, true, mark));
+               //TODO add a proposal to ignore the marker
+             }
+             if (hint.equals("managed_plugin_override")) { //$NON-NLS-1$
+               proposals.add(new ManagedVersionRemovalProposal(context, false, mark));
+               //TODO add a proposal to ignore the marker
+             }
              if (hint.equals("schema")) { //$NON-NLS-1$
                proposals.add(new SchemaCompletionProposal(context, mark));
              }
@@ -126,6 +134,39 @@ public class PomQuickAssistProcessor implements IQuickAssistProcessor {
   public String getErrorMessage() {
     return null;
   }
+  
+  static Element getRootElement(IDocument doc) {
+    IDOMModel domModel = null;
+    try {
+      domModel = (IDOMModel) StructuredModelManager.getModelManager().getExistingModelForRead(doc);
+      IStructuredDocument document = domModel.getStructuredDocument();
+      Element root = domModel.getDocument().getDocumentElement();
+      return root;
+    } finally {
+      if (domModel != null) {
+        domModel.releaseFromRead();
+      }
+    }
+  }
+  
+  static IStructuredDocument getDocument(IMarker marker) {
+    if (marker.getResource().getType() == IResource.FILE)
+    {
+      IDOMModel domModel = null;
+      try {
+        domModel = (IDOMModel)StructuredModelManager.getModelManager().getModelForEdit((IFile)marker.getResource());
+        return domModel.getStructuredDocument();
+      } catch(Exception e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      } finally {
+        if (domModel != null) {
+          domModel.releaseFromRead();
+        }
+      }
+    }
+    return null;
+  }    
 
 class SchemaCompletionProposal implements ICompletionProposal, ICompletionProposalExtension5 {
 
@@ -208,8 +249,8 @@ class SchemaCompletionProposal implements ICompletionProposal, ICompletionPropos
 static class IdPartRemovalProposal implements ICompletionProposal, ICompletionProposalExtension5, IMarkerResolution {
 
   private IQuickAssistInvocationContext context;
-  private boolean isVersion;
-  private IMarker marker;
+  private final boolean isVersion;
+  private final IMarker marker;
   public IdPartRemovalProposal(IQuickAssistInvocationContext context, boolean version, MarkerAnnotation mark) {
     this.context = context;
     isVersion = version;
@@ -221,43 +262,9 @@ static class IdPartRemovalProposal implements ICompletionProposal, ICompletionPr
     isVersion = version;
   }
   
-  private Element getRootElement(IDocument doc) {
-    IDOMModel domModel = null;
-    try {
-      domModel = (IDOMModel) StructuredModelManager.getModelManager().getExistingModelForRead(doc);
-      IStructuredDocument document = domModel.getStructuredDocument();
-      Element root = domModel.getDocument().getDocumentElement();
-      return root;
-    } finally {
-      if (domModel != null) {
-        domModel.releaseFromRead();
-      }
-    }
-  }
-  
-  private IStructuredDocument getDocument(IMarker marker) {
-    if (marker.getResource().getType() == IResource.FILE)
-    {
-      IDOMModel domModel = null;
-      try {
-        domModel = (IDOMModel)StructuredModelManager.getModelManager().getModelForEdit((IFile)marker.getResource());
-        return domModel.getStructuredDocument();
-      } catch(Exception e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      } finally {
-        if (domModel != null) {
-          domModel.releaseFromRead();
-        }
-      }
-    }
-    return null;
-  }  
-  
   public void apply(IDocument doc) {
     Element root = getRootElement(doc);
     processFix(doc, root, isVersion, marker);
-
   }
 
   private void processFix(IDocument doc, Element root, boolean isversion, IMarker marker) {
@@ -357,6 +364,179 @@ static class IdPartRemovalProposal implements ICompletionProposal, ICompletionPr
     if (doc != null) {
       Element root = getRootElement(doc);
       processFix(doc, root, isVersion, marker);
+    }
+  } 
+}
+
+static class ManagedVersionRemovalProposal implements ICompletionProposal, ICompletionProposalExtension5, IMarkerResolution {
+
+  private IQuickAssistInvocationContext context;
+  private final boolean isDependency;
+  private final IMarker marker;
+  public ManagedVersionRemovalProposal(IQuickAssistInvocationContext context, boolean dependency, MarkerAnnotation mark) {
+    this.context = context;
+    isDependency = dependency;
+    marker = mark.getMarker();
+  }
+  
+  public ManagedVersionRemovalProposal(IMarker marker, boolean dependency) {
+    this.marker = marker;
+    isDependency = dependency;
+  }
+  
+
+  
+  public void apply(IDocument doc) {
+    Element root = getRootElement(doc);
+    processFix(doc, root, isDependency, marker);
+
+  }
+
+  private void processFix(IDocument doc, Element root, boolean isdep, IMarker marker) {
+    if (root.getNodeName().equals(PomQuickAssistProcessor.PROJECT_NODE)) { 
+      Element artifact = findArtifactElement(root, isdep, marker);
+      if (artifact == null) {
+        //TODO report somehow?
+        MavenLogger.log("Unable to find the marked element"); //$NON-NLS-1$
+        return;
+      }
+      Element value = MavenMarkerManager.findChildElement(artifact, VERSION_NODE); //$NON-NLS-1$ //$NON-NLS-2$
+      if (value != null && value instanceof IndexedRegion) {
+        IndexedRegion off = (IndexedRegion) value;
+
+        int offset = off.getStartOffset();
+        if (offset <= 0) {
+          return;
+        }
+        Node prev = value.getNextSibling();
+        if (prev instanceof Text) {
+          //check the content as well??
+          off = ((IndexedRegion) prev);
+        }
+        DeleteEdit edit = new DeleteEdit(offset, off.getEndOffset() - offset);
+        try {
+          edit.apply(doc);
+          marker.delete();
+        } catch(Exception e) {
+          MavenLogger.log("Unable to remove the element", e); //$NON-NLS-1$
+        }
+      }
+    }
+  }
+
+  private Element findArtifactElement(Element root, boolean isdep, IMarker marker) {
+    if (root == null) {
+      return null;
+    }
+    String groupId = marker.getAttribute("groupId", null);
+    String artifactId = marker.getAttribute("artifactId", null);
+    assert groupId != null;
+    assert artifactId != null;
+    
+    String profile = marker.getAttribute("profile", null);
+    Element artifactParent = root;
+    if (profile != null) {
+      Element profileRoot = MavenMarkerManager.findChildElement(root, "profiles");
+      if (profileRoot != null) {
+        for (Element prf : MavenMarkerManager.findChildElements(profileRoot, "profile")) {
+          if (profile.equals(MavenMarkerManager.getElementTextValue(MavenMarkerManager.findChildElement(prf, "id")))) {
+            artifactParent = prf;
+            break;
+          }
+        }
+      }
+    }
+    if (!isdep) {
+      //we have plugins now, need to go one level down to build
+      artifactParent = MavenMarkerManager.findChildElement(artifactParent, "build");
+    }
+    if (artifactParent == null) {
+      return null;
+    }
+    Element list = MavenMarkerManager.findChildElement(artifactParent, isdep ? "dependencies" : "plugins");
+    if (list == null) {
+      return null;
+    }
+    Element artifact = null;
+    for (Element art : MavenMarkerManager.findChildElements(list, isdep ? "dependency" : "plugin")) {
+       String grpString = MavenMarkerManager.getElementTextValue(MavenMarkerManager.findChildElement(art, GROUP_ID_NODE));
+       String artString = MavenMarkerManager.getElementTextValue(MavenMarkerManager.findChildElement(art, "artifactId"));
+       if (groupId.equals(grpString) && artifactId.equals(artString)) {
+         artifact = art;
+         break;
+       }
+    }
+    return artifact;
+  }
+
+  public String getAdditionalProposalInfo() {
+    return null;
+  }
+
+  public IContextInformation getContextInformation() {
+    return null;
+  }
+
+  public String getDisplayString() {
+    return Messages.PomQuickAssistProcessor_title_version;
+  }
+
+  public Image getImage() {
+    return WorkbenchPlugin.getDefault().getImageRegistry().get(org.eclipse.ui.internal.SharedImages.IMG_TOOL_DELETE);
+  }
+
+  public Point getSelection(IDocument arg0) {
+    return null;
+  }
+
+  public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
+    if (context == null) {
+      //no context in markerresolution, just to be sure..
+      return null;
+    }
+    IDocument doc = context.getSourceViewer().getDocument();
+    IDOMModel domModel = null;
+    try {
+      domModel = (IDOMModel) StructuredModelManager.getModelManager().getExistingModelForRead(doc);
+      Element root = domModel.getDocument().getDocumentElement();
+      Element artifact = findArtifactElement(root, isDependency, marker);
+      if (artifact != null) {
+        Element value = MavenMarkerManager.findChildElement(artifact, VERSION_NODE); 
+        if (value != null && value instanceof IndexedRegion) {
+          IndexedRegion reg = (IndexedRegion)value;
+          try {
+            int line = doc.getLineOfOffset(reg.getStartOffset());
+            int startLine = doc.getLineOffset(line);
+            int prev2 = doc.getLineOffset(line - 2);
+            String prevString = StringUtils.convertToHTMLContent(doc.get(prev2, startLine - prev2));
+            String currentLine = doc.get(startLine, doc.getLineLength(line));
+            int next2End = doc.getLineOffset(line + 2) + doc.getLineLength(line + 2);
+            int next2Start = startLine + doc.getLineLength( line ) + 1;
+            String nextString = StringUtils.convertToHTMLContent(doc.get(next2Start, next2End - next2Start));
+            return "<html>...<br>" + prevString + /**"<del>" + currentLine + "</del>" +*/ nextString + "...<html>";  //$NON-NLS-1$ //$NON-NLS-2$
+          } catch(BadLocationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          }
+        }
+      }
+    } finally {
+      if (domModel != null) {
+        domModel.releaseFromRead();
+      }
+    }      
+    return Messages.PomQuickAssistProcessor_remove_hint;
+  }
+
+  public String getLabel() {
+    return getDisplayString();
+  }
+
+  public void run(IMarker marker) {
+    IStructuredDocument doc = getDocument(marker);
+    if (doc != null) {
+      Element root = getRootElement(doc);
+      processFix(doc, root, isDependency, marker);
     }
   } 
 }
