@@ -141,7 +141,7 @@ public class MavenMarkerManager implements IMavenMarkerManager {
       }
     }
     catch (Throwable t) {
-      MavenLogger.log("Error checking for warnings", t);
+      MavenLogger.log("Error checking for warnings", t); //$NON-NLS-1$
     }
     finally {
       if ( domModel != null ) {
@@ -172,8 +172,8 @@ public class MavenMarkerManager implements IMavenMarkerManager {
     
     Element dependencies = findChildElement(root, "dependencies"); //$NON-NLS-1$
     if (dependencies != null) {
-      for (Element el : findChildElements(dependencies, "dependency")) {
-        Element version = findChildElement(el, "version");
+      for (Element el : findChildElements(dependencies, "dependency")) { //$NON-NLS-1$
+        Element version = findChildElement(el, "version"); //$NON-NLS-1$
         if (version != null) {
           candidates.add(el);
         }
@@ -182,19 +182,19 @@ public class MavenMarkerManager implements IMavenMarkerManager {
     //we should also consider <dependencies> section in the profiles, but profile are optional and so is their
     // dependencyManagement section.. that makes handling our markers more complex.
     // see MavenProject.getInjectedProfileIds() for a list of currently active profiles in effective pom
-    String currentProjectKey = mavenproject.getGroupId() + ":" + mavenproject.getArtifactId() + ":" + mavenproject.getVersion();
+    String currentProjectKey = mavenproject.getGroupId() + ":" + mavenproject.getArtifactId() + ":" + mavenproject.getVersion(); //$NON-NLS-1$ //$NON-NLS-2$
     List<String> activeprofiles = mavenproject.getInjectedProfileIds().get(currentProjectKey);
     //remember what profile we found the dependency in.
     Map<Element, String> candidateProfile = new HashMap<Element, String>();
-    Element profiles = findChildElement(root, "profiles");
+    Element profiles = findChildElement(root, "profiles"); //$NON-NLS-1$
     if (profiles != null) {
-      for (Element profile : findChildElements(profiles, "profile")) {
-        String idString = getElementTextValue(findChildElement(profile, "id"));
+      for (Element profile : findChildElements(profiles, "profile")) { //$NON-NLS-1$
+        String idString = getElementTextValue(findChildElement(profile, "id")); //$NON-NLS-1$
         if (idString != null && activeprofiles.contains(idString)) {
           dependencies = findChildElement(profile, "dependencies"); //$NON-NLS-1$
           if (dependencies != null) {
-            for (Element el : findChildElements(dependencies, "dependency")) {
-              Element version = findChildElement(el, "version");
+            for (Element el : findChildElements(dependencies, "dependency")) { //$NON-NLS-1$
+              Element version = findChildElement(el, "version"); //$NON-NLS-1$
               if (version != null) {
                 candidates.add(el);
                 candidateProfile.put(el, idString);
@@ -212,34 +212,34 @@ public class MavenMarkerManager implements IMavenMarkerManager {
       if (deps != null) {
         for (Dependency dep : deps) {
           //shall we be using geManagementkey() here? but it contains also the type, not only the gr+art ids..
-          managed.put(dep.getGroupId() + ":" + dep.getArtifactId(), dep.getVersion());
+          managed.put(dep.getGroupId() + ":" + dep.getArtifactId(), dep.getVersion()); //$NON-NLS-1$
         }
       }
     }
     
     //now we have all the candidates, match them against the effective managed set 
     for (Element dep : candidates) {
-       Element version = findChildElement(dep, "version");
-        String grpString = getElementTextValue(findChildElement(dep, "groupId"));
-        String artString = getElementTextValue(findChildElement(dep, "artifactId"));
+       Element version = findChildElement(dep, "version"); //$NON-NLS-1$
+        String grpString = getElementTextValue(findChildElement(dep, "groupId")); //$NON-NLS-1$
+        String artString = getElementTextValue(findChildElement(dep, "artifactId")); //$NON-NLS-1$
         String versionString = getElementTextValue(version);
         if (grpString != null && artString != null && versionString != null) {
-          String id = grpString + ":" + artString;
+          String id = grpString + ":" + artString; //$NON-NLS-1$
           if (managed.containsKey(id)) {
             String managedVersion = managed.get(id);
             if (version instanceof IndexedRegion) {
               IndexedRegion off = (IndexedRegion)version;
-              IMarker mark = addMarker(pomFile, IMavenConstants.MARKER_HINT_ID, NLS.bind("Overriding managed version {0} for {1}", managedVersion, artString), document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING);
+              IMarker mark = addMarker(pomFile, IMavenConstants.MARKER_HINT_ID, NLS.bind(org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_managed_title, managedVersion, artString), document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING);
               mark.setAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, "managed_dependency_override"); //$NON-NLS-1$ //$NON-NLS-2$
               mark.setAttribute(IMarker.CHAR_START, off.getStartOffset());
               mark.setAttribute(IMarker.CHAR_END, off.getEndOffset());
-              mark.setAttribute("problemType", "pomhint"); //only imporant in case we enable the generic xml quick fixes
+              mark.setAttribute("problemType", "pomhint"); //only imporant in case we enable the generic xml quick fixes //$NON-NLS-1$ //$NON-NLS-2$
               //add these attributes to easily and deterministicaly find the declaration in question
-              mark.setAttribute("groupId", grpString);
-              mark.setAttribute("artifactId", artString);
+              mark.setAttribute("groupId", grpString); //$NON-NLS-1$
+              mark.setAttribute("artifactId", artString); //$NON-NLS-1$
               String profile = candidateProfile.get(dep);
               if (profile != null) {
-                mark.setAttribute("profile", profile);
+                mark.setAttribute("profile", profile); //$NON-NLS-1$
               }
             }
           }
@@ -265,14 +265,14 @@ public class MavenMarkerManager implements IMavenMarkerManager {
       return;
     }
     List<Element> candidates = new ArrayList<Element>();
-    Element build = findChildElement(root, "build");
+    Element build = findChildElement(root, "build"); //$NON-NLS-1$
     if (build == null) {
       return;
     }
     Element plugins = findChildElement(build, "plugins"); //$NON-NLS-1$
     if (plugins != null) {
-      for (Element el : findChildElements(plugins, "plugin")) {
-        Element version = findChildElement(el, "version");
+      for (Element el : findChildElements(plugins, "plugin")) { //$NON-NLS-1$
+        Element version = findChildElement(el, "version"); //$NON-NLS-1$
         if (version != null) {
           candidates.add(el);
         }
@@ -281,23 +281,23 @@ public class MavenMarkerManager implements IMavenMarkerManager {
     //we should also consider <plugins> section in the profiles, but profile are optional and so is their
     // pluginManagement section.. that makes handling our markers more complex.
     // see MavenProject.getInjectedProfileIds() for a list of currently active profiles in effective pom
-    String currentProjectKey = mavenproject.getGroupId() + ":" + mavenproject.getArtifactId() + ":" + mavenproject.getVersion();
+    String currentProjectKey = mavenproject.getGroupId() + ":" + mavenproject.getArtifactId() + ":" + mavenproject.getVersion(); //$NON-NLS-1$ //$NON-NLS-2$
     List<String> activeprofiles = mavenproject.getInjectedProfileIds().get(currentProjectKey);
     //remember what profile we found the dependency in.
     Map<Element, String> candidateProfile = new HashMap<Element, String>();
-    Element profiles = findChildElement(root, "profiles");
+    Element profiles = findChildElement(root, "profiles"); //$NON-NLS-1$
     if (profiles != null) {
-      for (Element profile : findChildElements(profiles, "profile")) {
-        String idString = getElementTextValue(findChildElement(profile, "id"));
+      for (Element profile : findChildElements(profiles, "profile")) { //$NON-NLS-1$
+        String idString = getElementTextValue(findChildElement(profile, "id")); //$NON-NLS-1$
         if (idString != null && activeprofiles.contains(idString)) {
-          build = findChildElement(profile, "build");
+          build = findChildElement(profile, "build"); //$NON-NLS-1$
           if (build == null) {
             continue;
           }
           plugins = findChildElement(build, "plugins"); //$NON-NLS-1$
           if (plugins != null) {
-            for (Element el : findChildElements(plugins, "plugin")) {
-              Element version = findChildElement(el, "version");
+            for (Element el : findChildElements(plugins, "plugin")) { //$NON-NLS-1$
+              Element version = findChildElement(el, "version"); //$NON-NLS-1$
               if (version != null) {
                 candidates.add(el);
                 candidateProfile.put(el, idString);
@@ -321,9 +321,9 @@ public class MavenMarkerManager implements IMavenMarkerManager {
     
     //now we have all the candidates, match them against the effective managed set 
     for (Element dep : candidates) {
-        String grpString = getElementTextValue(findChildElement(dep, "groupId"));
-        String artString = getElementTextValue(findChildElement(dep, "artifactId"));
-        Element version = findChildElement(dep, "version");
+        String grpString = getElementTextValue(findChildElement(dep, "groupId")); //$NON-NLS-1$
+        String artString = getElementTextValue(findChildElement(dep, "artifactId")); //$NON-NLS-1$
+        Element version = findChildElement(dep, "version"); //$NON-NLS-1$
         String versionString = getElementTextValue(version);
         if (grpString != null && artString != null && versionString != null) {
           String id = Plugin.constructKey(grpString, artString);
@@ -331,17 +331,17 @@ public class MavenMarkerManager implements IMavenMarkerManager {
             String managedVersion = managed.get(id);
             if (version instanceof IndexedRegion) {
               IndexedRegion off = (IndexedRegion)version;
-              IMarker mark = addMarker(pomFile, IMavenConstants.MARKER_HINT_ID, NLS.bind("Overriding managed version {0} for {1}", managedVersion, artString), document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING);
+              IMarker mark = addMarker(pomFile, IMavenConstants.MARKER_HINT_ID, NLS.bind(org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_managed_title, managedVersion, artString), document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING);
               mark.setAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, "managed_plugin_override"); //$NON-NLS-1$ //$NON-NLS-2$
               mark.setAttribute(IMarker.CHAR_START, off.getStartOffset());
               mark.setAttribute(IMarker.CHAR_END, off.getEndOffset());
-              mark.setAttribute("problemType", "pomhint"); //only imporant in case we enable the generic xml quick fixes
+              mark.setAttribute("problemType", "pomhint"); //only imporant in case we enable the generic xml quick fixes //$NON-NLS-1$ //$NON-NLS-2$
               //add these attributes to easily and deterministicaly find the declaration in question
-              mark.setAttribute("groupId", grpString);
-              mark.setAttribute("artifactId", artString);
+              mark.setAttribute("groupId", grpString); //$NON-NLS-1$
+              mark.setAttribute("artifactId", artString); //$NON-NLS-1$
               String profile = candidateProfile.get(dep);
               if (profile != null) {
-                mark.setAttribute("profile", profile);
+                mark.setAttribute("profile", profile); //$NON-NLS-1$
               }
             }
           }
@@ -356,7 +356,7 @@ public class MavenMarkerManager implements IMavenMarkerManager {
     Element groupId = findChildElement(root, "groupId"); //$NON-NLS-1$
     if (parent != null && groupId != null) {
         //now compare the values of parent and project groupid..
-        String parentString = getElementTextValue(findChildElement(parent, "groupId"));
+        String parentString = getElementTextValue(findChildElement(parent, "groupId")); //$NON-NLS-1$
         String childString = getElementTextValue(groupId);
         if (parentString != null && parentString.equals(childString)) {
           //now figure out the offset
@@ -366,14 +366,14 @@ public class MavenMarkerManager implements IMavenMarkerManager {
             mark.setAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, "parent_groupid"); //$NON-NLS-1$ //$NON-NLS-2$
             mark.setAttribute(IMarker.CHAR_START, off.getStartOffset());
             mark.setAttribute(IMarker.CHAR_END, off.getEndOffset());
-            mark.setAttribute("problemType", "pomhint"); //only imporant in case we enable the generic xml quick fixes
+            mark.setAttribute("problemType", "pomhint"); //only imporant in case we enable the generic xml quick fixes //$NON-NLS-1$ //$NON-NLS-2$
           }
         }
     }
     Element version = findChildElement(root, "version"); //$NON-NLS-1$
     if (parent != null && version != null) {
         //now compare the values of parent and project version..
-        String parentString = getElementTextValue(findChildElement(parent, "version"));
+        String parentString = getElementTextValue(findChildElement(parent, "version")); //$NON-NLS-1$
         String childString = getElementTextValue(version);
         if (parentString != null && parentString.equals(childString)) {
           //now figure out the offset
@@ -383,7 +383,7 @@ public class MavenMarkerManager implements IMavenMarkerManager {
             mark.setAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, "parent_version"); //$NON-NLS-1$ //$NON-NLS-2$
             mark.setAttribute(IMarker.CHAR_START, off.getStartOffset());
             mark.setAttribute(IMarker.CHAR_END, off.getEndOffset());
-            mark.setAttribute("problemType", "pomhint"); //only imporant in case we enable the generic xml quick fixes
+            mark.setAttribute("problemType", "pomhint"); //only imporant in case we enable the generic xml quick fixes //$NON-NLS-1$ //$NON-NLS-2$
           }
         }
     }    
@@ -469,7 +469,7 @@ public class MavenMarkerManager implements IMavenMarkerManager {
                   marker.setAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, "schema"); //$NON-NLS-1$ 
                   marker.setAttribute(IMarker.CHAR_START, documentRegion.getStartOffset());
                   marker.setAttribute(IMarker.CHAR_END, documentRegion.getEndOffset());
-                  marker.setAttribute("problemType", "pomhint"); //only imporant in case we enable the generic xml quick fixes
+                  marker.setAttribute("problemType", "pomhint"); //only imporant in case we enable the generic xml quick fixes //$NON-NLS-1$ //$NON-NLS-2$
                 }
               }
               // there could only be one project tag
@@ -479,7 +479,7 @@ public class MavenMarkerManager implements IMavenMarkerManager {
         }
       }
     } catch(Throwable ex) {
-      MavenLogger.log("Error checking for schema", ex);
+      MavenLogger.log("Error checking for schema", ex); //$NON-NLS-1$
     }
     finally {
       if ( domModel != null ) {
@@ -516,7 +516,7 @@ public class MavenMarkerManager implements IMavenMarkerManager {
         marker.setAttribute(IMarker.LINE_NUMBER, lineNumber);
       }
     } catch(CoreException ex) {
-      console.logError("Unable to add marker; " + ex.toString());
+      console.logError("Unable to add marker; " + ex.toString()); //$NON-NLS-1$
     }
     return marker;
   }

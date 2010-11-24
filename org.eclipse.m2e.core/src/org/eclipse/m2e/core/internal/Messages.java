@@ -466,6 +466,8 @@ public class Messages extends NLS {
 
   public static String MavenMarkerManager_error_offline;
 
+  public static String MavenMarkerManager_managed_title;
+
   public static String MavenMarkerManager_metadata_resolution;
 
   public static String MavenMaterializePomWizard_btnCheckout;
