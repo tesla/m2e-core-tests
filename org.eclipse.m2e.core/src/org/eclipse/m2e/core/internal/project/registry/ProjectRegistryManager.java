@@ -809,7 +809,11 @@ public class ProjectRegistryManager {
 
     if (lifecycleMapping == null) {
       // TODO create error marker
-      console.logError("Project " + pom.getProject().getName() + " uses unknown or missing lifecycle mapping with id=`" + mappingId + "'");
+      String msg = "Project " + pom.getProject().getName() + " uses unknown or missing lifecycle mapping with id='"
+          + mappingId + "', project packaging type='" + project.getPackaging() + "'.";
+      Exception e = new Exception(msg);
+      MavenLogger.log(msg, e);
+      console.logError(msg);
       return new MissingLifecycleMapping(mappingId);
     }
 

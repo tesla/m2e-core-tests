@@ -186,6 +186,8 @@ public class Messages extends NLS {
 
   public static String EnableNatureAction_wizard_shell;
 
+  public static String ExtensionReader_foundLifecycleMapping;
+
   public static String GlobalRepositoriesNode_name;
 
   public static String IndexedArtifactNode_no_pack;

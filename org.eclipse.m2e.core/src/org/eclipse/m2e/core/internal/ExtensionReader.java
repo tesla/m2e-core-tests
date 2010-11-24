@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.m2e.core.archetype.ArchetypeCatalogFactory;
 import org.eclipse.m2e.core.core.IMavenConstants;
@@ -196,13 +197,12 @@ public class ExtensionReader {
               lifecycleMapping.setName(element.getAttribute(ATTR_NAME));
               lifecycleMapping.setId(id);
 
+              MavenLogger.log(NLS.bind(Messages.ExtensionReader_foundLifecycleMapping, id, lifecycleMapping.getName()));
               lifecycleMappings.put(id, lifecycleMapping);
-
             } catch(CoreException ex) {
               MavenLogger.log(ex);
             }
           }
-
         }
       }
     }
