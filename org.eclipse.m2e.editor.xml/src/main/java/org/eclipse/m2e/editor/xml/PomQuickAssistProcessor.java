@@ -166,7 +166,28 @@ public class PomQuickAssistProcessor implements IQuickAssistProcessor {
       }
     }
     return null;
-  }    
+  }
+  
+  static String previewForRemovedElement(IDocument doc, Element removed) {
+    if (removed != null && removed instanceof IndexedRegion) {
+      IndexedRegion reg = (IndexedRegion)removed;
+      try {
+        int line = doc.getLineOfOffset(reg.getStartOffset());
+        int startLine = doc.getLineOffset(line);
+        int prev2 = doc.getLineOffset(line - 2);
+        String prevString = StringUtils.convertToHTMLContent(doc.get(prev2, startLine - prev2));
+        String currentLine = doc.get(startLine, doc.getLineLength(line));
+        int next2End = doc.getLineOffset(line + 2) + doc.getLineLength(line + 2);
+        int next2Start = startLine + doc.getLineLength( line ) + 1;
+        String nextString = StringUtils.convertToHTMLContent(doc.get(next2Start, next2End - next2Start));
+        return "<html>...<br>" + prevString + /**"<del>" + currentLine + "</del>" +*/ nextString + "...<html>";  //$NON-NLS-1$ //$NON-NLS-2$
+      } catch(BadLocationException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+    }
+    return null;
+  }
 
 class SchemaCompletionProposal implements ICompletionProposal, ICompletionProposalExtension5 {
 
@@ -329,22 +350,9 @@ static class IdPartRemovalProposal implements ICompletionProposal, ICompletionPr
       //now check parent version and groupid against the current project's ones..
       if (root.getNodeName().equals(PomQuickAssistProcessor.PROJECT_NODE)) { //$NON-NLS-1$
         Element value = MavenMarkerManager.findChildElement(root, isVersion ? VERSION_NODE : GROUP_ID_NODE); //$NON-NLS-1$ //$NON-NLS-2$
-        if (value != null && value instanceof IndexedRegion) {
-          IndexedRegion reg = (IndexedRegion)value;
-          try {
-            int line = doc.getLineOfOffset(reg.getStartOffset());
-            int startLine = doc.getLineOffset(line);
-            int prev2 = doc.getLineOffset(line - 2);
-            String prevString = StringUtils.convertToHTMLContent(doc.get(prev2, startLine - prev2));
-            String currentLine = doc.get(startLine, doc.getLineLength(line));
-            int next2End = doc.getLineOffset(line + 2) + doc.getLineLength(line + 2);
-            int next2Start = startLine + doc.getLineLength( line ) + 1;
-            String nextString = StringUtils.convertToHTMLContent(doc.get(next2Start, next2End - next2Start));
-            return "<html>...<br>" + prevString + /**"<del>" + currentLine + "</del>" +*/ nextString + "...<html>";  //$NON-NLS-1$ //$NON-NLS-2$
-          } catch(BadLocationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-          }
+        String toRet = previewForRemovedElement(doc, value);
+        if (toRet != null) {
+          return toRet;
         }
       }
     } finally {
@@ -502,22 +510,9 @@ static class ManagedVersionRemovalProposal implements ICompletionProposal, IComp
       Element artifact = findArtifactElement(root, isDependency, marker);
       if (artifact != null) {
         Element value = MavenMarkerManager.findChildElement(artifact, VERSION_NODE); 
-        if (value != null && value instanceof IndexedRegion) {
-          IndexedRegion reg = (IndexedRegion)value;
-          try {
-            int line = doc.getLineOfOffset(reg.getStartOffset());
-            int startLine = doc.getLineOffset(line);
-            int prev2 = doc.getLineOffset(line - 2);
-            String prevString = StringUtils.convertToHTMLContent(doc.get(prev2, startLine - prev2));
-            String currentLine = doc.get(startLine, doc.getLineLength(line));
-            int next2End = doc.getLineOffset(line + 2) + doc.getLineLength(line + 2);
-            int next2Start = startLine + doc.getLineLength( line ) + 1;
-            String nextString = StringUtils.convertToHTMLContent(doc.get(next2Start, next2End - next2Start));
-            return "<html>...<br>" + prevString + /**"<del>" + currentLine + "</del>" +*/ nextString + "...<html>";  //$NON-NLS-1$ //$NON-NLS-2$
-          } catch(BadLocationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-          }
+        String toRet = previewForRemovedElement(doc, value);
+        if (toRet != null) {
+          return toRet;
         }
       }
     } finally {
