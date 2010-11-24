@@ -229,7 +229,7 @@ public class MavenMarkerManager implements IMavenMarkerManager {
             String managedVersion = managed.get(id);
             if (version instanceof IndexedRegion) {
               IndexedRegion off = (IndexedRegion)version;
-              IMarker mark = addMarker(pomFile, IMavenConstants.MARKER_HINT_ID, NLS.bind("Overriding the managed version {0}", managedVersion), document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING);
+              IMarker mark = addMarker(pomFile, IMavenConstants.MARKER_HINT_ID, NLS.bind("Overriding managed version {0} for {1}", managedVersion, artString), document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING);
               mark.setAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, "managed_dependency_override"); //$NON-NLS-1$ //$NON-NLS-2$
               mark.setAttribute(IMarker.CHAR_START, off.getStartOffset());
               mark.setAttribute(IMarker.CHAR_END, off.getEndOffset());
@@ -331,7 +331,7 @@ public class MavenMarkerManager implements IMavenMarkerManager {
             String managedVersion = managed.get(id);
             if (version instanceof IndexedRegion) {
               IndexedRegion off = (IndexedRegion)version;
-              IMarker mark = addMarker(pomFile, IMavenConstants.MARKER_HINT_ID, NLS.bind("Overriding the managed version {0}", managedVersion), document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING);
+              IMarker mark = addMarker(pomFile, IMavenConstants.MARKER_HINT_ID, NLS.bind("Overriding managed version {0} for {1}", managedVersion, artString), document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING);
               mark.setAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, "managed_plugin_override"); //$NON-NLS-1$ //$NON-NLS-2$
               mark.setAttribute(IMarker.CHAR_START, off.getStartOffset());
               mark.setAttribute(IMarker.CHAR_END, off.getEndOffset());
