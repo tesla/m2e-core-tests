@@ -20,27 +20,26 @@ import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.eclipse.wst.xml.ui.internal.contentassist.XMLContentAssistProcessor;
 
 
-public class PropertyCompletionTest extends AbstractCompletionTest {
+public class PropertyCompletionOnInvalidParentTest extends AbstractCompletionTest {
   
   
   protected IFile loadProjectsAndFiles() throws Exception {
     //Create the projects
-    IProject[] projects = importProjects("projects/MNGECLIPSE-2576", new String[] {"child2576/pom.xml",
+    IProject[] projects = importProjects("projects/MNGECLIPSE-2576", new String[] {"child2576WithBadParent/pom.xml",
     "parent2576/pom.xml"}, new ResolverConfiguration());
     waitForJobsToComplete();
     return (IFile) projects[0].findMember("pom.xml");
   }
 
-  public void testCompletion() throws Exception {
+  public void testCompletionOnInvalidHierarchy() throws Exception {
     //Get the location of the place where we want to start the completion
     int offset = sourceViewer.getDocument().getLineOffset(11) + 24;
     IDOMNode node = (IDOMNode) ContentAssistUtils.getNodeAt(sourceViewer, offset);
     assertEquals("anotherProperty", node.getLocalName());
 
     ICompletionProposal[] proposals = getProposals(offset);
-    assertTrue("Length less than 1", proposals.length > 1);
-    assertEquals(InsertExpressionProposal.class, proposals[0].getClass());
-    assertEquals("${aProperty}", ((InsertExpressionProposal) proposals[0]).getDisplayString());
+    for(ICompletionProposal iCompletionProposal : proposals) {
+      assertNotSame(InsertExpressionProposal.class, iCompletionProposal.getClass());
+    }
   }
-
 }
