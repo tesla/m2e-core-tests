@@ -325,6 +325,16 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
   public boolean validateLifecycleMappingConfiguration(IMavenProjectFacade mavenProjectFacade, IProgressMonitor monitor)
       throws CoreException {
     ILifecycleMapping lifecycleMapping = getLifecycleMapping(mavenProjectFacade, monitor);
+    if(lifecycleMapping == null || lifecycleMapping instanceof MissingLifecycleMapping) {
+      String lifecycleId = null;
+      if(lifecycleMapping != null) {
+        lifecycleId = lifecycleMapping.getId();
+      }
+      mavenMarkerManager.addMarker(mavenProjectFacade.getPom(),
+          NLS.bind(Messages.LifecycleMissing, lifecycleId, mavenProjectFacade.getPackaging()), 1 /*lineNumber*/,
+          IMarker.SEVERITY_ERROR);
+      return false;
+    }
     List<MojoExecution> notCoveredMojoExecutions = lifecycleMapping.getNotCoveredMojoExecutions(mavenProjectFacade,
         monitor);
     if(notCoveredMojoExecutions != null && notCoveredMojoExecutions.size() != 0) {
