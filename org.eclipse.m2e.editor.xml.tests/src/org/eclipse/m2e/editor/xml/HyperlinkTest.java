@@ -13,35 +13,46 @@ package org.eclipse.m2e.editor.xml;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.editor.pom.MavenPomEditor;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.internal.UIPlugin;
 
 public class HyperlinkTest extends AbstractPOMEditorTestCase {
-
+  private IFile parentPom;
+  
   public IFile loadProjectsAndFiles() throws Exception {
     IProject[] projects = importProjects("projects/hyperlink", new String[] {
         "hyperlinkChild/pom.xml", 
         "hyperlinkParent/pom.xml"}, new ResolverConfiguration());
     waitForJobsToComplete();
     
+    parentPom = (IFile) projects[1].findMember("pom.xml");
+    System.out.println(parentPom.exists());
     return (IFile) projects[0].findMember("pom.xml");
     
   }
   
-  public void testHasLink() {
+  public void testHasLink() throws BadLocationException {
     //Locate the area where we want to detect the link
-    IRegion region = new Region(476+17, 10);
+    IRegion region = new Region(sourceViewer.getDocument().getLineOffset(12) + 17, 10);
+    
     IHyperlink[] links = new PomHyperlinkDetector().detectHyperlinks(sourceViewer, region, true);
     assertEquals(1, links.length);
     assertNotNull(links[0].getHyperlinkText());
     assertTrue(links[0].getHyperlinkText().contains("aProperty"));
-//    links[0].open();
-//    IWorkbench wbch  = UIPlugin.getDefault().getWorkbench();
-//    assertTrue(wbch.getWorkbenchWindows()[0].getActivePage().getActiveEditor() instanceof MavenPomEditor);
+    
+    //test opening the link
+    links[0].open();
+    IWorkbench wbch  = UIPlugin.getDefault().getWorkbench();
+    IEditorPart editor = wbch.getWorkbenchWindows()[0].getActivePage().getActiveEditor();
+    assertTrue(editor instanceof MavenPomEditor);
+    assertEquals(parentPom, ((MavenPomEditor) editor).getPomFile());
+    ((MavenPomEditor) editor).close(false);
   }
 }

@@ -4,6 +4,7 @@
     <artifactId>hyperlinkParent</artifactId>
     <groupId>org.eclipse.m2e</groupId>
     <version>0.0.1-SNAPSHOT</version>
+    <relativePath>../hyperlinkParent</relativePath>
   </parent>
   <artifactId>hyperlinkChild</artifactId>
   <packaging>pom</packaging>
