@@ -325,6 +325,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
 
     // TODO: Can't that delegate to buildSettings()?
     SettingsBuildingRequest request = new DefaultSettingsBuildingRequest();
+    request.setSystemProperties(System.getProperties());
     if(mavenConfiguration.getGlobalSettingsFile() != null) {
       request.setGlobalSettingsFile(new File(mavenConfiguration.getGlobalSettingsFile()));
     }

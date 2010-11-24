@@ -415,4 +415,20 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
     assertNull(parent);
   }
 
+  public void testMNGECLIPSE2556_settingsSystemPropertiesSubstiution() throws Exception {
+    String origSettings = configuration.getUserSettingsFile();
+    try {
+      configuration.setUserSettingsFile(new File("resources/settings/settingsWithSystemPropertySubstitution.xml").getCanonicalPath());
+      
+      ArtifactRepository repository = maven.getLocalRepository();
+      
+      File location = new File(System.getProperty("user.home"), ".m2/repository-my-project").getCanonicalFile();
+      
+      assertEquals( location, new File(repository.getBasedir()).getCanonicalFile());
+    } finally {
+      configuration.setUserSettingsFile(origSettings);
+    }
+    
+  }
+
 }
