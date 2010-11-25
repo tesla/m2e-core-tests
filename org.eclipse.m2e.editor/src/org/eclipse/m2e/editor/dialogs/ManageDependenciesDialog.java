@@ -10,6 +10,7 @@ package org.eclipse.m2e.editor.dialogs;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
@@ -239,6 +240,25 @@ public class ManageDependenciesDialog extends AbstractMavenDialog {
       Command createDepManagement = SetCommand.create(editingDomain, targetModel,
           PomPackage.eINSTANCE.getModel_DependencyManagement(), management);
       command.append(createDepManagement);
+    } else {
+      for (Dependency depFromTarget : management.getDependencies()) {
+        Iterator<Dependency> iter = dependencies.iterator();
+        while (iter.hasNext()) {
+          Dependency depFromSource = iter.next();
+          if (depFromSource.getGroupId().equals(depFromTarget.getGroupId()) 
+              && depFromSource.getArtifactId().equals(depFromTarget.getArtifactId())
+              && depFromSource.getVersion().equals(depFromTarget.getVersion())) {
+            /* 
+             * Dependency already exists in the target's dependencyManagement,
+             * so we don't need to add it.
+             * 
+             * TODO: Remove the check comparing versions and warn the user before
+             * they commit to such an action.
+             */
+            iter.remove();
+          }
+        }
+      }
     }
         
     for (Dependency dep : dependencies) {
