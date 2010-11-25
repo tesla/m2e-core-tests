@@ -28,7 +28,7 @@ import org.eclipse.m2e.editor.xml.internal.Messages;
 
 /**
  * MavenMarkerResolution
- *
+ * TODO mkleint: this class shall be eventually merged with the class doing the same in POMQuickAssistProcessor
  * @author dyocum
  */
 public class XMLSchemaMarkerResolution implements IMarkerResolution {
