@@ -32,7 +32,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.WeakHashMap;
-import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -60,8 +59,8 @@ import org.apache.maven.index.ArtifactContext;
 import org.apache.maven.index.ArtifactContextProducer;
 import org.apache.maven.index.ArtifactInfo;
 import org.apache.maven.index.Field;
-import org.apache.maven.index.FlatSearchRequest;
-import org.apache.maven.index.FlatSearchResponse;
+import org.apache.maven.index.IteratorSearchRequest;
+import org.apache.maven.index.IteratorSearchResponse;
 import org.apache.maven.index.MAVEN;
 import org.apache.maven.index.NexusIndexer;
 import org.apache.maven.index.SearchType;
@@ -366,18 +365,15 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     Map<String, IndexedArtifact> result = new TreeMap<String, IndexedArtifact>();
 
     try {
-      FlatSearchResponse response;
+      IteratorSearchResponse response;
 
       synchronized(getIndexLock(repository)) {
         IndexingContext context = getIndexingContext(repository);
         if(context == null) {
-          response = getIndexer().searchFlat(new FlatSearchRequest(query));
+          response = getIndexer().searchIterator(new IteratorSearchRequest(query));
         } else {
-          response = getIndexer().searchFlat(new FlatSearchRequest(query, context));
+          response = getIndexer().searchIterator(new IteratorSearchRequest(query, context));
         }
-
-        String regex = "^(.*?" + term.replaceAll("\\*", ".+?") + ".*?)$"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-        Pattern p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
 
         for(ArtifactInfo artifactInfo : response.getResults()) {
           addArtifactFile(result, getIndexedArtifactFile(artifactInfo), null, null, artifactInfo.packaging);
@@ -418,14 +414,14 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
   public Map<String, IndexedArtifact> search(IRepository repository, Query query) throws CoreException {
     Map<String, IndexedArtifact> result = new TreeMap<String, IndexedArtifact>();
     try {
-      FlatSearchResponse response;
+      IteratorSearchResponse response;
 
       synchronized(getIndexLock(repository)) {
         IndexingContext context = getIndexingContext(repository);
         if(context == null) {
-          response = getIndexer().searchFlat(new FlatSearchRequest(query));
+          response = getIndexer().searchIterator(new IteratorSearchRequest(query));
         } else {
-          response = getIndexer().searchFlat(new FlatSearchRequest(query, context));
+          response = getIndexer().searchIterator(new IteratorSearchRequest(query, context));
         }
       }
 
@@ -669,6 +665,8 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     }
 
     // TODO use artifact handler to retrieve extension
+    // cstamas: will not work since ArtifactKey misses type
+    // either get packaging from POM or store/honor extension
     return key + ".pom"; //$NON-NLS-1$
   }
 
