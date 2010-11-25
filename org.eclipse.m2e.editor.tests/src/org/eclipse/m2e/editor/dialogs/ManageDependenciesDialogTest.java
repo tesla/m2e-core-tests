@@ -328,6 +328,24 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
     assertTrue(oldDep.getVersion() == null || oldDep.getVersion().equals(""));
   }
   
+  public void testBrokenSource() throws Exception {
+    try {
+      loadModels("projects/broken_child", new String[] { "child/pom.xml" });
+      assertTrue("Expected Exception but didn't get one", false);
+    } catch (Exception e) {
+      
+    }
+  }
+  
+  public void testBrokenTarget() throws Exception {
+     try {
+       loadModels("projects/broken_target", new String[] { "child/pom.xml", "parent/pom.xml" });
+       assertTrue("Expected Exception but didn't get one", false);
+     } catch (Exception e) {
+       
+     }
+  }
+  
   public void testBiggerHierarchy() throws Exception {
     Map<String, Model> models = loadModels("projects/grandparent", 
         new String[] { "child/pom.xml", "parent/pom.xml", "grandparent/pom.xml" });
