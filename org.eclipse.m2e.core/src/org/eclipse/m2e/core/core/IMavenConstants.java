@@ -29,6 +29,12 @@ public interface IMavenConstants {
   public static final String MARKER_ID = PLUGIN_ID + ".maven2Problem"; //$NON-NLS-1$
 
   public static final String MARKER_HINT_ID = MARKER_ID + "Hint"; //$NON-NLS-1$
+  
+  /**
+   * string that gets included in pom.xml file comments and makes the marker manager to ignore
+   * the managed version override marker
+   */
+  public static final String MARKER_IGNORE_MANAGED = "$NO-MVN-MAN-VER$";//$NON-NLS-1$ 
 
   public static final String MAVEN_COMPONENT_CONTRIBUTORS_XPT = PLUGIN_ID + ".mavenComponentContributors"; //$NON-NLS-1$
   

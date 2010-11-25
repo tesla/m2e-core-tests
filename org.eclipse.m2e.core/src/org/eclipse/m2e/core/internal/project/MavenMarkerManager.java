@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.w3c.dom.Comment;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -28,6 +29,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IndexedRegion;
@@ -229,6 +231,10 @@ public class MavenMarkerManager implements IMavenMarkerManager {
             String managedVersion = managed.get(id);
             if (version instanceof IndexedRegion) {
               IndexedRegion off = (IndexedRegion)version;
+              if (lookForIgnoreMarker(document, version, off, IMavenConstants.MARKER_IGNORE_MANAGED)) {
+                continue;
+              }
+              
               IMarker mark = addMarker(pomFile, IMavenConstants.MARKER_HINT_ID, NLS.bind(org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_managed_title, managedVersion, artString), document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING);
               mark.setAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, "managed_dependency_override"); //$NON-NLS-1$ //$NON-NLS-2$
               mark.setAttribute(IMarker.CHAR_START, off.getStartOffset());
@@ -245,6 +251,31 @@ public class MavenMarkerManager implements IMavenMarkerManager {
           }
         }
     }
+  }
+
+  static boolean lookForIgnoreMarker(IStructuredDocument document, Element version, IndexedRegion off, String ignoreString) {
+    Node reg = version;
+    int line = document.getLineOfOffset(off.getStartOffset());
+    try {
+      int lineend = document.getLineOffset(line) + document.getLineLength(line) - 1;
+      int start = off.getStartOffset();
+      while (reg != null && start < lineend) {
+        reg = reg.getNextSibling();
+        if (reg != null && reg instanceof Comment) {
+          Comment comm = (Comment)reg;
+          String data =comm.getData(); 
+          if (data != null && data.contains(ignoreString)) {
+            return true;
+          }
+        }
+        if (reg != null) {
+            start = ((IndexedRegion)reg).getStartOffset();
+        }
+      }
+    } catch(BadLocationException ex) {
+      //not possible IMHO we ask for line offset of line we know is in the document.
+    }
+    return false;
   }
   
   private void checkManagedPlugins(Element root, IResource pomFile, IStructuredDocument document)  throws CoreException {
@@ -331,6 +362,10 @@ public class MavenMarkerManager implements IMavenMarkerManager {
             String managedVersion = managed.get(id);
             if (version instanceof IndexedRegion) {
               IndexedRegion off = (IndexedRegion)version;
+              if (lookForIgnoreMarker(document, version, off, IMavenConstants.MARKER_IGNORE_MANAGED)) {
+                continue;
+              }
+              
               IMarker mark = addMarker(pomFile, IMavenConstants.MARKER_HINT_ID, NLS.bind(org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_managed_title, managedVersion, artString), document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING);
               mark.setAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, "managed_plugin_override"); //$NON-NLS-1$ //$NON-NLS-2$
               mark.setAttribute(IMarker.CHAR_START, off.getStartOffset());

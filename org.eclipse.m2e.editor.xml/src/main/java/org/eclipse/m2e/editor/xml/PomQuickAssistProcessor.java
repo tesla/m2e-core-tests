@@ -11,7 +11,6 @@
 
 package org.eclipse.m2e.editor.xml;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -28,7 +27,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
-import org.eclipse.jface.text.contentassist.ContextInformation;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension5;
 import org.eclipse.jface.text.contentassist.IContextInformation;
@@ -47,9 +45,7 @@ import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IndexedRegion;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
-import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocumentRegion;
 import org.eclipse.wst.sse.core.utils.StringUtils;
-import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
 
 import org.eclipse.m2e.core.core.IMavenConstants;
@@ -109,12 +105,12 @@ public class PomQuickAssistProcessor implements IQuickAssistProcessor {
              if (hint.equals("managed_dependency_override")) { //$NON-NLS-1$
                proposals.add(new ManagedVersionRemovalProposal(context, true, mark));
                //add a proposal to ignore the marker
-               proposals.add(new IgnoreWarningProposal(context, mark, "NO-MVN-MAN-VER"));
+               proposals.add(new IgnoreWarningProposal(context, mark, IMavenConstants.MARKER_IGNORE_MANAGED));
              }
              if (hint.equals("managed_plugin_override")) { //$NON-NLS-1$
                proposals.add(new ManagedVersionRemovalProposal(context, false, mark));
                //add a proposal to ignore the marker
-               proposals.add(new IgnoreWarningProposal(context, mark, "NO-MVN-MAN-VER"));
+               proposals.add(new IgnoreWarningProposal(context, mark, IMavenConstants.MARKER_IGNORE_MANAGED));
              }
              if (hint.equals("schema")) { //$NON-NLS-1$
                proposals.add(new SchemaCompletionProposal(context, mark));
@@ -591,7 +587,7 @@ static class IgnoreWarningProposal implements ICompletionProposal, ICompletionPr
             }
           }
           if (reg != null && reg instanceof Element) {
-            InsertEdit edit = new InsertEdit(reg.getEndOffset(), "<!--$" + markupText + "$-->");
+            InsertEdit edit = new InsertEdit(reg.getEndOffset(), "<!--" + markupText + "-->");
             try {
               edit.apply(doc);
               marker.delete();
@@ -658,7 +654,7 @@ static class IgnoreWarningProposal implements ICompletionProposal, ICompletionPr
           try {
             int startLine = doc.getLineOffset(line);
             String currentLine = StringUtils.convertToHTMLContent(doc.get(reg.getStartOffset(), reg.getEndOffset() - reg.getStartOffset()));
-            String insert = StringUtils.convertToHTMLContent("<!--$" + markupText + "$-->");
+            String insert = StringUtils.convertToHTMLContent("<!--" + markupText + "-->");
             return "<html>...<br>" + currentLine + "<b>" + insert + "</b><br>...<html>";  //$NON-NLS-1$ //$NON-NLS-2$
           } catch(BadLocationException e) {
             // TODO Auto-generated catch block
