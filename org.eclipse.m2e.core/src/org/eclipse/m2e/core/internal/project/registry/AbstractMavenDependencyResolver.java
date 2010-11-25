@@ -48,7 +48,7 @@ public abstract class AbstractMavenDependencyResolver {
 
   public abstract void resolveProjectDependencies(IMavenProjectFacade facade, MavenExecutionRequest mavenRequest, Set<Capability> capabilities, Set<RequiredCapability> requirements, IProgressMonitor monitor) throws CoreException;
 
-  void setConextProjectRegistry(MutableProjectRegistry contextRegistry) {
+  void setContextProjectRegistry(MutableProjectRegistry contextRegistry) {
     this.contextRegistry = contextRegistry;
   }
 

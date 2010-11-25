@@ -443,11 +443,11 @@ public class ProjectRegistryManager {
           capabilities.add(mavenParentCapability); // TODO consider packaging
 
           AbstractMavenDependencyResolver resolver = getMavenDependencyResolver(newFacade, monitor);
-          resolver.setConextProjectRegistry(newState);
+          resolver.setContextProjectRegistry(newState);
           try {
             resolver.resolveProjectDependencies(newFacade, mavenRequest, capabilities, requirements, monitor);
           } finally {
-            resolver.setConextProjectRegistry(null);
+            resolver.setContextProjectRegistry(null);
           }
 
           newFacade.setMavenProjectArtifacts();
