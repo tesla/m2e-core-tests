@@ -332,7 +332,7 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
     try {
       loadModels("projects/broken_child", new String[] { "child/pom.xml" });
       assertTrue("Expected Exception but didn't get one", false);
-    } catch (Exception e) {
+    } catch (Throwable t) {
       
     }
   }
@@ -341,7 +341,7 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
      try {
        loadModels("projects/broken_target", new String[] { "child/pom.xml", "parent/pom.xml" });
        assertTrue("Expected Exception but didn't get one", false);
-     } catch (Exception e) {
+     } catch (Throwable t) {
        
      }
   }
