@@ -245,20 +245,15 @@ public class PomHyperlinkDetector implements IHyperlinkDetector {
               if (mavprj != null) {
                 InputLocation openLocation = findLocationForManagedArtifact(region, mavprj);
                 if (openLocation != null) {
-                  InputSource source = openLocation.getSource();
-                  if (source != null) {
-                    String loc = source.getLocation();
-                    if (loc != null) {
-                      File file = new File(loc);
-                      IFileStore fileStore = EFS.getLocalFileSystem().getStore(file.toURI());
-                      openXmlEditor(fileStore, openLocation.getLineNumber(), openLocation.getColumnNumber());
-                    }
+                  File file = fileForInputLocation(openLocation);
+                  if (file != null) {
+                    IFileStore fileStore = EFS.getLocalFileSystem().getStore(file.toURI());
+                    openXmlEditor(fileStore, openLocation.getLineNumber(), openLocation.getColumnNumber());
                   }
                 }
               }
             }
           }
-
         };
     }
     return null;
@@ -364,6 +359,31 @@ public class PomHyperlinkDetector implements IHyperlinkDetector {
     }
     return null;
   }
+  
+  static  File fileForInputLocation(InputLocation location) {
+    InputSource source = location.getSource();
+    if (source != null) {
+      //MNGECLIPSE-2539 apparently if maven can't resolve the model from local storage,
+      //the location will be empty. not only applicable to local repo models but
+      //apparently also to models in workspace not reachable by relativePath 
+      String loc = source.getLocation();
+      File file = null;
+      if (loc != null) {
+        file = new File(loc);
+      } else {
+        //try to find pom by coordinates..
+        String modelId = source.getModelId();
+        String[] splitStrings = modelId.split(":");
+        assert splitStrings.length == 3;
+        IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectManager().getMavenProject(splitStrings[0], splitStrings[1], splitStrings[2]);
+        if (facade != null) {
+          file = facade.getPomFile();
+        }
+      }
+      return file;
+    }
+    return null;
+  }
     
         
    private IHyperlink openPropertyDefinition(Node current, ITextViewer viewer, int offset) {
@@ -392,16 +412,10 @@ public class PomHyperlinkDetector implements IHyperlinkDetector {
                 if (mdl.getProperties().containsKey(region.property)) {
                   InputLocation location = mdl.getLocation( "properties" ).getLocation( region.property ); //$NON-NLS-1$
                   if (location != null) {
-                    InputSource source = location.getSource();
-                    //MNGECLIPSE-2539 apparently you can have an InputLocation with null input source.
-                    // check!
-                    if (source != null) {
-                      String loc = source.getLocation();
-                      if (loc != null) {
-                        File file = new File(loc);
-                        IFileStore fileStore = EFS.getLocalFileSystem().getStore(file.toURI());
-                        openXmlEditor(fileStore, location.getLineNumber(), location.getColumnNumber());
-                      }
+                    File file = fileForInputLocation(location);
+                    if (file != null) {
+                      IFileStore fileStore = EFS.getLocalFileSystem().getStore(file.toURI());
+                      openXmlEditor(fileStore, location.getLineNumber(), location.getColumnNumber());
                     }
                   }
                 }
