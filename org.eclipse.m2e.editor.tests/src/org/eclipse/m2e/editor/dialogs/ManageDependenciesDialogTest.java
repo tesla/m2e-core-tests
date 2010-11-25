@@ -220,6 +220,56 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
     assertTrue(oldDep.getVersion() == null || oldDep.getVersion().equals(""));
   }
   
+  public void testDepExistsDiffVersion() throws Exception {
+    final String ARTIFACT_ID = "dep_exists_diff_version";
+    
+    Model model = loadModels("projects/dep_exists_diff_version", new String[] { "project/pom.xml" }).get(ARTIFACT_ID);
+    assertEquals(model.getArtifactId(), ARTIFACT_ID);
+    
+    IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectManager().getMavenProject(GROUP_ID, ARTIFACT_ID, VERSION);
+    MavenProject project = facade.getMavenProject();
+    assertEquals(project.getArtifactId(), ARTIFACT_ID);
+    
+    LinkedList<MavenProject> hierarchy = new LinkedList<MavenProject>();
+    hierarchy.add(project);
+    
+    TestDialog dialog = new TestDialog(Display.getDefault().getActiveShell(), 
+        model, hierarchy);
+
+    LinkedList<Dependency> dependencies = new LinkedList<Dependency>();
+    assertNotNull(model.getDependencies().get(0));
+    assertEquals(model.getDependencies().get(0).getVersion(), "0.1");
+    dependencies.add(model.getDependencies().get(0));
+    
+    dialog.setDependenciesList(dependencies);
+    dialog.setTargetPOM(project);
+    
+    assertNotNull(model.getDependencyManagement());
+    assertNotNull(model.getDependencyManagement().getDependencies());
+    assertEquals(model.getDependencyManagement().getDependencies().size(), 1);
+    Dependency dep = model.getDependencyManagement().getDependencies().get(0);
+    assertEquals(dep.getGroupId(), "test");
+    assertEquals(dep.getArtifactId(), "b");
+    assertEquals(dep.getVersion(), "0.2");
+    
+    dialog.compute();
+    
+    assertNotNull(model.getDependencyManagement());
+    assertEquals(1, model.getDependencyManagement().getDependencies().size());
+    
+    Dependency depManDep = model.getDependencyManagement().getDependencies().get(0);
+    assertEquals(depManDep.getGroupId(), "test");
+    assertEquals(depManDep.getArtifactId(), "b");
+    assertEquals(depManDep.getVersion(), "0.2");
+    
+    assertNotNull(model.getDependencies());
+    assertNotNull(model.getDependencies().get(0));
+    Dependency oldDep = model.getDependencies().get(0);
+    assertEquals(oldDep.getGroupId(), "test");
+    assertEquals(oldDep.getArtifactId(), "b");
+    assertTrue(oldDep.getVersion() == null || oldDep.getVersion().equals(""));
+  }
+  
   public void testBiggerHierarchy() throws Exception {
     Map<String, Model> models = loadModels("projects/grandparent", 
         new String[] { "child/pom.xml", "parent/pom.xml", "grandparent/pom.xml" });
