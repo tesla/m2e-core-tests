@@ -17,6 +17,7 @@ import org.apache.maven.plugin.MojoExecution;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.internal.project.CustomizableLifecycleMapping;
 import org.eclipse.m2e.core.internal.project.MissingLifecycleMapping;
 import org.eclipse.m2e.core.internal.project.MojoExecutionProjectConfigurator;
@@ -86,9 +87,11 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
     assertNotNull(errorMarkers);
     assertEquals(WorkspaceHelpers.toString(errorMarkers), 1, errorMarkers.size());
-    assertEquals(
-        "Mojo execution not covered by lifecycle configuration: org.codehaus.modello:modello-maven-plugin:1.1:java {execution: standard} (maven lifecycle phase: generate-sources)",
-        errorMarkers.get(0).getAttribute(IMarker.MESSAGE));
+    WorkspaceHelpers
+        .assertErrorMarker(
+            IMavenConstants.MARKER_CONFIGURATION_ID,
+            "Mojo execution not covered by lifecycle configuration: org.codehaus.modello:modello-maven-plugin:1.1:java {execution: standard} (maven lifecycle phase: generate-sources)",
+            1 /*lineNumber*/, errorMarkers.get(0));
   }
 
   public void testMissingMapping() throws Exception {
@@ -107,8 +110,9 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
     assertNotNull(errorMarkers);
     assertEquals(WorkspaceHelpers.toString(errorMarkers), 1, errorMarkers.size());
-    assertEquals("Unknown or missing lifecycle mapping with id=\"MISSING\" (project packaging type=\"jar\")",
-        errorMarkers.get(0).getAttribute(IMarker.MESSAGE));
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID,
+        "Unknown or missing lifecycle mapping with id=\"MISSING\" (project packaging type=\"jar\")", 1 /*lineNumber*/,
+        errorMarkers.get(0));
   }
 
   public void testUnknownPackagingType() throws Exception {
@@ -127,7 +131,8 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
     assertNotNull(errorMarkers);
     assertEquals(WorkspaceHelpers.toString(errorMarkers), 1, errorMarkers.size());
-    assertEquals("Unknown or missing lifecycle mapping with id=\"MISSING\" (project packaging type=\"war\")",
-        errorMarkers.get(0).getAttribute(IMarker.MESSAGE));
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID,
+        "Unknown or missing lifecycle mapping with id=\"MISSING\" (project packaging type=\"war\")", 1 /*lineNumber*/,
+        errorMarkers.get(0));
   }
 }

@@ -25,6 +25,7 @@ import org.apache.maven.project.MavenProject;
 
 import org.sonatype.aether.graph.Dependency;
 
+import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.embedder.ArtifactKey;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 
@@ -45,7 +46,7 @@ public class DefaultMavenDependencyResolver extends AbstractMavenDependencyResol
       throws CoreException {
     MavenExecutionResult mavenResult = getMaven().readProject(mavenRequest, monitor);
 
-    getManager().addMarkers(facade.getPom(), mavenResult);
+    getManager().addMarkers(facade.getPom(), IMavenConstants.MARKER_DEPENDENCY_ID, mavenResult);
 
     if(!facade.getResolverConfiguration().shouldResolveWorkspaceProjects()) {
       return;

@@ -239,6 +239,11 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
 
     IMarker[] markers = p2.findMarkers(null, true, IResource.DEPTH_INFINITE);
     assertEquals(WorkspaceHelpers.toString(markers), 1, markers.length);
+    WorkspaceHelpers
+        .assertErrorMarker(
+            IMavenConstants.MARKER_CONFIGURATION_ID,
+            "Project build error: Non-resolvable parent POM: Failure to find t001:t001-p3:pom:0.0.1-SNAPSHOT in file:remoterepo was cached in the local repository, resolution will not be reattempted until the update interval of central has elapsed or updates are forced and 'parent.relativePath' points at wrong local POM",
+            1 /*lineNumber*/, markers[0]);
 
     IProject p3 = createExisting("t001-p3");
     waitForJobsToComplete();
@@ -577,6 +582,8 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertNull(manager.create(p1, monitor));
     IMarker[] markers = p1.findMarkers(null, true, IResource.DEPTH_INFINITE);
     assertEquals(WorkspaceHelpers.toString(markers), 1, markers.length);
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID,
+        "Project build error: Non-readable POM ", 1 /*lineNumber*/, markers[0]);
 
     copyContent(p1, "pom_good.xml", "pom.xml");
     markers = p1.findMarkers(null, true, IResource.DEPTH_INFINITE);
@@ -595,6 +602,8 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     // (jdt) The project cannot be built until build path errors are resolved
     // (maven) Missing artifact missing:missing:jar:0.0.0:compile
     assertEquals(WorkspaceHelpers.toString(markers), 4, markers.length);
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_DEPENDENCY_ID,
+        "Missing artifact missing:missing:jar:0.0.0:compile", 1 /*lineNumber*/, markers[2]);
   }
 
   public void test015_refreshOffline() throws Exception {

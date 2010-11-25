@@ -573,7 +573,8 @@ public class ProjectRegistryManager {
     }
 
     if (mavenProject == null) {
-      addMarkers(pom, mavenResult);
+      //TODO Is this really a configuration error marker?
+      addMarkers(pom, IMavenConstants.MARKER_CONFIGURATION_ID, mavenResult);
       return null;
     }
 
@@ -586,8 +587,8 @@ public class ProjectRegistryManager {
     return new MavenProjectFacade(ProjectRegistryManager.this, pom, mavenProject, resolverConfiguration, lifecycleMapping);
   }
 
-  void addMarkers(IFile pom, MavenExecutionResult mavenResult) {
-    markerManager.addMarkers(pom, mavenResult);
+  void addMarkers(IFile pom, String type, MavenExecutionResult mavenResult) {
+    markerManager.addMarkers(pom, type, mavenResult);
   }
 
   MavenExecutionPlan calculateExecutionPlan(MavenProjectFacade facade, IProgressMonitor monitor) throws CoreException {

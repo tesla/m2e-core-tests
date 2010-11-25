@@ -64,6 +64,8 @@ import org.eclipse.m2e.core.embedder.IMavenConfiguration;
 import org.eclipse.m2e.core.project.IMavenMarkerManager;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 
+
+@SuppressWarnings("restriction")
 public class MavenMarkerManager implements IMavenMarkerManager {
   private static final String XSI_SCHEMA_LOCATION = "xsi:schemaLocation"; //$NON-NLS-1$
 
@@ -78,34 +80,35 @@ public class MavenMarkerManager implements IMavenMarkerManager {
     this.mavenConfiguration = mavenConfiguration;
   }
   
-  public void addMarkers(IResource pomFile, MavenExecutionResult result) {
+  public void addMarkers(IResource pomFile, String type, MavenExecutionResult result) {
     List<Throwable> exceptions = result.getExceptions();
     
     for(Throwable ex : exceptions) {
       if(ex instanceof ProjectBuildingException) {
-        handleProjectBuildingException(pomFile, (ProjectBuildingException) ex);
-  
+        handleProjectBuildingException(pomFile, type, (ProjectBuildingException) ex);
       } else if(ex instanceof AbstractArtifactResolutionException) {
         AbstractArtifactResolutionException rex = (AbstractArtifactResolutionException) ex;
         String errorMessage = getArtifactId(rex) + " " + getErrorMessage(ex); //$NON-NLS-1$
-        addMarker(pomFile, errorMessage, 1, IMarker.SEVERITY_ERROR);
+        addMarker(pomFile, type, errorMessage, 1, IMarker.SEVERITY_ERROR);
       } else {
-        handleBuildException(pomFile, ex);
+        handleBuildException(pomFile, type, ex);
       }
     }
 
     DependencyResolutionResult resolutionResult = result.getDependencyResolutionResult();
     if(resolutionResult != null) {
       // @see also addMissingArtifactMarkers
-      addErrorMarkers(pomFile, org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_metadata_resolution, resolutionResult.getCollectionErrors());
+      addErrorMarkers(pomFile, type, org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_metadata_resolution,
+          resolutionResult.getCollectionErrors());
       for(org.sonatype.aether.graph.Dependency dependency : resolutionResult.getUnresolvedDependencies()) {
-        addErrorMarkers(pomFile, org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_error_artifact, resolutionResult.getResolutionErrors(dependency));
+        addErrorMarkers(pomFile, type, org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_error_artifact,
+            resolutionResult.getResolutionErrors(dependency));
       }
     }
 
     MavenProject mavenProject = result.getProject();
     if (mavenProject != null) {
-      addMissingArtifactMarkers(pomFile, mavenProject);
+      addMissingArtifactMarkers(pomFile, type, mavenProject);
     }
     addEditorHintMarkers(pomFile);
   }
@@ -521,13 +524,8 @@ public class MavenMarkerManager implements IMavenMarkerManager {
    * @see org.eclipse.m2e.core.project.IMavenMarkerManager#addMarker(org.eclipse.core.resources.IResource, java.lang.String, int, int)
    */
   //just here to satisfy the IMavenMarkerManager contract.
-  public IMarker addMarker(IResource resource, String message, int lineNumber, int severity) {
-    return addMarker(resource, IMavenConstants.MARKER_ID, message, lineNumber, severity);
-  }
-  
-  
   public IMarker addMarker(IResource resource, String type, String message, int lineNumber, int severity) {
-     return addMarker(resource, type, message,  lineNumber, severity, true); 
+    return addMarker(resource, type, message, lineNumber, severity, true /*isTransient*/);
   }
 
   private IMarker addMarker(IResource resource, String type, String message, int lineNumber, int severity, boolean isTransient) {
@@ -581,7 +579,7 @@ public class MavenMarkerManager implements IMavenMarkerManager {
     return null;
   }
 
-  private void handleProjectBuildingException(IResource pomFile, ProjectBuildingException ex) {
+  private void handleProjectBuildingException(IResource pomFile, String type, ProjectBuildingException ex) {
     Throwable cause = ex.getCause();
     if(cause instanceof ModelBuildingException) {
       ModelBuildingException mbe = (ModelBuildingException) cause;
@@ -589,18 +587,18 @@ public class MavenMarkerManager implements IMavenMarkerManager {
         String msg = Messages.getString("plugin.markerBuildError", problem.getMessage()); //$NON-NLS-1$
 //      console.logError(msg);
         int severity = (Severity.WARNING == problem.getSeverity())? IMarker.SEVERITY_WARNING: IMarker.SEVERITY_ERROR;
-        addMarker(pomFile, msg, 1, severity);
+        addMarker(pomFile, type, msg, 1, severity);
       }
     } else {
-      handleBuildException(pomFile, ex);
+      handleBuildException(pomFile, type, ex);
     }
   }
 
-  private void handleBuildException(IResource pomFile, Throwable ex) {
+  private void handleBuildException(IResource pomFile, String type, Throwable ex) {
     Throwable cause = getRootCause(ex);
     // String msg = Messages.getString("plugin.markerBuildError", cause.getMessage());  //$NON-NLS-1$
     String msg = cause.getMessage();
-    addMarker(pomFile, msg, 1, IMarker.SEVERITY_ERROR);
+    addMarker(pomFile, type, msg, 1, IMarker.SEVERITY_ERROR);
 //    console.logError(msg);
   }
 
@@ -634,7 +632,7 @@ public class MavenMarkerManager implements IMavenMarkerManager {
   }
 
   
-  private void addErrorMarkers(IResource pomFile, String msg, List<? extends Exception> exceptions) {
+  private void addErrorMarkers(IResource pomFile, String type, String msg, List<? extends Exception> exceptions) {
     if(exceptions != null) {
       for(Exception ex : exceptions) {
         if(ex instanceof org.sonatype.aether.transfer.ArtifactNotFoundException) {
@@ -642,11 +640,11 @@ public class MavenMarkerManager implements IMavenMarkerManager {
         } else if(ex instanceof AbstractArtifactResolutionException) {
           AbstractArtifactResolutionException rex = (AbstractArtifactResolutionException) ex;
           String errorMessage = getArtifactId(rex) + " " + getErrorMessage(ex); //$NON-NLS-1$
-          addMarker(pomFile, errorMessage, 1, IMarker.SEVERITY_ERROR);
+          addMarker(pomFile, type, errorMessage, 1, IMarker.SEVERITY_ERROR);
 //          console.logError(errorMessage);
 
         } else {
-          addMarker(pomFile, ex.getMessage(), 1, IMarker.SEVERITY_ERROR);
+          addMarker(pomFile, type, ex.getMessage(), 1, IMarker.SEVERITY_ERROR);
 //          console.logError(msg + "; " + ex.toString());
         }
       }
@@ -665,10 +663,8 @@ public class MavenMarkerManager implements IMavenMarkerManager {
     }
   }
 
-  private void addMissingArtifactMarkers(IResource pomFile, MavenProject mavenProject) {
-//    @SuppressWarnings("unchecked")
+  private void addMissingArtifactMarkers(IResource pomFile, String type, MavenProject mavenProject) {
 //    Set<Artifact> directDependencies = mavenProject.getDependencyArtifacts();
-//    @SuppressWarnings("unchecked")
     Set<Artifact> artifacts = mavenProject.getArtifacts();
     for(Artifact artifact : artifacts) {
       if (!artifact.isResolved()) {
@@ -683,28 +679,28 @@ public class MavenMarkerManager implements IMavenMarkerManager {
           errorMessage = NLS.bind(org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_error_offline, errorMessage); 
         }
         
-        addMarker(pomFile, errorMessage, 1, IMarker.SEVERITY_ERROR);
+        addMarker(pomFile, type, errorMessage, 1, IMarker.SEVERITY_ERROR);
         console.logError(errorMessage);
       }
     }
   }
 
-  public void addErrorMarkers(IResource resource, Exception ex) {
+  public void addErrorMarkers(IResource resource, String type, Exception ex) {
     Throwable cause = getRootCause(ex);
     if(cause instanceof CoreException) {
       CoreException cex = (CoreException) cause;
       IStatus status = cex.getStatus();
       if(status != null) {
-        addMarker(resource, IMavenConstants.MARKER_ID, status.getMessage(), 1, IMarker.SEVERITY_ERROR, false); //$NON-NLS-1$
+        addMarker(resource, type, status.getMessage(), 1, IMarker.SEVERITY_ERROR, false); //$NON-NLS-1$
         IStatus[] children = status.getChildren();
         if(children != null) {
           for(IStatus childStatus : children) {
-            addMarker(resource, IMavenConstants.MARKER_ID, childStatus.getMessage(), 1, IMarker.SEVERITY_ERROR, false); //$NON-NLS-1$
+            addMarker(resource, type, childStatus.getMessage(), 1, IMarker.SEVERITY_ERROR, false); //$NON-NLS-1$
           }
         }
       }
     } else {
-      addMarker(resource, IMavenConstants.MARKER_ID, cause.getMessage(), 1, IMarker.SEVERITY_ERROR, false); //$NON-NLS-1$
+      addMarker(resource, type, cause.getMessage(), 1, IMarker.SEVERITY_ERROR, false); //$NON-NLS-1$
     }
   }
 }

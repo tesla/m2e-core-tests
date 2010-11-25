@@ -197,7 +197,7 @@ public class MavenBuilder extends IncrementalProjectBuilder {
 
       MavenExecutionResult result = session.getResult();
       if (result.hasExceptions()) {
-        markerManager.addMarkers(pomResource, result);
+        markerManager.addMarkers(pomResource, IMavenConstants.MARKER_BUILD_ID, result);
       }
 
       return !dependencies.isEmpty() ? dependencies.toArray(new IProject[dependencies.size()]) : null;

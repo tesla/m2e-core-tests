@@ -110,7 +110,7 @@ public class WorkspaceHelpers {
     if (markers != null) {
       for(IMarker marker : markers) {
         try { 
-          sb.append(sep).append(marker.getType()+":"+marker.getAttribute(IMarker.MESSAGE));
+          sb.append(sep).append(toString(marker));
         } catch(CoreException ex) {
           // ignore
         }
@@ -118,6 +118,10 @@ public class WorkspaceHelpers {
       }
     }
     return sb.toString();
+  }
+
+  private static String toString(IMarker marker) throws CoreException {
+    return "Type=" + marker.getType() + ":Message=" + marker.getAttribute(IMarker.MESSAGE);
   }
 
   public static void assertMarkers(IProject project, int expected) throws CoreException {
@@ -146,4 +150,12 @@ public class WorkspaceHelpers {
     Assert.assertEquals("Unexpected error markers " + toString(markers), 0, markers.size());
   }
 
+  public static void assertErrorMarker(String type, String message, int lineNumber, IMarker actual) throws Exception {
+    Assert.assertNotNull("Expected not null error marker", actual);
+    String sMarker = toString(actual);
+    Assert.assertEquals(sMarker, type, actual.getType());
+    String actualMessage = actual.getAttribute(IMarker.MESSAGE, "");
+    Assert.assertTrue(sMarker, actualMessage.startsWith(message));
+    Assert.assertEquals(sMarker, lineNumber, actual.getAttribute(IMarker.LINE_NUMBER));
+  }
 }

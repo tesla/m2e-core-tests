@@ -52,6 +52,7 @@ public class ResourceChangeListenerTest extends AbstractMavenProjectTestCase {
     super.tearDown();
   }
 
+  //TODO Does this test actually test anything?!
   public void testMarkerOnlyChange() throws Exception {
     // modify
     IFile pom = project.getFile("pom.xml");

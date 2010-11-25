@@ -314,7 +314,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     try {
       validateLifecycleMappingConfiguration(mavenProjectFacade, monitor);
     } catch(CoreException e) {
-      mavenMarkerManager.addErrorMarkers(mavenProjectFacade.getPom(), e);
+      mavenMarkerManager.addErrorMarkers(mavenProjectFacade.getPom(), IMavenConstants.MARKER_CONFIGURATION_ID, e);
     }
     lifecycleMapping.configure(request, monitor);
   }
@@ -330,7 +330,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
       if(lifecycleMapping != null) {
         lifecycleId = lifecycleMapping.getId();
       }
-      mavenMarkerManager.addMarker(mavenProjectFacade.getPom(),
+      mavenMarkerManager.addMarker(mavenProjectFacade.getPom(), IMavenConstants.MARKER_CONFIGURATION_ID,
           NLS.bind(Messages.LifecycleMissing, lifecycleId, mavenProjectFacade.getPackaging()), 1 /*lineNumber*/,
           IMarker.SEVERITY_ERROR);
       return false;
@@ -340,10 +340,11 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
         monitor);
     if(notCoveredMojoExecutions != null && notCoveredMojoExecutions.size() != 0) {
       for(MojoExecution mojoExecution : notCoveredMojoExecutions) {
-        mavenMarkerManager.addMarker(mavenProjectFacade.getPom(),
+        mavenMarkerManager.addMarker(
+            mavenProjectFacade.getPom(),
+            IMavenConstants.MARKER_CONFIGURATION_ID,
             NLS.bind(Messages.LifecycleConfigurationMojoExecutionNotCovered, mojoExecution.toString(),
-                mojoExecution.getLifecyclePhase()),
-            1 /*lineNumber*/, IMarker.SEVERITY_ERROR);
+                mojoExecution.getLifecyclePhase()), 1 /*lineNumber*/, IMarker.SEVERITY_ERROR);
       }
       return false;
     }
