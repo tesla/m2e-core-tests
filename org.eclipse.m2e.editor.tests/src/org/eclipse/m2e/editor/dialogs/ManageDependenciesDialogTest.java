@@ -26,7 +26,6 @@ import org.eclipse.m2e.model.edit.pom.Dependency;
 import org.eclipse.m2e.model.edit.pom.Model;
 import org.eclipse.m2e.model.edit.pom.util.PomResourceImpl;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
-import org.eclipse.swt.internal.theme.GroupDrawData;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
@@ -251,6 +250,91 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
     assertTrue(oldDep.getVersion() == null || oldDep.getVersion().equals(""));
     
     assertNull(parent.getDependencyManagement());
+  }
+  
+  public void testMultipleDependencies() throws Exception {
+    String ARTIFACT_CHILD = "multi-child";
+    String ARTIFACT_PARENT = "multi-parent";
+    Map<String, Model> models = loadModels("projects/multi", new String[] { "child/pom.xml", "parent/pom.xml" });
+    Model child = models.get(ARTIFACT_CHILD);
+    Model parent = models.get(ARTIFACT_PARENT);
+    
+    assertNotNull(child);
+    assertNotNull(parent);
+    assertEquals(child.getArtifactId(), ARTIFACT_CHILD);
+    assertEquals(parent.getArtifactId(), ARTIFACT_PARENT);
+    
+    MavenProject childProject = getMavenProject(GROUP_ID, ARTIFACT_CHILD, VERSION);
+    MavenProject parentProject = getMavenProject(GROUP_ID, ARTIFACT_PARENT, VERSION);
+    
+    LinkedList<MavenProject> hierarchy = new LinkedList<MavenProject>();
+    hierarchy.addFirst(childProject);
+    hierarchy.addLast(parentProject);
+    
+    TestDialog dialog = new TestDialog(Display.getDefault().getActiveShell(), 
+        child, hierarchy);
+    
+    LinkedList<Dependency> selectedDeps = new LinkedList<Dependency>();
+    List<Dependency> dependencies = child.getDependencies();
+    
+    assertNotNull(dependencies);
+    assertEquals(dependencies.size(), 4);
+    
+    for (Dependency dep : dependencies) {
+      if (dep.getArtifactId().equals("to-move") || dep.getArtifactId().equals("move-but-exists")) {
+        selectedDeps.add(dep);
+      }
+    }
+    
+    assertEquals(selectedDeps.size(), 3);
+    
+    dialog.setDependenciesList(selectedDeps);
+    
+    dialog.setTargetPOM(parentProject);
+    dialog.setTargetModel(parent);
+    
+    assertNotNull(parent.getDependencyManagement());
+    
+    dialog.compute();
+    
+    assertNotNull(parent.getDependencyManagement());
+    assertEquals(3, parent.getDependencyManagement().getDependencies().size());
+    
+    checkContainsDependency(parent.getDependencyManagement().getDependencies(), "test", "to-move", "1.0");
+    checkContainsDependency(parent.getDependencyManagement().getDependencies(), "test2", "to-move", "0.242");
+    checkContainsDependency(parent.getDependencyManagement().getDependencies(), "test", "move-but-exists", "0.9");
+     
+    assertNotNull(child.getDependencies());
+    assertEquals(child.getDependencies().size(), 4);
+    
+    Dependency dep = findDependency(child.getDependencies(), "test", "to-move", null);
+    assertNotNull(dep);
+    assertTrue(dep.getVersion() == null || dep.getVersion().equals(""));
+    dep = findDependency(child.getDependencies(), "test2", "to-move", null);
+    assertNotNull(dep);
+    assertTrue(dep.getVersion() == null || dep.getVersion().equals(""));
+    dep = findDependency(child.getDependencies(), "test", "move-but-exists", null);
+    assertNotNull(dep);
+    assertTrue(dep.getVersion() == null || dep.getVersion().equals(""));
+    
+    checkContainsDependency(child.getDependencies(), "test", "dont-move", "1.0");
+  }
+  
+  protected void checkContainsDependency(List<Dependency> deps, String group, String artifact, String version) {
+    Dependency dep = findDependency(deps, group, artifact, version);
+    assertNotNull("Dependency '"+group+"-"+artifact+"-"+version+"' not found.", dep);
+  }
+  
+  protected Dependency findDependency(List<Dependency> deps, String group, String artifact, String version) {
+    for (Dependency dep : deps ) {
+      if (dep.getGroupId().equals(group) 
+          && dep.getArtifactId().equals(artifact)) {
+        if (version == null || version.equals("") || dep.getVersion().equals(version)) {
+          return dep;
+        }
+      }
+    }
+    return null;
   }
   
   protected MavenProject getMavenProject(String groupID, String artifactID, String version) {
