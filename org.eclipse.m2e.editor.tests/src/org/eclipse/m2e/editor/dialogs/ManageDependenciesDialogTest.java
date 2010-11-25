@@ -26,6 +26,7 @@ import org.eclipse.m2e.model.edit.pom.Dependency;
 import org.eclipse.m2e.model.edit.pom.Model;
 import org.eclipse.m2e.model.edit.pom.util.PomResourceImpl;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
+import org.eclipse.swt.internal.theme.GroupDrawData;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
@@ -42,10 +43,11 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
    * - target POM is broken
    * - starting POM is broken
    * - dependency already exists in target POM's dependencyManagement
+   * - dependency already exists in target POM's dependencyManagement but has different version
    * - moving multiple dependencies
    * - moving multiple dependencies while at least one exists in target already
    * - DepLabelProvider provides a different colour for poms not in the workspace
-   * - 
+   * - test moving a dependency from A to C, where C -> B -> A is the hierarchy
    */
 
   public void testSamePOM() throws Exception {
@@ -103,8 +105,8 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
     assertEquals(child.getArtifactId(), "child-diff");
     assertEquals(parent.getArtifactId(), "parent-diff");
     
-    MavenProject childProject = getMavenProject("child-diff");
-    MavenProject parentProject = getMavenProject("parent-diff");    
+    MavenProject childProject = getMavenProject(GROUP_ID+".diff", "child-diff", VERSION);
+    MavenProject parentProject = getMavenProject(GROUP_ID+".diff", "parent-diff", VERSION);
     
     LinkedList<MavenProject> hierarchy = new LinkedList<MavenProject>();
     hierarchy.addFirst(childProject);
@@ -192,11 +194,70 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
     assertTrue(oldDep.getVersion() == null || oldDep.getVersion().equals(""));
   }
   
-  protected MavenProject getMavenProject(String artifactID) {
+  public void testBiggerHierarchy() throws Exception {
+    Map<String, Model> models = loadModels("projects/grandparent", 
+        new String[] { "child/pom.xml", "parent/pom.xml", "grandparent/pom.xml" });
+    Model child = models.get("grandparent-child");
+    Model parent = models.get("grandparent-parent");
+    Model grandparent = models.get("grandparent-grandparent");
+    
+    assertNotNull(child);
+    assertNotNull(parent);
+    assertNotNull(grandparent);
+    assertEquals(child.getArtifactId(), "grandparent-child");
+    assertEquals(parent.getArtifactId(), "grandparent-parent");
+    assertEquals(grandparent.getArtifactId(), "grandparent-grandparent");
+    
+    MavenProject childProject = getMavenProject(GROUP_ID, "grandparent-child", VERSION);
+    MavenProject parentProject = getMavenProject(GROUP_ID, "grandparent-parent", VERSION);
+    MavenProject grandparentProject = getMavenProject(GROUP_ID, "grandparent-grandparent", VERSION);
+    
+    LinkedList<MavenProject> hierarchy = new LinkedList<MavenProject>();
+    hierarchy.addFirst(childProject);
+    hierarchy.add(parentProject);
+    hierarchy.addLast(grandparentProject);
+    
+    TestDialog dialog = new TestDialog(Display.getDefault().getActiveShell(), 
+        child, hierarchy);
+    
+    LinkedList<Dependency> selectedDeps = new LinkedList<Dependency>();
+    List<Dependency> dependencies = child.getDependencies();
+    assertNotNull(dependencies);
+    assertEquals(dependencies.size(), 1);
+    selectedDeps.add(dependencies.get(0));
+    dialog.setDependenciesList(selectedDeps);
+    
+    dialog.setTargetPOM(grandparentProject);
+    dialog.setTargetModel(grandparent);
+    
+    assertNull(parent.getDependencyManagement());
+    assertNull(grandparent.getDependencyManagement());
+    
+    dialog.compute();
+    
+    assertNotNull(grandparent.getDependencyManagement());
+    assertEquals(1, grandparent.getDependencyManagement().getDependencies().size());
+    
+    Dependency depManDep = grandparent.getDependencyManagement().getDependencies().get(0);
+    assertEquals(depManDep.getGroupId(), "test");
+    assertEquals(depManDep.getArtifactId(), "a");
+    assertEquals(depManDep.getVersion(), "1.0");
+    
+    assertNotNull(child.getDependencies());
+    assertNotNull(child.getDependencies().get(0));
+    Dependency oldDep = child.getDependencies().get(0);
+    assertEquals(oldDep.getGroupId(), "test");
+    assertEquals(oldDep.getArtifactId(), "a");
+    assertTrue(oldDep.getVersion() == null || oldDep.getVersion().equals(""));
+    
+    assertNull(parent.getDependencyManagement());
+  }
+  
+  protected MavenProject getMavenProject(String groupID, String artifactID, String version) {
     MavenProjectManager mavenProjectManager = MavenPlugin.getDefault().getMavenProjectManager();
     assertNotNull(mavenProjectManager);
     
-    IMavenProjectFacade facade = mavenProjectManager.getMavenProject(GROUP_ID+".diff", artifactID, VERSION);
+    IMavenProjectFacade facade = mavenProjectManager.getMavenProject(groupID, artifactID, version);
     assertNotNull(facade);
     
     MavenProject project = facade.getMavenProject();
