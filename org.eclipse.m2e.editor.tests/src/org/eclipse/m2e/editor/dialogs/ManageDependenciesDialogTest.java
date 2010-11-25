@@ -7,9 +7,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.project.MavenProject;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.emf.common.command.BasicCommandStack;
 import org.eclipse.emf.common.notify.impl.AdapterFactoryImpl;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -19,6 +21,7 @@ import org.eclipse.emf.edit.provider.ComposedAdapterFactory;
 import org.eclipse.emf.edit.provider.ReflectiveItemProviderAdapterFactory;
 import org.eclipse.emf.edit.provider.resource.ResourceItemProviderAdapterFactory;
 import org.eclipse.m2e.core.MavenPlugin;
+import org.eclipse.m2e.core.embedder.IMaven;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.MavenProjectManager;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
@@ -48,6 +51,30 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
    * - DepLabelProvider provides a different colour for poms not in the workspace
    * - test moving a dependency from A to C, where C -> B -> A is the hierarchy
    */
+  
+  public void testDepLabelProvider() throws Exception {
+    Model model = loadModels("projects/colourprovider", new String[] { "child/pom.xml" }).get("child");
+    assertEquals(model.getArtifactId(), "child");
+    
+    IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectManager().getMavenProject(GROUP_ID, "child", VERSION);
+    MavenProject project = facade.getMavenProject();
+    assertEquals(project.getArtifactId(), "child");
+    
+    ManageDependenciesDialog.DepLabelProvider provider = new ManageDependenciesDialog.DepLabelProvider();
+    
+    assertNull(provider.getForeground(project));
+    
+    IMaven maven = MavenPlugin.getDefault().getMaven();
+    maven.detachFromSession(project);
+    MavenExecutionRequest request = MavenPlugin.getDefault().getMavenProjectManager().createExecutionRequest(facade, new NullProgressMonitor());
+    
+    project = maven.resolveParentProject(request, project, new NullProgressMonitor());
+    assertNotNull(project);
+    assertEquals(project.getArtifactId(), "forge-parent");
+    assertEquals(project.getGroupId(), "org.sonatype.forge");
+    assertEquals(project.getVersion(), "6");
+    assertNotNull(provider.getForeground(project));
+  }
 
   public void testSamePOM() throws Exception {
 
