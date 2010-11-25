@@ -35,8 +35,6 @@ public interface IIndex {
 
   public static final String SEARCH_PACKAGING = "packaging"; //$NON-NLS-1$
 
-  public static final String SEARCH_MD5 = "md5"; //$NON-NLS-1$
-
   public static final String SEARCH_SHA1 = "sha1"; //$NON-NLS-1$
 
   /**
