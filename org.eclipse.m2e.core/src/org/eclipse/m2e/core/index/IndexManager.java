@@ -17,6 +17,12 @@ import java.util.Map;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 
+import org.apache.lucene.search.Query;
+
+import org.apache.maven.index.Field;
+import org.apache.maven.index.SearchType;
+
+
 public interface IndexManager {
 
   public static final int MIN_CLASS_QUERY_LENGTH = 6;
@@ -30,7 +36,7 @@ public interface IndexManager {
   public abstract IMutableIndex getWorkspaceIndex();
 
   public abstract IMutableIndex getLocalIndex();
-  
+
   /**
    * For Maven projects, returns index of all repositories configured for the project. Index includes repositories
    * defined in the project pom.xml, inherited from parent projects and defined in enabled profiles in settings.xml. If
@@ -58,5 +64,17 @@ public interface IndexManager {
    * Convenience method to search in all indexes enabled for repositories defined in settings.xml
    */
   public abstract IndexedArtifactFile identify(File file) throws CoreException;
+
+  /**
+   * Method to construct Lucene Queries without need to actually know the structure and details (field names, analyze
+   * details, etc) of the underlying index. Also, using this methods makes you "future proof". Naturally, at caller
+   * level you can still combine these queries using BooleanQuery to suit your needs.
+   * 
+   * @param field
+   * @param query
+   * @param type
+   * @return
+   */
+  public abstract Query constructQuery(Field field, String query, SearchType type);
 
 }
