@@ -26,8 +26,7 @@ public interface IMutableIndex extends IIndex {
 
   // index content manipulation
 
-  public void addArtifact(File pomFile, ArtifactKey artifactKey, //
-      long size, long date, File jarFile, int sourceExists, int javadocExists);
+  public void addArtifact(File pomFile, ArtifactKey artifactKey);
 
   public void removeArtifact(File pomFile, ArtifactKey artifactKey);
 

@@ -17,12 +17,11 @@ import java.util.Collection;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.TermQuery;
 
-import org.apache.maven.index.ArtifactInfo;
+import org.apache.maven.index.MAVEN;
+import org.apache.maven.index.SearchType;
 
 import org.eclipse.m2e.core.embedder.ArtifactKey;
 import org.eclipse.m2e.core.index.IIndex;
@@ -39,13 +38,13 @@ import org.eclipse.m2e.core.repository.IRepository;
  */
 public class NexusIndex implements IIndex, IMutableIndex {
 
-  /** 
+  /**
    * Repository index is disabled.
    */
   public static final String DETAILS_DISABLED = "off"; //$NON-NLS-1$
 
   /**
-   * Only artifact index information is used. Classname index is disabled. 
+   * Only artifact index information is used. Classname index is disabled.
    */
   public static final String DETAILS_MIN = "min"; //$NON-NLS-1$
 
@@ -59,14 +58,14 @@ public class NexusIndex implements IIndex, IMutableIndex {
   private final IRepository repository;
 
   private final String indexDetails;
-  
+
   NexusIndex(NexusIndexManager indexManager, IRepository repository, String indexDetails) {
     this.indexManager = indexManager;
     this.repository = repository;
     this.indexDetails = indexDetails;
   }
 
-  public String getRepositoryUrl(){
+  public String getRepositoryUrl() {
     return this.repository.getUrl();
   }
 
@@ -74,10 +73,8 @@ public class NexusIndex implements IIndex, IMutableIndex {
     return this.indexDetails;
   }
 
-  public void addArtifact(File pomFile, ArtifactKey artifactKey, long size, long date, File jarFile, int sourceExists,
-      int javadocExists) {
-    indexManager.addDocument(repository, pomFile, NexusIndexManager.getDocumentKey(artifactKey), size, date, jarFile, sourceExists,
-        javadocExists);
+  public void addArtifact(File pomFile, ArtifactKey artifactKey) {
+    indexManager.addDocument(repository, pomFile, NexusIndexManager.getDocumentKey(artifactKey));
   }
 
   public void removeArtifact(File pomFile, ArtifactKey artifactKey) {
@@ -88,24 +85,27 @@ public class NexusIndex implements IIndex, IMutableIndex {
       throws CoreException {
     BooleanQuery query = new BooleanQuery();
 
-    if(packaging != null) {
-      query.add(new TermQuery(new Term(ArtifactInfo.PACKAGING, packaging)), Occur.MUST);
+    if(!isBlank(packaging)) {
+      query.add(indexManager.constructQuery(MAVEN.PACKAGING, packaging, SearchType.EXACT), Occur.MUST);
     }
 
-    if(groupId!=null) {
-      // TODO remove '-' workaround once Nexus indexer is fixed
-      query.add(indexManager.createQuery(ArtifactInfo.GROUP_ID, groupId.replace('-', '*')), Occur.MUST);
+    if(!isBlank(groupId)) {
+      query.add(indexManager.constructQuery(MAVEN.GROUP_ID, groupId, SearchType.SCORED), Occur.MUST);
     }
 
-    if(artifactId != null) {
-      query.add(indexManager.createQuery(ArtifactInfo.ARTIFACT_ID, artifactId), Occur.MUST);
+    if(!isBlank(artifactId)) {
+      query.add(indexManager.constructQuery(MAVEN.ARTIFACT_ID, artifactId, SearchType.SCORED), Occur.MUST);
     }
- 
-    if(version != null) {
-      query.add(indexManager.createQuery(ArtifactInfo.VERSION, version), Occur.MUST);
+
+    if(!isBlank(version)) {
+      query.add(indexManager.constructQuery(MAVEN.VERSION, version, SearchType.SCORED), Occur.MUST);
     }
- 
+
     return indexManager.search(repository, query).values();
+  }
+
+  private boolean isBlank(String str) {
+    return str == null || str.trim().length() == 0;
   }
 
   public IndexedArtifactFile getIndexedArtifactFile(ArtifactKey artifact) throws CoreException {
@@ -113,14 +113,13 @@ public class NexusIndex implements IIndex, IMutableIndex {
   }
 
   public IndexedArtifactFile identify(File file) throws CoreException {
-    // TODO identify in this index only
-    return indexManager.identify(file);
+    return indexManager.identify(repository, file);
   }
 
   public void updateIndex(boolean force, IProgressMonitor monitor) throws CoreException {
     indexManager.updateIndex(repository, force, monitor);
   }
-  
+
   public void scheduleIndexUpdate(boolean force) {
     indexManager.scheduleIndexUpdate(repository, force);
   }

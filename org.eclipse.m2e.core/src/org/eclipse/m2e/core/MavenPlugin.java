@@ -65,6 +65,7 @@ import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactCollector;
 import org.apache.maven.execution.MavenSession;
+import org.apache.maven.index.ArtifactContextProducer;
 import org.apache.maven.index.NexusIndexer;
 import org.apache.maven.index.updater.IndexUpdater;
 import org.apache.maven.plugin.LegacySupport;
@@ -114,13 +115,13 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
   // preferences
   private static final String PREFS_ARCHETYPES = "archetypesInfo.xml"; //$NON-NLS-1$
-  
+
   // The shared instance
   private static MavenPlugin plugin;
 
   /**
-   * General purpose plexus container. Contains components from maven embedder
-   * and all other bundles visible from this bundle's classloader.
+   * General purpose plexus container. Contains components from maven embedder and all other bundles visible from this
+   * bundle's classloader.
    */
   private MutablePlexusContainer plexus;
 
@@ -135,7 +136,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   private MavenProjectManager projectManager;
 
   private MavenRuntimeManager runtimeManager;
-  
+
   private ProjectConfigurationManager configurationManager;
 
   private ProjectRegistryRefreshJob mavenBackgroundJob;
@@ -155,7 +156,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   private IMavenConfiguration mavenConfiguration;
 
   private MavenImpl maven;
-  
+
   public MavenPlugin() {
     plugin = this;
 
@@ -164,8 +165,8 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
       new Throwable().printStackTrace();
     }
   }
-  
-  public IMaven getMaven(){
+
+  public IMaven getMaven() {
     return maven;
   }
 
@@ -174,37 +175,37 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
    */
   public void start(final BundleContext context) throws Exception {
     super.start(context);
-    
+
     if(Boolean.parseBoolean(Platform.getDebugOption(IMavenConstants.PLUGIN_ID + "/debug/initialization"))) { //$NON-NLS-1$
       System.err.println("### executing start() " + IMavenConstants.PLUGIN_ID); //$NON-NLS-1$
       new Throwable().printStackTrace();
     }
-    
+
     this.bundleContext = context;
 
     try {
       this.qualifiedVersion = (String) getBundle().getHeaders().get(Constants.BUNDLE_VERSION);
       Version bundleVersion = Version.parseVersion(this.qualifiedVersion);
       this.version = bundleVersion.getMajor() + "." + bundleVersion.getMinor() + "." + bundleVersion.getMicro(); //$NON-NLS-1$ //$NON-NLS-2$
-    } catch (IllegalArgumentException e) {
+    } catch(IllegalArgumentException e) {
       // ignored
     }
 
     MavenLogger.setLog(getLog());
-    
+
     try {
       this.console = new MavenConsoleImpl(MavenImages.M2); //$NON-NLS-1$
     } catch(RuntimeException ex) {
-      MavenLogger.log(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Unable to start console: " + ex.toString(), ex));
+      MavenLogger.log(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Unable to start console: "
+          + ex.toString(), ex));
     }
 
     this.mavenConfiguration = new MavenConfigurationImpl(getPreferenceStore());
 
     ClassLoader cl = MavenPlugin.class.getClassLoader();
-    ContainerConfiguration cc = new DefaultContainerConfiguration()
-      .setClassWorld(new ClassWorld("plexus.core", cl)) //$NON-NLS-1$
-      .setName("plexus"); //$NON-NLS-1$
-    this.plexus = new DefaultPlexusContainer( cc);
+    ContainerConfiguration cc = new DefaultContainerConfiguration().setClassWorld(new ClassWorld("plexus.core", cl)) //$NON-NLS-1$
+        .setName("plexus"); //$NON-NLS-1$
+    this.plexus = new DefaultPlexusContainer(cc);
 
     File stateLocationDir = getStateLocation().toFile();
 
@@ -212,7 +213,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     this.archetypeManager = newArchetypeManager(stateLocationDir);
     try {
       this.archetypeManager.readCatalogs();
-    } catch (Exception ex) {
+    } catch(Exception ex) {
       String msg = "Can't read archetype catalog configuration";
       this.console.logError(msg + "; " + ex.getMessage()); //$NON-NLS-1$
       MavenLogger.log(msg, ex);
@@ -244,7 +245,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     }
 
     this.modelManager = new MavenModelManager(maven, projectManager, console);
-    
+
     this.runtimeManager = new MavenRuntimeManager(getPreferenceStore());
     this.runtimeManager.setEmbeddedRuntime(new MavenEmbeddedRuntime(getBundleContext()));
     this.runtimeManager.setWorkspaceRuntime(new MavenWorkspaceRuntime(projectManager));
@@ -256,7 +257,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     //create repository registry
     this.repositoryRegistry = new RepositoryRegistry(maven, projectManager);
     this.maven.addSettingsChangeListener(repositoryRegistry);
-    this.projectManager.addMavenProjectChangedListener(repositoryRegistry);  
+    this.projectManager.addMavenProjectChangedListener(repositoryRegistry);
 
     //create the index manager
     this.indexManager = new NexusIndexManager(console, projectManager, repositoryRegistry, stateLocationDir);
@@ -286,10 +287,10 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     // nothing to do here, all startup work is done in #start(BundleContext)
   }
 
-  public PlexusContainer getPlexusContainer(){
+  public PlexusContainer getPlexusContainer() {
     return plexus;
   }
-  
+
   /**
    * This method is called when the plug-in is stopped
    */
@@ -349,8 +350,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
         Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
         MessageDialogWithToggle dialog = new MessageDialogWithToggle(shell, //
             Messages.MavenPlugin_error_jre_title, //
-            null, Messages.MavenPlugin_error_jre_message,
-            MessageDialog.WARNING, //
+            null, Messages.MavenPlugin_error_jre_message, MessageDialog.WARNING, //
             new String[] {IDialogConstants.OK_LABEL}, //
             0, Messages.MavenPlugin_error_warn_again, false) {
           protected Control createMessageArea(Composite composite) {
@@ -388,8 +388,9 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
               }
             });
 
-            GridDataFactory.fillDefaults().align(SWT.FILL, SWT.BEGINNING).grab(true, false).hint(
-                convertHorizontalDLUsToPixels(IDialogConstants.MINIMUM_MESSAGE_AREA_WIDTH), SWT.DEFAULT).applyTo(link);
+            GridDataFactory.fillDefaults().align(SWT.FILL, SWT.BEGINNING).grab(true, false)
+                .hint(convertHorizontalDLUsToPixels(IDialogConstants.MINIMUM_MESSAGE_AREA_WIDTH), SWT.DEFAULT)
+                .applyTo(link);
 
             return composite;
           }
@@ -439,7 +440,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   public ArchetypeManager getArchetypeManager() {
     return this.archetypeManager;
   }
-  
+
   public IMavenMarkerManager getMavenMarkerManager() {
     return this.mavenMarkerManager;
   }
@@ -477,7 +478,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   public ProjectRegistryRefreshJob getProjectManagerRefreshJob() {
     return mavenBackgroundJob;
   }
-  
+
   private <C> C lookup(Class<C> role) {
     try {
       return plexus.lookup(role);
@@ -521,13 +522,17 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   public IndexUpdater getIndexUpdater() {
     return lookup(IndexUpdater.class);
   }
-  
+
   public WagonManager getWagonManager() {
     return lookup(WagonManager.class);
   }
 
   public NexusIndexer getNexusIndexer() {
     return lookup(NexusIndexer.class);
+  }
+
+  public ArtifactContextProducer getArtifactContextProducer() {
+    return lookup(ArtifactContextProducer.class);
   }
 
   public ArtifactFactory getArtifactFactory() {
