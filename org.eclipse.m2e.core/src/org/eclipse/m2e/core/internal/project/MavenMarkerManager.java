@@ -65,14 +65,8 @@ import org.eclipse.m2e.core.project.IMavenMarkerManager;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 
 public class MavenMarkerManager implements IMavenMarkerManager {
-  /**
-   * 
-   */
   private static final String XSI_SCHEMA_LOCATION = "xsi:schemaLocation"; //$NON-NLS-1$
 
-  /**
-   * 
-   */
   private static final String PROJECT_NODE = "project"; //$NON-NLS-1$
   public static final String OFFSET = "offset"; //$NON-NLS-1$
   
@@ -694,25 +688,23 @@ public class MavenMarkerManager implements IMavenMarkerManager {
       }
     }
   }
-  
- public void addErrorMarkers(IResource resource, Exception ex) {
-   Throwable cause = getRootCause(ex);
-   if (cause instanceof CoreException) {
-     CoreException cex = (CoreException)cause;
-     IStatus status = cex.getStatus();
-     if(status != null) {
-       addMarker(resource, IMavenConstants.MARKER_ID, status.getMessage(), 1, IMarker.SEVERITY_ERROR, false); //$NON-NLS-1$
-       IStatus[] children = status.getChildren();
-       if(children != null) {
-         for(IStatus childStatus : children) {
-           addMarker(resource, IMavenConstants.MARKER_ID, childStatus.getMessage(), 1, IMarker.SEVERITY_ERROR, false); //$NON-NLS-1$
-         }
-       } 
-     }
-   } else {
-     addMarker(resource, IMavenConstants.MARKER_ID, cause.getMessage(), 1, IMarker.SEVERITY_ERROR, false); //$NON-NLS-1$
-   }
- }
 
-
+  public void addErrorMarkers(IResource resource, Exception ex) {
+    Throwable cause = getRootCause(ex);
+    if(cause instanceof CoreException) {
+      CoreException cex = (CoreException) cause;
+      IStatus status = cex.getStatus();
+      if(status != null) {
+        addMarker(resource, IMavenConstants.MARKER_ID, status.getMessage(), 1, IMarker.SEVERITY_ERROR, false); //$NON-NLS-1$
+        IStatus[] children = status.getChildren();
+        if(children != null) {
+          for(IStatus childStatus : children) {
+            addMarker(resource, IMavenConstants.MARKER_ID, childStatus.getMessage(), 1, IMarker.SEVERITY_ERROR, false); //$NON-NLS-1$
+          }
+        }
+      }
+    } else {
+      addMarker(resource, IMavenConstants.MARKER_ID, cause.getMessage(), 1, IMarker.SEVERITY_ERROR, false); //$NON-NLS-1$
+    }
+  }
 }
