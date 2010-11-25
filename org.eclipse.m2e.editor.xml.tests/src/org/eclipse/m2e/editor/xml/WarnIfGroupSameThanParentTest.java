@@ -31,6 +31,7 @@ public class WarnIfGroupSameThanParentTest extends AbstractMavenProjectTestCase 
         "child2552withDuplicateVersion/pom.xml", 
         "parent2552/pom.xml"}, new ResolverConfiguration());
     waitForJobsToComplete();
+    MavenMarkerResolutionGenerator generator = new MavenMarkerResolutionGenerator();
 
     {
       //"child2552withDuplicateGroupAndVersion/pom.xml"
@@ -39,6 +40,10 @@ public class WarnIfGroupSameThanParentTest extends AbstractMavenProjectTestCase 
       assertEquals(IMarker.SEVERITY_WARNING, markers[0].getAttribute(IMarker.SEVERITY));
       assertEquals("parent_groupid", markers[0].getAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT));
       assertEquals("parent_version", markers[1].getAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT));
+      
+      //this sort of testing just asks for trouble and endless updates of the test, but well..
+      assertEquals(1, generator.getResolutions(markers[0]).length);
+      assertEquals(1, generator.getResolutions(markers[1]).length);
     }
 
     {
@@ -47,6 +52,9 @@ public class WarnIfGroupSameThanParentTest extends AbstractMavenProjectTestCase 
       assertEquals(1, markers.length);
       assertEquals(IMarker.SEVERITY_WARNING, markers[0].getAttribute(IMarker.SEVERITY));
       assertEquals("parent_groupid", markers[0].getAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT));
+
+      //this sort of testing just asks for trouble and endless updates of the test, but well..
+      assertEquals(1, generator.getResolutions(markers[0]).length);
     }
     
     {
@@ -55,6 +63,9 @@ public class WarnIfGroupSameThanParentTest extends AbstractMavenProjectTestCase 
       assertEquals(1, markers.length);
       assertEquals(IMarker.SEVERITY_WARNING, markers[0].getAttribute(IMarker.SEVERITY));
       assertEquals("parent_version", markers[0].getAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT));
+      
+      //this sort of testing just asks for trouble and endless updates of the test, but well..
+      assertEquals(1, generator.getResolutions(markers[0]).length);
     }
   }
 }
