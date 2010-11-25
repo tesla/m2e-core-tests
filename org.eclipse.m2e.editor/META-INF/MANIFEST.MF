@@ -23,5 +23,6 @@ Bundle-Vendor: %Bundle-Vendor
 Bundle-ClassPath: .
 Export-Package: org.eclipse.m2e.editor,
  org.eclipse.m2e.editor.composites,
+ org.eclipse.m2e.editor.dialogs,
  org.eclipse.m2e.editor.plugins,
  org.eclipse.m2e.editor.pom

@@ -9,7 +9,6 @@
 package org.eclipse.m2e.editor.dialogs;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.ListIterator;
@@ -19,13 +18,10 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.common.command.CompoundCommand;
-import org.eclipse.emf.common.notify.impl.AdapterFactoryImpl;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.edit.command.AddCommand;
 import org.eclipse.emf.edit.command.SetCommand;
 import org.eclipse.emf.edit.domain.EditingDomain;
-import org.eclipse.emf.edit.provider.ReflectiveItemProviderAdapterFactory;
-import org.eclipse.emf.edit.provider.resource.ResourceItemProviderAdapterFactory;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -77,20 +73,19 @@ public class ManageDependenciesDialog extends AbstractMavenDialog {
 
   
   protected static final String DIALOG_SETTINGS = ManageDependenciesDialog.class.getName();
-  private TableViewer dependenciesViewer;
-  private TreeViewer pomsViewer;
-  private Model model;
+  protected TableViewer dependenciesViewer;
+  protected TreeViewer pomsViewer;
+  protected Model model;
   LinkedList<MavenProject> projectHierarchy;
-  private EditingDomain editingDomain;
-  private MavenPomEditor editor;
-
+  protected EditingDomain editingDomain;
+  
   /**
    * Hierarchy is a LinkedList representing the hierarchy relationship between
    * POM represented by model and its parents. The head of the list should be
    * the child, while the tail should be the root parent, with the others 
    * in between.
    */
-  public ManageDependenciesDialog(Shell parent, Model model, LinkedList<MavenProject> hierarchy, MavenPomEditor editor) {
+  public ManageDependenciesDialog(Shell parent, Model model, LinkedList<MavenProject> hierarchy, EditingDomain editingDomain) {
     super(parent, DIALOG_SETTINGS);
 
     setShellStyle(getShellStyle() | SWT.RESIZE);
@@ -98,8 +93,7 @@ public class ManageDependenciesDialog extends AbstractMavenDialog {
     
     this.model = model;
     this.projectHierarchy = hierarchy;
-    this.editor = editor;
-    this.editingDomain = editor.getEditingDomain();
+    this.editingDomain = editingDomain;
   }
 
   /* (non-Javadoc)
@@ -132,7 +126,6 @@ public class ManageDependenciesDialog extends AbstractMavenDialog {
         column.setWidth(dependenciesTable.getClientArea().width);
       }
     });
-//    List dependenciesList = new List(dependenciesComposite, SWT.BORDER | SWT.V_SCROLL);
     
     Composite pomComposite = new Composite(sashForm, SWT.NONE);
     
@@ -197,29 +190,8 @@ public class ManageDependenciesDialog extends AbstractMavenDialog {
     pomsViewer.setLabelProvider(new DepLabelProvider());
     
     pomsViewer.setContentProvider(new ContentProvider());
-    pomsViewer.setInput(projectHierarchy);
-    pomsViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-      
-      @SuppressWarnings("synthetic-access")
-      public void selectionChanged(SelectionChangedEvent event) {
-        boolean error = false;
-        IStructuredSelection selections = (IStructuredSelection) event.getSelection();
-        for (Object selection : selections.toArray()) {
-          if (selection instanceof MavenProject) {
-            MavenProject project = (MavenProject) selection;
-            
-            IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectManager().getMavenProject(project.getGroupId(), project.getArtifactId(), project.getVersion());
-            if (facade == null) {
-              error = true;
-              updateStatus(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, "The selected project cannot be chosen because it is not present in your workspace."));
-            }
-          }
-        }
-        if (!error) {
-          updateStatus(new Status(IStatus.OK, MavenEditorPlugin.PLUGIN_ID, ""));
-        }
-      }
-    });
+    pomsViewer.setInput(getProjectHierarchy());
+    pomsViewer.addSelectionChangedListener(new PomViewerSelectionChangedListener());
     pomsViewer.expandAll();
     
     return composite;
@@ -229,37 +201,24 @@ public class ManageDependenciesDialog extends AbstractMavenDialog {
    * @see org.eclipse.ui.dialogs.SelectionStatusDialog#computeResult()
    */
   protected void computeResult() {
-    IStructuredSelection selection = (IStructuredSelection) pomsViewer.getSelection();
-    MavenProject targetPOM = (MavenProject) selection.getFirstElement();
+    MavenProject targetPOM = getTargetPOM();
     IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectManager().getMavenProject(targetPOM.getGroupId(), targetPOM.getArtifactId(), targetPOM.getVersion());
     
     /*
      * Load the target model so we can make modifications to it
      */
     Model targetModel = null;
-    if (targetPOM.equals(this.projectHierarchy.getFirst())) {
+    if (targetPOM.equals(getProjectHierarchy().getFirst())) {
       //Editing the same models in both cases
       targetModel = model;
     } else {
-      PomResourceFactoryImpl factory = new PomResourceFactoryImpl();
-      PomResourceImpl resource = (PomResourceImpl) factory.createResource(
-          URI.createFileURI(facade.getPomFile().getPath()));
-      try {
-        resource.load(Collections.EMPTY_MAP);
-      } catch(IOException e) {
-        MavenLogger.log("Can't load model " + facade.getPomFile().getPath(), e);
+      targetModel = loadTargetModel(facade);
+      if (targetModel == null) {
         return;
       }
-      targetModel = (Model) resource.getContents().get(0);
     }
     
-    selection = (IStructuredSelection) dependenciesViewer.getSelection();
-    
-    LinkedList<Dependency> dependencies = new LinkedList<Dependency>();
-    
-    for (Object obj : selection.toArray()) {
-      dependencies.add((Dependency) obj);
-    }
+    LinkedList<Dependency> dependencies = getDependenciesList();
     
     /*
      * 1) Remove version values from the dependencies from the current POM
@@ -273,19 +232,6 @@ public class ManageDependenciesDialog extends AbstractMavenDialog {
           PomPackage.eINSTANCE.getDependency_Version(), SetCommand.UNSET_VALUE);
       command.append(unset);
     }
-
-//    editingDomain.getCommandStack().execute(command);
-    
-    ArrayList<AdapterFactoryImpl> factories = new ArrayList<AdapterFactoryImpl>();
-    factories.add(new ResourceItemProviderAdapterFactory());
-    factories.add(new ReflectiveItemProviderAdapterFactory());
-//    
-//    ComposedAdapterFactory adapterFactory = new ComposedAdapterFactory(factories);
-//    BasicCommandStack commandStack = new BasicCommandStack();
-//    EditingDomain targetEditingDomain = new AdapterFactoryEditingDomain(adapterFactory,
-//        commandStack, new HashMap<Resource, Boolean>());
-    
-//    command = new CompoundCommand();
     
     DependencyManagement management = targetModel.getDependencyManagement();
     if (management == null) {
@@ -294,11 +240,7 @@ public class ManageDependenciesDialog extends AbstractMavenDialog {
           PomPackage.eINSTANCE.getModel_DependencyManagement(), management);
       command.append(createDepManagement);
     }
-    
-//    editingDomain.getCommandStack().execute(command);
-//    
-//    command = new CompoundCommand();
-    
+        
     for (Dependency dep : dependencies) {
       Dependency clone = PomFactory.eINSTANCE.createDependency();
       clone.setGroupId(dep.getGroupId());
@@ -313,7 +255,65 @@ public class ManageDependenciesDialog extends AbstractMavenDialog {
     editingDomain.getCommandStack().execute(command);
     
   }
+
+  protected Model loadTargetModel(IMavenProjectFacade facade) {
+    Model targetModel;
+    PomResourceFactoryImpl factory = new PomResourceFactoryImpl();
+    PomResourceImpl resource = (PomResourceImpl) factory.createResource(
+        URI.createFileURI(facade.getPomFile().getPath()));
+    try {
+      resource.load(Collections.EMPTY_MAP);
+    } catch(IOException e) {
+      MavenLogger.log("Can't load model " + facade.getPomFile().getPath(), e);
+      return null;
+    }
+    targetModel = (Model) resource.getContents().get(0);
+    return targetModel;
+  }
+
+  protected LinkedList<Dependency> getDependenciesList() {
+    IStructuredSelection selection = (IStructuredSelection) dependenciesViewer.getSelection();
+    
+    LinkedList<Dependency> dependencies = new LinkedList<Dependency>();
+
+    for (Object obj : selection.toArray()) {
+      dependencies.add((Dependency) obj);
+    }
+    
+    return dependencies;
+  }
+
+  protected LinkedList<MavenProject> getProjectHierarchy() {
+    return this.projectHierarchy;
+  }
+
+  protected MavenProject getTargetPOM() {
+    IStructuredSelection selection = (IStructuredSelection) pomsViewer.getSelection();
+    return (MavenProject) selection.getFirstElement();
+  }
   
+  protected class PomViewerSelectionChangedListener implements ISelectionChangedListener {
+    @SuppressWarnings("synthetic-access")
+    public void selectionChanged(SelectionChangedEvent event) {
+      boolean error = false;
+      IStructuredSelection selections = (IStructuredSelection) event.getSelection();
+      for (Object selection : selections.toArray()) {
+        if (selection instanceof MavenProject) {
+          MavenProject project = (MavenProject) selection;
+          
+          IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectManager().getMavenProject(project.getGroupId(), project.getArtifactId(), project.getVersion());
+          if (facade == null) {
+            error = true;
+            updateStatus(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, "The selected project cannot be chosen because it is not present in your workspace."));
+          }
+        }
+      }
+      if (!error) {
+        updateStatus(new Status(IStatus.OK, MavenEditorPlugin.PLUGIN_ID, ""));
+      }
+    }
+  }
+
   public static class DepLabelProvider extends LabelProvider implements IColorProvider {
     /* (non-Javadoc)
      * @see org.eclipse.jface.viewers.LabelProvider#getText(java.lang.Object)
@@ -399,17 +399,17 @@ public class ManageDependenciesDialog extends AbstractMavenDialog {
          */
         MavenProject parent = (MavenProject) parentElement;
         
-        if (projectHierarchy.size() == 1) {
+        if (getProjectHierarchy().size() == 1) {
           //No parent exists, only one element in the tree
           return new Object[0];
         }
         
-        if (projectHierarchy.getFirst().equals(parent)) {
+        if (getProjectHierarchy().getFirst().equals(parent)) {
           //We are the final child
           return new Object[0];
         }
         
-        ListIterator<MavenProject> iter = projectHierarchy.listIterator();
+        ListIterator<MavenProject> iter = getProjectHierarchy().listIterator();
         while (iter.hasNext()) {
           MavenProject next = iter.next();
           if (next.equals(parent)) {

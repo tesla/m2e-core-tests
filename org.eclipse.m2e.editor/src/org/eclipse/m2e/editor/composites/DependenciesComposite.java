@@ -1134,7 +1134,7 @@ public class DependenciesComposite extends Composite {
     }
     
     
-    final ManageDependenciesDialog manageDepDialog = new ManageDependenciesDialog(getShell(), model, hierarchy, pomEditor);
+    final ManageDependenciesDialog manageDepDialog = new ManageDependenciesDialog(getShell(), model, hierarchy, pomEditor.getEditingDomain());
     manageDepDialog.open();
   }
 }
