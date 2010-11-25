@@ -41,7 +41,6 @@ import org.eclipse.m2e.core.ui.dialogs.AbstractMavenDialog;
 import org.eclipse.m2e.editor.MavenEditorPlugin;
 import org.eclipse.m2e.editor.composites.ListEditorContentProvider;
 import org.eclipse.m2e.editor.composites.ManageDependencyLabelProvider;
-import org.eclipse.m2e.editor.pom.MavenPomEditor;
 import org.eclipse.m2e.model.edit.pom.Dependency;
 import org.eclipse.m2e.model.edit.pom.DependencyManagement;
 import org.eclipse.m2e.model.edit.pom.Model;
@@ -49,6 +48,7 @@ import org.eclipse.m2e.model.edit.pom.PomFactory;
 import org.eclipse.m2e.model.edit.pom.PomPackage;
 import org.eclipse.m2e.model.edit.pom.util.PomResourceFactoryImpl;
 import org.eclipse.m2e.model.edit.pom.util.PomResourceImpl;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.ControlAdapter;
@@ -93,7 +93,7 @@ public class ManageDependenciesDialog extends AbstractMavenDialog {
     super(parent, DIALOG_SETTINGS);
 
     setShellStyle(getShellStyle() | SWT.RESIZE);
-    setTitle("Manage Dependencies");
+    setTitle(Messages.ManageDependenciesDialog_dialogTitle);
     
     this.model = model;
     this.projectHierarchy = hierarchy;
@@ -110,9 +110,7 @@ public class ManageDependenciesDialog extends AbstractMavenDialog {
 
     Label infoLabel = new Label(composite, SWT.WRAP);
     infoLabel
-        .setText("This will start managing the selected dependencies for all " +
-        		"child POMs. You may select the POM that will manage these " +
-        		"dependencies. The version information will then be moved to it.");
+        .setText(Messages.ManageDependenciesDialog_dialogInfo);
     
     Label horizontalBar = new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
 
@@ -120,7 +118,7 @@ public class ManageDependenciesDialog extends AbstractMavenDialog {
     Composite dependenciesComposite = new Composite(sashForm, SWT.NONE);
     
     Label selectDependenciesLabel = new Label(dependenciesComposite, SWT.NONE);
-    selectDependenciesLabel.setText("Select dependencies to manage:");
+    selectDependenciesLabel.setText(Messages.ManageDependenciesDialog_selectDependenciesLabel);
     
     final Table dependenciesTable = new Table(dependenciesComposite, SWT.FLAT | SWT.MULTI | SWT.BORDER);
     final TableColumn column = new TableColumn(dependenciesTable, SWT.NONE);
@@ -134,7 +132,7 @@ public class ManageDependenciesDialog extends AbstractMavenDialog {
     Composite pomComposite = new Composite(sashForm, SWT.NONE);
     
     Label selectPomLabel = new Label(pomComposite, SWT.NONE);
-    selectPomLabel.setText("Select the POM which will manage the dependencies:");
+    selectPomLabel.setText(Messages.ManageDependenciesDialog_selectPOMLabel);
     
     Tree pomTree = new Tree(pomComposite, SWT.BORDER);
     
@@ -284,7 +282,7 @@ public class ManageDependenciesDialog extends AbstractMavenDialog {
     try {
       resource.load(Collections.EMPTY_MAP);
     } catch(IOException e) {
-      MavenLogger.log("Can't load model " + facade.getPomFile().getPath(), e);
+      MavenLogger.log("Can't load model " + facade.getPomFile().getPath(), e); //$NON-NLS-1$
       return null;
     }
     targetModel = (Model) resource.getContents().get(0);
@@ -338,16 +336,16 @@ public class ManageDependenciesDialog extends AbstractMavenDialog {
         if (selectedDep.getGroupId().equals(targetDep.getGroupId())
             && selectedDep.getArtifactId().equals(targetDep.getArtifactId())
             && !selectedDep.getVersion().equals(targetDep.getVersion())) {
-          String modelID = model.getGroupId()+":"+model.getArtifactId()+":"+model.getVersion();
-          if (targetDep.getLocation("") != null && targetDep.getLocation("").getSource() != null) {
-            modelID = targetDep.getLocation("").getSource().getModelId();
+          String modelID = model.getGroupId()+":"+model.getArtifactId()+":"+model.getVersion(); //$NON-NLS-1$ //$NON-NLS-2$
+          if (targetDep.getLocation("") != null && targetDep.getLocation("").getSource() != null) { //$NON-NLS-1$ //$NON-NLS-2$
+            modelID = targetDep.getLocation("").getSource().getModelId(); //$NON-NLS-1$
           }
           Object[] arguments = {
-            selectedDep.getArtifactId()+"-"+selectedDep.getVersion(),
+            selectedDep.getArtifactId()+"-"+selectedDep.getVersion(), //$NON-NLS-1$
             targetDep.getVersion(),
             modelID
           };
-          String message = MessageFormat.format("Dependency {0} already declared with version {1} under {2}''s dependencyManagement.", arguments);
+          String message = NLS.bind(Messages.ManageDependenciesDialog_dependencyExistsWarning, arguments);
           updateStatus(new Status(IStatus.WARNING, MavenEditorPlugin.PLUGIN_ID, message));
           return true;
         }
@@ -365,14 +363,15 @@ public class ManageDependenciesDialog extends AbstractMavenDialog {
     IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectManager().getMavenProject(targetProject.getGroupId(), targetProject.getArtifactId(), targetProject.getVersion());
     if (facade == null) {
       error = true;
-      updateStatus(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, "The selected project cannot be chosen because it is not present in your workspace."));
+      updateStatus(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, Messages.ManageDependenciesDialog_projectNotPresentError));
     } else {
       org.apache.maven.model.Model model = null;
       if (facade.getMavenProject() == null || facade.getMavenProject().getModel() == null) {
          try {
           model = MavenPlugin.getDefault().getMavenModelManager().readMavenModel(facade.getPom());
         } catch(CoreException e) {
-          Status status = new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, "Error reading POM file "+facade.getPom()+": " +e.getLocalizedMessage() );
+          Object[] arguments = { facade.getPom(), e.getLocalizedMessage() };
+          Status status = new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, NLS.bind(Messages.ManageDependenciesDialog_pomReadingError,arguments));
           MavenPlugin.getDefault().getLog().log(status);
           updateStatus(status);
           error = true;
@@ -391,7 +390,7 @@ public class ManageDependenciesDialog extends AbstractMavenDialog {
   }
 
   protected void clearStatus() {
-    updateStatus(new Status(IStatus.OK, MavenEditorPlugin.PLUGIN_ID, ""));
+    updateStatus(new Status(IStatus.OK, MavenEditorPlugin.PLUGIN_ID, "")); //$NON-NLS-1$
   }
   
   protected class DependenciesViewerSelectionListener implements ISelectionChangedListener {
@@ -424,11 +423,11 @@ public class ManageDependenciesDialog extends AbstractMavenDialog {
       } else if (element instanceof Object[]) {
         project = (MavenProject) ((Object[]) element)[0];
       } else {
-        return "";
+        return ""; //$NON-NLS-1$
       }
       
       StringBuffer buffer = new StringBuffer();
-      buffer.append(project.getGroupId() + " : " + project.getArtifactId() + " : " +project.getVersion());
+      buffer.append(project.getGroupId() + " : " + project.getArtifactId() + " : " +project.getVersion()); //$NON-NLS-1$ //$NON-NLS-2$
       return buffer.toString();
       
     }
