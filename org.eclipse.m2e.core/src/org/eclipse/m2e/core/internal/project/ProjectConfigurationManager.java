@@ -335,12 +335,14 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
           IMarker.SEVERITY_ERROR);
       return false;
     }
+
     List<MojoExecution> notCoveredMojoExecutions = lifecycleMapping.getNotCoveredMojoExecutions(mavenProjectFacade,
         monitor);
     if(notCoveredMojoExecutions != null && notCoveredMojoExecutions.size() != 0) {
       for(MojoExecution mojoExecution : notCoveredMojoExecutions) {
         mavenMarkerManager.addMarker(mavenProjectFacade.getPom(),
-            NLS.bind(Messages.LifecycleConfigurationMojoExecutionNotCovered, mojoExecution.toString()),
+            NLS.bind(Messages.LifecycleConfigurationMojoExecutionNotCovered, mojoExecution.toString(),
+                mojoExecution.getLifecyclePhase()),
             1 /*lineNumber*/, IMarker.SEVERITY_ERROR);
       }
       return false;

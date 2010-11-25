@@ -87,7 +87,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertNotNull(errorMarkers);
     assertEquals(WorkspaceHelpers.toString(errorMarkers), 1, errorMarkers.size());
     assertEquals(
-        "Mojo execution not covered by lifecycle configuration: org.codehaus.modello:modello-maven-plugin:1.1:java {execution: standard}",
+        "Mojo execution not covered by lifecycle configuration: org.codehaus.modello:modello-maven-plugin:1.1:java {execution: standard} (maven lifecycle phase: generate-sources)",
         errorMarkers.get(0).getAttribute(IMarker.MESSAGE));
   }
 
