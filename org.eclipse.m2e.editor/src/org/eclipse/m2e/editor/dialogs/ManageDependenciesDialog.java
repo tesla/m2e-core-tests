@@ -9,12 +9,14 @@
 package org.eclipse.m2e.editor.dialogs;
 
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
 import org.apache.maven.project.MavenProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.emf.common.command.Command;
@@ -79,6 +81,7 @@ public class ManageDependenciesDialog extends AbstractMavenDialog {
   protected Model model;
   LinkedList<MavenProject> projectHierarchy;
   protected EditingDomain editingDomain;
+  private IStatus status;
   
   /**
    * Hierarchy is a LinkedList representing the hierarchy relationship between
@@ -185,6 +188,7 @@ public class ManageDependenciesDialog extends AbstractMavenDialog {
     dependenciesViewer.setLabelProvider(new ManageDependencyLabelProvider());
     dependenciesViewer.setContentProvider(new ListEditorContentProvider<Dependency>());
     dependenciesViewer.setInput(model.getDependencies());
+    dependenciesViewer.addSelectionChangedListener(new DependenciesViewerSelectionListener());
     
     pomsViewer = new TreeViewer(pomTree);
     
@@ -246,14 +250,10 @@ public class ManageDependenciesDialog extends AbstractMavenDialog {
         while (iter.hasNext()) {
           Dependency depFromSource = iter.next();
           if (depFromSource.getGroupId().equals(depFromTarget.getGroupId()) 
-              && depFromSource.getArtifactId().equals(depFromTarget.getArtifactId())
-              && depFromSource.getVersion().equals(depFromTarget.getVersion())) {
+              && depFromSource.getArtifactId().equals(depFromTarget.getArtifactId())) {
             /* 
              * Dependency already exists in the target's dependencyManagement,
              * so we don't need to add it.
-             * 
-             * TODO: Remove the check comparing versions and warn the user before
-             * they commit to such an action.
              */
             iter.remove();
           }
@@ -312,26 +312,104 @@ public class ManageDependenciesDialog extends AbstractMavenDialog {
     return (MavenProject) selection.getFirstElement();
   }
   
-  protected class PomViewerSelectionChangedListener implements ISelectionChangedListener {
-    @SuppressWarnings("synthetic-access")
-    public void selectionChanged(SelectionChangedEvent event) {
-      boolean error = false;
-      IStructuredSelection selections = (IStructuredSelection) event.getSelection();
-      for (Object selection : selections.toArray()) {
-        if (selection instanceof MavenProject) {
-          MavenProject project = (MavenProject) selection;
-          
-          IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectManager().getMavenProject(project.getGroupId(), project.getArtifactId(), project.getVersion());
-          if (facade == null) {
-            error = true;
-            updateStatus(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, "The selected project cannot be chosen because it is not present in your workspace."));
+  /**
+   * Compare the list of selected dependencies against the selected targetPOM.
+   * If one of the dependencies is already under dependencyManagement, but has
+   * a different version than the selected dependency, warn the user about this.
+   * 
+   * returns true if the user has been warned (but this method updates the status itself)
+   * 
+   * @param model
+   * @param dependencies
+   */
+  protected boolean checkDependencies(org.apache.maven.model.Model model, LinkedList<Dependency> dependencies) {
+    if (this.status != null && this.status.getCode() == IStatus.ERROR) {
+      //Don't warn the user if there is already an error
+      return false;
+    }
+    if (model == null || model.getDependencyManagement() == null 
+        || model.getDependencyManagement().getDependencies() == null
+        || model.getDependencyManagement().getDependencies().isEmpty()) {
+      return false;
+    }
+    
+    for (Dependency selectedDep : dependencies ) {
+      for (org.apache.maven.model.Dependency targetDep : model.getDependencyManagement().getDependencies()) {
+        if (selectedDep.getGroupId().equals(targetDep.getGroupId())
+            && selectedDep.getArtifactId().equals(targetDep.getArtifactId())
+            && !selectedDep.getVersion().equals(targetDep.getVersion())) {
+          String modelID = model.getGroupId()+":"+model.getArtifactId()+":"+model.getVersion();
+          if (targetDep.getLocation("") != null && targetDep.getLocation("").getSource() != null) {
+            modelID = targetDep.getLocation("").getSource().getModelId();
           }
+          Object[] arguments = {
+            selectedDep.getArtifactId()+"-"+selectedDep.getVersion(),
+            targetDep.getVersion(),
+            modelID
+          };
+          String message = MessageFormat.format("Dependency {0} already declared with version {1} under {2}''s dependencyManagement.", arguments);
+          updateStatus(new Status(IStatus.WARNING, MavenEditorPlugin.PLUGIN_ID, message));
+          return true;
         }
       }
-      if (!error) {
-        updateStatus(new Status(IStatus.OK, MavenEditorPlugin.PLUGIN_ID, ""));
+    }
+    return false;
+  }
+  
+  protected void checkStatus(MavenProject targetProject, LinkedList<Dependency> selectedDependencies) {
+    if (targetProject == null) {
+      clearStatus();
+      return;
+    }
+    boolean error = false;
+    IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectManager().getMavenProject(targetProject.getGroupId(), targetProject.getArtifactId(), targetProject.getVersion());
+    if (facade == null) {
+      error = true;
+      updateStatus(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, "The selected project cannot be chosen because it is not present in your workspace."));
+    } else {
+      org.apache.maven.model.Model model = null;
+      if (facade.getMavenProject() == null || facade.getMavenProject().getModel() == null) {
+         try {
+          model = MavenPlugin.getDefault().getMavenModelManager().readMavenModel(facade.getPom());
+        } catch(CoreException e) {
+          Status status = new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, "Error reading POM file "+facade.getPom()+": " +e.getLocalizedMessage() );
+          MavenPlugin.getDefault().getLog().log(status);
+          updateStatus(status);
+          error = true;
+        }
+      } else {
+        model = facade.getMavenProject().getModel();
+      }
+      if (model != null) {
+        error = checkDependencies(model, getDependenciesList());
       }
     }
+    
+    if (!error) {
+      clearStatus();
+    } 
+  }
+
+  protected void clearStatus() {
+    updateStatus(new Status(IStatus.OK, MavenEditorPlugin.PLUGIN_ID, ""));
+  }
+  
+  protected class DependenciesViewerSelectionListener implements ISelectionChangedListener {
+    public void selectionChanged(SelectionChangedEvent event) {
+      checkStatus(getTargetPOM(), getDependenciesList());
+    }
+  }
+  
+  protected class PomViewerSelectionChangedListener implements ISelectionChangedListener {
+    public void selectionChanged(SelectionChangedEvent event) {
+      checkStatus(getTargetPOM(), getDependenciesList());
+    }
+  }
+  
+  @Override
+  protected void updateStatus(IStatus status) {
+    this.status = status;
+    super.updateStatus(status);
   }
 
   public static class DepLabelProvider extends LabelProvider implements IColorProvider {

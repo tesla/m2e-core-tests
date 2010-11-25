@@ -269,6 +269,7 @@ public class DependenciesComposite extends Composite {
     
     dependenciesEditor.setSelectListener(new SelectionAdapter(){
       public void widgetSelected(SelectionEvent e) {
+        openManageDependenciesDialog();
         
         final AddDependencyDialog addDepDialog = new AddDependencyDialog(getShell(), false, editorPage.getProject());
         
