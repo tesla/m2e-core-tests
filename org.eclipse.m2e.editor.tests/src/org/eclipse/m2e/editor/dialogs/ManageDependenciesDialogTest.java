@@ -303,6 +303,9 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
     checkContainsDependency(parent.getDependencyManagement().getDependencies(), "test", "to-move", "1.0");
     checkContainsDependency(parent.getDependencyManagement().getDependencies(), "test2", "to-move", "0.242");
     checkContainsDependency(parent.getDependencyManagement().getDependencies(), "test", "move-but-exists", "0.9");
+    
+    Dependency shouldBeNull = findDependency(parent.getDependencyManagement().getDependencies(), "test", "dont-move", "1.0");
+    assertNull(shouldBeNull);
      
     assertNotNull(child.getDependencies());
     assertEquals(child.getDependencies().size(), 4);
