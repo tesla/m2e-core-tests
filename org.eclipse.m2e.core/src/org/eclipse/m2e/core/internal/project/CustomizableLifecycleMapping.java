@@ -49,7 +49,6 @@ public class CustomizableLifecycleMapping extends AbstractLifecycleMapping imple
   public static final String EXTENSION_ID = "customizable"; //$NON-NLS-1$
 
   public CustomizableLifecycleMapping() {
-
   }
   
   public List<AbstractProjectConfigurator> getProjectConfigurators(IMavenProjectFacade facade, IProgressMonitor monitor)
@@ -113,7 +112,6 @@ public class CustomizableLifecycleMapping extends AbstractLifecycleMapping imple
 
   public List<AbstractBuildParticipant> getBuildParticipants(IMavenProjectFacade facade, IProgressMonitor monitor)
       throws CoreException {
-
     List<AbstractProjectConfigurator> configurators = getProjectConfigurators(facade, monitor);
 
     return getBuildParticipants(facade, configurators, monitor);
@@ -146,14 +144,37 @@ public class CustomizableLifecycleMapping extends AbstractLifecycleMapping imple
     return mojos;
   }
 
-  private static final String[] NOT_INTERESTING_PHASES = {"test", "prepare-package", "package", "pre-integration-test",
-      "integration-test", "post-integration-test", "verify", "install", "deploy"};
+  private static final String[] INTERESTING_PHASES = {"validate", //
+      "initialize", //
+      "generate-sources", //
+      "process-sources", //
+      "generate-resources", //
+      "process-resources", //
+      "compile", //
+      "process-classes", //
+      "generate-test-sources", //
+      "process-test-sources", //
+      "generate-test-resources", //
+      "process-test-resources", //
+      "test-compile", //
+      "process-test-classes", //
+  // "test", //
+  // "prepare-package", //
+  // "package", //
+  //"pre-integration-test", //
+  // "integration-test", //
+  // "post-integration-test", //
+  // "verify", //
+  // "install", //
+  // "deploy", //
+  };
+
   public boolean isInterestingPhase(String phase) {
-    for(String notInterestingPhase : NOT_INTERESTING_PHASES) {
-      if(notInterestingPhase.equals(phase)) {
-        return false;
+    for(String interestingPhase : INTERESTING_PHASES) {
+      if(interestingPhase.equals(phase)) {
+        return true;
       }
     }
-    return true;
+    return false;
   }
 }
