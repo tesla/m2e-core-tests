@@ -36,6 +36,6 @@ public class HoverDependencyManagedTest extends AbstractPOMEditorTestCase {
     assertTrue(links.length >= 1);
     String s = new PomTextHover(null, null, 0).getHoverInfo(sourceViewer, links[0].getHyperlinkRegion());
     assertTrue(s.contains("3.8.1"));
-    
+    assertTrue(s.contains("org.eclipse.m2e:parent2541:"));
   }
 }
