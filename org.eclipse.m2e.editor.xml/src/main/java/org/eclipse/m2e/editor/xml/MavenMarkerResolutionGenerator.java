@@ -56,16 +56,14 @@ public class MavenMarkerResolutionGenerator implements IMarkerResolutionGenerato
       if (hint.equals("managed_dependency_override")) { //$NON-NLS-1$
         return new IMarkerResolution[] {
             new PomQuickAssistProcessor.ManagedVersionRemovalProposal(marker, true), 
-            new PomQuickAssistProcessor.IgnoreWarningProposal(marker, "NO-MVN-MAN-VER")
+            new PomQuickAssistProcessor.IgnoreWarningProposal(marker, IMavenConstants.MARKER_IGNORE_MANAGED)
             };
-        //TODO add a proposal to ignore the marker
       }
       if (hint.equals("managed_plugin_override")) { //$NON-NLS-1$
         return new IMarkerResolution[] {
             new PomQuickAssistProcessor.ManagedVersionRemovalProposal(marker, false), 
-            new PomQuickAssistProcessor.IgnoreWarningProposal(marker, "NO-MVN-MAN-VER")
+            new PomQuickAssistProcessor.IgnoreWarningProposal(marker, IMavenConstants.MARKER_IGNORE_MANAGED)
             };
-        //TODO add a proposal to ignore the marker
       }
       
     }
