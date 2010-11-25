@@ -17,6 +17,7 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 
@@ -33,27 +34,27 @@ public class WarnIfGroupSameThanParentTest extends AbstractMavenProjectTestCase 
 
     {
       //"child2552withDuplicateGroupAndVersion/pom.xml"
-      IMarker[] markers = projects[0].findMember("pom.xml").findMarkers("org.eclipse.m2e.core.maven2ProblemHint", true, IResource.DEPTH_INFINITE);
+      IMarker[] markers = projects[0].findMember("pom.xml").findMarkers(IMavenConstants.MARKER_HINT_ID, true, IResource.DEPTH_INFINITE);
       assertEquals(2, markers.length);
       assertEquals(IMarker.SEVERITY_WARNING, markers[0].getAttribute(IMarker.SEVERITY));
-      assertEquals(org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_duplicate_groupid, markers[0].getAttribute("message"));
-      assertEquals(org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_duplicate_version, markers[1].getAttribute("message"));
+      assertEquals("parent_groupid", markers[0].getAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT));
+      assertEquals("parent_version", markers[1].getAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT));
     }
 
     {
       //"child2552withDuplicateGroup/pom.xml", 
-      IMarker[] markers = projects[1].findMember("pom.xml").findMarkers("org.eclipse.m2e.core.maven2ProblemHint", true, IResource.DEPTH_INFINITE);
+      IMarker[] markers = projects[1].findMember("pom.xml").findMarkers(IMavenConstants.MARKER_HINT_ID, true, IResource.DEPTH_INFINITE);
       assertEquals(1, markers.length);
       assertEquals(IMarker.SEVERITY_WARNING, markers[0].getAttribute(IMarker.SEVERITY));
-      assertEquals(org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_duplicate_groupid, markers[0].getAttribute("message"));
+      assertEquals("parent_groupid", markers[0].getAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT));
     }
     
     {
       //"child2552withDuplicateVersion/pom.xml"
-      IMarker[] markers = projects[2].findMember("pom.xml").findMarkers("org.eclipse.m2e.core.maven2ProblemHint", true, IResource.DEPTH_INFINITE);
+      IMarker[] markers = projects[2].findMember("pom.xml").findMarkers(IMavenConstants.MARKER_HINT_ID, true, IResource.DEPTH_INFINITE);
       assertEquals(1, markers.length);
       assertEquals(IMarker.SEVERITY_WARNING, markers[0].getAttribute(IMarker.SEVERITY));
-      assertEquals(org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_duplicate_version, markers[0].getAttribute("message"));
+      assertEquals("parent_version", markers[0].getAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT));
     }
   }
 }
