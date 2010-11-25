@@ -269,8 +269,6 @@ public class DependenciesComposite extends Composite {
     
     dependenciesEditor.setSelectListener(new SelectionAdapter(){
       public void widgetSelected(SelectionEvent e) {
-        openManageDependenciesDialog();
-        
         final AddDependencyDialog addDepDialog = new AddDependencyDialog(getShell(), false, editorPage.getProject());
         
         /*
@@ -1093,7 +1091,7 @@ public class DependenciesComposite extends Composite {
 //    return newSelection;
 //  }
 
-  private void openManageDependenciesDialog() {
+  private void openManageDependenciesDialog() throws InvocationTargetException, InterruptedException {
     /*
      * A linked list representing the path from child to root parent pom.
      * The head is the child, the tail is the root pom
@@ -1113,27 +1111,21 @@ public class DependenciesComposite extends Composite {
           
           MavenProject project = mavenProject;
           while (project.getModel().getParent() != null) {
+            if (monitor.isCanceled()) {
+              return;
+            }
             IMavenProjectFacade projectFacade = projectManager.create(pomEditor.getPomFile(), true, monitor);
             MavenExecutionRequest request = projectManager.createExecutionRequest(projectFacade, monitor);
             project = maven.resolveParentProject(request, project, monitor);
             hierarchy.add(project);
           }
         } catch(CoreException e) {
-          MavenEditorPlugin.getDefault().getLog().log(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, "Unable to resolve POMs: " + e));
+          throw new InvocationTargetException(e);
         }
       }
     };
     
-    try {
-      PlatformUI.getWorkbench().getProgressService().run(true, true, projectLoader);
-    } catch(InvocationTargetException e1) {
-      MavenEditorPlugin.getDefault().getLog().log(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, "Unable to resolve POMs: " + e1));
-      return;
-    } catch(InterruptedException e1) {
-      MavenEditorPlugin.getDefault().getLog().log(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, "Unable to resolve POMs: " + e1));
-      return;
-    }
-    
+    PlatformUI.getWorkbench().getProgressService().run(true, true, projectLoader);
     
     final ManageDependenciesDialog manageDepDialog = new ManageDependenciesDialog(getShell(), model, hierarchy, pomEditor.getEditingDomain());
     manageDepDialog.open();
