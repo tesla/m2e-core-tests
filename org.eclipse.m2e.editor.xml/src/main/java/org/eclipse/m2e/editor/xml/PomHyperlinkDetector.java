@@ -359,7 +359,12 @@ public class PomHyperlinkDetector implements IHyperlinkDetector {
     }
     return null;
   }
-  
+  /**
+   * converts an InputLocation to a file path on the local disk, null if not available.
+   * still the input source's model value can be used further..
+   * @param location
+   * @return
+   */
   static  File fileForInputLocation(InputLocation location) {
     InputSource source = location.getSource();
     if (source != null) {
