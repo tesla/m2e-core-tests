@@ -19,6 +19,7 @@ import org.eclipse.ui.IMarkerResolutionGenerator2;
 
 import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.core.MavenLogger;
+import org.eclipse.m2e.editor.xml.PomQuickAssistProcessor.IgnoreWarningProposal;
 import org.eclipse.m2e.editor.xml.PomQuickAssistProcessor.ManagedVersionRemovalProposal;
 
 
@@ -53,11 +54,17 @@ public class MavenMarkerResolutionGenerator implements IMarkerResolutionGenerato
         return new IMarkerResolution[] {new PomQuickAssistProcessor.IdPartRemovalProposal(marker, false) };
       }
       if (hint.equals("managed_dependency_override")) { //$NON-NLS-1$
-        return new IMarkerResolution[] {new PomQuickAssistProcessor.ManagedVersionRemovalProposal(marker, true) };
+        return new IMarkerResolution[] {
+            new PomQuickAssistProcessor.ManagedVersionRemovalProposal(marker, true), 
+            new PomQuickAssistProcessor.IgnoreWarningProposal(marker, "NO-MVN-MAN-VER")
+            };
         //TODO add a proposal to ignore the marker
       }
       if (hint.equals("managed_plugin_override")) { //$NON-NLS-1$
-        return new IMarkerResolution[] {new PomQuickAssistProcessor.ManagedVersionRemovalProposal(marker, false) };
+        return new IMarkerResolution[] {
+            new PomQuickAssistProcessor.ManagedVersionRemovalProposal(marker, false), 
+            new PomQuickAssistProcessor.IgnoreWarningProposal(marker, "NO-MVN-MAN-VER")
+            };
         //TODO add a proposal to ignore the marker
       }
       

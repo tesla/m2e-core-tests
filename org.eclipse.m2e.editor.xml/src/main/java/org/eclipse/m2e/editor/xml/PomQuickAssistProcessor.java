@@ -47,6 +47,7 @@ import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IndexedRegion;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
+import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocumentRegion;
 import org.eclipse.wst.sse.core.utils.StringUtils;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
@@ -58,6 +59,7 @@ import org.eclipse.m2e.editor.xml.internal.Messages;
 
 public class PomQuickAssistProcessor implements IQuickAssistProcessor {
   private static final String GROUP_ID_NODE = "groupId"; //$NON-NLS-1$
+  private static final String ARTIFACT_ID_NODE = "artifactId"; //$NON-NLS-1$
   private static final String VERSION_NODE = "version"; //$NON-NLS-1$
 
   public static final String PROJECT_NODE = "project"; //$NON-NLS-1$
@@ -106,11 +108,13 @@ public class PomQuickAssistProcessor implements IQuickAssistProcessor {
              }
              if (hint.equals("managed_dependency_override")) { //$NON-NLS-1$
                proposals.add(new ManagedVersionRemovalProposal(context, true, mark));
-               //TODO add a proposal to ignore the marker
+               //add a proposal to ignore the marker
+               proposals.add(new IgnoreWarningProposal(context, mark, "NO-MVN-MAN-VER"));
              }
              if (hint.equals("managed_plugin_override")) { //$NON-NLS-1$
                proposals.add(new ManagedVersionRemovalProposal(context, false, mark));
-               //TODO add a proposal to ignore the marker
+               //add a proposal to ignore the marker
+               proposals.add(new IgnoreWarningProposal(context, mark, "NO-MVN-MAN-VER"));
              }
              if (hint.equals("schema")) { //$NON-NLS-1$
                proposals.add(new SchemaCompletionProposal(context, mark));
@@ -468,7 +472,7 @@ static class ManagedVersionRemovalProposal implements ICompletionProposal, IComp
     Element artifact = null;
     for (Element art : MavenMarkerManager.findChildElements(list, isdep ? "dependency" : "plugin")) {
        String grpString = MavenMarkerManager.getElementTextValue(MavenMarkerManager.findChildElement(art, GROUP_ID_NODE));
-       String artString = MavenMarkerManager.getElementTextValue(MavenMarkerManager.findChildElement(art, "artifactId"));
+       String artString = MavenMarkerManager.getElementTextValue(MavenMarkerManager.findChildElement(art, ARTIFACT_ID_NODE));
        if (groupId.equals(grpString) && artifactId.equals(artString)) {
          artifact = art;
          break;
@@ -535,4 +539,154 @@ static class ManagedVersionRemovalProposal implements ICompletionProposal, IComp
     }
   } 
 }
+
+static class IgnoreWarningProposal implements ICompletionProposal, ICompletionProposalExtension5, IMarkerResolution {
+
+  private IQuickAssistInvocationContext context;
+  private final IMarker marker;
+  private final String markupText;
+  public IgnoreWarningProposal(IQuickAssistInvocationContext context, MarkerAnnotation mark, String markupText) {
+    this.context = context;
+    marker = mark.getMarker();
+    this.markupText = markupText;
+  }
+  
+  public IgnoreWarningProposal(IMarker marker, String markupText) {
+    this.marker = marker;
+    this.markupText = markupText;
+  }
+  
+  public void apply(IDocument doc) {
+    if (doc instanceof IStructuredDocument) {
+      processFix((IStructuredDocument) doc, marker);
+    } else {
+      IStructuredDocument strdoc = getDocument(marker);
+      if (strdoc != null) {
+        processFix(strdoc, marker);
+      }
+    }
+  }
+
+  private void processFix(IStructuredDocument doc, IMarker marker) {
+      IDOMModel domModel = null;
+      try {
+        domModel = (IDOMModel) StructuredModelManager.getModelManager().getExistingModelForRead(doc);
+        int line;
+        if (context != null) {
+          line = doc.getLineOfOffset(context.getOffset());
+        } else {
+          line = marker.getAttribute(IMarker.LINE_NUMBER, -1);
+          assert line != -1;
+          line = line - 1;
+        }
+        try {
+          int linestart = doc.getLineOffset(line);
+          int lineend = linestart + doc.getLineLength(line);
+          int start = linestart;
+          IndexedRegion reg = domModel.getIndexedRegion(start);
+          while (reg != null && !(reg instanceof Element) && start < lineend) {
+            reg = domModel.getIndexedRegion(reg.getEndOffset() + 1);
+            if (reg != null) {
+              start = reg.getStartOffset();
+            }
+          }
+          if (reg != null && reg instanceof Element) {
+            InsertEdit edit = new InsertEdit(reg.getEndOffset(), "<!--$" + markupText + "$-->");
+            try {
+              edit.apply(doc);
+              marker.delete();
+            } catch(Exception e) {
+              MavenLogger.log("Unable to insert", e); //$NON-NLS-1$
+            }
+          }
+        } catch(BadLocationException e1) {
+          // TODO Auto-generated catch block
+          e1.printStackTrace();
+        }
+      } finally {
+        if (domModel != null) {
+          domModel.releaseFromRead();
+        }
+      }      
+  }
+
+  public String getAdditionalProposalInfo() {
+    return null;
+  }
+
+  public IContextInformation getContextInformation() {
+    return null;
+  }
+
+  public String getDisplayString() {
+    return "Ignore this warning";
+  }
+
+  public Image getImage() {
+    return MvnImages.IMG_CLOSE;
+  }
+
+  public Point getSelection(IDocument arg0) {
+    return null;
+  }
+
+  public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
+    if (context == null) {
+      //no context in markerresolution, just to be sure..
+      return null;
+    }
+    IDOMModel domModel = null;
+    try {
+      IDocument doc = context.getSourceViewer().getDocument();
+      domModel = (IDOMModel) StructuredModelManager.getModelManager().getExistingModelForRead(doc);
+      try {
+        //the offset of context is important here, not the offset of the marker!!!
+        //line/offset of marker only gets updated hen file gets saved.
+        //we need the proper handling also for unsaved documents..
+        int line = doc.getLineOfOffset(context.getOffset());
+        int linestart = doc.getLineOffset(line);
+        int lineend = linestart + doc.getLineLength(line);
+        int start = linestart;
+        IndexedRegion reg = domModel.getIndexedRegion(start);
+        while (reg != null && !(reg instanceof Element) && start < lineend) {
+          reg = domModel.getIndexedRegion(reg.getEndOffset() + 1);
+          if (reg != null) {
+            start = reg.getStartOffset();
+          }
+        }
+        if (reg != null && reg instanceof Element) { //just a simple guard against moved marker
+          try {
+            int startLine = doc.getLineOffset(line);
+            String currentLine = StringUtils.convertToHTMLContent(doc.get(reg.getStartOffset(), reg.getEndOffset() - reg.getStartOffset()));
+            String insert = StringUtils.convertToHTMLContent("<!--$" + markupText + "$-->");
+            return "<html>...<br>" + currentLine + "<b>" + insert + "</b><br>...<html>";  //$NON-NLS-1$ //$NON-NLS-2$
+          } catch(BadLocationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          }
+        }
+      } catch(BadLocationException e1) {
+        // TODO Auto-generated catch block
+        e1.printStackTrace();
+      }
+    } finally {
+      if (domModel != null) {
+        domModel.releaseFromRead();
+      }
+    }      
+    return Messages.PomQuickAssistProcessor_remove_hint;
+  }
+
+  public String getLabel() {
+    return getDisplayString();
+  }
+
+  public void run(IMarker marker) {
+    IStructuredDocument doc = getDocument(marker);
+    if (doc != null) {
+      processFix(doc, marker);
+    }
+  } 
+}
+
 }

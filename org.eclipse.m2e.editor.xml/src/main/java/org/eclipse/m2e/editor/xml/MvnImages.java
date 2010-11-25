@@ -73,6 +73,8 @@ public class MvnImages {
 
   public static final Image IMG_OPEN_POM = createImage("open_pom.gif"); //$NON-NLS-1$
   
+  public static final Image IMG_CLOSE = createImage("close.gif"); //$NON-NLS-1$
+  
   private static ImageDescriptor create(String key) {
     try {
       ImageDescriptor imageDescriptor = createDescriptor(key);
