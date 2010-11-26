@@ -88,16 +88,6 @@ public abstract class AbstractLifecycleMapping implements IExtensionLifecycleMap
     }
     return Collections.unmodifiableList(configurators);
   }
-  
-  public static List<AbstractProjectConfigurator> getProjectConfigurators(boolean generic) {
-    ArrayList<AbstractProjectConfigurator> result = new ArrayList<AbstractProjectConfigurator>();
-    for (AbstractProjectConfigurator configurator : getProjectConfigurators()) {
-      if (generic == configurator.isGeneric()) {
-        result.add(configurator);
-      }
-    }
-    return result;
-  }
 
   public static AbstractProjectConfigurator getProjectConfigurator(String id) {
     if(id == null) {

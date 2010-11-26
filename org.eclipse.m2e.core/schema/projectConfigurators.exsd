@@ -2,9 +2,9 @@
 <!-- Schema file written by PDE -->
 <schema targetNamespace="org.eclipse.m2e" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
-      <appInfo>
+      <appinfo>
          <meta.schema plugin="org.eclipse.m2e" id="projectConfigurators" name="Project Configurators"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          Project Configurators
       </documentation>
@@ -12,9 +12,9 @@
 
    <element name="extension">
       <annotation>
-         <appInfo>
+         <appinfo>
             <meta.element />
-         </appInfo>
+         </appinfo>
       </annotation>
       <complexType>
          <sequence minOccurs="1" maxOccurs="unbounded">
@@ -39,9 +39,9 @@
                <documentation>
                   
                </documentation>
-               <appInfo>
+               <appinfo>
                   <meta.attribute translatable="true"/>
-               </appInfo>
+               </appinfo>
             </annotation>
          </attribute>
       </complexType>
@@ -66,9 +66,9 @@
                <documentation>
                   Configurator implementation
                </documentation>
-               <appInfo>
+               <appinfo>
                   <meta.attribute kind="java" basedOn="org.eclipse.m2e.project.configurator.AbstractProjectConfigurator:"/>
-               </appInfo>
+               </appinfo>
             </annotation>
          </attribute>
          <attribute name="name" type="string">
@@ -76,22 +76,15 @@
                <documentation>
                   Configurator name, eg. &quot;JDT&quot;, &quot;PDE&quot;, &quot;AJDT&quot;, &quot;WTP&quot;, etc.
                </documentation>
-               <appInfo>
+               <appinfo>
                   <meta.attribute translatable="true"/>
-               </appInfo>
+               </appinfo>
             </annotation>
          </attribute>
          <attribute name="priority" type="string">
             <annotation>
                <documentation>
                   Priority of given configurator. Smaller number correspond to higher priority, for example, &quot;10&quot; for JDT, &quot;50&quot; - PDE, AJDT and WTP. Tools that build on WTP should use priority bigger then &quot;100&quot;
-               </documentation>
-            </annotation>
-         </attribute>
-         <attribute name="generic" type="boolean" use="default" value="false">
-            <annotation>
-               <documentation>
-                  If set to true, this project configurator will be considered by generic Maven build lifecycle mapping.
                </documentation>
             </annotation>
          </attribute>
@@ -106,45 +99,45 @@
    </element>
 
    <annotation>
-      <appInfo>
+      <appinfo>
          <meta.section type="since"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          0.9.4
       </documentation>
    </annotation>
 
    <annotation>
-      <appInfo>
+      <appinfo>
          <meta.section type="examples"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          [Enter extension point usage example here.]
       </documentation>
    </annotation>
 
    <annotation>
-      <appInfo>
+      <appinfo>
          <meta.section type="apiinfo"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          [Enter API information here.]
       </documentation>
    </annotation>
 
    <annotation>
-      <appInfo>
+      <appinfo>
          <meta.section type="implementation"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          [Enter information about supplied implementation of this extension point.]
       </documentation>
    </annotation>
 
    <annotation>
-      <appInfo>
+      <appinfo>
          <meta.section type="copyright"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          Copyright (c) 2007, 2008 Sonatype, Inc.
 All rights reserved. This program and the accompanying materials

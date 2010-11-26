@@ -79,11 +79,9 @@ public class CustomLifecycleMappingEditorContribution implements ILifecycleMappi
     if(templateId != null) {
       ILifecycleMapping mapping = mappings.get(templateId);
       for(AbstractProjectConfigurator configer : mapping.getProjectConfigurators(projectFacade, new NullProgressMonitor())) {
-        if(!configer.isGeneric()) {
-          Element configuratorElement = configNode.getOwnerDocument().createElement("configurator"); //$NON-NLS-1$
-          configuratorElement.setAttribute("id", configer.getId()); //$NON-NLS-1$
-          configuratorsElement.appendChild(configuratorElement);
-        }
+        Element configuratorElement = configNode.getOwnerDocument().createElement("configurator"); //$NON-NLS-1$
+        configuratorElement.setAttribute("id", configer.getId()); //$NON-NLS-1$
+        configuratorsElement.appendChild(configuratorElement);
       }
     }
     

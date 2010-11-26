@@ -48,8 +48,6 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
   
   public static final String ATTR_PRIORITY = "priority"; //$NON-NLS-1$
   
-  public static final String ATTR_GENERIC = "generic"; //$NON-NLS-1$
-
   public static final String ATTR_NAME = "name"; //$NON-NLS-1$
   
   public static final String ATTR_CLASS = "class"; //$NON-NLS-1$
@@ -59,7 +57,6 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
   private int priority;
   private String id;
   private String name;
-  private boolean generic;
 
   private boolean requiresExplicitEnablement;
 
@@ -143,15 +140,10 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
     return name;
   }
 
-  public boolean isGeneric() {
-    return generic;
-  }
-
   // IExecutableExtension  
   public void setInitializationData(IConfigurationElement config, String propertyName, Object data) {
     this.id = config.getAttribute(ATTR_ID);
     this.name = config.getAttribute(ATTR_NAME);
-    this.generic = parseBoolean(config.getAttribute(ATTR_GENERIC), true);
     String priorityString = config.getAttribute(ATTR_PRIORITY);
     try {
       priority = Integer.parseInt(priorityString);
