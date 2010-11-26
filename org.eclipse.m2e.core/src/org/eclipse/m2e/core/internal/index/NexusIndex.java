@@ -74,11 +74,11 @@ public class NexusIndex implements IIndex, IMutableIndex {
   }
 
   public void addArtifact(File pomFile, ArtifactKey artifactKey) {
-    indexManager.addDocument(repository, pomFile, NexusIndexManager.getDocumentKey(artifactKey));
+    indexManager.addDocument(repository, pomFile, artifactKey);
   }
 
   public void removeArtifact(File pomFile, ArtifactKey artifactKey) {
-    indexManager.removeDocument(repository, pomFile, NexusIndexManager.getDocumentKey(artifactKey));
+    indexManager.removeDocument(repository, pomFile, artifactKey);
   }
 
   public Collection<IndexedArtifact> find(String groupId, String artifactId, String version, String packaging)
