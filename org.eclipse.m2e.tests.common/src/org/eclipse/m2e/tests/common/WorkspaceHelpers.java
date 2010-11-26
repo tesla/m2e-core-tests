@@ -150,12 +150,23 @@ public class WorkspaceHelpers {
     Assert.assertEquals("Unexpected error markers " + toString(markers), 0, markers.size());
   }
 
-  public static void assertErrorMarker(String type, String message, int lineNumber, IMarker actual) throws Exception {
+  public static void assertErrorMarker(String type, String message, Integer lineNumber, IProject project)
+      throws Exception {
+    List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
+    Assert.assertNotNull(errorMarkers);
+    Assert.assertEquals(WorkspaceHelpers.toString(errorMarkers), 1, errorMarkers.size());
+    assertErrorMarker(type, message, lineNumber, errorMarkers.get(0));
+  }
+
+  public static void assertErrorMarker(String type, String message, Integer lineNumber, IMarker actual)
+      throws Exception {
     Assert.assertNotNull("Expected not null error marker", actual);
     String sMarker = toString(actual);
     Assert.assertEquals(sMarker, type, actual.getType());
     String actualMessage = actual.getAttribute(IMarker.MESSAGE, "");
     Assert.assertTrue(sMarker, actualMessage.startsWith(message));
-    Assert.assertEquals(sMarker, lineNumber, actual.getAttribute(IMarker.LINE_NUMBER));
+    if(lineNumber != null) {
+      Assert.assertEquals(sMarker, lineNumber, actual.getAttribute(IMarker.LINE_NUMBER));
+    }
   }
 }

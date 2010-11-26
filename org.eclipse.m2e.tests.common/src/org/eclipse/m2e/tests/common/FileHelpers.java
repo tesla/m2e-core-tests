@@ -43,6 +43,9 @@ public class FileHelpers {
   }
 
   private static void copyDir(File src, File dst, FileFilter filter, boolean deleteDst) throws IOException {
+    if(!src.isDirectory()) {
+      throw new IllegalArgumentException("Not a directory:" + src.getAbsolutePath());
+    }
     if(deleteDst) {
       FileUtils.deleteDirectory(dst);
     }

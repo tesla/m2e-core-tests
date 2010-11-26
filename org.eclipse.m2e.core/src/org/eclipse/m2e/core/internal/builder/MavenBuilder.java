@@ -145,7 +145,7 @@ public class MavenBuilder extends IncrementalProjectBuilder {
 
       ThreadBuildContext.setThreadBuildContext(buildContext);
       try {
-        if(configurationManager.validateLifecycleMappingConfiguration(projectFacade, monitor)) {
+        if(projectFacade.hasValidConfiguration()) {
           List<AbstractBuildParticipant> participants = lifecycleMapping.getBuildParticipants(projectFacade, monitor);
           for(InternalBuildParticipant participant : participants) {
             participant.setMavenProjectFacade(projectFacade);

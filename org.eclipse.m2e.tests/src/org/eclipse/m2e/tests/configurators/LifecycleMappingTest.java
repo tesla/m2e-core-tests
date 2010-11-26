@@ -34,6 +34,9 @@ import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
   public void testJarLifecycleMapping() throws Exception {
     IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping", "jar/pom.xml");
+    assertNotNull("Expected not null MavenProjectFacade", facade);
+    IProject project = facade.getProject();
+    WorkspaceHelpers.assertNoErrors(project);
 
     ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade, monitor);
 
@@ -51,6 +54,9 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
 
   public void testCustomizableMapping() throws Exception {
     IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping", "customizable/pom.xml");
+    assertNotNull("Expected not null MavenProjectFacade", facade);
+    IProject project = facade.getProject();
+    WorkspaceHelpers.assertNoErrors(project);
 
     ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade, monitor);
 
@@ -67,9 +73,13 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
 
   public void testCustomizableMappingNotComplete() throws Exception {
     IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping", "customizableNotComplete/pom.xml");
+    assertNotNull("Expected not null MavenProjectFacade", facade);
+    IProject project = facade.getProject();
+    String expectedErrorMessage = "Mojo execution not covered by lifecycle configuration: org.codehaus.modello:modello-maven-plugin:1.1:java {execution: standard} (maven lifecycle phase: generate-sources)";
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+        1 /*lineNumber*/, project);
 
     ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade, monitor);
-
     assertTrue(lifecycleMapping instanceof CustomizableLifecycleMapping);
 
     List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
@@ -81,58 +91,52 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertEquals("org.codehaus.modello:modello-maven-plugin:1.1:java {execution: standard}", notCoveredMojoExecutions
         .get(0).toString());
 
-    IProject project = facade.getProject();
     project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
     waitForJobsToComplete();
-    List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
-    assertNotNull(errorMarkers);
-    assertEquals(WorkspaceHelpers.toString(errorMarkers), 1, errorMarkers.size());
-    WorkspaceHelpers
-        .assertErrorMarker(
-            IMavenConstants.MARKER_CONFIGURATION_ID,
-            "Mojo execution not covered by lifecycle configuration: org.codehaus.modello:modello-maven-plugin:1.1:java {execution: standard} (maven lifecycle phase: generate-sources)",
-            1 /*lineNumber*/, errorMarkers.get(0));
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+        1 /*lineNumber*/, project);
   }
 
   public void testMissingMapping() throws Exception {
     IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping", "missing/pom.xml");
+    assertNotNull("Expected not null MavenProjectFacade", facade);
+    IProject project = facade.getProject();
+    String expectedErrorMessage = "Unknown or missing lifecycle mapping with id=\"MISSING\" (project packaging type=\"jar\")";
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+        1 /*lineNumber*/, project);
 
     ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade, monitor);
-
     assertTrue(lifecycleMapping instanceof MissingLifecycleMapping);
     assertEquals("unknown-or-missing", ((MissingLifecycleMapping) lifecycleMapping).getMissingMappingId());
-
     assertEquals(0, lifecycleMapping.getNotCoveredMojoExecutions(facade, monitor).size());
 
-    IProject project = facade.getProject();
     project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
     waitForJobsToComplete();
     List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
     assertNotNull(errorMarkers);
     assertEquals(WorkspaceHelpers.toString(errorMarkers), 1, errorMarkers.size());
-    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID,
-        "Unknown or missing lifecycle mapping with id=\"MISSING\" (project packaging type=\"jar\")", 1 /*lineNumber*/,
-        errorMarkers.get(0));
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+        1 /*lineNumber*/, project);
   }
 
   public void testUnknownPackagingType() throws Exception {
     IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping", "unknownPackagingType/pom.xml");
     assertNotNull("Expected not null MavenProjectFacade", facade);
+    IProject project = facade.getProject();
+    String expectedErrorMessage = "Unknown or missing lifecycle mapping with id=\"MISSING\" (project packaging type=\"war\")";
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+        1 /*lineNumber*/, project);
 
     ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade, monitor);
-
     assertTrue(lifecycleMapping instanceof MissingLifecycleMapping);
-
     assertEquals(0, lifecycleMapping.getNotCoveredMojoExecutions(facade, monitor).size());
 
-    IProject project = facade.getProject();
     project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
     waitForJobsToComplete();
     List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
     assertNotNull(errorMarkers);
     assertEquals(WorkspaceHelpers.toString(errorMarkers), 1, errorMarkers.size());
-    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID,
-        "Unknown or missing lifecycle mapping with id=\"MISSING\" (project packaging type=\"war\")", 1 /*lineNumber*/,
-        errorMarkers.get(0));
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+        1 /*lineNumber*/, project);
   }
 }

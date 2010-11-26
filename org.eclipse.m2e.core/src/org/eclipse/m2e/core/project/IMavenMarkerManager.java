@@ -39,11 +39,11 @@ public interface IMavenMarkerManager {
    * @param severity : the severity of the marker. 
    */
   public IMarker addMarker(IResource resource, String type, String message, int lineNumber, int severity);
-  
+
   /**
-   * Delete all Maven markers from an IResource
+   * Delete all Maven markers of the specified type from an IResource
    */
-  public void deleteMarkers(IResource resource) throws CoreException; 
+  public void deleteMarkers(IResource resource, String type) throws CoreException;
   
   /**
    * Transform an exception into an error marker on an IResource

@@ -651,9 +651,9 @@ public class MavenMarkerManager implements IMavenMarkerManager {
     }
   }
 
-  public void deleteMarkers(IResource resource) throws CoreException {
+  public void deleteMarkers(IResource resource, String type) throws CoreException {
     if (resource != null && resource.exists()) {
-      resource.deleteMarkers(IMavenConstants.MARKER_ID, true, IResource.DEPTH_INFINITE);
+      resource.deleteMarkers(type, true, IResource.DEPTH_INFINITE);
     }
   }
   

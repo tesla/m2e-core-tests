@@ -49,6 +49,7 @@ import org.eclipse.m2e.tests.common.FilexWagon;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
 
+@SuppressWarnings("restriction")
 public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
 
   MavenPlugin plugin = MavenPlugin.getDefault();
@@ -241,7 +242,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertEquals(WorkspaceHelpers.toString(markers), 1, markers.length);
     WorkspaceHelpers
         .assertErrorMarker(
-            IMavenConstants.MARKER_CONFIGURATION_ID,
+            IMavenConstants.MARKER_POM_LOADING_ID,
             "Project build error: Non-resolvable parent POM: Failure to find t001:t001-p3:pom:0.0.1-SNAPSHOT in file:remoterepo was cached in the local repository, resolution will not be reattempted until the update interval of central has elapsed or updates are forced and 'parent.relativePath' points at wrong local POM",
             1 /*lineNumber*/, markers[0]);
 
@@ -576,34 +577,40 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
   }
 
   public void test013_cantParsePomMarker() throws Exception {
-    IProject p1 = createExisting("t013-p1");
+    IProject project = createExisting("t013-p1");
     waitForJobsToComplete();
 
-    assertNull(manager.create(p1, monitor));
-    IMarker[] markers = p1.findMarkers(null, true, IResource.DEPTH_INFINITE);
-    assertEquals(WorkspaceHelpers.toString(markers), 1, markers.length);
-    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID,
-        "Project build error: Non-readable POM ", 1 /*lineNumber*/, markers[0]);
+    assertNull(manager.create(project, monitor));
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_POM_LOADING_ID, "Project build error: Non-readable POM ",
+        1 /*lineNumber*/, project);
 
-    copyContent(p1, "pom_good.xml", "pom.xml");
-    markers = p1.findMarkers(null, true, IResource.DEPTH_INFINITE);
-    assertEquals(WorkspaceHelpers.toString(markers), 0, markers.length);
-    assertNotNull(manager.create(p1, monitor));
+    copyContent(project, "pom_good.xml", "pom.xml");
+    WorkspaceHelpers.assertNoErrors(project);
+    assertNotNull(manager.create(project, monitor));
   }
 
   public void test013_missingDependencyMarker() throws Exception {
-    IProject p2 = createExisting("t013-p2");
+    IProject project = createExisting("t013-p2");
     waitForJobsToComplete();
 
-    workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+    String expectedErrorMessage = "Missing artifact missing:missing:jar:0.0.0:compile";
+    List<IMarker> markers = WorkspaceHelpers.findErrorMarkers(project);
+    // (jdt) The container 'Maven Dependencies' references non existing library ...missing/missing/0.0.0/missing-0.0.0.jar'
+    // (maven) Missing artifact missing:missing:jar:0.0.0:compile
+    assertEquals(WorkspaceHelpers.toString(markers), 2, markers.size());
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_DEPENDENCY_ID, expectedErrorMessage, 1 /*lineNumber*/,
+        markers.get(1));
 
-    IMarker[] markers = p2.findMarkers(null, true, IResource.DEPTH_INFINITE);
+    workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+    waitForJobsToComplete();
+
+    markers = WorkspaceHelpers.findErrorMarkers(project);
     // (jdt) The container 'Maven Dependencies' references non existing library ...missing/missing/0.0.0/missing-0.0.0.jar'
     // (jdt) The project cannot be built until build path errors are resolved
     // (maven) Missing artifact missing:missing:jar:0.0.0:compile
-    assertEquals(WorkspaceHelpers.toString(markers), 4, markers.length);
-    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_DEPENDENCY_ID,
-        "Missing artifact missing:missing:jar:0.0.0:compile", 1 /*lineNumber*/, markers[2]);
+    assertEquals(WorkspaceHelpers.toString(markers), 3, markers.size());
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_DEPENDENCY_ID, expectedErrorMessage, 1 /*lineNumber*/,
+        markers.get(2));
   }
 
   public void test015_refreshOffline() throws Exception {

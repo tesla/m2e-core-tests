@@ -27,6 +27,7 @@ import org.sonatype.aether.graph.Dependency;
 
 import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.embedder.ArtifactKey;
+import org.eclipse.m2e.core.project.IMavenMarkerManager;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 
 
@@ -36,17 +37,21 @@ import org.eclipse.m2e.core.project.IMavenProjectFacade;
  * @author igor
  */
 public class DefaultMavenDependencyResolver extends AbstractMavenDependencyResolver {
+  private final IMavenMarkerManager markerManager;
 
-  public DefaultMavenDependencyResolver(ProjectRegistryManager manager) {
+  public DefaultMavenDependencyResolver(ProjectRegistryManager manager, IMavenMarkerManager markerManager) {
     setManager(manager);
+    this.markerManager = markerManager;
   }
 
   public void resolveProjectDependencies(IMavenProjectFacade facade, MavenExecutionRequest mavenRequest,
       Set<Capability> capabilities, Set<RequiredCapability> requirements, IProgressMonitor monitor)
       throws CoreException {
+    markerManager.deleteMarkers(facade.getPom(), IMavenConstants.MARKER_DEPENDENCY_ID);
+
     MavenExecutionResult mavenResult = getMaven().readProject(mavenRequest, monitor);
 
-    getManager().addMarkers(facade.getPom(), IMavenConstants.MARKER_DEPENDENCY_ID, mavenResult);
+    markerManager.addMarkers(facade.getPom(), IMavenConstants.MARKER_DEPENDENCY_ID, mavenResult);
 
     if(!facade.getResolverConfiguration().shouldResolveWorkspaceProjects()) {
       return;

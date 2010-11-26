@@ -382,8 +382,6 @@ public class ProjectRegistryManager {
             continue;
           }
 
-          markerManager.deleteMarkers(pom);
-
           flushCaches(pom, oldFacade);
 
           newFacade = readMavenProject(pom, context, newState, monitor);
@@ -540,7 +538,7 @@ public class ProjectRegistryManager {
       return resolver;
     }
 
-    return new DefaultMavenDependencyResolver(this);
+    return new DefaultMavenDependencyResolver(this, markerManager);
   }
 
   protected MavenExecutionRequest getConfiguredExecutionRequest(DependencyResolutionContext context,
@@ -552,7 +550,10 @@ public class ProjectRegistryManager {
     return mavenRequest;
   }
 
-  MavenProjectFacade readMavenProject(IFile pom, DependencyResolutionContext context, MutableProjectRegistry state, IProgressMonitor monitor) throws CoreException {
+  private MavenProjectFacade readMavenProject(IFile pom, DependencyResolutionContext context,
+      MutableProjectRegistry state, IProgressMonitor monitor) throws CoreException {
+    markerManager.deleteMarkers(pom, IMavenConstants.MARKER_POM_LOADING_ID);
+
     ResolverConfiguration resolverConfiguration = readResolverConfiguration(pom.getProject());
 
     MavenProject mavenProject = null;
@@ -564,8 +565,7 @@ public class ProjectRegistryManager {
     }
 
     if (mavenProject == null) {
-      //TODO Is this really a configuration error marker?
-      addMarkers(pom, IMavenConstants.MARKER_CONFIGURATION_ID, mavenResult);
+      markerManager.addMarkers(pom, IMavenConstants.MARKER_POM_LOADING_ID, mavenResult);
       return null;
     }
 
@@ -575,11 +575,12 @@ public class ProjectRegistryManager {
     getMaven().detachFromSession(mavenProject);
 
     // create and return new project facade
-    return new MavenProjectFacade(ProjectRegistryManager.this, pom, mavenProject, resolverConfiguration, lifecycleMapping);
-  }
+    MavenProjectFacade mavenProjectFacade = new MavenProjectFacade(ProjectRegistryManager.this, pom, mavenProject,
+        resolverConfiguration, lifecycleMapping);
 
-  void addMarkers(IFile pom, String type, MavenExecutionResult mavenResult) {
-    markerManager.addMarkers(pom, type, mavenResult);
+    MavenPlugin.getDefault().getProjectConfigurationManager().validateProjectConfiguration(mavenProjectFacade, monitor);
+
+    return mavenProjectFacade;
   }
 
   MavenExecutionPlan calculateExecutionPlan(MavenProjectFacade facade, IProgressMonitor monitor) throws CoreException {
@@ -803,8 +804,8 @@ public class ProjectRegistryManager {
       // Do not create error marker here - it is created in ProjectConfigurationManager.validateLifecycleMappingConfiguration
       String msg = "Project " + pom.getProject().getName() + " uses unknown or missing lifecycle mapping with id='"
           + mappingId + "', project packaging type='" + project.getPackaging() + "'.";
-      Exception e = new Exception(msg);
-      MavenLogger.log(msg, e);
+      //Exception e = new Exception(msg);
+      //MavenLogger.log(msg, e);
       console.logError(msg);
       return new MissingLifecycleMapping(mappingId);
     }

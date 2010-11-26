@@ -68,6 +68,8 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
 
   private transient Map<String, Object> sessionProperties;
 
+  private boolean hasValidConfiguration = false;
+
   // XXX make final, there should be no need to change it
   private ResolverConfiguration resolverConfiguration;
 
@@ -365,5 +367,16 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
       lifecycleMapping = manager.getLifecycleMapping(pom, getMavenProject(monitor), getResolverConfiguration(), monitor);
     }
     return lifecycleMapping;
+  }
+
+  /* (non-Javadoc)
+   * @see org.eclipse.m2e.core.project.IMavenProjectFacade#hasValidConfiguration()
+   */
+  public boolean hasValidConfiguration() {
+    return hasValidConfiguration;
+  }
+
+  public void setHasValidConfiguration(boolean hasValidConfiguration) {
+    this.hasValidConfiguration = hasValidConfiguration;
   }
 }

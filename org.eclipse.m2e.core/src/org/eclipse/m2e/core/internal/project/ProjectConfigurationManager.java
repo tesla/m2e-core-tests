@@ -207,16 +207,15 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
 
     //SubProgressMonitor sub = new SubProgressMonitor(monitor, projects.size()+1);
     
-      // first, resolve maven dependencies for all projects
-      MavenUpdateRequest updateRequest = new MavenUpdateRequest(mavenConfiguration.isOffline(), false);
-      for (IProject project : projects) {
-        updateRequest.addPomFile(project);
-      }
-      progress.subTask(Messages.ProjectConfigurationManager_task_refreshing);
-      projectManager.refresh(updateRequest, progress.newChild(75));
+    // first, resolve maven dependencies for all projects
+    MavenUpdateRequest updateRequest = new MavenUpdateRequest(mavenConfiguration.isOffline(), false);
+    for(IProject project : projects) {
+      updateRequest.addPomFile(project);
+    }
+    progress.subTask(Messages.ProjectConfigurationManager_task_refreshing);
+    projectManager.refresh(updateRequest, progress.newChild(75));
 
     // TODO this emits project change events, which may be premature at this point
-
 
     //Creating maven facades 
     SubMonitor subProgress = SubMonitor.convert(progress.newChild(5), projects.size() * 100);
@@ -303,52 +302,54 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
 
   private void updateProjectConfiguration(ProjectConfigurationRequest request,
       IProgressMonitor monitor) throws CoreException {
-    mavenMarkerManager.deleteMarkers(request.getProject());
-
     IProject project = request.getProject();
     addMavenNature(project, monitor);
 
     IMavenProjectFacade mavenProjectFacade = request.getMavenProjectFacade();
-    ILifecycleMapping lifecycleMapping = getLifecycleMapping(mavenProjectFacade, monitor);
+    validateProjectConfiguration(mavenProjectFacade, monitor);
 
-    try {
-      validateLifecycleMappingConfiguration(mavenProjectFacade, monitor);
-    } catch(CoreException e) {
-      mavenMarkerManager.addErrorMarkers(mavenProjectFacade.getPom(), IMavenConstants.MARKER_CONFIGURATION_ID, e);
-    }
+    ILifecycleMapping lifecycleMapping = getLifecycleMapping(mavenProjectFacade, monitor);
     lifecycleMapping.configure(request, monitor);
   }
 
   /* (non-Javadoc)
-   * @see org.eclipse.m2e.core.project.IProjectConfigurationManager#validateLifecycleMappingConfiguration(org.eclipse.m2e.core.project.IMavenProjectFacade, org.eclipse.core.runtime.IProgressMonitor)
+   * @see org.eclipse.m2e.core.project.IProjectConfigurationManager#validateProjectConfiguration(org.eclipse.m2e.core.project.IMavenProjectFacade, org.eclipse.core.runtime.IProgressMonitor)
    */
-  public boolean validateLifecycleMappingConfiguration(IMavenProjectFacade mavenProjectFacade, IProgressMonitor monitor)
-      throws CoreException {
-    ILifecycleMapping lifecycleMapping = getLifecycleMapping(mavenProjectFacade, monitor);
-    if(lifecycleMapping == null || lifecycleMapping instanceof MissingLifecycleMapping) {
-      String lifecycleId = null;
-      if(lifecycleMapping != null) {
-        lifecycleId = lifecycleMapping.getId();
-      }
-      mavenMarkerManager.addMarker(mavenProjectFacade.getPom(), IMavenConstants.MARKER_CONFIGURATION_ID,
-          NLS.bind(Messages.LifecycleMissing, lifecycleId, mavenProjectFacade.getPackaging()), 1 /*lineNumber*/,
-          IMarker.SEVERITY_ERROR);
-      return false;
-    }
+  public boolean validateProjectConfiguration(IMavenProjectFacade mavenProjectFacade, IProgressMonitor monitor) {
+    try {
+      mavenProjectFacade.setHasValidConfiguration(false);
+      mavenMarkerManager.deleteMarkers(mavenProjectFacade.getPom(), IMavenConstants.MARKER_CONFIGURATION_ID);
 
-    List<MojoExecution> notCoveredMojoExecutions = lifecycleMapping.getNotCoveredMojoExecutions(mavenProjectFacade,
-        monitor);
-    if(notCoveredMojoExecutions != null && notCoveredMojoExecutions.size() != 0) {
-      for(MojoExecution mojoExecution : notCoveredMojoExecutions) {
-        mavenMarkerManager.addMarker(
-            mavenProjectFacade.getPom(),
-            IMavenConstants.MARKER_CONFIGURATION_ID,
-            NLS.bind(Messages.LifecycleConfigurationMojoExecutionNotCovered, mojoExecution.toString(),
-                mojoExecution.getLifecyclePhase()), 1 /*lineNumber*/, IMarker.SEVERITY_ERROR);
+      ILifecycleMapping lifecycleMapping = getLifecycleMapping(mavenProjectFacade, monitor);
+      if(lifecycleMapping == null || lifecycleMapping instanceof MissingLifecycleMapping) {
+        String lifecycleId = null;
+        if(lifecycleMapping != null) {
+          lifecycleId = lifecycleMapping.getId();
+        }
+        mavenMarkerManager.addMarker(mavenProjectFacade.getPom(), IMavenConstants.MARKER_CONFIGURATION_ID,
+            NLS.bind(Messages.LifecycleMissing, lifecycleId, mavenProjectFacade.getPackaging()), 1 /*lineNumber*/,
+            IMarker.SEVERITY_ERROR);
+        return false;
       }
+
+      List<MojoExecution> notCoveredMojoExecutions = lifecycleMapping.getNotCoveredMojoExecutions(mavenProjectFacade,
+          monitor);
+      if(notCoveredMojoExecutions != null && notCoveredMojoExecutions.size() != 0) {
+        for(MojoExecution mojoExecution : notCoveredMojoExecutions) {
+          mavenMarkerManager.addMarker(
+              mavenProjectFacade.getPom(),
+              IMavenConstants.MARKER_CONFIGURATION_ID,
+              NLS.bind(Messages.LifecycleConfigurationMojoExecutionNotCovered, mojoExecution.toString(),
+                  mojoExecution.getLifecyclePhase()), 1 /*lineNumber*/, IMarker.SEVERITY_ERROR);
+        }
+        return false;
+      }
+      mavenProjectFacade.setHasValidConfiguration(true);
+      return true;
+    } catch(CoreException e) {
+      mavenMarkerManager.addErrorMarkers(mavenProjectFacade.getPom(), IMavenConstants.MARKER_CONFIGURATION_ID, e);
       return false;
     }
-    return true;
   }
 
   public void enableMavenNature(IProject project, ResolverConfiguration configuration, IProgressMonitor monitor)

@@ -56,8 +56,11 @@ public interface IProjectConfigurationManager {
       throws CoreException;
 
   /**
-   * @return true if the lifecycle mapping configuration is valid
+   * Validates that the project configuration is valid. It does not actually (re)configure the project, but it validates
+   * that the project configure action will not fail for obvious reasons like missing lifecycle mapping, missing project
+   * configuration, etc.
+   * 
+   * @return true if the configuration is valid
    */
-  boolean validateLifecycleMappingConfiguration(IMavenProjectFacade projectFacade, IProgressMonitor monitor)
-      throws CoreException;
+  boolean validateProjectConfiguration(IMavenProjectFacade projectFacade, IProgressMonitor monitor);
 }

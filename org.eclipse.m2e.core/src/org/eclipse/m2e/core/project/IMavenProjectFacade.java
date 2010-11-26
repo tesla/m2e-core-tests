@@ -27,6 +27,7 @@ import org.apache.maven.project.MavenProject;
 import org.eclipse.m2e.core.embedder.ArtifactKey;
 import org.eclipse.m2e.core.embedder.ArtifactRef;
 import org.eclipse.m2e.core.embedder.ArtifactRepositoryRef;
+import org.eclipse.m2e.core.internal.project.ProjectConfigurationManager;
 import org.eclipse.m2e.core.project.configurator.ILifecycleMapping;
 
 /**
@@ -150,4 +151,13 @@ public interface IMavenProjectFacade {
   public Set<ArtifactRepositoryRef> getPluginArtifactRepositoryRefs();
 
   public ILifecycleMapping getLifecycleMapping(IProgressMonitor monitor) throws CoreException;
+
+  /**
+   * Returns true if the project configuration is valid. This flag is set by
+   * {@link ProjectConfigurationManager#validateProjectConfiguration(IMavenProjectFacade, IProgressMonitor)}. Returns
+   * false if the project configuration has not been validated yet.
+   */
+  boolean hasValidConfiguration();
+
+  void setHasValidConfiguration(boolean hasValidConfiguration);
 }
