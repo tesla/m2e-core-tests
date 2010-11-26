@@ -308,10 +308,10 @@ public abstract class AbstractMavenProjectTestCase extends TestCase {
        * Sanity check: make sure they were all imported
        */
       Model model = projectInfos.get(0).getModel();
-      IMavenProjectFacade facade = plugin.getMavenProjectManager().getMavenProject(model.getGroupId(), model.getArtifactId(), model.getVersion());
+      IMavenProjectFacade facade = plugin.getMavenProjectManager().create(projects[i], monitor);
       assertNotNull("Project " + model.getGroupId()+"-"+model.getArtifactId()+"-"+model.getVersion()+" was not imported.", facade);
     }
-    
+
     return projects;
   }
 
