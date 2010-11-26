@@ -22,7 +22,7 @@ import org.eclipse.wst.xml.ui.internal.contentassist.XMLContentAssistProcessor;
 /**
  * Hello fellow tester:
  * everytime this test finds a regression add an 'x' here:
- * everytime you do mindless test update add an 'y' here:
+ * everytime you do mindless test update add an 'y' here: y
  * @author mkleint
  *
  */
@@ -32,15 +32,20 @@ public class PropertyCompletionTest extends AbstractCompletionTest {
   
   protected IFile loadProjectsAndFiles() throws Exception {
     //Create the projects
-    IProject[] projects = importProjects("projects/MNGECLIPSE-2576", new String[] {"child2576/pom.xml",
-    "parent2576/pom.xml"}, new ResolverConfiguration());
+    IProject[] projects = importProjects("projects/MNGECLIPSE-2576", 
+        new String[] {
+        "parent2576/pom.xml",
+        "child2576/pom.xml"
+        }, new ResolverConfiguration());
     waitForJobsToComplete();
-    return (IFile) projects[0].findMember("pom.xml");
+    return (IFile) projects[1].findMember("pom.xml");
   }
 
   public void testCompletion() throws Exception {
     //Get the location of the place where we want to start the completion
-    int offset = sourceViewer.getDocument().getLineOffset(11) + 24;
+    String docString = sourceViewer.getDocument().get();
+    int offset = docString.indexOf("${") + "${".length();
+    
     IDOMNode node = (IDOMNode) ContentAssistUtils.getNodeAt(sourceViewer, offset);
     assertEquals("anotherProperty", node.getLocalName());
 

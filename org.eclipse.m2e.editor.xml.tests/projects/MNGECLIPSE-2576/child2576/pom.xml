@@ -7,6 +7,7 @@
 		<groupId>org.eclipse.m2e</groupId>
 		<artifactId>parent2576</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
+		<relativePath>../parent2576/pom.xml</relativePath>
 	</parent>
 	<properties>
      <anotherProperty>${</anotherProperty>
