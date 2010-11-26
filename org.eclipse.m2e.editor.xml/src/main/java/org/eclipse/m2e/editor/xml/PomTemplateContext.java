@@ -36,6 +36,7 @@ import org.codehaus.plexus.interpolation.PrefixedObjectValueSource;
 import org.codehaus.plexus.interpolation.PropertiesBasedValueSource;
 import org.codehaus.plexus.interpolation.RegexBasedInterpolator;
 import org.codehaus.plexus.util.StringUtils;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
@@ -48,6 +49,7 @@ import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.core.MavenLogger;
+import org.eclipse.m2e.core.internal.project.MavenMarkerManager;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.util.search.ArtifactInfo;
 import org.eclipse.m2e.core.util.search.Packaging;
@@ -372,6 +374,23 @@ public enum PomTemplateContext {
         //shall not happen just double check.
         return;
       }
+      //MNGECLIPSE-2204 collect the existing values from the surrounding xml content only..
+      List<String> existings = new ArrayList<String>();
+      Node moduleNode = node;
+      if (moduleNode != null) {
+        Node modulesNode = moduleNode.getParentNode();
+        if (modulesNode != null) {
+          for (Element el : MavenMarkerManager.findChildElements((Element)modulesNode, "module")) {
+            if (el != moduleNode) {
+              String val = MavenMarkerManager.getElementTextValue(el);
+              if (val != null) {
+                existings.add(val);
+              }
+            }
+          }
+        }
+      }
+      
       File currentPom = new File(project.getLocationURI());
       File directory = currentPom;
       String path = prefix;
@@ -400,8 +419,11 @@ public enum PomTemplateContext {
           }
         });
         for (File candidate : offerings) {
-          if(lastElement == null || candidate.getName().startsWith(lastElement)) {
-            add(proposals, getContextTypeId(), path + candidate.getName(), NLS.bind(Messages.PomTemplateContext_candidate, candidate));
+          if(lastElement == null || candidate.getName().startsWith(lastElement) ) {
+            String val = path + candidate.getName();
+            if (!existings.contains(val)) { //only those not already being added in the surrounding area
+              add(proposals, getContextTypeId(), val, NLS.bind(Messages.PomTemplateContext_candidate, candidate));
+            }
           }
         }
       }
