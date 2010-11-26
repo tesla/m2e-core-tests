@@ -226,7 +226,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     return minCreators;
   }
 
-  public IndexedArtifactFile getIndexedArtifactFile(IRepository repository, ArtifactKey gav) throws CoreException {
+  protected IndexedArtifactFile getIndexedArtifactFile(IRepository repository, ArtifactKey gav) throws CoreException {
 
     try {
       BooleanQuery query = new BooleanQuery();
@@ -263,7 +263,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     }
   }
 
-  public IndexedArtifactFile identify(IRepository repository, File file) throws CoreException {
+  protected IndexedArtifactFile identify(IRepository repository, File file) throws CoreException {
     try {
       IndexingContext context = getIndexingContext(repository);
       ArtifactInfo artifactInfo = identify(file, Collections.singleton(context));
@@ -308,7 +308,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
   /**
    * @return Map<String, IndexedArtifact>
    */
-  public Map<String, IndexedArtifact> search(IRepository repository, String term, String type, int classifier)
+  protected Map<String, IndexedArtifact> search(IRepository repository, String term, String type, int classifier)
       throws CoreException {
     Query query;
     if(IIndex.SEARCH_GROUP.equals(type)) {
@@ -405,14 +405,14 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
   /**
    * @return Map<String, IndexedArtifact>
    */
-  public Map<String, IndexedArtifact> search(IRepository repository, String term, String type) throws CoreException {
+  protected Map<String, IndexedArtifact> search(IRepository repository, String term, String type) throws CoreException {
     return search(repository, term, type, IIndex.SEARCH_ALL);
   }
 
   /**
    * @return Map<String, IndexedArtifact>
    */
-  public Map<String, IndexedArtifact> search(IRepository repository, Query query) throws CoreException {
+  protected Map<String, IndexedArtifact> search(IRepository repository, Query query) throws CoreException {
     Map<String, IndexedArtifact> result = new TreeMap<String, IndexedArtifact>();
     try {
       IteratorSearchResponse response;
@@ -455,7 +455,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     return className + " : " + packageName + " : " + group + " : " + artifact; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
   }
 
-  public IndexedArtifactFile getIndexedArtifactFile(ArtifactInfo artifactInfo) {
+  protected IndexedArtifactFile getIndexedArtifactFile(ArtifactInfo artifactInfo) {
     String groupId = artifactInfo.groupId;
     String artifactId = artifactInfo.artifactId;
     String repository = artifactInfo.repository;
@@ -528,7 +528,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     }
   }
 
-  public void addDocument(IRepository repository, File file, ArtifactKey key) {
+  protected void addDocument(IRepository repository, File file, ArtifactKey key) {
     synchronized(getIndexLock(repository)) {
       IndexingContext context = getIndexingContext(repository);
       if(context == null) {
@@ -564,7 +564,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
             "Workspace project with key %s not found!", new Object[] {artifactKey})))); //$NON-NLS-1$ 
   }
 
-  public void removeDocument(IRepository repository, File file, ArtifactKey key) {
+  protected void removeDocument(IRepository repository, File file, ArtifactKey key) {
     synchronized(getIndexLock(repository)) {
       try {
         IndexingContext context = getIndexingContext(repository);
@@ -614,7 +614,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     }
   }
 
-  public void scheduleIndexUpdate(final IRepository repository, final boolean force) {
+  protected void scheduleIndexUpdate(final IRepository repository, final boolean force) {
     if(repository != null) {
       IndexCommand command = new IndexUpdaterJob.IndexCommand() {
         public void run(IProgressMonitor monitor) throws CoreException {
@@ -626,7 +626,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     }
   }
 
-  public IndexedArtifactGroup[] getRootGroups(IRepository repository) throws CoreException {
+  protected IndexedArtifactGroup[] getRootGroups(IRepository repository) throws CoreException {
     synchronized(getIndexLock(repository)) {
       IndexingContext context = getIndexingContext(repository);
       if(context != null) {
@@ -767,7 +767,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     return new NexusIndex(this, repository, details);
   }
 
-  public File getIndexDirectoryFile(IRepository repository) {
+  protected File getIndexDirectoryFile(IRepository repository) {
     return new File(baseIndexDir, repository.getUid());
   }
 
@@ -807,7 +807,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     setIndexDetails(repository, null, details, null/*async*/);
   }
 
-  public String getIndexDetails(IRepository repository) {
+  protected String getIndexDetails(IRepository repository) {
     String details = indexDetails.getProperty(repository.getUid());
 
     if(details == null) {
@@ -829,7 +829,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
    * Updates index synchronously if monitor!=null. Schedules index update otherwise. ... and yes, I know this ain't
    * kosher. Public for unit tests only!
    */
-  public void setIndexDetails(IRepository repository, String details, IProgressMonitor monitor) throws CoreException {
+  protected void setIndexDetails(IRepository repository, String details, IProgressMonitor monitor) throws CoreException {
     setIndexDetails(repository, details, details, monitor);
   }
 
@@ -928,7 +928,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     fireIndexRemoved(repository);
   }
 
-  public void fireIndexAdded(IRepository repository) {
+  protected void fireIndexAdded(IRepository repository) {
     synchronized(indexListeners) {
       for(IndexListener listener : indexListeners) {
         listener.indexAdded(repository);
@@ -936,7 +936,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     }
   }
 
-  public void fireIndexRemoved(IRepository repository) {
+  protected void fireIndexRemoved(IRepository repository) {
     synchronized(updatingIndexes) {
       if(repository != null) {
         //since workspace index can be null at startup, guard against nulls
@@ -950,13 +950,13 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     }
   }
 
-  public boolean isUpdatingIndex(IRepository repository) {
+  protected boolean isUpdatingIndex(IRepository repository) {
     synchronized(updatingIndexes) {
       return updatingIndexes.contains(repository.getUid());
     }
   }
 
-  public void fireIndexUpdating(IRepository repository) {
+  protected void fireIndexUpdating(IRepository repository) {
     synchronized(updatingIndexes) {
       if(repository != null) {
         //since workspace index can be null at startup, guard against nulls
@@ -970,7 +970,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     }
   }
 
-  public void fireIndexChanged(IRepository repository) {
+  protected void fireIndexChanged(IRepository repository) {
     synchronized(updatingIndexes) {
       if(repository != null) {
         //since workspace index can be null at startup, guard against nulls
@@ -999,7 +999,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     }
   }
 
-  public void updateIndex(IRepository repository, boolean force, IProgressMonitor monitor) throws CoreException {
+  protected void updateIndex(IRepository repository, boolean force, IProgressMonitor monitor) throws CoreException {
     synchronized(getIndexLock(repository)) {
       if(repository.isScope(IRepositoryRegistry.SCOPE_WORKSPACE)) {
         reindexWorkspace(force, monitor);
@@ -1185,7 +1185,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
   /// REMOVE THIS BELOW ONCE Maven Indexer upgraded to 3.2.0-SNAPSHOT
   /// In that moment this code becomes duplicated and already in place, this method added
 
-  public ArtifactInfo identify(File artifact, Collection<IndexingContext> contexts) throws IOException {
+  protected ArtifactInfo identify(File artifact, Collection<IndexingContext> contexts) throws IOException {
 
     FileInputStream is = null;
 
