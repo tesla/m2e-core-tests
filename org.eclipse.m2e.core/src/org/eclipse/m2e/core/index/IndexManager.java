@@ -11,31 +11,23 @@
 
 package org.eclipse.m2e.core.index;
 
-import java.io.File;
-import java.util.Map;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-
-import org.apache.lucene.search.Query;
-
-import org.apache.maven.index.Field;
-import org.apache.maven.index.SearchType;
 
 
 public interface IndexManager {
 
-  public static final int MIN_CLASS_QUERY_LENGTH = 6;
-
   // well-known indexes
 
-  public static final String LOCAL_INDEX = "local"; //$NON-NLS-1$
+  String LOCAL_INDEX = "local"; //$NON-NLS-1$
 
-  public static final String WORKSPACE_INDEX = "workspace"; //$NON-NLS-1$
+  String WORKSPACE_INDEX = "workspace"; //$NON-NLS-1$
 
-  public abstract IMutableIndex getWorkspaceIndex();
+  // 
 
-  public abstract IMutableIndex getLocalIndex();
+  IMutableIndex getWorkspaceIndex();
+
+  IMutableIndex getLocalIndex();
 
   /**
    * For Maven projects, returns index of all repositories configured for the project. Index includes repositories
@@ -43,38 +35,19 @@ public interface IndexManager {
    * project is null or is not a maven project, returns index that includes repositories defined in profiles enabled by
    * default in settings.xml.
    */
-  public abstract IIndex getIndex(IProject project) throws CoreException;
+  IIndex getIndex(IProject project) throws CoreException;
 
   /**
-   * Convenience method to search in all indexes enabled for repositories defined in settings.xml
-   */
-  public abstract Map<String, IndexedArtifact> search(String term, String searchType) throws CoreException;
-
-  /**
-   * Convenience method to search in all indexes enabled for repositories defined in settings.xml
+   * Returns index aggregating all indexes enabled for repositories defined in settings.xml
    * 
-   * @param term - search term
-   * @param searchType - query type. Should be one of the SEARCH_* values.
-   * @param classifier - the type of classifiers to search for, SEARCH_ALL, SEARCH_JAVADOCS, SEARCH_SOURCES,
-   *          SEARCH_TESTS
-   */
-  public abstract Map<String, IndexedArtifact> search(String term, String type, int classifier) throws CoreException;
-
-  /**
-   * Convenience method to search in all indexes enabled for repositories defined in settings.xml
-   */
-  public abstract IndexedArtifactFile identify(File file) throws CoreException;
-
-  /**
-   * Method to construct Lucene Queries without need to actually know the structure and details (field names, analyze
-   * details, etc) of the underlying index. Also, using this methods makes you "future proof". Naturally, at caller
-   * level you can still combine these queries using BooleanQuery to suit your needs.
-   * 
-   * @param field
-   * @param query
-   * @param type
    * @return
+   * @throws CoreException
    */
-  public abstract Query constructQuery(Field field, String query, SearchType type);
+  IIndex getAllIndexes() throws CoreException;
 
+  //
+
+  void removeIndexListener(IndexListener listener);
+
+  void addIndexListener(IndexListener listener);
 }

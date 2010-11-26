@@ -89,7 +89,6 @@ import org.eclipse.m2e.core.embedder.IMaven;
 import org.eclipse.m2e.core.index.IMutableIndex;
 import org.eclipse.m2e.core.index.IndexListener;
 import org.eclipse.m2e.core.index.IndexManager;
-import org.eclipse.m2e.core.internal.index.NexusIndexManager;
 import org.eclipse.m2e.core.project.ProjectImportConfiguration;
 import org.eclipse.m2e.core.repository.IRepository;
 import org.eclipse.m2e.core.util.M2EUtils;
@@ -178,7 +177,7 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage imp
 
     createAdvancedSettings(composite, new GridData(SWT.FILL, SWT.TOP, true, false, 3, 1));
 
-    ((NexusIndexManager) MavenPlugin.getDefault().getIndexManager()).addIndexListener(this);
+    MavenPlugin.getDefault().getIndexManager().addIndexListener(this);
     setControl(composite);
   }
 
@@ -475,7 +474,7 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage imp
   }
 
   public void dispose() {
-    ((NexusIndexManager) MavenPlugin.getDefault().getIndexManager()).removeIndexListener(this);
+    MavenPlugin.getDefault().getIndexManager().removeIndexListener(this);
     super.dispose();
   }
 

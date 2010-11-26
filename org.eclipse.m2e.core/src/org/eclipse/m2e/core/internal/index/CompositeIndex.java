@@ -13,8 +13,10 @@ package org.eclipse.m2e.core.internal.index;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
@@ -69,8 +71,30 @@ public class CompositeIndex implements IIndex {
     Set<IndexedArtifact> result = new LinkedHashSet<IndexedArtifact>();
     for(IIndex index : indexes) {
       Collection<IndexedArtifact> findResults = index.find(groupId, artifactId, version, packaging);
-      if(findResults != null){
+      if(findResults != null) {
         result.addAll(findResults);
+      }
+    }
+    return result;
+  }
+
+  public Map<String, IndexedArtifact> search(String term, String searchType) throws CoreException {
+    Map<String, IndexedArtifact> result = new HashMap<String, IndexedArtifact>();
+    for(IIndex index : indexes) {
+      Map<String, IndexedArtifact> iresult = index.search(term, searchType);
+      if(iresult != null) {
+        result.putAll(iresult);
+      }
+    }
+    return result;
+  }
+
+  public Map<String, IndexedArtifact> search(String term, String searchType, int classifier) throws CoreException {
+    Map<String, IndexedArtifact> result = new HashMap<String, IndexedArtifact>();
+    for(IIndex index : indexes) {
+      Map<String, IndexedArtifact> iresult = index.search(term, searchType, classifier);
+      if(iresult != null) {
+        result.putAll(iresult);
       }
     }
     return result;

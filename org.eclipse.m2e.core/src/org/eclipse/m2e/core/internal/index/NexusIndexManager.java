@@ -108,6 +108,8 @@ import org.eclipse.m2e.core.repository.IRepositoryRegistry;
  */
 public class NexusIndexManager implements IndexManager, IMavenProjectChangedListener, IRepositoryIndexer {
 
+  public static final int MIN_CLASS_QUERY_LENGTH = 6;
+
   /**
    * Lazy instantiated nexus indexer instance.
    */
@@ -274,6 +276,16 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     }
   }
 
+  /**
+   * Method to construct Lucene Queries without need to actually know the structure and details (field names, analyze
+   * details, etc) of the underlying index. Also, using this methods makes you "future proof". Naturally, at caller
+   * level you can still combine these queries using BooleanQuery to suit your needs.
+   * 
+   * @param field
+   * @param query
+   * @param type
+   * @return
+   */
   public Query constructQuery(Field field, String query, SearchType type) {
     return getIndexer().constructQuery(field, query, type);
   }
@@ -626,7 +638,23 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     }
   }
 
-  protected IndexedArtifactGroup[] getRootGroups(IRepository repository) throws CoreException {
+  protected Set<String> getRootGroups(IRepository repository) throws CoreException {
+    synchronized(getIndexLock(repository)) {
+      IndexingContext context = getIndexingContext(repository);
+      if(context != null) {
+        try {
+          Set<String> rootGroups = context.getRootGroups();
+          return rootGroups;
+        } catch(IOException ex) {
+          throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, //
+              NLS.bind(Messages.NexusIndexManager_error_root_grp, repository.toString()), ex));
+        }
+      }
+      return Collections.emptySet();
+    }
+  }
+
+  protected IndexedArtifactGroup[] getRootIndexedArtifactGroups(IRepository repository) throws CoreException {
     synchronized(getIndexLock(repository)) {
       IndexingContext context = getIndexingContext(repository);
       if(context != null) {
@@ -762,6 +790,25 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     return new CompositeIndex(indexes);
   }
 
+  public IIndex getAllIndexes() {
+    ArrayList<IIndex> indexes = new ArrayList<IIndex>();
+    indexes.add(getWorkspaceIndex());
+    indexes.add(getLocalIndex());
+
+    for(IMavenProjectFacade facade : projectManager.getProjects()) {
+      LinkedHashSet<ArtifactRepositoryRef> repositories = new LinkedHashSet<ArtifactRepositoryRef>();
+      repositories.addAll(facade.getArtifactRepositoryRefs());
+      repositories.addAll(facade.getPluginArtifactRepositoryRefs());
+
+      for(ArtifactRepositoryRef repositoryRef : repositories) {
+        IRepository repository = repositoryRegistry.getRepository(repositoryRef);
+        indexes.add(getIndex(repository));
+      }
+    }
+
+    return new CompositeIndex(indexes);
+  }
+
   public NexusIndex getIndex(IRepository repository) {
     String details = getIndexDetails(repository);
     return new NexusIndex(this, repository, details);
@@ -807,7 +854,8 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     setIndexDetails(repository, null, details, null/*async*/);
   }
 
-  protected String getIndexDetails(IRepository repository) {
+  /** For tests only */
+  public String getIndexDetails(IRepository repository) {
     String details = indexDetails.getProperty(repository.getUid());
 
     if(details == null) {
@@ -829,7 +877,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
    * Updates index synchronously if monitor!=null. Schedules index update otherwise. ... and yes, I know this ain't
    * kosher. Public for unit tests only!
    */
-  protected void setIndexDetails(IRepository repository, String details, IProgressMonitor monitor) throws CoreException {
+  public void setIndexDetails(IRepository repository, String details, IProgressMonitor monitor) throws CoreException {
     setIndexDetails(repository, details, details, monitor);
   }
 

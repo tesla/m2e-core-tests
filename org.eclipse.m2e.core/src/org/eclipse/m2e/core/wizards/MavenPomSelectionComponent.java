@@ -66,9 +66,10 @@ import org.eclipse.m2e.core.index.IndexedArtifact;
 import org.eclipse.m2e.core.index.IndexedArtifactFile;
 import org.eclipse.m2e.core.internal.Messages;
 
+
 /**
  * MavenPomSelectionComposite
- *
+ * 
  * @author Eugene Kuleshov
  */
 public class MavenPomSelectionComponent extends Composite {
@@ -77,7 +78,7 @@ public class MavenPomSelectionComponent extends Composite {
    * @see org.eclipse.swt.widgets.Widget#dispose()
    */
   public void dispose() {
-    if(searchJob != null){
+    if(searchJob != null) {
       searchJob.cancel();
     }
     super.dispose();
@@ -86,43 +87,47 @@ public class MavenPomSelectionComponent extends Composite {
   Text searchText = null;
 
   TreeViewer searchResultViewer = null;
-  
+
   Button javadocCheckBox;
+
   Button sourcesCheckBox;
+
   Button testCheckBox;
 
   /**
-   * One of 
-   *   {@link IIndex#SEARCH_ARTIFACT}, 
-   *   {@link IIndex#SEARCH_CLASS_NAME}, 
+   * One of {@link IIndex#SEARCH_ARTIFACT}, {@link IIndex#SEARCH_CLASS_NAME},
    */
   String queryType;
-  
+
   SearchJob searchJob;
 
   private IStatus status;
 
   private ISelectionChangedListener selectionListener;
-  
+
   public static final String P_SEARCH_INCLUDE_JAVADOC = "searchIncludesJavadoc"; //$NON-NLS-1$
-  public static final String P_SEARCH_INCLUDE_SOURCES = "searchIncludesSources";   //$NON-NLS-1$
+
+  public static final String P_SEARCH_INCLUDE_SOURCES = "searchIncludesSources"; //$NON-NLS-1$
+
   public static final String P_SEARCH_INCLUDE_TESTS = "searchIncludesTests"; //$NON-NLS-1$
+
   private static final long SHORT_DELAY = 150L;
+
   private static final long LONG_DELAY = 500L;
-  
+
   HashSet<String> artifactKeys = new HashSet<String>();
 
   public MavenPomSelectionComponent(Composite parent, int style) {
     super(parent, style);
-    createSearchComposite();    
+    createSearchComposite();
   }
-  
+
   private void createSearchComposite() {
     GridLayout gridLayout = new GridLayout(2, false);
     gridLayout.marginWidth = 0;
     gridLayout.marginHeight = 0;
     setLayout(gridLayout);
-    
+
     Label searchTextlabel = new Label(this, SWT.NONE);
     searchTextlabel.setText(Messages.MavenPomSelectionComponent_search_title);
     searchTextlabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
@@ -135,9 +140,9 @@ public class MavenPomSelectionComponent extends Composite {
           searchResultViewer.getTree().setFocus();
           selectFirstElementInTheArtifactTreeIfNoSelectionHasBeenMade();
         }
-      }      
+      }
     });
-    
+
     searchText.addModifyListener(new ModifyListener() {
       public void modifyText(ModifyEvent e) {
         scheduleSearch(searchText.getText(), true);
@@ -151,65 +156,65 @@ public class MavenPomSelectionComponent extends Composite {
     Tree tree = new Tree(this, SWT.BORDER | SWT.SINGLE);
     tree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
     tree.setData("name", "searchResultTree"); //$NON-NLS-1$ //$NON-NLS-2$
-    tree.addFocusListener( new FocusListener() {
+    tree.addFocusListener(new FocusListener() {
 
       public void focusGained(FocusEvent e) {
         selectFirstElementInTheArtifactTreeIfNoSelectionHasBeenMade();
       }
 
       public void focusLost(FocusEvent e) {
-        
+
       }
     });
-    
+
     searchResultViewer = new TreeViewer(tree);
   }
-  
+
   void selectFirstElementInTheArtifactTreeIfNoSelectionHasBeenMade() {
     //
     // If we have started a new search when focus is passed to the tree viewer we will automatically select
     // the first element if no element has been selected from a previous expedition into the tree viewer.
     //
-    if(searchResultViewer.getTree().getItemCount()>0 && searchResultViewer.getSelection().isEmpty()) {
+    if(searchResultViewer.getTree().getItemCount() > 0 && searchResultViewer.getSelection().isEmpty()) {
       Object artifact = searchResultViewer.getTree().getTopItem().getData();
       searchResultViewer.setSelection(new StructuredSelection(artifact), true);
-    }            
+    }
   }
-  
-  protected boolean showClassifiers(){
+
+  protected boolean showClassifiers() {
     return (queryType != null && IIndex.SEARCH_ARTIFACT.equals(queryType));
   }
-  
-  private void setupButton(final Button button, String label, final String prefName, int horizontalIndent){
+
+  private void setupButton(final Button button, String label, final String prefName, int horizontalIndent) {
     button.setText(label);
     GridData gd = new GridData(SWT.LEFT, SWT.TOP, false, false);
-    gd.horizontalIndent=horizontalIndent;
+    gd.horizontalIndent = horizontalIndent;
     button.setLayoutData(gd);
     boolean check = MavenPlugin.getDefault().getPreferenceStore().getBoolean(prefName);
     button.setSelection(check);
-    button.addSelectionListener(new SelectionAdapter(){
-      public void widgetSelected(SelectionEvent e){
+    button.addSelectionListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent e) {
         boolean checked = button.getSelection();
         MavenPlugin.getDefault().getPreferenceStore().setValue(prefName, checked);
         scheduleSearch(searchText.getText(), false);
       }
     });
   }
-  
+
   public void init(String queryText, String queryType, Set<ArtifactKey> artifacts) {
     this.queryType = queryType;
-    
+
     if(queryText != null) {
       searchText.setText(queryText);
     }
-    
-    if(artifacts!=null) {
+
+    if(artifacts != null) {
       for(ArtifactKey a : artifacts) {
         artifactKeys.add(a.getGroupId() + ":" + a.getArtifactId()); //$NON-NLS-1$
         artifactKeys.add(a.getGroupId() + ":" + a.getArtifactId() + ":" + a.getVersion()); //$NON-NLS-1$ //$NON-NLS-2$
       }
     }
-    
+
     searchResultViewer.setContentProvider(new SearchResultContentProvider());
     searchResultViewer.setLabelProvider(new SearchResultLabelProvider(artifactKeys, queryType));
     searchResultViewer.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -220,8 +225,11 @@ public class MavenPomSelectionComponent extends Composite {
             IndexedArtifactFile f = getSelectedIndexedArtifactFile(selection.getFirstElement());
             // int severity = artifactKeys.contains(f.group + ":" + f.artifact) ? IStatus.ERROR : IStatus.OK;
             int severity = IStatus.OK;
-            String date = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(f .date); 
-            setStatus(severity, NLS.bind(Messages.MavenPomSelectionComponent_detail1, f.fname, (f.size != -1 ? NLS.bind(Messages.MavenPomSelectionComponent_details2, date, f.size) : date)));  
+            String date = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(f.date);
+            setStatus(
+                severity,
+                NLS.bind(Messages.MavenPomSelectionComponent_detail1, f.fname,
+                    (f.size != -1 ? NLS.bind(Messages.MavenPomSelectionComponent_details2, date, f.size) : date)));
           } else {
             setStatus(IStatus.OK, NLS.bind(Messages.MavenPomSelectionComponent_selected, selection.size()));
           }
@@ -234,24 +242,25 @@ public class MavenPomSelectionComponent extends Composite {
     setStatus(IStatus.ERROR, ""); //$NON-NLS-1$
     scheduleSearch(queryText, false);
   }
-  
-  protected void setupClassifiers(){
-    if(showClassifiers()){
+
+  protected void setupClassifiers() {
+    if(showClassifiers()) {
       Composite includesComp = new Composite(this, SWT.NONE);
       includesComp.setLayout(new GridLayout(3, true));
       GridData gd = new GridData(SWT.LEFT, SWT.TOP, true, false);
       includesComp.setLayoutData(gd);
-      
+
       javadocCheckBox = new Button(includesComp, SWT.CHECK);
-      setupButton(javadocCheckBox, Messages.MavenPomSelectionComponent_btnJavadoc, P_SEARCH_INCLUDE_JAVADOC,0);
-      
+      setupButton(javadocCheckBox, Messages.MavenPomSelectionComponent_btnJavadoc, P_SEARCH_INCLUDE_JAVADOC, 0);
+
       sourcesCheckBox = new Button(includesComp, SWT.CHECK);
-      setupButton(sourcesCheckBox, Messages.MavenPomSelectionComponent_btnSource, P_SEARCH_INCLUDE_SOURCES,10);
-  
+      setupButton(sourcesCheckBox, Messages.MavenPomSelectionComponent_btnSource, P_SEARCH_INCLUDE_SOURCES, 10);
+
       testCheckBox = new Button(includesComp, SWT.CHECK);
-      setupButton(testCheckBox, Messages.MavenPomSelectionComponent_btnTests, P_SEARCH_INCLUDE_TESTS,10);
+      setupButton(testCheckBox, Messages.MavenPomSelectionComponent_btnTests, P_SEARCH_INCLUDE_TESTS, 10);
     }
   }
+
   public IStatus getStatus() {
     return this.status;
   }
@@ -259,18 +268,19 @@ public class MavenPomSelectionComponent extends Composite {
   public void addDoubleClickListener(IDoubleClickListener listener) {
     searchResultViewer.addDoubleClickListener(listener);
   }
-  
+
   public void addSelectionChangedListener(ISelectionChangedListener listener) {
     this.selectionListener = listener;
   }
 
   void setStatus(int severity, String message) {
     this.status = new Status(severity, IMavenConstants.PLUGIN_ID, 0, message, null);
-    if(selectionListener!=null) {
-      selectionListener.selectionChanged(new SelectionChangedEvent(searchResultViewer, searchResultViewer.getSelection()));
+    if(selectionListener != null) {
+      selectionListener.selectionChanged(new SelectionChangedEvent(searchResultViewer, searchResultViewer
+          .getSelection()));
     }
   }
-  
+
   public IndexedArtifact getIndexedArtifact() {
     IStructuredSelection selection = (IStructuredSelection) searchResultViewer.getSelection();
     Object element = selection.getFirstElement();
@@ -278,12 +288,12 @@ public class MavenPomSelectionComponent extends Composite {
       return (IndexedArtifact) element;
     }
     TreeItem[] treeItems = searchResultViewer.getTree().getSelection();
-    if(treeItems.length == 0){
+    if(treeItems.length == 0) {
       return null;
     }
     return (IndexedArtifact) treeItems[0].getParentItem().getData();
   }
-  
+
   public IndexedArtifactFile getIndexedArtifactFile() {
     IStructuredSelection selection = (IStructuredSelection) searchResultViewer.getSelection();
     return getSelectedIndexedArtifactFile(selection.getFirstElement());
@@ -302,7 +312,7 @@ public class MavenPomSelectionComponent extends Composite {
         IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
         searchJob = new SearchJob(queryType, indexManager);
       } else {
-        if (!searchJob.cancel()) {
+        if(!searchJob.cancel()) {
           //for already running ones, just create new instance so that the previous one can piecefully die
           //without preventing the new one from completing first
           IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
@@ -312,12 +322,11 @@ public class MavenPomSelectionComponent extends Composite {
       searchJob.setQuery(query.toLowerCase());
       searchJob.schedule(delay ? LONG_DELAY : SHORT_DELAY);
     } else {
-      if (searchJob != null) {
+      if(searchJob != null) {
         searchJob.cancel();
       }
     }
   }
-
 
   /**
    * Search Job
@@ -341,60 +350,68 @@ public class MavenPomSelectionComponent extends Composite {
     public void setQuery(String query) {
       this.query = query;
     }
-    
+
     public boolean shouldRun() {
       stop = false;
       return super.shouldRun();
     }
 
-    public int getClassifier(){
+    public int getClassifier() {
       int classifier = IIndex.SEARCH_JARS;
-      if(MavenPlugin.getDefault().getPreferenceStore().getBoolean(P_SEARCH_INCLUDE_JAVADOC)){
+      if(MavenPlugin.getDefault().getPreferenceStore().getBoolean(P_SEARCH_INCLUDE_JAVADOC)) {
         classifier = classifier + IIndex.SEARCH_JAVADOCS;
       }
-      if(MavenPlugin.getDefault().getPreferenceStore().getBoolean(P_SEARCH_INCLUDE_SOURCES)){
+      if(MavenPlugin.getDefault().getPreferenceStore().getBoolean(P_SEARCH_INCLUDE_SOURCES)) {
         classifier = classifier + IIndex.SEARCH_SOURCES;
       }
-      if(MavenPlugin.getDefault().getPreferenceStore().getBoolean(P_SEARCH_INCLUDE_TESTS)){
+      if(MavenPlugin.getDefault().getPreferenceStore().getBoolean(P_SEARCH_INCLUDE_TESTS)) {
         classifier = classifier + IIndex.SEARCH_TESTS;
       }
       return classifier;
     }
-    
+
     protected IStatus run(IProgressMonitor monitor) {
       int classifier = showClassifiers() ? getClassifier() : IIndex.SEARCH_ALL;
-      if(searchResultViewer == null || searchResultViewer.getControl() == null || searchResultViewer.getControl().isDisposed()){
+      if(searchResultViewer == null || searchResultViewer.getControl() == null
+          || searchResultViewer.getControl().isDisposed()) {
         return Status.CANCEL_STATUS;
       }
-      if (query != null) {
+      if(query != null) {
         String activeQuery = query;
         try {
-          setResult(IStatus.OK, NLS.bind(Messages.MavenPomSelectionComponent_searching , activeQuery.toLowerCase()), null);
-          Map<String, IndexedArtifact> res = indexManager.search(activeQuery, field, classifier);
+          setResult(IStatus.OK, NLS.bind(Messages.MavenPomSelectionComponent_searching, activeQuery.toLowerCase()),
+              null);
+
+          // TODO: cstamas identified this as "user input", true?
+          Map<String, IndexedArtifact> res = indexManager.getAllIndexes().search(activeQuery, field, classifier);
           setResult(IStatus.OK, NLS.bind(Messages.MavenPomSelectionComponent_results, activeQuery, res.size()), res);
-        } catch(BooleanQuery.TooManyClauses ex){
-          setResult(IStatus.ERROR, Messages.MavenPomSelectionComponent_toomany, Collections.<String, IndexedArtifact>emptyMap());
+        } catch(BooleanQuery.TooManyClauses ex) {
+          setResult(IStatus.ERROR, Messages.MavenPomSelectionComponent_toomany,
+              Collections.<String, IndexedArtifact> emptyMap());
         } catch(final RuntimeException ex) {
-          setResult(IStatus.ERROR, NLS.bind(Messages.MavenPomSelectionComponent_error, ex.toString()), Collections.<String, IndexedArtifact>emptyMap());
+          setResult(IStatus.ERROR, NLS.bind(Messages.MavenPomSelectionComponent_error, ex.toString()),
+              Collections.<String, IndexedArtifact> emptyMap());
         } catch(final Exception ex) {
-          setResult(IStatus.ERROR, NLS.bind(Messages.MavenPomSelectionComponent_error, ex.getMessage()), Collections.<String, IndexedArtifact>emptyMap());
+          setResult(IStatus.ERROR, NLS.bind(Messages.MavenPomSelectionComponent_error, ex.getMessage()),
+              Collections.<String, IndexedArtifact> emptyMap());
         }
-      } 
+      }
       return Status.OK_STATUS;
     }
 
     protected void canceling() {
-      stop  = true;
+      stop = true;
     }
 
     private void setResult(final int severity, final String message, final Map<String, IndexedArtifact> result) {
-      if (stop) return;
+      if(stop)
+        return;
       Display.getDefault().syncExec(new Runnable() {
         public void run() {
           setStatus(severity, message);
           if(result != null) {
-            if(!searchResultViewer.getControl().isDisposed()){
-              searchResultViewer.setInput(result);              
+            if(!searchResultViewer.getControl().isDisposed()) {
+              searchResultViewer.setInput(result);
             }
           }
         }
@@ -404,6 +421,7 @@ public class MavenPomSelectionComponent extends Composite {
 
   public static class SearchResultLabelProvider extends LabelProvider implements IColorProvider {
     private final Set<String> artifactKeys;
+
     private final String queryType;
 
     public SearchResultLabelProvider(Set<String> artifactKeys, String queryType) {
@@ -419,15 +437,15 @@ public class MavenPomSelectionComponent extends Composite {
       } else if(element instanceof IndexedArtifactFile) {
         IndexedArtifactFile f = (IndexedArtifactFile) element;
 //        String displayName = getRepoDisplayName(f.repository);
-        return f.version + " [" + f.type + (f.classifier != null ? ", " + f.classifier : "") +  "]"; //unless there is something reasonably short " [" + displayName + "]";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+        return f.version + " [" + f.type + (f.classifier != null ? ", " + f.classifier : "") + "]"; //unless there is something reasonably short " [" + displayName + "]";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
       }
       return super.getText(element);
     }
-    
-    protected String getRepoDisplayName(String repo){
+
+    protected String getRepoDisplayName(String repo) {
       return repo;
     }
-    
+
     public Color getForeground(Object element) {
       if(element instanceof IndexedArtifactFile) {
         IndexedArtifactFile f = (IndexedArtifactFile) element;
@@ -446,11 +464,11 @@ public class MavenPomSelectionComponent extends Composite {
     public Color getBackground(Object element) {
       return null;
     }
-    
+
     public Image getImage(Object element) {
       if(element instanceof IndexedArtifactFile) {
         IndexedArtifactFile f = (IndexedArtifactFile) element;
-        if(f.sourcesExists==IIndex.PRESENT) {
+        if(f.sourcesExists == IIndex.PRESENT) {
           return MavenImages.IMG_VERSION_SRC;
         }
         return MavenImages.IMG_VERSION;
@@ -493,9 +511,8 @@ public class MavenPomSelectionComponent extends Composite {
     }
 
     public void dispose() {
-      
+
     }
 
   }
 }
-

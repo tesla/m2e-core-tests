@@ -55,12 +55,12 @@ import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.actions.MaterializeAction;
 import org.eclipse.m2e.core.actions.OpenPomAction;
 import org.eclipse.m2e.core.index.IndexListener;
+import org.eclipse.m2e.core.index.IndexManager;
 import org.eclipse.m2e.core.index.IndexedArtifact;
 import org.eclipse.m2e.core.index.IndexedArtifactFile;
 import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.internal.index.IndexedArtifactGroup;
 import org.eclipse.m2e.core.internal.index.NexusIndex;
-import org.eclipse.m2e.core.internal.index.NexusIndexManager;
 import org.eclipse.m2e.core.repository.IRepository;
 import org.eclipse.m2e.core.ui.internal.views.nodes.AbstractIndexedRepositoryNode;
 import org.eclipse.m2e.core.ui.internal.views.nodes.IArtifactNode;
@@ -83,7 +83,7 @@ public class MavenRepositoryView extends ViewPart {
   private static final String ENABLE_MIN = Messages.MavenRepositoryView_enable_minimum;
   private static final String ENABLED_MIN = Messages.MavenRepositoryView_minimum_enabled;
   
-  private NexusIndexManager indexManager = (NexusIndexManager) MavenPlugin.getDefault().getIndexManager();
+  private IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
 
   private IAction collapseAllAction;
   

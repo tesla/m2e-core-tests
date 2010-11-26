@@ -59,7 +59,7 @@ import org.eclipse.m2e.core.index.IndexedArtifactFile;
 public class MavenGoalSelectionDialog extends ElementTreeSelectionDialog {
 
   Button isQualifiedNameButton;
-  
+
   boolean isQualifiedName = true;
 
   public MavenGoalSelectionDialog(Shell parent) {
@@ -91,10 +91,10 @@ public class MavenGoalSelectionDialog extends ElementTreeSelectionDialog {
     gd_filterText.widthHint = 200;
     filterText.setLayoutData(gd_filterText);
     filterText.setFocus();
-    
+
     final TreeViewer treeViewer = createTreeViewer(composite);
     treeViewer.addFilter(filter);
-    
+
     GridData data = new GridData(GridData.FILL_BOTH);
     data.widthHint = 500;
     data.heightHint = 400;
@@ -110,7 +110,7 @@ public class MavenGoalSelectionDialog extends ElementTreeSelectionDialog {
         String text = filterText.getText();
         filter.setFilter(text);
         treeViewer.refresh();
-        if(text.trim().length()==0) {
+        if(text.trim().length() == 0) {
           treeViewer.collapseAll();
         } else {
           treeViewer.expandAll();
@@ -120,14 +120,14 @@ public class MavenGoalSelectionDialog extends ElementTreeSelectionDialog {
 
     filterText.addKeyListener(new KeyAdapter() {
       public void keyPressed(KeyEvent e) {
-        if(e.keyCode==SWT.ARROW_DOWN) {
+        if(e.keyCode == SWT.ARROW_DOWN) {
           tree.setFocus();
           tree.setSelection(tree.getTopItem().getItem(0));
 
           Object[] elements = ((ITreeContentProvider) treeViewer.getContentProvider()).getElements(null);
           treeViewer.setSelection(new StructuredSelection(elements[0]));
         }
-        
+
       }
     });
 
@@ -139,7 +139,7 @@ public class MavenGoalSelectionDialog extends ElementTreeSelectionDialog {
         isQualifiedName = isQualifiedNameButton.getSelection();
       }
     });
-    
+
 //    if (fIsEmpty) {
 //        messageLabel.setEnabled(false);
 //        treeWidget.setEnabled(false);
@@ -147,7 +147,7 @@ public class MavenGoalSelectionDialog extends ElementTreeSelectionDialog {
 
     return composite;
   }
-  
+
   public boolean isQualifiedName() {
     return isQualifiedName;
   }
@@ -176,18 +176,21 @@ public class MavenGoalSelectionDialog extends ElementTreeSelectionDialog {
 
       IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
       try {
-        Map<String, IndexedArtifact> result = indexManager.search("*", IIndex.SEARCH_PLUGIN); //$NON-NLS-1$
+        // TODO: this will search ALL indexes, isn't the right to search _this_ project reposes only?
+        // I did not find (at first glance, maybe was hasty) a way to get IProject
+        // TODO: cstamas identified this as "user input", true?
+        Map<String, IndexedArtifact> result = indexManager.getAllIndexes().search("*", IIndex.SEARCH_PLUGIN); //$NON-NLS-1$
         TreeMap<String, Group> map = new TreeMap<String, Group>();
         for(IndexedArtifact a : result.values()) {
           IndexedArtifactFile f = a.getFiles().iterator().next();
-          if(f.prefix != null && f.prefix.length()>0 && f.goals != null) {
+          if(f.prefix != null && f.prefix.length() > 0 && f.goals != null) {
             List<Entry> goals = new ArrayList<Entry>();
             for(String goal : f.goals) {
-              if(goal.length()>0) {
+              if(goal.length() > 0) {
                 goals.add(new Entry(goal, f.prefix, f));
               }
             }
-            if(goals.size()>0) {
+            if(goals.size() > 0) {
               map.put(f.prefix + ":" + f.group, new Group(f.prefix, f.group, f.artifact, goals)); //$NON-NLS-1$
             }
           }
@@ -240,14 +243,14 @@ public class MavenGoalSelectionDialog extends ElementTreeSelectionDialog {
     public String getText(Object element) {
       if(element instanceof Group) {
         Group g = (Group) element;
-        if(g.groupId==null) {
+        if(g.groupId == null) {
           return g.name;
         }
         return g.name + " - " + g.groupId + ":" + g.artifactId; //$NON-NLS-1$ //$NON-NLS-2$
-        
+
       } else if(element instanceof Entry) {
         return ((Entry) element).name;
-        
+
       }
       return super.getText(element);
     }
@@ -258,7 +261,7 @@ public class MavenGoalSelectionDialog extends ElementTreeSelectionDialog {
    */
   static class GoalsFilter extends ViewerFilter {
     private String filter;
-  
+
     public boolean select(Viewer viewer, Object parentElement, Object element) {
       if(filter == null || filter.trim().length() == 0) {
         return true;
@@ -274,10 +277,10 @@ public class MavenGoalSelectionDialog extends ElementTreeSelectionDialog {
             return true;
           }
         }
-  
+
       } else if(element instanceof Entry) {
         Entry e = (Entry) element;
-        return e.name.indexOf(filter) > -1 || (e.prefix!=null && e.prefix.indexOf(filter) > -1);
+        return e.name.indexOf(filter) > -1 || (e.prefix != null && e.prefix.indexOf(filter) > -1);
 
       }
       return false;
@@ -294,7 +297,8 @@ public class MavenGoalSelectionDialog extends ElementTreeSelectionDialog {
   static class GoalsSelectionValidator implements ISelectionStatusValidator {
     public IStatus validate(Object[] selection) {
       if(selection.length == 0) {
-        return new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, org.eclipse.m2e.core.internal.Messages.MavenGoalSelectionDialog_error, null);
+        return new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
+            org.eclipse.m2e.core.internal.Messages.MavenGoalSelectionDialog_error, null);
       }
       for(int j = 0; j < selection.length; j++ ) {
         if(selection[j] instanceof Entry) {
@@ -311,7 +315,9 @@ public class MavenGoalSelectionDialog extends ElementTreeSelectionDialog {
    */
   static class Group {
     public final String name;
+
     public final String groupId;
+
     public final String artifactId;
 
     public final List<Entry> entries;
@@ -348,7 +354,7 @@ public class MavenGoalSelectionDialog extends ElementTreeSelectionDialog {
       // return prefix == null ? name : prefix + ":" + name;
       return prefix == null ? name : f.group + ":" + f.artifact + ":" + f.version + ":" + name; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
     }
-  
+
   }
 
 }
