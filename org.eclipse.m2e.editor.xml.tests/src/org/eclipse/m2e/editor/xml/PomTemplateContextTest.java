@@ -20,6 +20,13 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;
 
+/**
+ * Hello fellow tester:
+ * everytime this test finds a regression add an 'x' here:
+ * everytime you do mindless test update add an 'y' here:
+ * @author mkleint
+ *
+ */
 
 public class PomTemplateContextTest extends AbstractMavenProjectTestCase {
 

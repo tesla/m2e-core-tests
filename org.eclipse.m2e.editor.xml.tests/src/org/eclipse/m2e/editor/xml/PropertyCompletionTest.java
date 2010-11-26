@@ -19,6 +19,13 @@ import org.eclipse.wst.sse.ui.internal.contentassist.ContentAssistUtils;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.eclipse.wst.xml.ui.internal.contentassist.XMLContentAssistProcessor;
 
+/**
+ * Hello fellow tester:
+ * everytime this test finds a regression add an 'x' here:
+ * everytime you do mindless test update add an 'y' here:
+ * @author mkleint
+ *
+ */
 
 public class PropertyCompletionTest extends AbstractCompletionTest {
   

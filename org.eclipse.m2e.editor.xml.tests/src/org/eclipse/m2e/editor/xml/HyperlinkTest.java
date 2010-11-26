@@ -23,6 +23,13 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.internal.UIPlugin;
 
+/**
+ * Hello fellow tester:
+ * everytime this test finds a regression add an 'x' here:
+ * everytime you do mindless test update add an 'y' here:
+ * @author mkleint
+ *
+ */
 public class HyperlinkTest extends AbstractPOMEditorTestCase {
   private IFile parentPom;
   
