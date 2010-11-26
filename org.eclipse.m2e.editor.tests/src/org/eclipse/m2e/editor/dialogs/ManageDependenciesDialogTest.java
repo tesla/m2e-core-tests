@@ -31,6 +31,7 @@ import org.eclipse.m2e.model.edit.pom.util.PomResourceImpl;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.junit.Before;
 import org.junit.Test;
 
 
@@ -39,6 +40,11 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
   private static final String VERSION = "1.0.0";
   public static String GROUP_ID = "org.eclipse.m2e.tests";
 
+  @Before
+  public void setUp() throws Exception {
+    super.setUp();
+  }
+  
   /*
    * Cases to test:
    * - target and starting POM are the same
