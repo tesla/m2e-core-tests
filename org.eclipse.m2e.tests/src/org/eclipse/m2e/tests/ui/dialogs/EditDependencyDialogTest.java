@@ -9,8 +9,6 @@ import org.eclipse.m2e.model.edit.pom.PomFactory;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.junit.Test;
-
 
 public class EditDependencyDialogTest extends AbstractMavenProjectTestCase {
   public static final String GROUP_ID = "groupid"; //$NON-NLS-1$
@@ -27,7 +25,6 @@ public class EditDependencyDialogTest extends AbstractMavenProjectTestCase {
 
   public static final String PATH = "path"; //$NON-NLS-1$
 
-  @Test
   public void testDialog() throws Exception {
     final IProject project = this.createProject("dependencies", "projects/dependencies/pom.xml"); //$NON-NLS-1$ //$NON-NLS-2$
 
