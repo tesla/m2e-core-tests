@@ -32,10 +32,12 @@ public class PropertyCompletionOnInvalidParentTest extends AbstractCompletionTes
   
   protected IFile loadProjectsAndFiles() throws Exception {
     //Create the projects
-    IProject[] projects = importProjects("projects/MNGECLIPSE-2576", new String[] {"child2576WithBadParent/pom.xml",
-    "parent2576/pom.xml"}, new ResolverConfiguration());
+    IProject[] projects = importProjects("projects/MNGECLIPSE-2576", new String[] {
+        "parent2576/pom.xml",
+        "child2576WithBadParent/pom.xml"
+        }, new ResolverConfiguration());
     waitForJobsToComplete();
-    return (IFile) projects[0].findMember("pom.xml");
+    return (IFile) projects[1].findMember("pom.xml");
   }
 
   public void testCompletionOnInvalidHierarchy() throws Exception {
