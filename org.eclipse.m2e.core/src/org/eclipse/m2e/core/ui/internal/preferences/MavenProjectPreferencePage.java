@@ -32,7 +32,6 @@ import org.eclipse.ui.dialogs.PropertyPage;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.core.MavenLogger;
-import org.eclipse.m2e.core.embedder.IMavenConfiguration;
 import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.project.MavenProjectManager;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
@@ -139,9 +138,7 @@ public class MavenProjectPreferencePage extends PropertyPage {
           WorkspaceJob job = new WorkspaceJob(NLS.bind(Messages.MavenProjectPreferencePage_job, project.getName() )) {
             public IStatus runInWorkspace(IProgressMonitor monitor) {
               try {
-                final IMavenConfiguration mavenConfiguration = MavenPlugin.getDefault().getMavenConfiguration();
-                plugin.getProjectConfigurationManager().updateProjectConfiguration(project, configuration,
-                    mavenConfiguration.getGoalOnUpdate(), monitor);
+                plugin.getProjectConfigurationManager().updateProjectConfiguration(project, configuration, monitor);
               } catch(CoreException ex) {
                 return ex.getStatus();
               }

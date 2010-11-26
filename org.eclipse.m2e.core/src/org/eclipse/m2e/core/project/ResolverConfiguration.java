@@ -27,18 +27,9 @@ import java.util.List;
 public class ResolverConfiguration implements Serializable {
   private static final long serialVersionUID = 1258510761534886581L;
 
-  public static final String DEFAULT_FILTERING_GOALS = "process-resources resources:testResources"; //$NON-NLS-1$
-  public static final String DEFAULT_FULL_BUILD_GOALS = "process-test-resources"; //$NON-NLS-1$
-
   private boolean resolveWorkspaceProjects = true;
-  private String activeProfiles = ""; //$NON-NLS-1$
-  private String resourceFilteringGoals = DEFAULT_FILTERING_GOALS;
-  private String fullBuildGoals = DEFAULT_FULL_BUILD_GOALS;
 
-  /**
-   * Skip execution of Maven compiler plugin
-   */
-  private boolean skipCompiler = true;
+  private String activeProfiles = ""; //$NON-NLS-1$
 
   public boolean shouldResolveWorkspaceProjects() {
     return this.resolveWorkspaceProjects;
@@ -61,47 +52,5 @@ public class ResolverConfiguration implements Serializable {
   
   public void setActiveProfiles(String activeProfiles) {
     this.activeProfiles = activeProfiles;
-  }
-  
-  /**
-   * @deprecated only applies to GenericLifecycleMapping 
-   */
-  public String getResourceFilteringGoals() {
-    return resourceFilteringGoals;
-  }
-  
-  /**
-   * @deprecated only applies to GenericLifecycleMapping 
-   */
-  public void setResourceFilteringGoals(String resourceFilteringGoals) {
-    this.resourceFilteringGoals = resourceFilteringGoals;
-  }
-
-  /**
-   * @deprecated only applies to GenericLifecycleMapping 
-   */
-  public String getFullBuildGoals() {
-    return fullBuildGoals;
-  }
-
-  /**
-   * @deprecated only applies to GenericLifecycleMapping 
-   */
-  public void setFullBuildGoals(String fullBuildGoals) {
-    this.fullBuildGoals = fullBuildGoals;
-  }
-
-  /**
-   * @deprecated only applies to GenericLifecycleMapping 
-   */
-  public boolean isSkipCompiler() {
-    return this.skipCompiler;
-  }
-  
-  /**
-   * @deprecated only applies to GenericLifecycleMapping 
-   */
-  public void setSkipCompiler(boolean skipCompiler) {
-    this.skipCompiler = skipCompiler;
   }
 }

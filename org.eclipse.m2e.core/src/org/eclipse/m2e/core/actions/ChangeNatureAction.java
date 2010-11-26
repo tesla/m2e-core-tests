@@ -153,8 +153,7 @@ public class ChangeNatureAction implements IObjectActionDelegate {
       projectManager.setResolverConfiguration(project, configuration);
 
       if (updateSourceFolders) {
-        importManager.updateProjectConfiguration(project, //
-            configuration, mavenConfiguration.getGoalOnUpdate(), monitor);
+        importManager.updateProjectConfiguration(project, configuration, monitor);
       }
     }
   }

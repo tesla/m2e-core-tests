@@ -49,10 +49,11 @@ public interface IProjectConfigurationManager {
 
   void disableMavenNature(IProject project, IProgressMonitor monitor) throws CoreException;
 
-  void updateProjectConfiguration(IProject project, ResolverConfiguration configuration, String goalToExecute,
-      IProgressMonitor monitor) throws CoreException;
+  void updateProjectConfiguration(IProject project, ResolverConfiguration configuration, IProgressMonitor monitor)
+      throws CoreException;
 
-  ILifecycleMapping getLifecycleMapping(IMavenProjectFacade projectFacade, IProgressMonitor monitor) throws CoreException;
+  ILifecycleMapping getLifecycleMapping(IMavenProjectFacade projectFacade, IProgressMonitor monitor)
+      throws CoreException;
 
   /**
    * @return true if the lifecycle mapping configuration is valid

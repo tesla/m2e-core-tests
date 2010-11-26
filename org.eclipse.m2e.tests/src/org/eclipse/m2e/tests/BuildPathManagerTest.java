@@ -115,7 +115,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertEquals(IClasspathEntry.CPE_LIBRARY, project2entries[1].getEntryKind());
     assertEquals("junit-4.1.jar", project2entries[1].getPath().lastSegment());
 
-    configurationManager.updateProjectConfiguration(project2, configuration, "", monitor);
+    configurationManager.updateProjectConfiguration(project2, configuration, monitor);
     waitForJobsToComplete();
 
     WorkspaceHelpers.assertMarkers(project2, 0);
@@ -804,11 +804,10 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     verifyNaturesAndBuilders(project);
 
     ResolverConfiguration configuration = new ResolverConfiguration();
-    String goalToExecute = "";
 
     IProjectConfigurationManager configurationManager = plugin.getProjectConfigurationManager();
 
-    configurationManager.updateProjectConfiguration(project, configuration, goalToExecute, monitor);
+    configurationManager.updateProjectConfiguration(project, configuration, monitor);
     verifyNaturesAndBuilders(project);
 
     description.setNatureIds(new String[] {JavaCore.NATURE_ID});
@@ -865,7 +864,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     WorkspaceHelpers.assertMarkers(project2, 0);
 
     // update configuration
-    configurationManager.updateProjectConfiguration(project2, configuration, "", monitor);
+    configurationManager.updateProjectConfiguration(project2, configuration, monitor);
     waitForJobsToComplete();
 
     WorkspaceHelpers.assertMarkers(project2, 0);

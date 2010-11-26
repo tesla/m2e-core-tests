@@ -46,9 +46,6 @@ public class MavenPreferenceInitializer extends AbstractPreferenceInitializer {
     store.setDefault(MavenPreferenceConstants.P_DOWNLOAD_SOURCES, false);
     store.setDefault(MavenPreferenceConstants.P_DOWNLOAD_JAVADOC, false);
 
-    store.setDefault(MavenPreferenceConstants.P_GOAL_ON_UPDATE, MavenPreferenceConstants.DEFAULT_GOALS_ON_UPDATE);
-    store.setDefault(MavenPreferenceConstants.P_GOAL_ON_IMPORT, MavenPreferenceConstants.DEFAULT_GOALS_ON_IMPORT);
-
     // store.setDefault( MavenPreferenceConstants.P_GLOBAL_CHECKSUM_POLICY, ArtifactRepositoryPolicy.CHECKSUM_POLICY_WARN);
     // store.setDefault( MavenPreferenceConstants.P_UPDATE_SNAPSHOTS, false);
     // store.setDefault( MavenPreferenceConstants.P_CHECK_LATEST_PLUGIN_VERSION, false);

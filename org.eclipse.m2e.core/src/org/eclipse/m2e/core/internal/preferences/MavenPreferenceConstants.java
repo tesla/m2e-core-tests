@@ -50,16 +50,6 @@ public interface MavenPreferenceConstants {
   public static final String P_USER_SETTINGS_FILE = PREFIX + "userSettingsFile"; //$NON-NLS-1$
 
   /** String */
-  public static final String P_GOAL_ON_IMPORT = PREFIX + "goalOnImport"; //$NON-NLS-1$
-
-  /** String */
-  public static final String P_GOAL_ON_UPDATE = PREFIX + "goalOnUpdate"; //$NON-NLS-1$
-
-  public static final String DEFAULT_GOALS_ON_IMPORT = "";  //$NON-NLS-1$
-
-  public static final String DEFAULT_GOALS_ON_UPDATE = "process-resources";  //$NON-NLS-1$
-  
-  /** String */
   public static final String P_OUTPUT_FOLDER = PREFIX + "outputFolder"; //$NON-NLS-1$
 
   /** boolean */

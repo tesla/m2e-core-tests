@@ -289,7 +289,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     public IAdaptable[] adaptElements(IAdaptable[] objects);
   }
 
-  public void updateProjectConfiguration(IProject project, ResolverConfiguration configuration, String goalToExecute, IProgressMonitor monitor) throws CoreException {
+  public void updateProjectConfiguration(IProject project, ResolverConfiguration configuration, IProgressMonitor monitor) throws CoreException {
     IFile pom = project.getFile(IMavenConstants.POM_FILE_NAME);
     if (pom.isAccessible()) {
       projectManager.refresh(new MavenUpdateRequest(project, mavenConfiguration.isOffline(), false), monitor); 

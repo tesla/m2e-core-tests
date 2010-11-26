@@ -53,12 +53,6 @@ public interface IMavenConfiguration {
 
   public boolean isDebugOutput();
 
-  public String getGoalOnUpdate();
-
-  public String getGoalOnImport();
-
-  public void setGoalOnImport(String string);
-  
   //
 
   public boolean isUpdateProjectsOnStartup();
@@ -68,6 +62,5 @@ public interface IMavenConfiguration {
   // new experimental preferences
 
   public boolean isHideFoldersOfNestedProjects();
-
 
 }

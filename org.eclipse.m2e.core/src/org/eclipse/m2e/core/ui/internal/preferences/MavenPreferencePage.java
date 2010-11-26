@@ -86,12 +86,6 @@ public class MavenPreferencePage extends FieldEditorPreferencePage implements IW
     Composite comboComposite = new Composite(getFieldEditorParent(), SWT.NONE);
     comboComposite.setLayoutData(comboCompositeGridData);
     comboComposite.setLayout(new GridLayout(2, false));
-    
-    addField(new GoalsFieldEditor(MavenPreferenceConstants.P_GOAL_ON_IMPORT, //
-        Messages.getString("preferences.goalOnImport"), org.eclipse.m2e.core.internal.Messages.MavenPreferencePage_select, comboComposite)); //$NON-NLS-1$
-
-    addField(new GoalsFieldEditor(MavenPreferenceConstants.P_GOAL_ON_UPDATE, //
-        Messages.getString("preferences.goalOnUpdate"), org.eclipse.m2e.core.internal.Messages.MavenPreferencePage_select2, comboComposite)); //$NON-NLS-1$
 
     // addSeparator();
   }

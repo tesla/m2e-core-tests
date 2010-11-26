@@ -37,14 +37,6 @@ public class MavenConfigurationImpl implements IMavenConfiguration, IPropertyCha
     return preferenceStore.getString(MavenPreferenceConstants.P_GLOBAL_SETTINGS_FILE);
   }
 
-  public String getGoalOnImport() {
-    return preferenceStore.getString(MavenPreferenceConstants.P_GOAL_ON_IMPORT);
-  }
-
-  public String getGoalOnUpdate() {
-    return preferenceStore.getString(MavenPreferenceConstants.P_GOAL_ON_UPDATE);
-  }
-
   public String getJiraPassword() {
     return preferenceStore.getString(MavenPreferenceConstants.P_JIRA_PASSWORD);
   }
@@ -75,10 +67,6 @@ public class MavenConfigurationImpl implements IMavenConfiguration, IPropertyCha
 
   public boolean isOffline() {
     return preferenceStore.getBoolean(MavenPreferenceConstants.P_OFFLINE);
-  }
-
-  public void setGoalOnImport(String goalNames) {
-    preferenceStore.setValue(MavenPreferenceConstants.P_GOAL_ON_IMPORT, nvl(goalNames));
   }
 
   public void setUserSettingsFile(String settingsFile) {

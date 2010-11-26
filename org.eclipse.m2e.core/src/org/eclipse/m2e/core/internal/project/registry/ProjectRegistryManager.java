@@ -99,9 +99,6 @@ public class ProjectRegistryManager {
 
   private static final String P_VERSION = "version"; //$NON-NLS-1$
   private static final String P_RESOLVE_WORKSPACE_PROJECTS = "resolveWorkspaceProjects"; //$NON-NLS-1$
-  private static final String P_RESOURCE_FILTER_GOALS = "resourceFilterGoals"; //$NON-NLS-1$
-  private static final String P_FULL_BUILD_GOALS = "fullBuildGoals"; //$NON-NLS-1$
-  private static final String P_SKIP_COMPILER_PLUGIN = "skipCompilerPlugin"; //$NON-NLS-1$
   private static final String P_ACTIVE_PROFILES = "activeProfiles"; //$NON-NLS-1$
 
   private static final String VERSION = "1"; //$NON-NLS-1$
@@ -211,11 +208,8 @@ public class ProjectRegistryManager {
     if(projectNode != null) {
       projectNode.put(P_VERSION, VERSION);
       
-      projectNode.putBoolean(P_SKIP_COMPILER_PLUGIN, configuration.isSkipCompiler());
       projectNode.putBoolean(P_RESOLVE_WORKSPACE_PROJECTS, configuration.shouldResolveWorkspaceProjects());
       
-      projectNode.put(P_RESOURCE_FILTER_GOALS, configuration.getResourceFilteringGoals());
-      projectNode.put(P_FULL_BUILD_GOALS, configuration.getFullBuildGoals());
       projectNode.put(P_ACTIVE_PROFILES, configuration.getActiveProfiles());
       
       try {
@@ -243,11 +237,8 @@ public class ProjectRegistryManager {
     }
   
     ResolverConfiguration configuration = new ResolverConfiguration();
-    configuration.setSkipCompiler(projectNode.getBoolean(P_SKIP_COMPILER_PLUGIN, true));
     configuration.setResolveWorkspaceProjects(projectNode.getBoolean(P_RESOLVE_WORKSPACE_PROJECTS, false));
     
-    configuration.setResourceFilteringGoals(projectNode.get(P_RESOURCE_FILTER_GOALS, ResolverConfiguration.DEFAULT_FILTERING_GOALS));
-    configuration.setFullBuildGoals(projectNode.get(P_FULL_BUILD_GOALS, ResolverConfiguration.DEFAULT_FULL_BUILD_GOALS));
     configuration.setActiveProfiles(projectNode.get(P_ACTIVE_PROFILES, "")); //$NON-NLS-1$
     return configuration;
   }
