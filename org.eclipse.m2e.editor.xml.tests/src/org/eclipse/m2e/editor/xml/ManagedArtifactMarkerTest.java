@@ -38,16 +38,17 @@ public class ManagedArtifactMarkerTest extends AbstractMavenProjectTestCase {
       //mkleint: how are the $?# markers sorted? in xml dependency comes first.
       // potential source of test non-reliability..
       //HAHA.. in the second test the dependency one comes first.. so much for reproducibility..
-      assertEquals("managed_plugin_override", markers[0].getAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT));
-      assertEquals("managed_dependency_override", markers[1].getAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT));
+      //..not even remotely funny now.. on cmd line it resolves differently than in the IDE
+      assertEquals("managed_dependency_override", markers[0].getAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT));
+      assertEquals("managed_plugin_override", markers[1].getAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT));
       
-      assertEquals("org.apache.maven.plugins", markers[0].getAttribute("groupId"));
-      assertEquals("maven-compiler-plugin", markers[0].getAttribute("artifactId"));
+      assertEquals("org.apache.maven.plugins", markers[1].getAttribute("groupId"));
+      assertEquals("maven-compiler-plugin", markers[1].getAttribute("artifactId"));
       //not defined in profile
-      assertEquals(null, markers[0].getAttribute("profile"));
+      assertEquals(null, markers[1].getAttribute("profile"));
       
-      assertEquals("ant", markers[1].getAttribute("groupId"));
-      assertEquals("ant-apache-oro", markers[1].getAttribute("artifactId"));
+      assertEquals("ant", markers[0].getAttribute("groupId"));
+      assertEquals("ant-apache-oro", markers[0].getAttribute("artifactId"));
       //not defined in profile
       assertEquals(null, markers[0].getAttribute("profile"));
       
