@@ -74,12 +74,12 @@ import org.eclipse.m2e.model.edit.pom.PomFactory;
  */
 public class AddDependencyDialog extends AbstractMavenDialog {
 
-  protected static final String[] SCOPES = new String[] {"compile", "provided", "runtime", "test", "system"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+  public static final String[] SCOPES = new String[] {"compile", "provided", "runtime", "test", "system"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 
   /*
    * dependencies under dependencyManagement are permitted to use an the extra "import" scope
    */
-  protected static final String[] DEP_MANAGEMENT_SCOPES = new String[] {"compile", "provided", "runtime", "test", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+  public static final String[] DEP_MANAGEMENT_SCOPES = new String[] {"compile", "provided", "runtime", "test", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
       "system", "import"}; //$NON-NLS-1$ //$NON-NLS-2$
 
   protected static final String DIALOG_SETTINGS = AddDependencyDialog.class.getName();

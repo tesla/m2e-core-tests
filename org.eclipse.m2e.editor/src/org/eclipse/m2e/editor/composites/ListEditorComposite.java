@@ -51,15 +51,16 @@ public class ListEditorComposite<T> extends Composite {
   Button addButton;
 
   Button removeButton;
-  
+
   Button selectButton;
 
   boolean readOnly = false;
 
+  protected FormToolkit toolkit;
+
   public ListEditorComposite(Composite parent, int style, boolean includeSearch) {
     super(parent, style);
-
-    FormToolkit toolkit = new FormToolkit(parent.getDisplay());
+    toolkit = new FormToolkit(parent.getDisplay());
 
     GridLayout gridLayout = new GridLayout(2, false);
     gridLayout.marginWidth = 1;
@@ -79,41 +80,24 @@ public class ListEditorComposite<T> extends Composite {
     viewer = new TableViewer(table);
 
     int vSpan = includeSearch ? 3 : 2;
-    GridData viewerData = new GridData( SWT.FILL, SWT.FILL, true, true, 1, vSpan);
+    GridData viewerData = new GridData(SWT.FILL, SWT.FILL, true, true, 1, vSpan);
     viewerData.widthHint = 100;
     viewerData.heightHint = includeSearch ? 125 : 50;
     viewerData.minimumHeight = includeSearch ? 125 : 50;
     table.setLayoutData(viewerData);
     viewer.setData(FormToolkit.KEY_DRAW_BORDER, Boolean.TRUE);
-    GridData gd = null;
-    if(includeSearch){
-      selectButton = toolkit.createButton(this, Messages.ListEditorComposite_btnAdd, SWT.FLAT);
-      gd = new GridData(SWT.FILL, SWT.TOP, false, false);
-      gd.verticalIndent=0;
-      selectButton.setLayoutData(gd);
-      selectButton.setEnabled(false);
-    }
-    
-    addButton = toolkit.createButton(this, Messages.ListEditorComposite_btnCreate, SWT.FLAT);
-    gd = new GridData(SWT.FILL, SWT.TOP, false, false);
-    gd.verticalIndent=0;
-    addButton.setLayoutData(gd);
-    addButton.setEnabled(false);
 
-    removeButton = toolkit.createButton(this, Messages.ListEditorComposite_btnDelete, SWT.FLAT);
-    gd = new GridData(SWT.FILL, SWT.TOP, false, false);
-    gd.verticalIndent=0;
-    removeButton.setLayoutData(gd);
-    removeButton.setEnabled(false);
+    viewerData.verticalSpan = createButtons(includeSearch);
 
     viewer.addSelectionChangedListener(new ISelectionChangedListener() {
       public void selectionChanged(SelectionChangedEvent event) {
-        updateRemoveButton();
+        selectionUpdated();
       }
     });
 
     toolkit.paintBordersFor(this);
   }
+
   public ListEditorComposite(Composite parent, int style) {
     this(parent, style, false);
   }
@@ -130,7 +114,7 @@ public class ListEditorComposite<T> extends Composite {
     viewer.setInput(input);
     viewer.setSelection(new StructuredSelection());
   }
-  
+
   public Object getInput() {
     return viewer.getInput();
   }
@@ -142,8 +126,9 @@ public class ListEditorComposite<T> extends Composite {
   public void addSelectionListener(ISelectionChangedListener listener) {
     viewer.addSelectionChangedListener(listener);
   }
-  public void setSelectListener(SelectionListener listener){
-    if(selectButton != null){
+
+  public void setSelectListener(SelectionListener listener) {
+    if(selectButton != null) {
       selectButton.addSelectionListener(listener);
       selectButton.setEnabled(true);
     }
@@ -183,10 +168,10 @@ public class ListEditorComposite<T> extends Composite {
   public void setReadOnly(boolean readOnly) {
     this.readOnly = readOnly;
     addButton.setEnabled(!readOnly);
-    if(selectButton != null){
+    if(selectButton != null) {
       selectButton.setEnabled(!readOnly);
     }
-    updateRemoveButton();
+    selectionUpdated();
   }
 
   public void refresh() {
@@ -203,11 +188,49 @@ public class ListEditorComposite<T> extends Composite {
     viewer.setCellModifier(cellModifier);
   }
 
-  void updateRemoveButton() {
-    removeButton.setEnabled(!readOnly && !viewer.getSelection().isEmpty());
+  protected void selectionUpdated() {
+    updateButtons(!readOnly && !viewer.getSelection().isEmpty());
+  }
+
+  protected void updateButtons(boolean enable) {
+    removeButton.setEnabled(enable);
   }
 
   public void setDoubleClickListener(IDoubleClickListener listener) {
     viewer.addDoubleClickListener(listener);
+  }
+
+  protected int createButtons(boolean includeSearch) {
+    int n = 2;
+
+    if(includeSearch) {
+      n++ ;
+      createSelectButton();
+    }
+    createAddButton();
+    createRemoveButton();
+
+    return n;
+  }
+
+  protected void createSelectButton() {
+    selectButton = createButton(Messages.ListEditorComposite_btnAdd);
+  }
+
+  protected void createAddButton() {
+    addButton = createButton(Messages.ListEditorComposite_btnCreate);
+  }
+
+  protected void createRemoveButton() {
+    removeButton = createButton(Messages.ListEditorComposite_btnDelete);
+  }
+
+  protected Button createButton(String text) {
+    Button button = toolkit.createButton(this, text, SWT.FLAT);
+    GridData gd = new GridData(SWT.FILL, SWT.TOP, false, false);
+    gd.verticalIndent = 0;
+    button.setLayoutData(gd);
+    button.setEnabled(false);
+    return button;
   }
 }

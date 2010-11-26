@@ -180,6 +180,24 @@ public class Messages extends NLS {
 
   public static String EclipseLogger_warn2;
 
+  public static String EditDependencyDialog_artifactId_label;
+
+  public static String EditDependencyDialog_classifier_label;
+
+  public static String EditDependencyDialog_groupId_label;
+
+  public static String EditDependencyDialog_optional_checkbox;
+
+  public static String EditDependencyDialog_scope_label;
+
+  public static String EditDependencyDialog_systemPath_label;
+
+  public static String EditDependencyDialog_title;
+
+  public static String EditDependencyDialog_type_label;
+
+  public static String EditDependencyDialog_version_label;
+
   public static String EmptyLifecycleMappingPropertyPage_title;
 
   public static String EnableNatureAction_job_enable;

@@ -29,37 +29,37 @@ import org.eclipse.m2e.core.core.MavenLogger;
 
 /**
  * Utility methods
- *
+ * 
  * @author Eugene Kuleshov
  */
 public class Util {
-  
+
   public static boolean isEclipseVersion(int major, int minor) {
     Bundle bundle = ResourcesPlugin.getPlugin().getBundle();
     String version = (String) bundle.getHeaders().get(org.osgi.framework.Constants.BUNDLE_VERSION);
     Version v = Version.parseVersion(version);
     return v.getMajor() == major && v.getMinor() == minor;
   }
-  
+
   /**
    * Proxy factory for compatibility stubs
    */
   @SuppressWarnings("unchecked")
   public static <T> T proxy(final Object o, Class<T> type) {
     return (T) Proxy.newProxyInstance(type.getClassLoader(), //
-        new Class[] { type }, //
+        new Class[] {type}, //
         new InvocationHandler() {
           public Object invoke(Object proxy, Method m, Object[] args) throws Throwable {
             try {
               Method mm = o.getClass().getMethod(m.getName(), m.getParameterTypes());
               return mm.invoke(o, args);
-            } catch (final NoSuchMethodException e) {
+            } catch(final NoSuchMethodException e) {
               return null;
             }
           }
         });
   }
-  
+
   /**
    * Stub interface for FileStoreEditorInput
    * 
@@ -70,14 +70,11 @@ public class Util {
   }
 
   /**
-   * Helper method which creates a folder and, recursively, all its parent
-   * folders.
-   *
-   * @param folder  The folder to create.
+   * Helper method which creates a folder and, recursively, all its parent folders.
+   * 
+   * @param folder The folder to create.
    * @param derived true if folder should be marked as derived
-   *
-   * @throws CoreException if creating the given <code>folder</code> or any of
-   *                       its parents fails.
+   * @throws CoreException if creating the given <code>folder</code> or any of its parents fails.
    */
   public static void createFolder(IFolder folder, boolean derived) throws CoreException {
     // Recurse until we find a parent folder which already exists.
@@ -94,7 +91,7 @@ public class Util {
       folder.setDerived(true);
     }
   }
-  
+
   public static void setDerived(IFolder folder, boolean derived) throws CoreException {
     if(folder.isAccessible()) {
       folder.setDerived(derived);
@@ -116,5 +113,7 @@ public class Util {
     }
   }
 
+  public static String nvl(String s) {
+    return s == null ? "" : s; //$NON-NLS-1$
+  }
 }
-

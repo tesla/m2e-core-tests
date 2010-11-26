@@ -9,7 +9,6 @@
  *      Sonatype, Inc. - initial API and implementation
  *******************************************************************************/
 
-
 package org.eclipse.m2e.editor.internal;
 
 import org.eclipse.osgi.util.NLS;
@@ -41,6 +40,7 @@ public class Messages extends NLS {
   public static String BuildComposite_sectionResources;
 
   public static String BuildComposite_sectionTestResources;
+
   public static String BuildPage_action_addExtension;
 
   public static String BuildPage_action_openWeb;
@@ -220,6 +220,9 @@ public class Messages extends NLS {
   public static String ListEditorComposite_btnCreate;
 
   public static String ListEditorComposite_btnDelete;
+
+  public static String ListEditorComposite_btnEdit;
+
   public static String MavenPomEditor_action_advanced;
 
   public static String MavenPomEditor_effective;
@@ -373,6 +376,7 @@ public class Messages extends NLS {
   public static String PluginsPage_title;
 
   public static String PomEditorMenuCreator_action_showDependencyHierarchy;
+
   public static String ProfilesPage_action_newModuleProject;
 
   public static String ProfilesPage_btnActivateByDefault;
@@ -464,6 +468,7 @@ public class Messages extends NLS {
   public static String ReportingComposite_section_reportSets;
 
   public static String ReportingComposite_sectionReportingPlugins;
+
   public static String ReportingPage_find;
 
   public static String ReportingPage_form;
@@ -525,6 +530,7 @@ public class Messages extends NLS {
   public static String SearchControl_lblSearch;
 
   public static String ShowDependencyHierarchyAction_job_openPomEditor;
+
   public static String TeamComposite_lblEmail;
 
   public static String TeamComposite_lblId;
@@ -544,6 +550,7 @@ public class Messages extends NLS {
   public static String TeamComposite_section_roles;
 
   public static String TeamComposite_section_userdetails;
+
   public static String TeamPage_form;
 
   public static String TeamPage_title;
