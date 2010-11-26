@@ -55,7 +55,7 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     MavenPlugin
         .getDefault()
         .getProjectConfigurationManager()
-        .updateProjectConfiguration(project, new ResolverConfiguration(), mavenConfiguration.getGoalOnImport(), monitor);
+        .updateProjectConfiguration(project, new ResolverConfiguration(), monitor);
     expectedErrorMessage = "Missing artifact missing:missing:jar:0.0.0:compile";
     List<IMarker> markers = WorkspaceHelpers.findErrorMarkers(project);
     // (jdt) The container 'Maven Dependencies' references non existing library ...missing/missing/0.0.0/missing-0.0.0.jar'
