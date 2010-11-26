@@ -346,9 +346,10 @@ public class PomHyperlinkDetector implements IHyperlinkDetector {
           final String expr = before.substring(start) + after.substring(0, end + 1);
           final int length = expr.length();
           final String prop = before.substring(start + 2) + after.substring(0, end);
-          if (prop.startsWith("project.") || prop.startsWith("pom.")) { //$NON-NLS-1$ //$NON-NLS-2$
-            return null; //ignore these, not in properties section.
-          }
+// there are often properties that start with project. eg. project.build.sourceEncoding          
+//          if (prop.startsWith("project.") || prop.startsWith("pom.")) { //$NON-NLS-1$ //$NON-NLS-2$
+//            return null; //ignore these, not in properties section.
+//          }
           final IProject prj = PomContentAssistProcessor.extractProject(viewer);
           //TODO we shall rely on presence of a cached model, not project alone.. ]MNGECLIPSE-2540
           if (prj != null) {
