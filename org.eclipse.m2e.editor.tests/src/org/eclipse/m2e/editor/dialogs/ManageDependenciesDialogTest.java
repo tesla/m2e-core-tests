@@ -31,6 +31,7 @@ import org.eclipse.m2e.model.edit.pom.util.PomResourceImpl;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.junit.Test;
 
 
 public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
@@ -52,6 +53,7 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
    * - test moving a dependency from A to C, where C -> B -> A is the hierarchy
    */
   
+  @Test
   public void testDepLabelProvider() throws Exception {
     Model model = loadModels("projects/colourprovider", new String[] { "child/pom.xml" }).get("child");
     assertEquals(model.getArtifactId(), "child");
@@ -76,6 +78,7 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
     assertNotNull(provider.getForeground(project));
   }
 
+  @Test
   public void testSamePOM() throws Exception {
 
     Model model = loadModels("projects/same", new String[] { "child/pom.xml" }).get("child");
@@ -121,6 +124,7 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
   /*
    * Move dep from child to parent
    */
+  @Test
   public void testDiffPOMs() throws Exception {
     Map<String, Model> models = loadModels("projects/diff", new String[] { "child/pom.xml", "parent/pom.xml" });
     Model child = models.get("child-diff");
@@ -171,6 +175,7 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
     assertTrue(oldDep.getVersion() == null || oldDep.getVersion().equals(""));
   }
   
+  @Test
   public void testDepExists() throws Exception {
     final String ARTIFACT_ID = "dep_exists";
     
@@ -219,7 +224,8 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
     assertEquals(oldDep.getArtifactId(), "b");
     assertTrue(oldDep.getVersion() == null || oldDep.getVersion().equals(""));
   }
-  
+ 
+  @Test
   public void testDepExistsDiffVersion() throws Exception {
     final String ARTIFACT_ID = "dep_exists_diff_version";
     
@@ -270,6 +276,7 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
     assertTrue(oldDep.getVersion() == null || oldDep.getVersion().equals(""));
   }
   
+  @Test
   public void testDepExistsDiffVersionDiffPOMs() throws Exception {
     String ARTIFACT_ID_CHILD = "dep_exists_diff_version_diff_poms_child";
     String ARTIFACT_ID_PARENT = "dep_exists_diff_version_diff_poms_parent";
@@ -328,6 +335,7 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
     assertTrue(oldDep.getVersion() == null || oldDep.getVersion().equals(""));
   }
   
+  @Test
   public void testBrokenSource() throws Exception {
     try {
       loadModels("projects/broken_child", new String[] { "child/pom.xml" });
@@ -337,6 +345,7 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
     }
   }
   
+  @Test
   public void testBrokenTarget() throws Exception {
      try {
        loadModels("projects/broken_target", new String[] { "child/pom.xml", "parent/pom.xml" });
@@ -346,6 +355,7 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
      }
   }
   
+  @Test
   public void testBiggerHierarchy() throws Exception {
     Map<String, Model> models = loadModels("projects/grandparent", 
         new String[] { "child/pom.xml", "parent/pom.xml", "grandparent/pom.xml" });
@@ -405,6 +415,7 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
     assertNull(parent.getDependencyManagement());
   }
   
+  @Test
   public void testMultipleDependencies() throws Exception {
     String ARTIFACT_CHILD = "multi-child";
     String ARTIFACT_PARENT = "multi-parent";
