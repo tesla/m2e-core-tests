@@ -174,5 +174,12 @@
                enablesFor="1"/>
       </objectContribution>
    </extension>
+   <extension
+         point="org.eclipse.m2e.core.lifecycleMappingPropertyPage">
+      <lifecycleMappingPropertyPage
+            class="org.eclipse.m2e.core.ui.internal.preferences.CustomizableLifecycleMappingPropertyPage"
+            lifecycleMappingId="jar">
+      </lifecycleMappingPropertyPage>
+   </extension>
 
 </plugin>

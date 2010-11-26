@@ -46,6 +46,7 @@ Export-Package: org.eclipse.m2e.core,
  org.eclipse.m2e.core.repository,
  org.eclipse.m2e.core.scm,
  org.eclipse.m2e.core.ui.dialogs,
+ org.eclipse.m2e.core.ui.internal.preferences;x-internal:=true,
  org.eclipse.m2e.core.util,
  org.eclipse.m2e.core.util.search,
  org.eclipse.m2e.core.wizards
