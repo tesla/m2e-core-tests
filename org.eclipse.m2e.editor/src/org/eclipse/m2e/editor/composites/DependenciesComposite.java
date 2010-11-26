@@ -1143,32 +1143,21 @@ public class DependenciesComposite extends Composite {
      * The head is the child, the tail is the root pom
      */
     final LinkedList<MavenProject> hierarchy = new LinkedList<MavenProject>();
-
+    
     IRunnableWithProgress projectLoader = new IRunnableWithProgress() {
-
       public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
         try {
           IMaven maven = MavenPlugin.getDefault().getMaven();
           MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
           mavenProject = pomEditor.readMavenProject(false, monitor);
           maven.detachFromSession(mavenProject);
-
-          hierarchy.addFirst(mavenProject);
-
-          MavenProject project = mavenProject;
-          while(project.getModel().getParent() != null) {
-            if(monitor.isCanceled()) {
-              return;
-            }
-            IMavenProjectFacade projectFacade = projectManager.create(pomEditor.getPomFile(), true, monitor);
-            MavenExecutionRequest request = projectManager.createExecutionRequest(projectFacade, monitor);
-            project = maven.resolveParentProject(request, project, monitor);
-            hierarchy.add(project);
-          }
+          IMavenProjectFacade projectFacade = projectManager.create(pomEditor.getPomFile(), true, monitor);
+          hierarchy.addAll(new ParentGatherer(mavenProject, projectFacade).getParentHierarchy(monitor));
         } catch(CoreException e) {
           throw new InvocationTargetException(e);
         }
       }
+
     };
 
     PlatformUI.getWorkbench().getProgressService().run(true, true, projectLoader);

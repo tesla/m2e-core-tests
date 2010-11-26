@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 Sonatype, Inc.
+ * Copyright (c) 2010 Sonatype, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,7 +9,6 @@
 package org.eclipse.m2e.editor.dialogs;
 
 import java.io.IOException;
-import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -230,6 +229,7 @@ public class ManageDependenciesDialog extends AbstractMavenDialog {
     
     CompoundCommand command = new CompoundCommand();
     
+    //First we remove the version from the original dependency
     for (Dependency dep : dependencies) {
       Command unset = SetCommand.create(editingDomain, dep, 
           PomPackage.eINSTANCE.getDependency_Version(), SetCommand.UNSET_VALUE);
@@ -238,11 +238,13 @@ public class ManageDependenciesDialog extends AbstractMavenDialog {
     
     DependencyManagement management = targetModel.getDependencyManagement();
     if (management == null) {
+      //Add dependency management element if it does not exist
       management = PomFactory.eINSTANCE.createDependencyManagement();
       Command createDepManagement = SetCommand.create(editingDomain, targetModel,
           PomPackage.eINSTANCE.getModel_DependencyManagement(), management);
       command.append(createDepManagement);
     } else {
+      //Filter out of the  list of dependencies for which we need new entries in the dependency management section. 
       for (Dependency depFromTarget : management.getDependencies()) {
         Iterator<Dependency> iter = dependencies.iterator();
         while (iter.hasNext()) {
@@ -258,7 +260,8 @@ public class ManageDependenciesDialog extends AbstractMavenDialog {
         }
       }
     }
-        
+    
+    //Add new entry in dependency mgt section 
     for (Dependency dep : dependencies) {
       Dependency clone = PomFactory.eINSTANCE.createDependency();
       clone.setGroupId(dep.getGroupId());
