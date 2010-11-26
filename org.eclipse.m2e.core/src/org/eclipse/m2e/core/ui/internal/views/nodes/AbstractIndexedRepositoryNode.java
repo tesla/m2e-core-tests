@@ -44,7 +44,7 @@ public abstract class AbstractIndexedRepositoryNode implements IMavenRepositoryN
     }
 
     try {
-      IndexedArtifactGroup[] rootGroups = index.getRootGroups();
+      IndexedArtifactGroup[] rootGroups = index.getRootIndexedArtifactGroups();
       if(rootGroups == null) {
         return NO_CHILDREN;
       }

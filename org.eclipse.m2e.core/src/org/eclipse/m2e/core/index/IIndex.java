@@ -13,10 +13,12 @@ package org.eclipse.m2e.core.index;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.m2e.core.embedder.ArtifactKey;
+
 
 /**
  * @author igor
@@ -41,8 +43,23 @@ public interface IIndex {
    * like SEARCH_ARTIFACT but will only return artifacts with packaging == pom
    */
   public static final String SEARCH_PARENTS = "parents"; //$NON-NLS-1$
-  
+
   // search classifiers
+
+//  public enum SearchClassifiers {
+//    JARS,
+//
+//    JAVADOCS,
+//
+//    SOURCES,
+//
+//    TESTS
+//  }
+//
+//  public Set<SearchClassifiers> ALL_CLASSIFIERS = new HashSet<IIndex.SearchClassifiers>(Arrays.asList(SearchClassifiers
+//      .values()));
+
+  // 
 
   public static final int SEARCH_JARS = 1 << 0;
 
@@ -55,11 +72,11 @@ public interface IIndex {
   public static final int SEARCH_ALL = 15;
 
   // availability flags
-  
+
   public static final int PRESENT = 1;
-  
+
   public static final int NOT_PRESENT = 0;
-  
+
   public static final int NOT_AVAILABLE = 2;
 
   // index queries
@@ -68,7 +85,33 @@ public interface IIndex {
 
   public IndexedArtifactFile identify(File file) throws CoreException;
 
-  public Collection<IndexedArtifact> find(String groupId, String artifactId, String version,
-      String packaging) throws CoreException;
-  
+  /**
+   * Performs a search for artifacts with given parameters.
+   * 
+   * @param groupId
+   * @param artifactId
+   * @param version
+   * @param packaging
+   * @return
+   * @throws CoreException
+   */
+  public Collection<IndexedArtifact> find(String groupId, String artifactId, String version, String packaging)
+      throws CoreException;
+
+  /**
+   * Convenience method to search in all indexes enabled for repositories defined in settings.xml. This method always
+   * performs "scored" search.
+   */
+  public Map<String, IndexedArtifact> search(String term, String searchType) throws CoreException;
+
+  /**
+   * Convenience method to search in all indexes enabled for repositories defined in settings.xml. This method always
+   * performs "scored" search.
+   * 
+   * @param term - search term
+   * @param searchType - query type. Should be one of the SEARCH_* values.
+   * @param classifier - the type of classifiers to search for, SEARCH_ALL, SEARCH_JAVADOCS, SEARCH_SOURCES,
+   *          SEARCH_TESTS
+   */
+  public Map<String, IndexedArtifact> search(String term, String searchType, int classifier) throws CoreException;
 }

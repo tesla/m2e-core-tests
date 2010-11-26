@@ -250,7 +250,7 @@ public class MavenInstallFileArtifactWizardPage extends WizardPage {
     
     MavenPlugin plugin = MavenPlugin.getDefault();
     try {
-      IndexedArtifactFile iaf = plugin.getIndexManager().identify(file);
+      IndexedArtifactFile iaf = plugin.getIndexManager().getAllIndexes().identify(file);
       if(iaf!=null) {
         groupIdCombo.setText(iaf.group);
         artifactIdCombo.setText(iaf.artifact);

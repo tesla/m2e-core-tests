@@ -13,6 +13,7 @@ package org.eclipse.m2e.core.internal.index;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -124,8 +125,8 @@ public class NexusIndex implements IIndex, IMutableIndex {
     indexManager.scheduleIndexUpdate(repository, force);
   }
 
-  public IndexedArtifactGroup[] getRootGroups() throws CoreException {
-    return indexManager.getRootGroups(repository);
+  public IndexedArtifactGroup[] getRootIndexedArtifactGroups() throws CoreException {
+    return indexManager.getRootIndexedArtifactGroups(repository);
   }
 
   public boolean isUpdating() {
@@ -142,5 +143,13 @@ public class NexusIndex implements IIndex, IMutableIndex {
 
   public void setIndexDetails(String details) throws CoreException {
     indexManager.setIndexDetails(repository, details, null/*async*/);
+  }
+
+  public Map<String, IndexedArtifact> search(String term, String searchType) throws CoreException {
+    return indexManager.search(getRepository(), term, searchType);
+  }
+
+  public Map<String, IndexedArtifact> search(String term, String searchType, int classifier) throws CoreException {
+    return indexManager.search(getRepository(), term, searchType, classifier);
   }
 }
