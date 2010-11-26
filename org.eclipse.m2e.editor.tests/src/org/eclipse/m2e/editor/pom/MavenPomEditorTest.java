@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.m2e.editor.MavenEditorPlugin;
 import org.eclipse.m2e.editor.pom.MavenPomEditor.Callback;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
+import org.junit.Test;
 import org.sonatype.aether.artifact.Artifact;
 import org.sonatype.aether.graph.Dependency;
 import org.sonatype.aether.graph.DependencyNode;
@@ -34,6 +35,7 @@ public class MavenPomEditorTest extends AbstractMavenProjectTestCase {
     secondCalled = false;
   }
 
+  @Test
   public void testLoadDependencies() throws Exception {
     MavenPomEditor editor = new TestingMavenPomEditor(false, 1000);
     
@@ -54,6 +56,7 @@ public class MavenPomEditorTest extends AbstractMavenProjectTestCase {
     assertNotNull(dependencyNode);
   }
   
+  @Test
   public void testMultipleLoadDependencies() throws Exception {
     int delayInMS = 1000 * 10;
     MavenPomEditor editor = new TestingMavenPomEditor(false, delayInMS);
@@ -101,6 +104,7 @@ public class MavenPomEditorTest extends AbstractMavenProjectTestCase {
     assertTrue(secondCalled);
   }
   
+  @Test
   public void testLoadingDependenciesError() throws Exception {
     MavenPomEditor editor = new TestingMavenPomEditor(true, 0);
     exception = null;
