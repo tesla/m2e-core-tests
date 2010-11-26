@@ -26,7 +26,7 @@ import org.eclipse.ui.internal.UIPlugin;
 /**
  * Hello fellow tester:
  * everytime this test finds a regression add an 'x' here:
- * everytime you do mindless test update add an 'y' here:
+ * everytime you do mindless test update add an 'y' here: y
  * @author mkleint
  *
  */
@@ -34,14 +34,15 @@ public class HyperlinkTest extends AbstractPOMEditorTestCase {
   private IFile parentPom;
   
   public IFile loadProjectsAndFiles() throws Exception {
-    IProject[] projects = importProjects("projects/hyperlink", new String[] {
-        "hyperlinkChild/pom.xml", 
-        "hyperlinkParent/pom.xml"}, new ResolverConfiguration());
+    IProject[] projects = importProjects("projects/Hyperlink", new String[] {
+        "hyperlinkParent/pom.xml",
+        "hyperlinkChild/pom.xml"
+        }, new ResolverConfiguration());
     waitForJobsToComplete();
     
-    parentPom = (IFile) projects[1].findMember("pom.xml");
+    parentPom = (IFile) projects[0].findMember("pom.xml");
     System.out.println(parentPom.exists());
-    return (IFile) projects[0].findMember("pom.xml");
+    return (IFile) projects[1].findMember("pom.xml");
     
   }
   

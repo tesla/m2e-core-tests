@@ -21,7 +21,7 @@ import org.eclipse.m2e.core.project.ResolverConfiguration;
 /**
  * Hello fellow tester:
  * everytime this test finds a regression add an 'x' here:
- * everytime you do mindless test update add an 'y' here:
+ * everytime you do mindless test update add an 'y' here: y
  * @author mkleint
  *
  */
@@ -29,20 +29,24 @@ import org.eclipse.m2e.core.project.ResolverConfiguration;
 public class HoverTest extends AbstractPOMEditorTestCase {
 
   public IFile loadProjectsAndFiles() throws Exception {
-    IProject[] projects = importProjects("projects/hyperlink", new String[] {
-        "hyperlinkChild/pom.xml", 
-        "hyperlinkParent/pom.xml"}, new ResolverConfiguration());
+    IProject[] projects = importProjects("projects/Hyperlink", new String[] {
+        "hyperlinkParent/pom.xml",
+        "hyperlinkChild/pom.xml"
+        }, new ResolverConfiguration());
     waitForJobsToComplete();
     
-    return (IFile) projects[0].findMember("pom.xml");
+    return (IFile) projects[1].findMember("pom.xml");
     
   }
   
   public void testHasHover() {
     //Locate the area where we want to detect the hover
-    IRegion region = new Region(476+17, 10);
-    IHyperlink[] links = new PomHyperlinkDetector().detectHyperlinks(sourceViewer, region, true);
-    String s = new PomTextHover(null, null, 0).getHoverInfo(sourceViewer, links[0].getHyperlinkRegion());
+    String docString = sourceViewer.getDocument().get();
+    int offset = docString.indexOf("${aProperty}");
+    
+    PomTextHover hover = new PomTextHover(null, null, 0);
+    IRegion region = hover.getHoverRegion(sourceViewer, offset + 5); //+5 as a way to point to the middle..
+    String s = hover.getHoverInfo(sourceViewer, region);
     assertTrue(s.contains("theValue"));
     assertTrue(s.contains("org.eclipse.m2e:hyperlinkParent"));
   }
