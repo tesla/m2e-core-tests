@@ -14,6 +14,7 @@ package org.eclipse.m2e.editor.xml;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
@@ -21,7 +22,7 @@ import org.eclipse.m2e.core.project.ResolverConfiguration;
 /**
  * Hello fellow tester:
  * everytime this test finds a regression add an 'x' here:
- * everytime you do mindless test update add an 'y' here:
+ * everytime you do mindless test update add an 'y' here: y
  * @author mkleint
  *
  */
@@ -29,19 +30,25 @@ public class HoverDependencyManagedTest extends AbstractPOMEditorTestCase {
 
   public IFile loadProjectsAndFiles() throws Exception {
     IProject[] projects = importProjects("projects/MNGECLIPSE-2541", new String[] {
-        "child2541/pom.xml", 
-        "parent2541/pom.xml"}, new ResolverConfiguration());
+        "parent2541/pom.xml",
+        "child2541/pom.xml" 
+     }, new ResolverConfiguration());
     waitForJobsToComplete();
     
-    return (IFile) projects[0].findMember("pom.xml");
+    return (IFile) projects[1].findMember("pom.xml");
     
   }
   
-  public void testHasHover() throws BadLocationException {
+  public void testHasHover() {
     //Locate the area where we want to detect the hover
-    IHyperlink[] links = new PomHyperlinkDetector().detectHyperlinks(sourceViewer, new Region(sourceViewer.getDocument().getLineOffset(14) + 4, 0), true);
-    assertTrue(links.length >= 1);
-    String s = new PomTextHover(null, null, 0).getHoverInfo(sourceViewer, links[0].getHyperlinkRegion());
+    String docString = sourceViewer.getDocument().get();
+    int offset = docString.indexOf("<artifactId>org.junit</artifactId>");
+    
+    PomTextHover hover = new PomTextHover(null, null, 0);
+    IRegion region = hover.getHoverRegion(sourceViewer, offset + 5); //+5 as a way to point to the middle..
+    assertNotNull(region);
+    
+    String s = hover.getHoverInfo(sourceViewer, region);
     assertTrue(s.contains("3.8.1"));
     assertTrue(s.contains("org.eclipse.m2e:parent2541:"));
   }

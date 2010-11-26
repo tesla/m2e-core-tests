@@ -5,7 +5,7 @@
 		<groupId>org.eclipse.m2e</groupId>
 		<artifactId>parent2541</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
-		<relativePath>../parent2541</relativePath>
+		<relativePath>../parent2541/pom.xml</relativePath>
 	</parent>
 	<artifactId>child2541</artifactId>
 	<packaging>pom</packaging>
