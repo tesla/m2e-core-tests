@@ -87,11 +87,11 @@ public class MavenBuilder extends IncrementalProjectBuilder {
     IProjectConfigurationManager configurationManager = plugin.getProjectConfigurationManager();
     IMavenConfiguration mavenConfiguration = MavenPlugin.getDefault().getMavenConfiguration();
     IMavenMarkerManager markerManager = plugin.getMavenMarkerManager();
-    deleteProjectMarkers();
     
     IProject project = getProject();
+    markerManager.deleteMarkers(project, IMavenConstants.MARKER_BUILD_ID);
+
     if(project.hasNature(IMavenConstants.NATURE_ID)) {
-      deleteProjectMarkers();
       IFile pomResource = project.getFile(IMavenConstants.POM_FILE_NAME);
       if(pomResource == null) {
         console.logError("Project " + project.getName() + " does not have pom.xml");
@@ -205,38 +205,16 @@ public class MavenBuilder extends IncrementalProjectBuilder {
     return null;
   }
 
-  /**
-   * Get rid of project markers
-   */
-  private void deleteProjectMarkers() throws CoreException{
-    if(getProject() != null){
-      getProject().deleteMarkers(IMavenConstants.MARKER_ID, true, IResource.DEPTH_ZERO);
-    }
-  }
-
-  private void addErrorMarker(Exception e) throws CoreException {
+  private void addErrorMarker(Exception e) {
     String msg = e.getMessage();
     String rootCause = M2EUtils.getRootCauseMessage(e);
     if(!e.equals(msg)){
       msg = msg+": "+rootCause; //$NON-NLS-1$
     }
 
-    IMarker[] findMarkers = getProject().findMarkers(IMavenConstants.MARKER_ID, true, IResource.DEPTH_INFINITE);
-    if(findMarkers != null){
-      for(int i=0;i<findMarkers.length;i++){
-        String markerMsg = (String)findMarkers[i].getAttribute(IMarker.MESSAGE);
-        if(markerMsg != null && markerMsg.equals(msg)){
-          //get rid of old markers with the same message so we don't have a lot of duplicates,
-          //and the marker is always up to date
-          findMarkers[i].delete();
-        }
-      }
-    }
-    IMarker marker = getProject().createMarker(IMavenConstants.MARKER_ID);
-
-    marker.setAttribute(IMarker.MESSAGE, msg);
-    marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
-    marker.setAttribute(IMarker.TRANSIENT, true);
+    MavenPlugin plugin = MavenPlugin.getDefault();
+    IMavenMarkerManager markerManager = plugin.getMavenMarkerManager();
+    markerManager.addMarker(getProject(), IMavenConstants.MARKER_BUILD_ID, msg, 1, IMarker.SEVERITY_ERROR);
   }
 
   public static IPath getProjectRelativePath(IProject project, File file) {
@@ -262,8 +240,10 @@ public class MavenBuilder extends IncrementalProjectBuilder {
     MavenProjectManager projectManager = plugin.getMavenProjectManager();
     IProjectConfigurationManager configurationManager = plugin.getProjectConfigurationManager();
 
-    deleteProjectMarkers();
     IProject project = getProject();
+    IMavenMarkerManager markerManager = plugin.getMavenMarkerManager();
+    markerManager.deleteMarkers(project, IMavenConstants.MARKER_BUILD_ID);
+
     if(project.hasNature(IMavenConstants.NATURE_ID)) {
       IFile pomResource = project.getFile(IMavenConstants.POM_FILE_NAME);
       if(pomResource == null) {

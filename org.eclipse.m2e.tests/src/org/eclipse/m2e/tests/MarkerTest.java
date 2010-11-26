@@ -52,9 +52,7 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     // Fix the current configuration problem, introduce a dependency problem
     copyContent(project, "pom_badDependency.xml", "pom.xml");
     waitForJobsToComplete();
-    MavenPlugin
-        .getDefault()
-        .getProjectConfigurationManager()
+    MavenPlugin.getDefault().getProjectConfigurationManager()
         .updateProjectConfiguration(project, new ResolverConfiguration(), monitor);
     expectedErrorMessage = "Missing artifact missing:missing:jar:0.0.0:compile";
     List<IMarker> markers = WorkspaceHelpers.findErrorMarkers(project);
@@ -81,6 +79,19 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     WorkspaceHelpers.assertErrorMarker("org.eclipse.jdt.core.problem",
         "The project cannot be built until build path errors are resolved", null /*lineNumber*/,
         project);
+
+    // Building the project should fix the problem
+    project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+    waitForJobsToComplete();
+    WorkspaceHelpers.assertNoErrors(project);
+
+    // Add a maven build marker
+    project.createMarker(IMavenConstants.MARKER_BUILD_ID);
+
+    // Building the project should remove the marker
+    project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+    waitForJobsToComplete();
+    WorkspaceHelpers.assertNoErrors(project);
   }
 
   protected IMavenProjectFacade importMavenProject(String basedir, String pomName) throws Exception {
