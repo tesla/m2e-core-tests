@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Properties;
 
 import org.apache.maven.archetype.catalog.Archetype;
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
@@ -49,6 +50,7 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.core.IMavenConstants;
+import org.eclipse.m2e.core.embedder.IMaven;
 import org.eclipse.m2e.core.index.IMutableIndex;
 import org.eclipse.m2e.core.internal.index.NexusIndex;
 import org.eclipse.m2e.core.internal.index.NexusIndexManager;
@@ -251,20 +253,6 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertEquals(3, cp.length);
     assertEquals(new Path("/projectimport-p002/p002-m1/src/main/java"), cp[0].getPath());
     assertEquals(new Path("/projectimport-p002/p002-m1/target/classes"), cp[0].getOutputLocation());
-  }
-
-  public void testEmbedderException() throws Exception {
-    deleteProject("MNGECLIPSE-157parent");
-
-    IProject project = importProject("projects/MNGECLIPSE-157parent/pom.xml", new ResolverConfiguration());
-    importProject("projects/MNGECLIPSE-157child/pom.xml", new ResolverConfiguration());
-    waitForJobsToComplete();
-
-    project.build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
-
-    IMarker[] markers = project.findMarkers(null, true, IResource.DEPTH_INFINITE);
-    assertEquals(WorkspaceHelpers.toString(markers), 1, markers.length);
-    assertEquals(WorkspaceHelpers.toString(markers), "pom.xml", markers[0].getResource().getFullPath().lastSegment());
   }
 
   public void testClasspathOrderWorkspace001() throws Exception {
