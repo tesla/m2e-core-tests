@@ -26,9 +26,8 @@ public class ManagedArtifactMarkerTest extends AbstractMavenProjectTestCase {
 
   public void testMNGEclipse2559() throws IOException, CoreException, InterruptedException {
     ResolverConfiguration config = new ResolverConfiguration();
-    config.setActiveProfiles("plug,depend");
     IProject[] projects = importProjects("projects/MNGECLIPSE-2559", new String[] {
-        "pom.xml", "withProfileActivated/pom.xml"}, config);
+        "pom.xml"}, config);
     waitForJobsToComplete();
 
     {
@@ -38,6 +37,7 @@ public class ManagedArtifactMarkerTest extends AbstractMavenProjectTestCase {
       assertEquals(IMarker.SEVERITY_WARNING, markers[1].getAttribute(IMarker.SEVERITY));
       //mkleint: how are the $?# markers sorted? in xml dependency comes first.
       // potential source of test non-reliability..
+      //HAHA.. in the second test the dependency one comes first.. so much for reproducibility..
       assertEquals("managed_plugin_override", markers[0].getAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT));
       assertEquals("managed_dependency_override", markers[1].getAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT));
       
@@ -57,35 +57,41 @@ public class ManagedArtifactMarkerTest extends AbstractMavenProjectTestCase {
       assertEquals(2, generator.getResolutions(markers[0]).length);
       assertEquals(2, generator.getResolutions(markers[1]).length);
     }
+  }
+  
+  //splitted the test in two as both projects failed to load together!!!! why? shall I bother?
+  public void testMNGEclipse2559Second() throws IOException, CoreException, InterruptedException {
+      ResolverConfiguration config = new ResolverConfiguration();
+      config.setActiveProfiles("plug,depend");
+      IProject[] projects = importProjects("projects/MNGECLIPSE-2559", new String[] {
+          "withProfileActivated/pom.xml"}, config);
+      waitForJobsToComplete();
 
-// for some undisclosed reason the second project just doesn't load.
-// I don't have time or mood to dig through the endless setup code to find out why, so just comment it out..
-    
-//    {
-//      IMarker[] markers = projects[1].findMember("pom.xml").findMarkers(IMavenConstants.MARKER_HINT_ID, true, IResource.DEPTH_INFINITE);
-//      assertEquals(2, markers.length);
-//      assertEquals(IMarker.SEVERITY_WARNING, markers[0].getAttribute(IMarker.SEVERITY));
-//      assertEquals(IMarker.SEVERITY_WARNING, markers[1].getAttribute(IMarker.SEVERITY));
-//      //mkleint: how are the $?# markers sorted? in xml dependency comes first.
-//      // potential source of test non-reliability..
-//      assertEquals("managed_plugin_override", markers[0].getAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT));
-//      assertEquals("managed_dependency_override", markers[1].getAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT));
-//      
-//      assertEquals("org.apache.maven.plugins", markers[0].getAttribute("groupId"));
-//      assertEquals("maven-compiler-plugin", markers[0].getAttribute("artifactId"));
-//      assertEquals("plug", markers[0].getAttribute("profile"));
-//      
-//      assertEquals("ant", markers[1].getAttribute("groupId"));
-//      assertEquals("ant-apache-oro", markers[1].getAttribute("artifactId"));
-//      assertEquals("depend", markers[0].getAttribute("profile"));
-//      
-//      
-//      //this sort of testing just asks for trouble and endless updates of the test, but well..
-//      MavenMarkerResolutionGenerator generator = new MavenMarkerResolutionGenerator();
-//      assertEquals(2, generator.getResolutions(markers[0]).length);
-//      assertEquals(2, generator.getResolutions(markers[1]).length);
-//      
-//    }
+   
+    {
+      IMarker[] markers = projects[0].findMember("pom.xml").findMarkers(IMavenConstants.MARKER_HINT_ID, true, IResource.DEPTH_INFINITE);
+      assertEquals(2, markers.length);
+      assertEquals(IMarker.SEVERITY_WARNING, markers[0].getAttribute(IMarker.SEVERITY));
+      assertEquals(IMarker.SEVERITY_WARNING, markers[1].getAttribute(IMarker.SEVERITY));
+     
+      assertEquals("managed_dependency_override", markers[0].getAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT));
+      assertEquals("managed_plugin_override", markers[1].getAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT));
+      
+      assertEquals("org.apache.maven.plugins", markers[1].getAttribute("groupId"));
+      assertEquals("maven-compiler-plugin", markers[1].getAttribute("artifactId"));
+      assertEquals("plug", markers[1].getAttribute("profile"));
+      
+      assertEquals("ant", markers[0].getAttribute("groupId"));
+      assertEquals("ant-apache-oro", markers[0].getAttribute("artifactId"));
+      assertEquals("depend", markers[0].getAttribute("profile"));
+      
+      
+      //this sort of testing just asks for trouble and endless updates of the test, but well..
+      MavenMarkerResolutionGenerator generator = new MavenMarkerResolutionGenerator();
+      assertEquals(2, generator.getResolutions(markers[0]).length);
+      assertEquals(2, generator.getResolutions(markers[1]).length);
+      
+    }
 
   }
 }
