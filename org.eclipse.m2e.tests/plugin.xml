@@ -33,7 +33,6 @@
             name="AJDT-0.9.8" priority="1002"/>
       <configurator
             class="org.eclipse.m2e.tests.configurators.MNGECLIPSE2313MarkAllRawClasspathEntriesConfigurator"
-            generic="false"
             id="MNGECLIPSE-2313_markAllRawClasspathEntries">
       </configurator>
             

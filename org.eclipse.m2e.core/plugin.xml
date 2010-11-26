@@ -612,7 +612,6 @@
          point="org.eclipse.m2e.core.projectConfigurators">
       <configurator
             class="org.eclipse.m2e.core.project.configurator.MavenResourcesProjectConfigurator"
-            generic="false"
             id="org.eclipse.m2e.core.project.configurator.MavenResourcesProjectConfigurator"
             name="Maven Resources Project Configurator"
             requiresExplicitEnablement="false">
