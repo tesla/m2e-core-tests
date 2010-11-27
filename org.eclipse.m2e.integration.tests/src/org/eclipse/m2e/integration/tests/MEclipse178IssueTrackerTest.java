@@ -15,7 +15,7 @@ public class MEclipse178IssueTrackerTest extends M2EUIIntegrationTestCase {
    */
   private static final String TEST_PROJECT = "test-project";
 
-  @Test @Ignore
+  @Test
   public void testIssueTracker() throws Exception {
     createQuickstartProject(TEST_PROJECT);
 
@@ -34,7 +34,7 @@ public class MEclipse178IssueTrackerTest extends M2EUIIntegrationTestCase {
     editor.bot().cTabItem("pom.xml").activate();
 //    ui.click(new CTabItemLocator("pom.xml"));
     replaceText("</dependencies>",
-        "</dependencies><issueManagement><system>JIRA</system><url>http://jira.codehaus.org</url></issueManagement>");
+        "</dependencies><issueManagement><system>JIRA</system><url>http://issues.sonatype.org/</url></issueManagement>");
 
     editor.saveAndClose();
 
@@ -46,7 +46,7 @@ public class MEclipse178IssueTrackerTest extends M2EUIIntegrationTestCase {
     waitForAllBuildsToComplete();
 
     takeScreenShot("issue-tracking");
-    bot.editorByTitle("http://jira.codehaus.org").close();
+    bot.editorByTitle("http://issues.sonatype.org/").close();
   }
 
 }
