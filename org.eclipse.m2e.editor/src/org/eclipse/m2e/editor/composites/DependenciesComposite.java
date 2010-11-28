@@ -12,7 +12,6 @@
 package org.eclipse.m2e.editor.composites;
 
 import static org.eclipse.m2e.editor.pom.FormUtils.nvl;
-import static org.eclipse.m2e.editor.pom.FormUtils.setText;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
@@ -21,13 +20,9 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.project.MavenProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.common.notify.Notification;
@@ -37,10 +32,8 @@ import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.edit.command.AddCommand;
 import org.eclipse.emf.edit.command.RemoveCommand;
-import org.eclipse.emf.edit.command.SetCommand;
 import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -50,7 +43,6 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
 import org.eclipse.m2e.core.MavenPlugin;
-import org.eclipse.m2e.core.actions.OpenUrlAction;
 import org.eclipse.m2e.core.core.MavenLogger;
 import org.eclipse.m2e.core.embedder.ArtifactKey;
 import org.eclipse.m2e.core.embedder.IMaven;
@@ -61,13 +53,9 @@ import org.eclipse.m2e.core.project.MavenProjectManager;
 import org.eclipse.m2e.core.ui.dialogs.AddDependencyDialog;
 import org.eclipse.m2e.core.ui.dialogs.EditDependencyDialog;
 import org.eclipse.m2e.core.ui.dialogs.MavenRepositorySearchDialog;
-import org.eclipse.m2e.core.util.M2EUtils;
-import org.eclipse.m2e.core.util.ProposalUtil;
-import org.eclipse.m2e.core.util.search.Packaging;
 import org.eclipse.m2e.editor.MavenEditorImages;
 import org.eclipse.m2e.editor.dialogs.ManageDependenciesDialog;
 import org.eclipse.m2e.editor.internal.Messages;
-import org.eclipse.m2e.editor.pom.FormUtils;
 import org.eclipse.m2e.editor.pom.MavenPomEditor;
 import org.eclipse.m2e.editor.pom.MavenPomEditor.Callback;
 import org.eclipse.m2e.editor.pom.MavenPomEditorPage;
@@ -76,7 +64,6 @@ import org.eclipse.m2e.editor.pom.SearchMatcher;
 import org.eclipse.m2e.editor.pom.ValueProvider;
 import org.eclipse.m2e.model.edit.pom.Dependency;
 import org.eclipse.m2e.model.edit.pom.DependencyManagement;
-import org.eclipse.m2e.model.edit.pom.Exclusion;
 import org.eclipse.m2e.model.edit.pom.Model;
 import org.eclipse.m2e.model.edit.pom.PomFactory;
 import org.eclipse.m2e.model.edit.pom.PomPackage;
@@ -92,8 +79,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -120,24 +105,8 @@ public class DependenciesComposite extends Composite {
 
   EditableListComposite<Dependency> dependenciesEditor;
 
-  Composite rightSideComposite;
-
-  protected DependencyDetailComposite dependencyDetailComposite;
-
-  ListEditorComposite<Exclusion> exclusionsEditor;
-
-  Section exclusionDetailsSection;
-
-  Text exclusionArtifactIdText;
-
-  Text exclusionGroupIdText;
-
   Button dependencySelectButton;
 
-  Button exclusionSelectButton;
-
-  //Action dependencyAddAction;
-  //Action dependencyManagementAddAction;
   Action dependencySelectAction;
 
   SearchControl searchControl;
@@ -146,16 +115,9 @@ public class DependenciesComposite extends Composite {
 
   DependencyFilter searchFilter;
 
-  Action exclusionSelectAction;
-
-//  Action exclusionAddAction;
   Action openWebPageAction;
 
   // model
-
-  Dependency currentDependency;
-
-  Exclusion currentExclusion;
 
   boolean changingSelection = false;
 
@@ -168,8 +130,6 @@ public class DependenciesComposite extends Composite {
   DependencyLabelProvider dependencyLabelProvider = new DependencyLabelProvider();
 
   DependencyLabelProvider dependencyManagementLabelProvider = new DependencyLabelProvider();
-
-  DependencyLabelProvider exclusionLabelProvider = new DependencyLabelProvider();
 
   public DependenciesComposite(Composite composite, MavenPomEditorPage editorPage, int flags, MavenPomEditor pomEditor) {
     super(composite, flags);
@@ -193,28 +153,10 @@ public class DependenciesComposite extends Composite {
     horizontalSash.setLayoutData(horizontalCompositeGridData);
     toolkit.adapt(horizontalSash, true, true);
 
-    SashForm verticalSash = new SashForm(horizontalSash, SWT.VERTICAL);
-    toolkit.adapt(verticalSash, true, true);
-
-    createDependenciesSection(verticalSash);
-    createDependencyManagementSection(verticalSash);
-
-    verticalSash.setWeights(new int[] {1, 1});
-
-    rightSideComposite = new Composite(horizontalSash, SWT.NONE);
-    GridLayout dependencyDetailsLayout = new GridLayout(1, false);
-    dependencyDetailsLayout.marginWidth = 0;
-    dependencyDetailsLayout.marginHeight = 0;
-    rightSideComposite.setLayout(dependencyDetailsLayout);
-    toolkit.adapt(rightSideComposite, true, true);
-
-    createDependencyDetails(toolkit, rightSideComposite);
-    createExclusionsSection(toolkit, rightSideComposite);
-    createExclusionDetailsSection(toolkit, rightSideComposite);
+    createDependenciesSection(horizontalSash);
+    createDependencyManagementSection(horizontalSash);
 
     horizontalSash.setWeights(new int[] {1, 1});
-
-    updateDependencyDetails(null);
   }
 
   private void createDependenciesSection(SashForm verticalSash) {
@@ -236,8 +178,6 @@ public class DependenciesComposite extends Composite {
         }, POM_PACKAGE.getModel_Dependencies(), null, null, null, null, null, null);
         dependenciesEditor.setInput(model.getDependencies());
         dependenciesEditor.setSelection(Collections.singletonList(dependency));
-        updateDependencyDetails(dependency);
-        dependencyDetailComposite.setFocus();
       }
     });
 
@@ -254,7 +194,6 @@ public class DependenciesComposite extends Composite {
         }
 
         editingDomain.getCommandStack().execute(compoundCommand);
-        updateDependencyDetails(null);
       }
     });
 
@@ -274,7 +213,6 @@ public class DependenciesComposite extends Composite {
     dependenciesEditor.addSelectionListener(new ISelectionChangedListener() {
       public void selectionChanged(SelectionChangedEvent event) {
         List<Dependency> selection = dependenciesEditor.getSelection();
-        updateDependencyDetails(selection.size() == 1 ? selection.get(0) : null);
 
         if(!selection.isEmpty()) {
           changingSelection = true;
@@ -329,35 +267,11 @@ public class DependenciesComposite extends Composite {
           }
           dependenciesEditor.setInput(model.getDependencies());
           dependenciesEditor.setSelection(Collections.singletonList(deps.get(0)));
-          updateDependencyDetails(deps.get(0));
-          dependencyDetailComposite.setFocus();
         }
       }
 
     });
-//    dependencyAddAction = new Action("Add Dependency", MavenEditorImages.ADD_ARTIFACT) {
-//      public void run() {
-//        // TODO calculate current list of artifacts for the project
-//        Set<ArtifactKey> artifacts = Collections.emptySet();
-//        MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-//            "Add Dependency", IndexManager.SEARCH_ARTIFACT, artifacts, true);
-//        if(dialog.open() == Window.OK) {
-//          IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
-//          if(af != null) {
-//            Dependency dependency = createDependency(dependenciesProvider, //
-//                af.group, af.artifact, af.version, af.classifier, af.type, dialog.getSelectedScope());
-//            dependenciesEditor.setInput(dependenciesProvider.getValue().getDependency());
-//            dependenciesEditor.setSelection(Collections.singletonList(dependency));
-//            updateDependencyDetails(dependency);
-//            groupIdText.setFocus();
-//          }
-//        }
-//      }
-//    };
-//    dependencyAddAction.setEnabled(false);
 
-//    modulesToolBarManager.add(dependencyAddAction);
-//    modulesToolBarManager.add(new Separator());
     ToolBarManager modulesToolBarManager = new ToolBarManager(SWT.FLAT);
     modulesToolBarManager.add(new Action(Messages.DependenciesComposite_action_showgroupid,
         MavenEditorImages.SHOW_GROUP) {
@@ -426,8 +340,6 @@ public class DependenciesComposite extends Composite {
             POM_PACKAGE.getDependencyManagement_Dependencies(), null, null, null, null, null, null);
         dependencyManagementEditor.setInput(dependencyManagementProvider.getValue().getDependencies());
         dependencyManagementEditor.setSelection(Collections.singletonList(dependency));
-        updateDependencyDetails(dependency);
-        dependencyDetailComposite.setFocus();
       }
     });
 
@@ -444,7 +356,6 @@ public class DependenciesComposite extends Composite {
         }
 
         editingDomain.getCommandStack().execute(compoundCommand);
-        updateDependencyDetails(null);
       }
     });
     
@@ -464,7 +375,6 @@ public class DependenciesComposite extends Composite {
     dependencyManagementEditor.addSelectionListener(new ISelectionChangedListener() {
       public void selectionChanged(SelectionChangedEvent event) {
         List<Dependency> selection = dependencyManagementEditor.getSelection();
-        updateDependencyDetails(selection.size() == 1 ? selection.get(0) : null);
 
         if(!selection.isEmpty()) {
           changingSelection = true;
@@ -495,36 +405,12 @@ public class DependenciesComposite extends Composite {
                 "compile".equals(nvl(dialog.getSelectedScope())) ? "" : nvl(dialog.getSelectedScope()));//$NON-NLS-1$ //$NON-NLS-2$
             dependencyManagementEditor.setInput(dependencyManagementProvider.getValue().getDependencies());
             dependencyManagementEditor.setSelection(Collections.singletonList(dependency));
-            updateDependencyDetails(dependency);
-            dependencyDetailComposite.setFocus();
           }
         }
       }
     });
-//    dependencyManagementAddAction = new Action("Add Dependency", MavenEditorImages.ADD_ARTIFACT) {
-//      public void run() {
-//        // TODO calculate current list of artifacts for the project
-//        Set<ArtifactKey> artifacts = Collections.emptySet();
-//        MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-//            "Add Dependency", IndexManager.SEARCH_ARTIFACT, artifacts, true);
-//        if(dialog.open() == Window.OK) {
-//          IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
-//          if(af != null) {
-//            Dependency dependency = createDependency(dependencyManagementProvider, //
-//                af.group, af.artifact, af.version, af.classifier, af.type, dialog.getSelectedScope());
-//            dependencyManagementEditor.setInput(dependencyManagementProvider.getValue().getDependency());
-//            dependencyManagementEditor.setSelection(Collections.singletonList(dependency));
-//            updateDependencyDetails(dependency);
-//            groupIdText.setFocus();
-//          }
-//        }
-//      }
-//    };
-//    dependencyManagementAddAction.setEnabled(false);
 
     ToolBarManager modulesToolBarManager = new ToolBarManager(SWT.FLAT);
-//    modulesToolBarManager.add(dependencyManagementAddAction);
-//    modulesToolBarManager.add(new Separator());
 
     modulesToolBarManager.add(new Action(Messages.DependenciesComposite_action_showgroupid,
         MavenEditorImages.SHOW_GROUP) {
@@ -576,337 +462,12 @@ public class DependenciesComposite extends Composite {
     dependencyManagementSection.setTextClient(toolbarComposite);
   }
 
-  private void createDependencyDetails(FormToolkit toolkit, Composite parent) {
-    Section dependencyDetailsSection = toolkit.createSection(parent, ExpandableComposite.TITLE_BAR);
-    dependencyDetailsSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-    dependencyDetailsSection.setText(Messages.DependenciesComposite_section_dependency_details);
-    dependencyDetailsSection.marginWidth = 3;
-
-    dependencySelectAction = new Action(Messages.DependenciesComposite_action_selectDependency,
-        MavenEditorImages.SELECT_ARTIFACT) {
-      public void run() {
-        // TODO calculate current list of artifacts for the project
-        Set<ArtifactKey> artifacts = Collections.emptySet();
-        MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-            Messages.DependenciesComposite_searchDialog_title, IIndex.SEARCH_ARTIFACT, artifacts, true);
-        if(dialog.open() == Window.OK) {
-          IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
-          if(af != null) {
-            dependencyDetailComposite.setGroupId(af.group);
-            dependencyDetailComposite.setArtifactId(af.artifact);
-            dependencyDetailComposite.setVersion(af.version);
-            //MNGECLIPSE-2363
-            String type = nvl(af.type);
-            if("jar".equals(type)) {//$NON-NLS-1$
-              type = ""; //$NON-NLS-1$
-            }
-            dependencyDetailComposite.setType(type);
-            String scope = nvl(dialog.getSelectedScope());
-            if("compile".equals(scope)) {//$NON-NLS-1$
-              scope = "";//$NON-NLS-1$
-            }
-            dependencyDetailComposite.setScope(scope);
-          }
-        }
-      }
-    };
-    dependencySelectAction.setEnabled(false);
-
-    openWebPageAction = new Action(Messages.DependenciesComposite_action_open_project_page, MavenEditorImages.WEB_PAGE) {
-      public void run() {
-        final String groupId = dependencyDetailComposite.getGroupId();
-        final String artifactId = dependencyDetailComposite.getArtifactId();
-        final String version = dependencyDetailComposite.getVersion();
-        new Job("Opening " + groupId + ":" + artifactId + ":" + version) {
-          protected IStatus run(IProgressMonitor monitor) {
-            OpenUrlAction.openBrowser(OpenUrlAction.ID_PROJECT, groupId, artifactId, //
-                version != null ? version : getVersion(groupId, artifactId, monitor), monitor);
-            return Status.OK_STATUS;
-          }
-        }.schedule();
-
-      }
-    };
-    openWebPageAction.setEnabled(false);
-
-    ToolBarManager toolBarManager = new ToolBarManager(SWT.FLAT);
-    toolBarManager.add(dependencySelectAction);
-    toolBarManager.add(new Separator());
-    toolBarManager.add(openWebPageAction);
-
-    Composite toolbarComposite = toolkit.createComposite(dependencyDetailsSection);
-    GridLayout toolbarLayout = new GridLayout(1, true);
-    toolbarLayout.marginHeight = 0;
-    toolbarLayout.marginWidth = 0;
-    toolbarComposite.setLayout(toolbarLayout);
-    toolbarComposite.setBackground(null);
-
-    toolBarManager.createControl(toolbarComposite);
-    dependencyDetailsSection.setTextClient(toolbarComposite);
-
-    dependencyDetailComposite = new DependencyDetailComposite(dependencyDetailsSection, editorPage);
-    dependencyDetailsSection.setClient(dependencyDetailComposite);
-  }
-
-  private void createExclusionsSection(FormToolkit toolkit, Composite composite) {
-    Section exclusionsSection = toolkit.createSection(composite, ExpandableComposite.TITLE_BAR);
-    exclusionsSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-    exclusionsSection.setText(Messages.DependenciesComposite_sectionExclusions);
-    exclusionsSection.marginWidth = 3;
-
-    exclusionsEditor = new ListEditorComposite<Exclusion>(exclusionsSection, SWT.NONE, true);
-    exclusionsSection.setClient(exclusionsEditor);
-    toolkit.adapt(exclusionsEditor);
-
-    exclusionsEditor.setContentProvider(new ListEditorContentProvider<Exclusion>());
-    exclusionsEditor.setLabelProvider(exclusionLabelProvider);
-
-    exclusionsEditor.addSelectionListener(new ISelectionChangedListener() {
-      public void selectionChanged(SelectionChangedEvent event) {
-        List<Exclusion> selection = exclusionsEditor.getSelection();
-        updateExclusionDetails(selection.size() == 1 ? selection.get(0) : null);
-      }
-    });
-
-    exclusionsEditor.setAddListener(new SelectionAdapter() {
-      public void widgetSelected(SelectionEvent e) {
-        createExclusion(null, null);
-      }
-    });
-
-    exclusionsEditor.setRemoveListener(new SelectionAdapter() {
-      public void widgetSelected(SelectionEvent e) {
-        CompoundCommand compoundCommand = new CompoundCommand();
-        EditingDomain editingDomain = editorPage.getEditingDomain();
-
-        EList<Exclusion> exclusions = currentDependency.getExclusions();
-        int n = 0;
-        for(Exclusion exclusion : exclusionsEditor.getSelection()) {
-          Command removeCommand = RemoveCommand.create(editingDomain, currentDependency, POM_PACKAGE.getExclusion(),
-              exclusion);
-          compoundCommand.append(removeCommand);
-          n++ ;
-        }
-        if(exclusions.size() - n == 0) {
-          //if there are no exclusions left, just create a command to yank all the exclusions at once (by
-          //removing the root <exclusions> tag
-          Command removeExclusions = SetCommand.create(editingDomain, currentDependency,
-              POM_PACKAGE.getDependency_Exclusions(), SetCommand.UNSET_VALUE);
-          compoundCommand = new CompoundCommand();
-          compoundCommand.append(removeExclusions);
-        }
-
-        editingDomain.getCommandStack().execute(compoundCommand);
-        updateExclusionDetails(null);
-      }
-    });
-    exclusionsEditor.setSelectListener(new SelectionAdapter() {
-      public void widgetSelected(SelectionEvent e) {
-        Set<ArtifactKey> artifacts = Collections.emptySet();
-        MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-            Messages.DependenciesComposite_searchTitle_addExclusion, IIndex.SEARCH_ARTIFACT, artifacts);
-        if(dialog.open() == Window.OK) {
-          IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
-          if(af != null) {
-            createExclusion(af.group, af.artifact);
-          }
-        }
-      }
-    });
-//    exclusionAddAction = new Action("Add Exclusion", MavenEditorImages.ADD_ARTIFACT) {
-//      public void run() {
-//        // XXX calculate list available for exclusion
-//        Set<ArtifactKey> artifacts = Collections.emptySet();
-//        MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-//            "Add Exclusion", IndexManager.SEARCH_ARTIFACT, artifacts);
-//        if(dialog.open() == Window.OK) {
-//          IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
-//          if(af != null) {
-//            createExclusion(af.group, af.artifact);        
-//          }
-//        }
-//      }
-//    };
-//    exclusionAddAction.setEnabled(false);
-
-//    ToolBarManager toolBarManager = new ToolBarManager(SWT.FLAT);
-//    //toolBarManager.add(exclusionAddAction);
-//    
-//    Composite toolbarComposite = toolkit.createComposite(exclusionsSection);
-//    GridLayout toolbarLayout = new GridLayout(1, true);
-//    toolbarLayout.marginHeight = 0;
-//    toolbarLayout.marginWidth = 0;
-//    toolbarComposite.setLayout(toolbarLayout);
-//    toolbarComposite.setBackground(null);
-// 
-//    toolBarManager.createControl(toolbarComposite);
-//    exclusionsSection.setTextClient(toolbarComposite);
-  }
-
-  private void createExclusionDetailsSection(FormToolkit toolkit, Composite dependencyDetailsComposite) {
-    exclusionDetailsSection = toolkit.createSection(dependencyDetailsComposite, ExpandableComposite.TITLE_BAR);
-    exclusionDetailsSection.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-    exclusionDetailsSection.setText(Messages.DependenciesComposite_section_ExclusionDetails);
-
-    Composite exclusionDetailsComposite = toolkit.createComposite(exclusionDetailsSection, SWT.NONE);
-    GridLayout gridLayout = new GridLayout(2, false);
-    gridLayout.marginHeight = 2;
-    gridLayout.marginWidth = 2;
-    exclusionDetailsComposite.setLayout(gridLayout);
-    toolkit.paintBordersFor(exclusionDetailsComposite);
-    exclusionDetailsSection.setClient(exclusionDetailsComposite);
-//    exclusionDetailsComposite.addControlListener(detailsWidthGroup);
-
-    Label exclusionGroupIdLabel = toolkit.createLabel(exclusionDetailsComposite,
-        Messages.DependenciesComposite_lblExclusionGroupId, SWT.NONE);
-    exclusionGroupIdLabel.setLayoutData(new GridData());
-//    detailsWidthGroup.addControl(exclusionGroupIdLabel);
-
-    exclusionGroupIdText = toolkit.createText(exclusionDetailsComposite, null, SWT.NONE);
-    GridData gd_exclusionGroupIdText = new GridData(SWT.FILL, SWT.CENTER, true, false);
-    gd_exclusionGroupIdText.horizontalIndent = 4;
-    exclusionGroupIdText.setLayoutData(gd_exclusionGroupIdText);
-    // TODO handle ArtifactInfo
-    ProposalUtil.addGroupIdProposal(editorPage.getProject(), exclusionGroupIdText, Packaging.ALL);
-    M2EUtils.addRequiredDecoration(exclusionGroupIdText);
-
-//    exclusionSelectButton = toolkit.createButton(exclusionDetailsComposite, "Select...", SWT.NONE);
-//    exclusionSelectButton.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 2));
-//    exclusionSelectButton.addSelectionListener(new SelectionAdapter() {
-//      public void widgetSelected(SelectionEvent e) {
-//        // TODO calculate current list of artifacts for the project
-//        Set<Dependency> artifacts = Collections.emptySet();
-//        MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-//            "Add Dependency", IndexManager.SEARCH_ARTIFACT, artifacts);
-//        if(dialog.open() == Window.OK) {
-//          IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
-//          if(af != null) {
-//            exclusionGroupIdText.setText(nvl(af.group));
-//            exclusionArtifactIdText.setText(nvl(af.artifact));
-//          }
-//        }
-//      }
-//    });
-
-    Label exclusionArtifactIdLabel = toolkit.createLabel(exclusionDetailsComposite,
-        Messages.DependenciesComposite_lblExclusionArtifactId, SWT.NONE);
-    exclusionArtifactIdLabel.setLayoutData(new GridData());
-//    detailsWidthGroup.addControl(exclusionArtifactIdLabel);
-
-    exclusionArtifactIdText = toolkit.createText(exclusionDetailsComposite, null, SWT.NONE);
-    GridData gd_exclusionArtifactIdText = new GridData(SWT.FILL, SWT.CENTER, true, false);
-    gd_exclusionArtifactIdText.horizontalIndent = 4;
-    exclusionArtifactIdText.setLayoutData(gd_exclusionArtifactIdText);
-    // TODO handle ArtifactInfo
-    ProposalUtil.addArtifactIdProposal(editorPage.getProject(), exclusionGroupIdText, exclusionArtifactIdText,
-        Packaging.ALL);
-    M2EUtils.addRequiredDecoration(exclusionArtifactIdText);
-
-    exclusionSelectAction = new Action(Messages.DependenciesComposite_action_selectExclusion,
-        MavenEditorImages.SELECT_ARTIFACT) {
-      public void run() {
-        // XXX calculate list available for exclusion
-        Set<ArtifactKey> artifacts = Collections.emptySet();
-        MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-            Messages.DependenciesComposite_searchDialog_selectExclusion, IIndex.SEARCH_ARTIFACT, artifacts);
-        if(dialog.open() == Window.OK) {
-          IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
-          if(af != null) {
-            exclusionGroupIdText.setText(nvl(af.group));
-            exclusionArtifactIdText.setText(nvl(af.artifact));
-          }
-        }
-      }
-    };
-    exclusionSelectAction.setEnabled(false);
-
-    ToolBarManager toolBarManager = new ToolBarManager(SWT.FLAT);
-    toolBarManager.add(exclusionSelectAction);
-
-    Composite toolbarComposite = toolkit.createComposite(exclusionDetailsSection);
-    GridLayout toolbarLayout = new GridLayout(1, true);
-    toolbarLayout.marginHeight = 0;
-    toolbarLayout.marginWidth = 0;
-    toolbarComposite.setLayout(toolbarLayout);
-    toolbarComposite.setBackground(null);
-
-    toolBarManager.createControl(toolbarComposite);
-    exclusionDetailsSection.setTextClient(toolbarComposite);
-  }
-
-  protected void updateDependencyDetails(Dependency dependency) {
-    if(changingSelection) {
-      return;
-    }
-
-    this.currentDependency = dependency;
-
-    dependencyDetailComposite.update(dependency);
-
-    openWebPageAction.setEnabled(dependency != null);
-    dependencySelectAction.setEnabled(dependency != null && !editorPage.isReadOnly());
-
-    if(editorPage == null || dependency == null) {
-      FormUtils.setEnabled(rightSideComposite, false);
-
-      exclusionsEditor.setSelection(Collections.<Exclusion> emptyList());
-      exclusionsEditor.setInput(null);
-
-      updateExclusionDetails(null);
-
-      return;
-    }
-
-    FormUtils.setEnabled(rightSideComposite, true);
-    FormUtils.setReadonly(rightSideComposite, editorPage.isReadOnly());
-
-    exclusionsEditor.setInput(dependency.getExclusions());
-    exclusionsEditor.setSelection(Collections.<Exclusion> emptyList());
-
-    updateExclusionDetails(null);
-  }
-
-  void updateExclusionDetails(Exclusion exclusion) {
-//    if(exclusion!=null && exclusion==currentExclusion) {
-//      return;
-//    }
-
-    currentExclusion = exclusion;
-
-    if(editorPage != null) {
-      editorPage.removeNotifyListener(exclusionGroupIdText);
-      editorPage.removeNotifyListener(exclusionArtifactIdText);
-    }
-
-    if(editorPage == null || exclusion == null) {
-      FormUtils.setEnabled(exclusionDetailsSection, false);
-      exclusionSelectAction.setEnabled(false);
-
-      exclusionGroupIdText.setText(""); //$NON-NLS-1$
-      exclusionArtifactIdText.setText(""); //$NON-NLS-1$
-      return;
-    }
-
-    FormUtils.setEnabled(exclusionDetailsSection, true);
-    FormUtils.setReadonly(exclusionDetailsSection, editorPage.isReadOnly());
-    exclusionSelectAction.setEnabled(!editorPage.isReadOnly());
-
-    setText(exclusionGroupIdText, exclusion.getGroupId());
-    setText(exclusionArtifactIdText, exclusion.getArtifactId());
-
-    ValueProvider<Exclusion> exclusionProvider = new ValueProvider.DefaultValueProvider<Exclusion>(exclusion);
-    editorPage.setModifyListener(exclusionGroupIdText, exclusionProvider, POM_PACKAGE.getExclusion_GroupId(), ""); //$NON-NLS-1$
-    editorPage.setModifyListener(exclusionArtifactIdText, exclusionProvider, POM_PACKAGE.getExclusion_ArtifactId(), ""); //$NON-NLS-1$
-
-    editorPage.registerListeners();
-  }
 
   public void loadData(Model model, ValueProvider<DependencyManagement> dependencyManagementProvider) {
     this.model = model;
     this.dependencyManagementProvider = dependencyManagementProvider;
     this.dependencyLabelProvider.setPomEditor(editorPage.getPomEditor());
     this.dependencyManagementLabelProvider.setPomEditor(editorPage.getPomEditor());
-    this.exclusionLabelProvider.setPomEditor(editorPage.getPomEditor());
 
     changingSelection = true;
     dependenciesEditor.setInput(model.getDependencies());
@@ -919,16 +480,9 @@ public class DependenciesComposite extends Composite {
     dependenciesEditor.setReadOnly(editorPage.isReadOnly());
     dependencyManagementEditor.setReadOnly(editorPage.isReadOnly());
 
-    //dependencyAddAction.setEnabled(!editorPage.isReadOnly());
-    //dependencyManagementAddAction.setEnabled(!editorPage.isReadOnly());
-
     if(searchControl != null) {
       searchControl.getSearchText().setEditable(true);
     }
-
-    updateDependencyDetails(null);
-
-    // exclusionsEditor.setReadOnly(parent.isReadOnly());
   }
 
   public void updateView(final MavenPomEditorPage editorPage, final Notification notification) {
@@ -961,33 +515,6 @@ public class DependenciesComposite extends Composite {
             dependenciesEditor.setInput(((DependencyManagement) object).getDependencies());
           }
           dependencyManagementEditor.refresh();
-        }
-
-        Object notificationObject = MavenPomEditorPage.getFromNotification(notification);
-        if(object instanceof Dependency) {
-          Dependency dependency = (Dependency) object;
-
-          dependenciesEditor.refresh();
-          dependencyManagementEditor.refresh();
-
-          if(object == currentDependency && (notificationObject == null || notificationObject instanceof Dependency)) {
-            updateDependencyDetails((Dependency) notificationObject);
-          }
-        }
-
-        EList<Exclusion> exclusions = currentDependency == null ? null : currentDependency.getExclusions();
-        if(object instanceof Dependency) {
-          exclusionsEditor.refresh();
-          if(exclusions == object) {
-            updateDependencyDetails(currentDependency);
-          }
-        }
-
-        if(object instanceof Exclusion) {
-          exclusionsEditor.refresh();
-          if(currentExclusion == object && (notificationObject == null || notificationObject instanceof Exclusion)) {
-            updateExclusionDetails((Exclusion) notificationObject);
-          }
         }
       }
     });
@@ -1049,8 +576,6 @@ public class DependenciesComposite extends Composite {
         selectDepenendencies(dependencyManagementEditor, dependencyManagementProvider.getValue(),
             POM_PACKAGE.getDependencyManagement_Dependencies());
         changingSelection = false;
-
-        updateDependencyDetails(null);
       }
 
       private void selectDepenendencies(ListEditorComposite<Dependency> editor, EObject parent,
@@ -1067,25 +592,6 @@ public class DependenciesComposite extends Composite {
     viewer = dependencyManagementEditor.getViewer();
     viewer.addFilter(searchFilter);
 
-  }
-
-  void createExclusion(String groupId, String artifactId) {
-    CompoundCommand compoundCommand = new CompoundCommand();
-    EditingDomain editingDomain = editorPage.getEditingDomain();
-
-    Exclusion exclusion = PomFactory.eINSTANCE.createExclusion();
-    exclusion.setGroupId(groupId);
-    exclusion.setArtifactId(artifactId);
-
-    Command addCommand = AddCommand.create(editingDomain, currentDependency, POM_PACKAGE.getDependency_Exclusions(),
-        exclusion);
-    compoundCommand.append(addCommand);
-
-    editingDomain.getCommandStack().execute(compoundCommand);
-
-    exclusionsEditor.setSelection(Collections.singletonList(exclusion));
-    updateExclusionDetails(exclusion);
-    exclusionGroupIdText.setFocus();
   }
 
   String getVersion(String groupId, String artifactId, IProgressMonitor monitor) {
@@ -1116,26 +622,6 @@ public class DependenciesComposite extends Composite {
       return false;
     }
   }
-
-//  private List<Dependency> getUpdatedSelection(Dependencies dependencies, List<Dependency> selection) {
-//    List<Dependency> newSelection = new ArrayList<Dependency>();
-//    for(Dependency dependency : selection) {
-//      if (dependencies.getDependency().contains(dependency)) {
-//        newSelection.add(dependency);
-//      }
-//    }
-//    return newSelection;
-//  }
-
-//  private List<Exclusion> getUpdatedSelection(ExclusionsType exclusions, List<Exclusion> selection) {
-//    List<Exclusion> newSelection = new ArrayList<Exclusion>();
-//    for(Exclusion exclusion : selection) {
-//      if (exclusions.getExclusion().contains(exclusion)) {
-//        newSelection.add(exclusion);
-//      }
-//    }
-//    return newSelection;
-//  }
 
   private void openManageDependenciesDialog() throws InvocationTargetException, InterruptedException {
     /*
