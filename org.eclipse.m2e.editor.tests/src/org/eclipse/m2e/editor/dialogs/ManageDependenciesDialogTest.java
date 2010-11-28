@@ -29,6 +29,7 @@ import org.eclipse.m2e.model.edit.pom.Dependency;
 import org.eclipse.m2e.model.edit.pom.Model;
 import org.eclipse.m2e.model.edit.pom.util.PomResourceImpl;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.junit.Before;
@@ -39,6 +40,8 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
   
   private static final String VERSION = "1.0.0";
   public static String GROUP_ID = "org.eclipse.m2e.tests";
+  private TestDialog dialog;
+  private Color foreground;
 
   @Before
   public void setUp() throws Exception {
@@ -65,23 +68,37 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
     assertEquals(model.getArtifactId(), "child");
     
     IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectManager().getMavenProject(GROUP_ID, "child", VERSION);
-    MavenProject project = facade.getMavenProject();
+    final MavenProject project = facade.getMavenProject();
     assertEquals(project.getArtifactId(), "child");
     
-    ManageDependenciesDialog.DepLabelProvider provider = new ManageDependenciesDialog.DepLabelProvider();
+    final ManageDependenciesDialog.DepLabelProvider provider = new ManageDependenciesDialog.DepLabelProvider();
     
-    assertNull(provider.getForeground(project));
+    Display.getDefault().syncExec(new Runnable() {
+      
+      @SuppressWarnings("synthetic-access")
+      public void run() {
+       foreground = provider.getForeground(project);
+        
+      }
+    });
+    assertNull(foreground);
     
     IMaven maven = MavenPlugin.getDefault().getMaven();
     maven.detachFromSession(project);
     MavenExecutionRequest request = MavenPlugin.getDefault().getMavenProjectManager().createExecutionRequest(facade, new NullProgressMonitor());
     
-    project = maven.resolveParentProject(request, project, new NullProgressMonitor());
-    assertNotNull(project);
-    assertEquals(project.getArtifactId(), "forge-parent");
-    assertEquals(project.getGroupId(), "org.sonatype.forge");
-    assertEquals(project.getVersion(), "6");
-    assertNotNull(provider.getForeground(project));
+    final MavenProject project2 = maven.resolveParentProject(request, project, new NullProgressMonitor());
+    assertNotNull(project2);
+    assertEquals(project2.getArtifactId(), "forge-parent");
+    assertEquals(project2.getGroupId(), "org.sonatype.forge");
+    assertEquals(project2.getVersion(), "6");
+    Display.getDefault().syncExec(new Runnable() {
+      
+      public void run() {
+        foreground = provider.getForeground(project2);
+      }
+    });
+    assertNotNull(foreground);
   }
 
   @Test
@@ -97,8 +114,7 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
     LinkedList<MavenProject> hierarchy = new LinkedList<MavenProject>();
     hierarchy.add(project);
     
-    TestDialog dialog = new TestDialog(Display.getDefault().getActiveShell(), 
-        model, hierarchy);
+    initDialog(model, hierarchy);
 
     LinkedList<Dependency> dependencies = new LinkedList<Dependency>();
     assertNotNull(model.getDependencies().get(0));
@@ -148,8 +164,7 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
     hierarchy.addFirst(childProject);
     hierarchy.addLast(parentProject);
     
-    TestDialog dialog = new TestDialog(Display.getDefault().getActiveShell(), 
-        child, hierarchy);
+    initDialog(child, hierarchy);
     
     LinkedList<Dependency> selectedDeps = new LinkedList<Dependency>();
     List<Dependency> dependencies = child.getDependencies();
@@ -195,8 +210,7 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
     LinkedList<MavenProject> hierarchy = new LinkedList<MavenProject>();
     hierarchy.add(project);
     
-    TestDialog dialog = new TestDialog(Display.getDefault().getActiveShell(), 
-        model, hierarchy);
+    initDialog(model, hierarchy);
 
     LinkedList<Dependency> dependencies = new LinkedList<Dependency>();
     assertNotNull(model.getDependencies().get(0));
@@ -245,8 +259,7 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
     LinkedList<MavenProject> hierarchy = new LinkedList<MavenProject>();
     hierarchy.add(project);
     
-    TestDialog dialog = new TestDialog(Display.getDefault().getActiveShell(), 
-        model, hierarchy);
+    initDialog(model, hierarchy);
 
     LinkedList<Dependency> dependencies = new LinkedList<Dependency>();
     assertNotNull(model.getDependencies().get(0));
@@ -302,8 +315,7 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
     hierarchy.addFirst(childProject);
     hierarchy.addLast(parentProject);
     
-    TestDialog dialog = new TestDialog(Display.getDefault().getActiveShell(), 
-        child, hierarchy);
+    initDialog(child, hierarchy);
     
     LinkedList<Dependency> selectedDeps = new LinkedList<Dependency>();
     List<Dependency> dependencies = child.getDependencies();
@@ -385,8 +397,7 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
     hierarchy.add(parentProject);
     hierarchy.addLast(grandparentProject);
     
-    TestDialog dialog = new TestDialog(Display.getDefault().getActiveShell(), 
-        child, hierarchy);
+    initDialog(child, hierarchy);
     
     LinkedList<Dependency> selectedDeps = new LinkedList<Dependency>();
     List<Dependency> dependencies = child.getDependencies();
@@ -426,7 +437,7 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
     String ARTIFACT_CHILD = "multi-child";
     String ARTIFACT_PARENT = "multi-parent";
     Map<String, Model> models = loadModels("projects/multi", new String[] { "child/pom.xml", "parent/pom.xml" });
-    Model child = models.get(ARTIFACT_CHILD);
+    final Model child = models.get(ARTIFACT_CHILD);
     Model parent = models.get(ARTIFACT_PARENT);
     
     assertNotNull(child);
@@ -437,12 +448,11 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
     MavenProject childProject = getMavenProject(GROUP_ID, ARTIFACT_CHILD, VERSION);
     MavenProject parentProject = getMavenProject(GROUP_ID, ARTIFACT_PARENT, VERSION);
     
-    LinkedList<MavenProject> hierarchy = new LinkedList<MavenProject>();
+    final LinkedList<MavenProject> hierarchy = new LinkedList<MavenProject>();
     hierarchy.addFirst(childProject);
     hierarchy.addLast(parentProject);
     
-    TestDialog dialog = new TestDialog(Display.getDefault().getActiveShell(), 
-        child, hierarchy);
+    initDialog(child, hierarchy);
     
     LinkedList<Dependency> selectedDeps = new LinkedList<Dependency>();
     List<Dependency> dependencies = child.getDependencies();
@@ -491,6 +501,17 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
     assertTrue(dep.getVersion() == null || dep.getVersion().equals(""));
     
     checkContainsDependency(child.getDependencies(), "test", "dont-move", "1.0");
+  }
+
+  protected void initDialog(final Model model, final LinkedList<MavenProject> hierarchy) {
+    Display.getDefault().syncExec(new Runnable() {
+      
+      @SuppressWarnings("synthetic-access")
+      public void run() {
+        dialog = new TestDialog(Display.getDefault().getActiveShell(), 
+            model, hierarchy);
+      }
+    });
   }
   
   protected void checkContainsDependency(List<Dependency> deps, String group, String artifact, String version) {
