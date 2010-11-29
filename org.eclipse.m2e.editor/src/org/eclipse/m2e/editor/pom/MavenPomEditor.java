@@ -21,11 +21,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EventObject;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.apache.maven.project.MavenProject;
@@ -48,7 +46,6 @@ import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
@@ -74,10 +71,6 @@ import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.ITextListener;
 import org.eclipse.jface.text.TextEvent;
 import org.eclipse.jface.text.source.IAnnotationModel;
-import org.eclipse.jface.text.source.IVerticalRulerInfo;
-import org.eclipse.jface.text.source.IVerticalRulerInfoExtension;
-import org.eclipse.jface.text.source.IVerticalRulerListener;
-import org.eclipse.jface.text.source.VerticalRulerEvent;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.actions.OpenPomAction.MavenPathStorageEditorInput;
 import org.eclipse.m2e.core.actions.OpenPomAction.MavenStorageEditorInput;
@@ -86,7 +79,6 @@ import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.core.MavenLogger;
 import org.eclipse.m2e.core.embedder.ArtifactKey;
 import org.eclipse.m2e.core.embedder.MavenModelManager;
-import org.eclipse.m2e.core.internal.project.MavenMarkerManager;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.MavenProjectManager;
 import org.eclipse.m2e.core.util.Util;
@@ -95,15 +87,12 @@ import org.eclipse.m2e.editor.MavenEditorImages;
 import org.eclipse.m2e.editor.MavenEditorPlugin;
 import org.eclipse.m2e.editor.internal.Messages;
 import org.eclipse.m2e.editor.lifecycle.internal.LifecyclePage;
-import org.eclipse.m2e.editor.pom.MavenPomEditor.Callback;
 import org.eclipse.m2e.model.edit.pom.Model;
 import org.eclipse.m2e.model.edit.pom.util.PomResourceFactoryImpl;
 import org.eclipse.m2e.model.edit.pom.util.PomResourceImpl;
 import org.eclipse.search.ui.text.ISearchEditorAccess;
 import org.eclipse.search.ui.text.Match;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -135,7 +124,6 @@ import org.eclipse.wst.sse.ui.StructuredTextEditor;
 import org.eclipse.wst.xml.core.internal.emf2xml.EMF2DOMSSEAdapter;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMElement;
 import org.sonatype.aether.graph.DependencyNode;
-import org.sonatype.aether.graph.DependencyVisitor;
 
 
 /**
@@ -479,13 +467,13 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
                   //just ignore
                   MavenLogger.log("Unable to read maven project. Some content assists might not work as advertized.", e); //$NON-NLS-1$
                 }
-                MavenMarkerManager manager = (MavenMarkerManager) MavenPlugin.getDefault().getMavenMarkerManager();
-                try {
-                  manager.deleteEditorHintMarkers(file);
-                  manager.addEditorHintMarkers(file);
-                } catch(CoreException e) {
-                  MavenLogger.log("Unable to process editor markers", e);
-                }
+//                MavenMarkerManager manager = (MavenMarkerManager) MavenPlugin.getDefault().getMavenMarkerManager();
+//                try {
+//                  manager.deleteEditorHintMarkers(file);
+//                  manager.addEditorHintMarkers(file);
+//                } catch(CoreException e) {
+//                  MavenLogger.log("Unable to process editor markers", e);
+//                }
                 return Status.OK_STATUS;
               }
             };

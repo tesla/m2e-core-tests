@@ -12,15 +12,11 @@
 package org.eclipse.m2e.editor.xml;
 
 import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ui.IMarkerResolution;
 import org.eclipse.ui.IMarkerResolutionGenerator;
 import org.eclipse.ui.IMarkerResolutionGenerator2;
 
 import org.eclipse.m2e.core.core.IMavenConstants;
-import org.eclipse.m2e.core.core.MavenLogger;
-import org.eclipse.m2e.editor.xml.PomQuickAssistProcessor.IgnoreWarningProposal;
-import org.eclipse.m2e.editor.xml.PomQuickAssistProcessor.ManagedVersionRemovalProposal;
 
 
 /**
@@ -34,51 +30,36 @@ public class MavenMarkerResolutionGenerator implements IMarkerResolutionGenerato
    * @see org.eclipse.ui.IMarkerResolutionGenerator#getResolutions(org.eclipse.core.resources.IMarker)
    */
   public IMarkerResolution[] getResolutions(IMarker marker) {
-    String type;
-    try {
-      type = marker.getType();
-    } catch(CoreException e) {
-      MavenLogger.log(e);
-      type = ""; //$NON-NLS-1$
-    }
-    if(IMavenConstants.MARKER_HINT_ID.equals(type)) {
-      String hint = marker.getAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, ""); //$NON-NLS-1$
+    String hint = marker.getAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, null);
+    if(hint != null) {
       //only provide a quickfix for the schema marker
-      if("schema".equals(hint)) {
+      if(IMavenConstants.EDITOR_HINT_MISSING_SCHEMA.equals(hint)) {
         return new IMarkerResolution[] {new XMLSchemaMarkerResolution()};
       }
-      if ("parent_version".equals(hint)) {
+      if(IMavenConstants.EDITOR_HINT_PARENT_VERSION.equals(hint)) {
         return new IMarkerResolution[] {new PomQuickAssistProcessor.IdPartRemovalProposal(marker, true) };
       }
-      if ("parent_groupid".equals(hint)) {
+      if(IMavenConstants.EDITOR_HINT_PARENT_GROUP_ID.equals(hint)) {
         return new IMarkerResolution[] {new PomQuickAssistProcessor.IdPartRemovalProposal(marker, false) };
       }
-      if (hint.equals("managed_dependency_override")) { //$NON-NLS-1$
+      if(hint.equals(IMavenConstants.EDITOR_HINT_MANAGED_DEPENDENCY_OVERRIDE)) {
         return new IMarkerResolution[] {
             new PomQuickAssistProcessor.ManagedVersionRemovalProposal(marker, true), 
             new PomQuickAssistProcessor.IgnoreWarningProposal(marker, IMavenConstants.MARKER_IGNORE_MANAGED)
             };
       }
-      if (hint.equals("managed_plugin_override")) { //$NON-NLS-1$
+      if(hint.equals(IMavenConstants.EDITOR_HINT_MANAGED_PLUGIN_OVERRIDE)) {
         return new IMarkerResolution[] {
             new PomQuickAssistProcessor.ManagedVersionRemovalProposal(marker, false), 
             new PomQuickAssistProcessor.IgnoreWarningProposal(marker, IMavenConstants.MARKER_IGNORE_MANAGED)
             };
       }
-      
     }
     return new IMarkerResolution[0];
   }
 
   public boolean hasResolutions(IMarker marker) {
-    String type;
-    try {
-      type = marker.getType();
-    } catch(CoreException e) {
-      MavenLogger.log(e);
-      type = ""; //$NON-NLS-1$
-    }
-    return IMavenConstants.MARKER_HINT_ID.equals(type);
+    String hint = marker.getAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, null); //$NON-NLS-1$
+    return !(hint == null);
   }
-
 }

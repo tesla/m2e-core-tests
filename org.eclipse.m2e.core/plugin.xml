@@ -315,13 +315,6 @@
       <super type="org.eclipse.m2e.core.maven2Problem"/>
       <persistent value="false"/>
    </extension>
-   <extension point="org.eclipse.core.resources.markers"
-         id="maven2ProblemHint"
-         name="%m2.marker.hint.name">
-      <super type="org.eclipse.m2e.core.maven2Problem"/>
-      <super type="org.eclipse.core.resources.problemmarker"/>
-      <persistent value="false"/>
-   </extension>
 
    <extension point="org.eclipse.ui.keywords">
       <keyword id="org.eclipse.m2e.core.maven" label="%keyword.label"/>

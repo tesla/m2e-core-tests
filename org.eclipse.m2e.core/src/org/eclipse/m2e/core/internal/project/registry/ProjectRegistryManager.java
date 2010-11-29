@@ -564,6 +564,7 @@ public class ProjectRegistryManager {
         mavenProject = mavenResult.getProject();
     }
 
+    markerManager.addEditorHintMarkers(pom, IMavenConstants.MARKER_POM_LOADING_ID);
     if (mavenProject == null) {
       markerManager.addMarkers(pom, IMavenConstants.MARKER_POM_LOADING_ID, mavenResult);
       return null;

@@ -110,47 +110,44 @@ public class MavenMarkerManager implements IMavenMarkerManager {
     if (mavenProject != null) {
       addMissingArtifactMarkers(pomFile, type, mavenProject);
     }
-    addEditorHintMarkers(pomFile);
   }
   
-  public void addEditorHintMarkers(IResource pomFile) {
-    checkForSchema(pomFile);
+  public void addEditorHintMarkers(IResource pomFile, String type) {
+    checkForSchema(pomFile, type);
     //mkleint: adding here but I'm sort of not entirely clear what the usage patter of this class is.
-    checkVarious(pomFile);
+    checkVarious(pomFile, type);
   }
 
   /**
    * @param pomFile
    */
-  private void checkVarious(IResource pomFile) {
+  private void checkVarious(IResource pomFile, String type) {
     IDOMModel domModel = null;
-    try{
-      if(!(pomFile instanceof IFile)){
+    try {
+      if(!(pomFile instanceof IFile)) {
         return;
       }
-      domModel = (IDOMModel)StructuredModelManager.getModelManager().getModelForRead((IFile)pomFile);
+      domModel = (IDOMModel) StructuredModelManager.getModelManager().getModelForRead((IFile) pomFile);
       IStructuredDocument document = domModel.getStructuredDocument();
       Element root = domModel.getDocument().getDocumentElement();
 
-      if (root.getNodeName().equals("project")) { //$NON-NLS-1$
+      if(root.getNodeName().equals("project")) { //$NON-NLS-1$
         //now check parent version and groupid against the current project's ones..
-        checkParentMatchingGroupIdVersion(root, pomFile, document);
-        checkManagedDependencies(root, pomFile, document);
-        checkManagedPlugins(root, pomFile, document);
+        checkParentMatchingGroupIdVersion(root, pomFile, type, document);
+        checkManagedDependencies(root, pomFile, type, document);
+        checkManagedPlugins(root, pomFile, type, document);
       }
-    }
-    catch (Throwable t) {
+    } catch(Exception t) {
       MavenLogger.log("Error checking for warnings", t); //$NON-NLS-1$
-    }
-    finally {
-      if ( domModel != null ) {
+    } finally {
+      if(domModel != null) {
         domModel.releaseFromRead();
       }
     }
-    
   }
   
-  private void checkManagedDependencies(Element root, IResource pomFile, IStructuredDocument document)  throws CoreException {
+  private void checkManagedDependencies(Element root, IResource pomFile, String type, IStructuredDocument document)
+      throws CoreException {
     IProject prj = pomFile.getProject();
     //the project returned is in a way unrelated to nested child poms that don't have an opened project,
     //in that case we pass along a wrong parent/aggregator
@@ -217,36 +214,39 @@ public class MavenMarkerManager implements IMavenMarkerManager {
     }
     
     //now we have all the candidates, match them against the effective managed set 
-    for (Element dep : candidates) {
-       Element version = findChildElement(dep, "version"); //$NON-NLS-1$
-        String grpString = getElementTextValue(findChildElement(dep, "groupId")); //$NON-NLS-1$
-        String artString = getElementTextValue(findChildElement(dep, "artifactId")); //$NON-NLS-1$
-        String versionString = getElementTextValue(version);
-        if (grpString != null && artString != null && versionString != null) {
-          String id = grpString + ":" + artString; //$NON-NLS-1$
-          if (managed.containsKey(id)) {
-            String managedVersion = managed.get(id);
-            if (version instanceof IndexedRegion) {
-              IndexedRegion off = (IndexedRegion)version;
-              if (lookForIgnoreMarker(document, version, off, IMavenConstants.MARKER_IGNORE_MANAGED)) {
-                continue;
-              }
-              
-              IMarker mark = addMarker(pomFile, IMavenConstants.MARKER_HINT_ID, NLS.bind(org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_managed_title, managedVersion, artString), document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING);
-              mark.setAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, "managed_dependency_override"); //$NON-NLS-1$ //$NON-NLS-2$
-              mark.setAttribute(IMarker.CHAR_START, off.getStartOffset());
-              mark.setAttribute(IMarker.CHAR_END, off.getEndOffset());
-              mark.setAttribute("problemType", "pomhint"); //only imporant in case we enable the generic xml quick fixes //$NON-NLS-1$ //$NON-NLS-2$
-              //add these attributes to easily and deterministicaly find the declaration in question
-              mark.setAttribute("groupId", grpString); //$NON-NLS-1$
-              mark.setAttribute("artifactId", artString); //$NON-NLS-1$
-              String profile = candidateProfile.get(dep);
-              if (profile != null) {
-                mark.setAttribute("profile", profile); //$NON-NLS-1$
-              }
+    for(Element dep : candidates) {
+      Element version = findChildElement(dep, "version"); //$NON-NLS-1$
+      String grpString = getElementTextValue(findChildElement(dep, "groupId")); //$NON-NLS-1$
+      String artString = getElementTextValue(findChildElement(dep, "artifactId")); //$NON-NLS-1$
+      String versionString = getElementTextValue(version);
+      if(grpString != null && artString != null && versionString != null) {
+        String id = grpString + ":" + artString; //$NON-NLS-1$
+        if(managed.containsKey(id)) {
+          String managedVersion = managed.get(id);
+          if(version instanceof IndexedRegion) {
+            IndexedRegion off = (IndexedRegion) version;
+            if(lookForIgnoreMarker(document, version, off, IMavenConstants.MARKER_IGNORE_MANAGED)) {
+              continue;
+            }
+
+            IMarker mark = addMarker(pomFile, type, NLS.bind(
+                org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_managed_title, managedVersion, artString),
+                document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING);
+            mark.setAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT,
+                IMavenConstants.EDITOR_HINT_MANAGED_DEPENDENCY_OVERRIDE);
+            mark.setAttribute(IMarker.CHAR_START, off.getStartOffset());
+            mark.setAttribute(IMarker.CHAR_END, off.getEndOffset());
+            mark.setAttribute("problemType", "pomhint"); //only imporant in case we enable the generic xml quick fixes //$NON-NLS-1$ //$NON-NLS-2$
+            //add these attributes to easily and deterministicaly find the declaration in question
+            mark.setAttribute("groupId", grpString); //$NON-NLS-1$
+            mark.setAttribute("artifactId", artString); //$NON-NLS-1$
+            String profile = candidateProfile.get(dep);
+            if(profile != null) {
+              mark.setAttribute("profile", profile); //$NON-NLS-1$
             }
           }
         }
+      }
     }
   }
 
@@ -275,7 +275,8 @@ public class MavenMarkerManager implements IMavenMarkerManager {
     return false;
   }
   
-  private void checkManagedPlugins(Element root, IResource pomFile, IStructuredDocument document)  throws CoreException {
+  private void checkManagedPlugins(Element root, IResource pomFile, String type, IStructuredDocument document)
+      throws CoreException {
     IProject prj = pomFile.getProject();
     //the project returned is in a way unrelated to nested child poms that don't have an opened project,
     //in that case we pass along a wrong parent/aggregator
@@ -348,77 +349,83 @@ public class MavenMarkerManager implements IMavenMarkerManager {
     }
     
     //now we have all the candidates, match them against the effective managed set 
-    for (Element dep : candidates) {
-        String grpString = getElementTextValue(findChildElement(dep, "groupId")); //$NON-NLS-1$
-        String artString = getElementTextValue(findChildElement(dep, "artifactId")); //$NON-NLS-1$
-        Element version = findChildElement(dep, "version"); //$NON-NLS-1$
-        String versionString = getElementTextValue(version);
-        if (grpString != null && artString != null && versionString != null) {
-          String id = Plugin.constructKey(grpString, artString);
-          if (managed.containsKey(id)) {
-            String managedVersion = managed.get(id);
-            if (version instanceof IndexedRegion) {
-              IndexedRegion off = (IndexedRegion)version;
-              if (lookForIgnoreMarker(document, version, off, IMavenConstants.MARKER_IGNORE_MANAGED)) {
-                continue;
-              }
-              
-              IMarker mark = addMarker(pomFile, IMavenConstants.MARKER_HINT_ID, NLS.bind(org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_managed_title, managedVersion, artString), document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING);
-              mark.setAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, "managed_plugin_override"); //$NON-NLS-1$ //$NON-NLS-2$
-              mark.setAttribute(IMarker.CHAR_START, off.getStartOffset());
-              mark.setAttribute(IMarker.CHAR_END, off.getEndOffset());
-              mark.setAttribute("problemType", "pomhint"); //only imporant in case we enable the generic xml quick fixes //$NON-NLS-1$ //$NON-NLS-2$
-              //add these attributes to easily and deterministicaly find the declaration in question
-              mark.setAttribute("groupId", grpString); //$NON-NLS-1$
-              mark.setAttribute("artifactId", artString); //$NON-NLS-1$
-              String profile = candidateProfile.get(dep);
-              if (profile != null) {
-                mark.setAttribute("profile", profile); //$NON-NLS-1$
-              }
+    for(Element dep : candidates) {
+      String grpString = getElementTextValue(findChildElement(dep, "groupId")); //$NON-NLS-1$
+      String artString = getElementTextValue(findChildElement(dep, "artifactId")); //$NON-NLS-1$
+      Element version = findChildElement(dep, "version"); //$NON-NLS-1$
+      String versionString = getElementTextValue(version);
+      if(grpString != null && artString != null && versionString != null) {
+        String id = Plugin.constructKey(grpString, artString);
+        if(managed.containsKey(id)) {
+          String managedVersion = managed.get(id);
+          if(version instanceof IndexedRegion) {
+            IndexedRegion off = (IndexedRegion) version;
+            if(lookForIgnoreMarker(document, version, off, IMavenConstants.MARKER_IGNORE_MANAGED)) {
+              continue;
+            }
+
+            IMarker mark = addMarker(pomFile, type, NLS.bind(
+                org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_managed_title, managedVersion, artString),
+                document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING);
+            mark.setAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT,
+                IMavenConstants.EDITOR_HINT_MANAGED_PLUGIN_OVERRIDE);
+            mark.setAttribute(IMarker.CHAR_START, off.getStartOffset());
+            mark.setAttribute(IMarker.CHAR_END, off.getEndOffset());
+            mark.setAttribute("problemType", "pomhint"); //only imporant in case we enable the generic xml quick fixes //$NON-NLS-1$ //$NON-NLS-2$
+            //add these attributes to easily and deterministicaly find the declaration in question
+            mark.setAttribute("groupId", grpString); //$NON-NLS-1$
+            mark.setAttribute("artifactId", artString); //$NON-NLS-1$
+            String profile = candidateProfile.get(dep);
+            if(profile != null) {
+              mark.setAttribute("profile", profile); //$NON-NLS-1$
             }
           }
         }
-      
+      }
     }
   }
-  
 
-  private void checkParentMatchingGroupIdVersion(Element root, IResource pomFile, IStructuredDocument document) throws CoreException {
+  private void checkParentMatchingGroupIdVersion(Element root, IResource pomFile, String type,
+      IStructuredDocument document) throws CoreException {
     Element parent = findChildElement(root, "parent"); //$NON-NLS-1$
     Element groupId = findChildElement(root, "groupId"); //$NON-NLS-1$
-    if (parent != null && groupId != null) {
-        //now compare the values of parent and project groupid..
-        String parentString = getElementTextValue(findChildElement(parent, "groupId")); //$NON-NLS-1$
-        String childString = getElementTextValue(groupId);
-        if (parentString != null && parentString.equals(childString)) {
-          //now figure out the offset
-          if (groupId instanceof IndexedRegion) {
-            IndexedRegion off = (IndexedRegion)groupId;
-            IMarker mark = addMarker(pomFile, IMavenConstants.MARKER_HINT_ID, org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_duplicate_groupid, document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING);
-            mark.setAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, "parent_groupid"); //$NON-NLS-1$ //$NON-NLS-2$
-            mark.setAttribute(IMarker.CHAR_START, off.getStartOffset());
-            mark.setAttribute(IMarker.CHAR_END, off.getEndOffset());
-            mark.setAttribute("problemType", "pomhint"); //only imporant in case we enable the generic xml quick fixes //$NON-NLS-1$ //$NON-NLS-2$
-          }
+    if(parent != null && groupId != null) {
+      //now compare the values of parent and project groupid..
+      String parentString = getElementTextValue(findChildElement(parent, "groupId")); //$NON-NLS-1$
+      String childString = getElementTextValue(groupId);
+      if(parentString != null && parentString.equals(childString)) {
+        //now figure out the offset
+        if(groupId instanceof IndexedRegion) {
+          IndexedRegion off = (IndexedRegion) groupId;
+          IMarker mark = addMarker(pomFile, type,
+              org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_duplicate_groupid,
+              document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING);
+          mark.setAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, IMavenConstants.EDITOR_HINT_PARENT_GROUP_ID);
+          mark.setAttribute(IMarker.CHAR_START, off.getStartOffset());
+          mark.setAttribute(IMarker.CHAR_END, off.getEndOffset());
+          mark.setAttribute("problemType", "pomhint"); //only imporant in case we enable the generic xml quick fixes //$NON-NLS-1$ //$NON-NLS-2$
         }
+      }
     }
     Element version = findChildElement(root, "version"); //$NON-NLS-1$
-    if (parent != null && version != null) {
-        //now compare the values of parent and project version..
-        String parentString = getElementTextValue(findChildElement(parent, "version")); //$NON-NLS-1$
-        String childString = getElementTextValue(version);
-        if (parentString != null && parentString.equals(childString)) {
-          //now figure out the offset
-          if (version instanceof IndexedRegion) {
-            IndexedRegion off = (IndexedRegion)version;
-            IMarker mark = addMarker(pomFile, IMavenConstants.MARKER_HINT_ID, org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_duplicate_version, document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING);
-            mark.setAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, "parent_version"); //$NON-NLS-1$ //$NON-NLS-2$
-            mark.setAttribute(IMarker.CHAR_START, off.getStartOffset());
-            mark.setAttribute(IMarker.CHAR_END, off.getEndOffset());
-            mark.setAttribute("problemType", "pomhint"); //only imporant in case we enable the generic xml quick fixes //$NON-NLS-1$ //$NON-NLS-2$
-          }
+    if(parent != null && version != null) {
+      //now compare the values of parent and project version..
+      String parentString = getElementTextValue(findChildElement(parent, "version")); //$NON-NLS-1$
+      String childString = getElementTextValue(version);
+      if(parentString != null && parentString.equals(childString)) {
+        //now figure out the offset
+        if(version instanceof IndexedRegion) {
+          IndexedRegion off = (IndexedRegion) version;
+          IMarker mark = addMarker(pomFile, type,
+              org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_duplicate_version,
+              document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING);
+          mark.setAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, IMavenConstants.EDITOR_HINT_PARENT_VERSION);
+          mark.setAttribute(IMarker.CHAR_START, off.getStartOffset());
+          mark.setAttribute(IMarker.CHAR_END, off.getEndOffset());
+          mark.setAttribute("problemType", "pomhint"); //only important in case we enable the generic xml quick fixes //$NON-NLS-1$ //$NON-NLS-2$
         }
-    }    
+      }
+    }
   }
   
   public static Element findChildElement(Element parent, String name) {
@@ -473,7 +480,7 @@ public class MavenMarkerManager implements IMavenMarkerManager {
    * and look for the project node to see if it has this schema defined
    * @param pomFile
    */
-  protected void checkForSchema(IResource pomFile){
+  protected void checkForSchema(IResource pomFile, String type) {
     IDOMModel domModel = null;
     try{
       if(!(pomFile instanceof IFile)){
@@ -493,12 +500,15 @@ public class MavenMarkerManager implements IMavenMarkerManager {
               if (documentRegion.getText().lastIndexOf(XSI_SCHEMA_LOCATION) == -1) {
                 int offset = documentRegion.getStartOffset();
                 int lineNumber = document.getLineOfOffset(offset) + 1;
-                IMarker marker = addMarker(pomFile, IMavenConstants.MARKER_HINT_ID, org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_error_noschema, lineNumber, IMarker.SEVERITY_WARNING, false);
+                IMarker marker = addMarker(pomFile, type,
+                    org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_error_noschema, lineNumber,
+                    IMarker.SEVERITY_WARNING, false);
                 //the quick fix in the marker view needs to know the offset, since it doesn't have access to the
                 //editor/source viewer
                 if(marker != null){
                   marker.setAttribute(OFFSET, offset);
-                  marker.setAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, "schema"); //$NON-NLS-1$ 
+                  marker.setAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT,
+                      IMavenConstants.EDITOR_HINT_MISSING_SCHEMA);
                   marker.setAttribute(IMarker.CHAR_START, documentRegion.getStartOffset());
                   marker.setAttribute(IMarker.CHAR_END, documentRegion.getEndOffset());
                   marker.setAttribute("problemType", "pomhint"); //only imporant in case we enable the generic xml quick fixes //$NON-NLS-1$ //$NON-NLS-2$
@@ -510,7 +520,7 @@ public class MavenMarkerManager implements IMavenMarkerManager {
           }
         }
       }
-    } catch(Throwable ex) {
+    } catch(Exception ex) {
       MavenLogger.log("Error checking for schema", ex); //$NON-NLS-1$
     }
     finally {
@@ -656,12 +666,13 @@ public class MavenMarkerManager implements IMavenMarkerManager {
       resource.deleteMarkers(type, true, IResource.DEPTH_INFINITE);
     }
   }
-  
-  public void deleteEditorHintMarkers(IResource resource) throws CoreException {
-    if (resource != null && resource.exists()) {
-      resource.deleteMarkers(IMavenConstants.MARKER_HINT_ID, true, IResource.DEPTH_INFINITE);
-    }
-  }
+
+//  
+//  public void deleteEditorHintMarkers(IResource resource) throws CoreException {
+//    if (resource != null && resource.exists()) {
+//      resource.deleteMarkers(IMavenConstants.MARKER_HINT_ID, true, IResource.DEPTH_INFINITE);
+//    }
+//  }
 
   private void addMissingArtifactMarkers(IResource pomFile, String type, MavenProject mavenProject) {
 //    Set<Artifact> directDependencies = mavenProject.getDependencyArtifacts();

@@ -1,0 +1,43 @@
+package org.eclipse.m2e.editor.xml;
+
+import java.util.List;
+
+import junit.framework.Assert;
+
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.m2e.core.core.IMavenConstants;
+import org.eclipse.m2e.tests.common.WorkspaceHelpers;
+
+
+public class XmlEditorHelpers extends WorkspaceHelpers {
+  private static final MavenMarkerResolutionGenerator mavenMarkerResolutionGenerator = new MavenMarkerResolutionGenerator();
+
+  public static List<IMarker> findEditorHintWarningMarkers(IProject project) throws CoreException {
+    return WorkspaceHelpers.findMarkers(project, IMarker.SEVERITY_WARNING, IMavenConstants.MARKER_ATTR_EDITOR_HINT);
+  }
+
+  public static void assertNoEditorHintWarningMarkers(IProject project) throws Exception {
+    List<IMarker> markers = XmlEditorHelpers.findEditorHintWarningMarkers(project);
+    Assert.assertEquals(toString(markers), 0, markers.size());
+  }
+
+  public static void assertEditorHintWarningMarker(String type, String hintType, String message, Integer lineNumber,
+      int resolutions, IMarker actual) throws Exception {
+    Assert.assertNotNull("Expected not null marker", actual);
+    String sMarker = toString(actual);
+    Assert.assertEquals(sMarker, IMarker.SEVERITY_WARNING, actual.getAttribute(IMarker.SEVERITY));
+    Assert.assertEquals(sMarker, type, actual.getType());
+    Assert.assertEquals(sMarker, hintType, actual.getAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT));
+    if(message != null) {
+      String actualMessage = actual.getAttribute(IMarker.MESSAGE, "");
+      Assert.assertTrue(sMarker, actualMessage.startsWith(message));
+    }
+    if(lineNumber != null) {
+      Assert.assertEquals(sMarker, lineNumber, actual.getAttribute(IMarker.LINE_NUMBER));
+    }
+    Assert.assertTrue(sMarker, mavenMarkerResolutionGenerator.hasResolutions(actual));
+    Assert.assertEquals(sMarker, resolutions, mavenMarkerResolutionGenerator.getResolutions(actual).length);
+  }
+}

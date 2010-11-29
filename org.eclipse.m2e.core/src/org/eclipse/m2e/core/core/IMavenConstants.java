@@ -35,8 +35,6 @@ public interface IMavenConstants {
   public static final String MARKER_DEPENDENCY_ID = MARKER_ID + ".dependency"; //$NON-NLS-1$
 
   public static final String MARKER_BUILD_ID = MARKER_ID + ".build"; //$NON-NLS-1$
-
-  public static final String MARKER_HINT_ID = MARKER_ID + "Hint"; //$NON-NLS-1$
   
   /**
    * string that gets included in pom.xml file comments and makes the marker manager to ignore
@@ -74,9 +72,16 @@ public interface IMavenConstants {
 
   public static final String INDEX_UPDATE_PROP = "indexUpdate"; //$NON-NLS-1$
 
-  /**
-   * 
-   */
   public static final String MARKER_ATTR_EDITOR_HINT = "editor_hint";
+
+  public static final String EDITOR_HINT_PARENT_GROUP_ID = "parent_groupid";
+
+  public static final String EDITOR_HINT_PARENT_VERSION = "parent_version";
+
+  public static final String EDITOR_HINT_MANAGED_DEPENDENCY_OVERRIDE = "managed_dependency_override";
+
+  public static final String EDITOR_HINT_MANAGED_PLUGIN_OVERRIDE = "managed_plugin_override";
+
+  public static final String EDITOR_HINT_MISSING_SCHEMA = "missing_schema";
 
 }

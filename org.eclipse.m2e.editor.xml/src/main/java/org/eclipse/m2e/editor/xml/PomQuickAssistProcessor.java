@@ -22,7 +22,6 @@ import org.w3c.dom.Text;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -67,68 +66,58 @@ public class PomQuickAssistProcessor implements IQuickAssistProcessor {
   }
 
   public boolean canFix(Annotation an) {
-
-    if (an instanceof MarkerAnnotation) {
+    if(an instanceof MarkerAnnotation) {
       MarkerAnnotation mark = (MarkerAnnotation) an;
-      try {
-        if (mark.getMarker().isSubtypeOf(IMavenConstants.MARKER_HINT_ID)) {
-          return true;
-        }
-      } catch(CoreException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+      String hint = mark.getMarker().getAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, null);
+      if(hint != null) {
+        return true;
       }
     }
     return false;
   }
   
   public ICompletionProposal[] computeQuickAssistProposals(IQuickAssistInvocationContext context) {
-   List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
-   Iterator<Annotation> annotationIterator = context.getSourceViewer().getAnnotationModel().getAnnotationIterator();
-   while(annotationIterator.hasNext()){
-     Annotation annotation = annotationIterator.next();
-     if (annotation instanceof MarkerAnnotation) {
-       MarkerAnnotation mark = (MarkerAnnotation) annotation;
-       try {
-         Position position = context.getSourceViewer().getAnnotationModel().getPosition(annotation);
-         int lineNum = context.getSourceViewer().getDocument().getLineOfOffset(position.getOffset()) + 1;
-         int currentLineNum = context.getSourceViewer().getDocument().getLineOfOffset(context.getOffset()) + 1;
-         if (currentLineNum == lineNum) {
-           if (mark.getMarker().isSubtypeOf(IMavenConstants.MARKER_HINT_ID)) {
-             String hint = mark.getMarker().getAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, ""); //$NON-NLS-1$
-             if (hint.equals("parent_groupid")) { //$NON-NLS-1$
-               proposals.add(new IdPartRemovalProposal(context, false, mark));
-             }
-             if (hint.equals("parent_version")) { //$NON-NLS-1$
-               proposals.add(new IdPartRemovalProposal(context, true, mark));
-             }
-             if (hint.equals("managed_dependency_override")) { //$NON-NLS-1$
-               proposals.add(new ManagedVersionRemovalProposal(context, true, mark));
-               //add a proposal to ignore the marker
-               proposals.add(new IgnoreWarningProposal(context, mark, IMavenConstants.MARKER_IGNORE_MANAGED));
-             }
-             if (hint.equals("managed_plugin_override")) { //$NON-NLS-1$
-               proposals.add(new ManagedVersionRemovalProposal(context, false, mark));
-               //add a proposal to ignore the marker
-               proposals.add(new IgnoreWarningProposal(context, mark, IMavenConstants.MARKER_IGNORE_MANAGED));
-             }
-             if (hint.equals("schema")) { //$NON-NLS-1$
-               proposals.add(new SchemaCompletionProposal(context, mark));
-             }
-           }
-         }
-       } catch(Exception e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-       }
-     }
-     
-   }
-   
-   if (proposals.size() > 0) {
-     return proposals.toArray(new ICompletionProposal[0]);
-   }
-   return null;
+    List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
+    Iterator<Annotation> annotationIterator = context.getSourceViewer().getAnnotationModel().getAnnotationIterator();
+    while(annotationIterator.hasNext()) {
+      Annotation annotation = annotationIterator.next();
+      if(annotation instanceof MarkerAnnotation) {
+        MarkerAnnotation mark = (MarkerAnnotation) annotation;
+        try {
+          Position position = context.getSourceViewer().getAnnotationModel().getPosition(annotation);
+          int lineNum = context.getSourceViewer().getDocument().getLineOfOffset(position.getOffset()) + 1;
+          int currentLineNum = context.getSourceViewer().getDocument().getLineOfOffset(context.getOffset()) + 1;
+          if(currentLineNum == lineNum) {
+            String hint = mark.getMarker().getAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, null);
+            if(hint != null) {
+              if(hint.equals(IMavenConstants.EDITOR_HINT_PARENT_GROUP_ID)) {
+                proposals.add(new IdPartRemovalProposal(context, false, mark));
+              } else if(hint.equals(IMavenConstants.EDITOR_HINT_PARENT_VERSION)) {
+                proposals.add(new IdPartRemovalProposal(context, true, mark));
+              } else if(hint.equals(IMavenConstants.EDITOR_HINT_MANAGED_DEPENDENCY_OVERRIDE)) {
+                proposals.add(new ManagedVersionRemovalProposal(context, true, mark));
+                //add a proposal to ignore the marker
+                proposals.add(new IgnoreWarningProposal(context, mark, IMavenConstants.MARKER_IGNORE_MANAGED));
+              } else if(hint.equals(IMavenConstants.EDITOR_HINT_MANAGED_PLUGIN_OVERRIDE)) {
+                proposals.add(new ManagedVersionRemovalProposal(context, false, mark));
+                //add a proposal to ignore the marker
+                proposals.add(new IgnoreWarningProposal(context, mark, IMavenConstants.MARKER_IGNORE_MANAGED));
+              } else if(hint.equals(IMavenConstants.EDITOR_HINT_MISSING_SCHEMA)) {
+                proposals.add(new SchemaCompletionProposal(context, mark));
+              }
+            }
+          }
+        } catch(Exception e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
+      }
+    }
+
+    if(proposals.size() > 0) {
+      return proposals.toArray(new ICompletionProposal[0]);
+    }
+    return null;
   }
 
   public String getErrorMessage() {

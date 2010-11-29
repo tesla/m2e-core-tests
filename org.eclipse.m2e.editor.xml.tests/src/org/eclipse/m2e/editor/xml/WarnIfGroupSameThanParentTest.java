@@ -11,12 +11,8 @@
 
 package org.eclipse.m2e.editor.xml;
 
-import java.io.IOException;
-
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
@@ -31,48 +27,57 @@ import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 
 public class WarnIfGroupSameThanParentTest extends AbstractMavenProjectTestCase {
 
-  public void testMNGEclipse2552() throws IOException, CoreException, InterruptedException {
+  public void testMNGEclipse2552() throws Exception {
     IProject[] projects = importProjects("projects/MNGECLIPSE-2552", new String[] {
         "child2552withDuplicateGroupAndVersion/pom.xml", 
         "child2552withDuplicateGroup/pom.xml",
         "child2552withDuplicateVersion/pom.xml", 
         "parent2552/pom.xml"}, new ResolverConfiguration());
     waitForJobsToComplete();
-    MavenMarkerResolutionGenerator generator = new MavenMarkerResolutionGenerator();
 
     {
       //"child2552withDuplicateGroupAndVersion/pom.xml"
-      IMarker[] markers = projects[0].findMember("pom.xml").findMarkers(IMavenConstants.MARKER_HINT_ID, true, IResource.DEPTH_INFINITE);
+      IProject project = projects[0];
+      IMarker[] markers = XmlEditorHelpers.findEditorHintWarningMarkers(project).toArray(new IMarker[0]);
       assertEquals(2, markers.length);
-      assertEquals(IMarker.SEVERITY_WARNING, markers[0].getAttribute(IMarker.SEVERITY));
-      assertEquals("parent_groupid", markers[0].getAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT));
-      assertEquals("parent_version", markers[1].getAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT));
-      
-      //this sort of testing just asks for trouble and endless updates of the test, but well..
-      assertEquals(1, generator.getResolutions(markers[0]).length);
-      assertEquals(1, generator.getResolutions(markers[1]).length);
+      XmlEditorHelpers.assertEditorHintWarningMarker(IMavenConstants.MARKER_POM_LOADING_ID,
+          IMavenConstants.EDITOR_HINT_PARENT_GROUP_ID, null /*message*/, 8 /*lineNumber*/, 1 /*resolutions*/,
+          markers[0]);
+      XmlEditorHelpers.assertEditorHintWarningMarker(IMavenConstants.MARKER_POM_LOADING_ID,
+          IMavenConstants.EDITOR_HINT_PARENT_VERSION, null /*message*/, 10 /*lineNumber*/, 1 /*resolutions*/,
+          markers[1]);
+      // Fix the problem - the marker should be removed
+      copyContent(project, "pom_good.xml", "pom.xml");
+      waitForJobsToComplete();
+      XmlEditorHelpers.assertNoEditorHintWarningMarkers(project);
     }
 
     {
       //"child2552withDuplicateGroup/pom.xml", 
-      IMarker[] markers = projects[1].findMember("pom.xml").findMarkers(IMavenConstants.MARKER_HINT_ID, true, IResource.DEPTH_INFINITE);
+      IProject project = projects[1];
+      IMarker[] markers = XmlEditorHelpers.findEditorHintWarningMarkers(project).toArray(new IMarker[0]);
       assertEquals(1, markers.length);
-      assertEquals(IMarker.SEVERITY_WARNING, markers[0].getAttribute(IMarker.SEVERITY));
-      assertEquals("parent_groupid", markers[0].getAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT));
-
-      //this sort of testing just asks for trouble and endless updates of the test, but well..
-      assertEquals(1, generator.getResolutions(markers[0]).length);
+      XmlEditorHelpers.assertEditorHintWarningMarker(IMavenConstants.MARKER_POM_LOADING_ID,
+          IMavenConstants.EDITOR_HINT_PARENT_GROUP_ID, null /*message*/, 8 /*lineNumber*/, 1 /*resolutions*/,
+          markers[0]);
+      // Fix the problem - the marker should be removed
+      copyContent(project, "pom_good.xml", "pom.xml");
+      waitForJobsToComplete();
+      XmlEditorHelpers.assertNoEditorHintWarningMarkers(project);
     }
     
     {
       //"child2552withDuplicateVersion/pom.xml"
-      IMarker[] markers = projects[2].findMember("pom.xml").findMarkers(IMavenConstants.MARKER_HINT_ID, true, IResource.DEPTH_INFINITE);
+      IProject project = projects[2];
+      IMarker[] markers = XmlEditorHelpers.findEditorHintWarningMarkers(project).toArray(new IMarker[0]);
       assertEquals(1, markers.length);
-      assertEquals(IMarker.SEVERITY_WARNING, markers[0].getAttribute(IMarker.SEVERITY));
-      assertEquals("parent_version", markers[0].getAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT));
-      
-      //this sort of testing just asks for trouble and endless updates of the test, but well..
-      assertEquals(1, generator.getResolutions(markers[0]).length);
+      XmlEditorHelpers.assertEditorHintWarningMarker(IMavenConstants.MARKER_POM_LOADING_ID,
+          IMavenConstants.EDITOR_HINT_PARENT_VERSION, null /*message*/, 9 /*lineNumber*/, 1 /*resolutions*/,
+          markers[0]);
+      // Fix the problem - the marker should be removed
+      copyContent(project, "pom_good.xml", "pom.xml");
+      waitForJobsToComplete();
+      XmlEditorHelpers.assertNoEditorHintWarningMarkers(project);
     }
   }
 }

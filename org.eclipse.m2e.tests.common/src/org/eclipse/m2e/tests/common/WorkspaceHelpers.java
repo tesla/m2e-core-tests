@@ -15,7 +15,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import junit.framework.Assert;
 
@@ -120,8 +123,9 @@ public class WorkspaceHelpers {
     return sb.toString();
   }
 
-  private static String toString(IMarker marker) throws CoreException {
-    return "Type=" + marker.getType() + ":Message=" + marker.getAttribute(IMarker.MESSAGE);
+  protected static String toString(IMarker marker) throws CoreException {
+    return "Type=" + marker.getType() + ":Message=" + marker.getAttribute(IMarker.MESSAGE) + ":LineNumber="
+        + marker.getAttribute(IMarker.LINE_NUMBER);
   }
 
   public static void assertMarkers(IProject project, int expected) throws CoreException {
@@ -130,15 +134,45 @@ public class WorkspaceHelpers {
         expected, markers.size());
   }
 
-  public static List<IMarker> findMarkers(IProject project, int targetSeverity) throws CoreException {
-    ArrayList<IMarker> errors = new ArrayList<IMarker>();
+  public static List<IMarker> findMarkers(IProject project, int targetSeverity)
+      throws CoreException {
+    return findMarkers(project, targetSeverity, null /*withAttribute*/);
+  }
+
+  public static List<IMarker> findMarkers(IProject project, int targetSeverity, String withAttribute)
+      throws CoreException {
+    SortedMap<IMarker, IMarker> errors = new TreeMap<IMarker, IMarker>(new Comparator<IMarker>() {
+      public int compare(IMarker o1, IMarker o2) {
+        int lineNumber1 = o1.getAttribute(IMarker.LINE_NUMBER, -1);
+        int lineNumber2 = o2.getAttribute(IMarker.LINE_NUMBER, -1);
+        if(lineNumber1 < lineNumber2) {
+          return -1;
+        }
+        if(lineNumber1 > lineNumber2) {
+          return 1;
+        }
+        // Markers on the same line
+        String message1 = o1.getAttribute(IMarker.MESSAGE, "");
+        String message2 = o2.getAttribute(IMarker.MESSAGE, "");
+        return message1.compareTo(message2);
+      }
+    });
     for(IMarker marker : project.findMarkers(null /* all markers */, true /* subtypes */, IResource.DEPTH_INFINITE)) {
       int severity = marker.getAttribute(IMarker.SEVERITY, 0);
-      if(severity==targetSeverity) {
-        errors.add(marker);
+      if(severity != targetSeverity) {
+        continue;
       }
+      if(withAttribute != null) {
+        String attribute = marker.getAttribute(withAttribute, null);
+        if(attribute == null) {
+          continue;
+        }
+      }
+      errors.put(marker, marker);
     }
-    return errors;
+    List<IMarker> result = new ArrayList<IMarker>();
+    result.addAll(errors.keySet());
+    return result;
   }
 
   public static List<IMarker> findErrorMarkers(IProject project) throws CoreException {
