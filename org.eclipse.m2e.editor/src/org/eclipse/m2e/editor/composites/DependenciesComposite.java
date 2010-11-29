@@ -119,8 +119,6 @@ public class DependenciesComposite extends Composite {
 
   // model
 
-  boolean changingSelection = false;
-
   Model model;
 
   MavenProject mavenProject;
@@ -215,12 +213,7 @@ public class DependenciesComposite extends Composite {
         List<Dependency> selection = dependenciesEditor.getSelection();
 
         if(!selection.isEmpty()) {
-          changingSelection = true;
-          try {
-            dependencyManagementEditor.setSelection(Collections.<Dependency> emptyList());
-          } finally {
-            changingSelection = false;
-          }
+          dependencyManagementEditor.setSelection(Collections.<Dependency> emptyList());
         }
       }
     });
@@ -377,12 +370,7 @@ public class DependenciesComposite extends Composite {
         List<Dependency> selection = dependencyManagementEditor.getSelection();
 
         if(!selection.isEmpty()) {
-          changingSelection = true;
-          try {
-            dependenciesEditor.setSelection(Collections.<Dependency> emptyList());
-          } finally {
-            changingSelection = false;
-          }
+          dependenciesEditor.setSelection(Collections.<Dependency> emptyList());
         }
       }
     });
@@ -469,13 +457,10 @@ public class DependenciesComposite extends Composite {
     this.dependencyLabelProvider.setPomEditor(editorPage.getPomEditor());
     this.dependencyManagementLabelProvider.setPomEditor(editorPage.getPomEditor());
 
-    changingSelection = true;
     dependenciesEditor.setInput(model.getDependencies());
 
     DependencyManagement dependencyManagement = dependencyManagementProvider.getValue();
     dependencyManagementEditor.setInput(dependencyManagement == null ? null : dependencyManagement.getDependencies());
-
-    changingSelection = false;
 
     dependenciesEditor.setReadOnly(editorPage.isReadOnly());
     dependencyManagementEditor.setReadOnly(editorPage.isReadOnly());
@@ -571,11 +556,9 @@ public class DependenciesComposite extends Composite {
     this.searchControl = searchControl;
     this.searchControl.getSearchText().addModifyListener(new ModifyListener() {
       public void modifyText(ModifyEvent e) {
-        changingSelection = true;
         selectDepenendencies(dependenciesEditor, model, POM_PACKAGE.getModel_Dependencies());
         selectDepenendencies(dependencyManagementEditor, dependencyManagementProvider.getValue(),
             POM_PACKAGE.getDependencyManagement_Dependencies());
-        changingSelection = false;
       }
 
       private void selectDepenendencies(ListEditorComposite<Dependency> editor, EObject parent,
