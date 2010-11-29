@@ -4,7 +4,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.wst.xml.ui.internal.contentassist.XMLContentAssistProcessor;
 
-public class AbstractCompletionTest extends AbstractPOMEditorTestCase {
+
+public abstract class AbstractCompletionTest extends AbstractPOMEditorTestCase {
   protected XMLContentAssistProcessor xmlContentAssistProcessor = null;
   
   protected IFile loadProjectsAndFiles() throws Exception {
