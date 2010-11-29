@@ -35,7 +35,7 @@ public class PropertyCompletionOnInvalidParentTest extends AbstractCompletionTes
     IProject[] projects = importProjects("projects/MNGECLIPSE-2576", new String[] {
         "parent2576/pom.xml",
         "child2576WithBadParent/pom.xml"
-        }, new ResolverConfiguration());
+        }, new ResolverConfiguration(), true);
     waitForJobsToComplete();
     return (IFile) projects[1].findMember("pom.xml");
   }

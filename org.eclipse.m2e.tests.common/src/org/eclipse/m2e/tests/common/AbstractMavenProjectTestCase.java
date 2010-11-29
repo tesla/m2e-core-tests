@@ -270,6 +270,10 @@ public abstract class AbstractMavenProjectTestCase extends TestCase {
    * @return created projects
    */
   protected IProject[] importProjects(String basedir, String[] pomNames, ResolverConfiguration configuration) throws IOException, CoreException {
+    return importProjects(basedir, pomNames, configuration, false);
+  }
+
+  protected IProject[] importProjects(String basedir, String[] pomNames, ResolverConfiguration configuration, boolean skipSanityCheck) throws IOException, CoreException {
     final MavenPlugin plugin = MavenPlugin.getDefault();
     MavenModelManager mavenModelManager = plugin.getMavenModelManager();
     IWorkspaceRoot root = workspace.getRoot();
@@ -307,9 +311,12 @@ public abstract class AbstractMavenProjectTestCase extends TestCase {
       /*
        * Sanity check: make sure they were all imported
        */
-      Model model = projectInfos.get(0).getModel();
-      IMavenProjectFacade facade = plugin.getMavenProjectManager().create(projects[i], monitor);
-      assertNotNull("Project " + model.getGroupId()+"-"+model.getArtifactId()+"-"+model.getVersion()+" was not imported.", facade);
+      if(!skipSanityCheck) {
+        Model model = projectInfos.get(0).getModel();
+        IMavenProjectFacade facade = plugin.getMavenProjectManager().create(projects[i], monitor);
+        assertNotNull("Project " + model.getGroupId() + "-" + model.getArtifactId() + "-" + model.getVersion()
+            + " was not imported.", facade);
+      }
     }
 
     return projects;
