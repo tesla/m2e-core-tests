@@ -12,7 +12,9 @@
 package org.eclipse.m2e.editor.composites;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ICellModifier;
@@ -46,13 +48,17 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
  */
 public class ListEditorComposite<T> extends Composite {
 
+
   TableViewer viewer;
-
-  Button addButton;
-
-  Button removeButton;
-
-  Button selectButton;
+  
+  protected Map<String, Button> buttons = new HashMap<String, Button>(5);
+  
+  /*
+   * Default button keys
+   */
+  private static final String ADD = "SELECT"; //$NON-NLS-1$
+  private static final String CREATE = "ADD"; //$NON-NLS-1$
+  private static final String REMOVE = "REMOVE"; //$NON-NLS-1$
 
   boolean readOnly = false;
 
@@ -79,7 +85,9 @@ public class ListEditorComposite<T> extends Composite {
 
     viewer = new TableViewer(table);
 
-    int vSpan = includeSearch ? 3 : 2;
+    createButtons(includeSearch);
+    
+    int vSpan = buttons.size();
     GridData viewerData = new GridData(SWT.FILL, SWT.FILL, true, true, 1, vSpan);
     viewerData.widthHint = 100;
     viewerData.heightHint = includeSearch ? 125 : 50;
@@ -87,11 +95,9 @@ public class ListEditorComposite<T> extends Composite {
     table.setLayoutData(viewerData);
     viewer.setData(FormToolkit.KEY_DRAW_BORDER, Boolean.TRUE);
 
-    viewerData.verticalSpan = createButtons(includeSearch);
-
     viewer.addSelectionChangedListener(new ISelectionChangedListener() {
       public void selectionChanged(SelectionChangedEvent event) {
-        selectionUpdated();
+        viewerSelectionChanged();
       }
     });
 
@@ -128,19 +134,31 @@ public class ListEditorComposite<T> extends Composite {
   }
 
   public void setSelectListener(SelectionListener listener) {
-    if(selectButton != null) {
-      selectButton.addSelectionListener(listener);
-      selectButton.setEnabled(true);
+    if(getSelectButton() != null) {
+      getSelectButton().addSelectionListener(listener);
+      getSelectButton().setEnabled(true);
     }
+  }
+  
+  protected Button getAddButton() {
+    return buttons.get(CREATE);
+  }
+  
+  protected Button getRemoveButton() {
+    return buttons.get(REMOVE);
+  }
+
+  protected Button getSelectButton() {
+    return buttons.get(ADD);
   }
 
   public void setAddListener(SelectionListener listener) {
-    addButton.addSelectionListener(listener);
-    addButton.setEnabled(true);
+    getAddButton().addSelectionListener(listener);
+    getAddButton().setEnabled(true);
   }
 
   public void setRemoveListener(SelectionListener listener) {
-    removeButton.addSelectionListener(listener);
+    getRemoveButton().addSelectionListener(listener);
   }
 
   public TableViewer getViewer() {
@@ -167,11 +185,22 @@ public class ListEditorComposite<T> extends Composite {
 
   public void setReadOnly(boolean readOnly) {
     this.readOnly = readOnly;
-    addButton.setEnabled(!readOnly);
-    if(selectButton != null) {
-      selectButton.setEnabled(!readOnly);
+    for (Map.Entry<String, Button> entry : buttons.entrySet()) {
+      if (entry.getKey().equals(REMOVE)) {
+        //Special case, as it makes no sense to enable if it there's nothing selected.
+        updateRemoveButton();
+      } else {
+        entry.getValue().setEnabled(!readOnly);
+      }
     }
-    selectionUpdated();
+  }
+
+  protected void viewerSelectionChanged() {
+    updateRemoveButton();
+  }
+  
+  protected void updateRemoveButton() {
+    getRemoveButton().setEnabled(!readOnly && !viewer.getSelection().isEmpty());
   }
 
   public void refresh() {
@@ -181,48 +210,46 @@ public class ListEditorComposite<T> extends Composite {
   }
 
   public void setCellModifier(ICellModifier cellModifier) {
-    viewer.setColumnProperties(new String[] {"?"});
+    viewer.setColumnProperties(new String[] {"?"}); //$NON-NLS-1$
 
     TextCellEditor editor = new TextCellEditor(viewer.getTable());
     viewer.setCellEditors(new CellEditor[] {editor});
     viewer.setCellModifier(cellModifier);
   }
 
-  protected void selectionUpdated() {
-    updateButtons(!readOnly && !viewer.getSelection().isEmpty());
-  }
-
-  protected void updateButtons(boolean enable) {
-    removeButton.setEnabled(enable);
-  }
-
   public void setDoubleClickListener(IDoubleClickListener listener) {
     viewer.addDoubleClickListener(listener);
   }
 
-  protected int createButtons(boolean includeSearch) {
-    int n = 2;
-
+  /**
+   * Create the buttons that populate the column to the right of the ListViewer.
+   * Subclasses must call the helper method addButton to add each button to the
+   * composite.
+   * 
+   * @param includeSearch true if the search button should be created
+   */
+  protected void createButtons(boolean includeSearch) {
     if(includeSearch) {
-      n++ ;
-      createSelectButton();
+      createAddButton();
     }
-    createAddButton();
+    createCreateButton();
     createRemoveButton();
-
-    return n;
   }
-
-  protected void createSelectButton() {
-    selectButton = createButton(Messages.ListEditorComposite_btnAdd);
+  
+  protected void addButton(String key, Button button) {
+    buttons.put(key, button);
   }
 
   protected void createAddButton() {
-    addButton = createButton(Messages.ListEditorComposite_btnCreate);
+    addButton(ADD, createButton(Messages.ListEditorComposite_btnAdd));
+  }
+
+  protected void createCreateButton() {
+    addButton(CREATE, createButton(Messages.ListEditorComposite_btnCreate));
   }
 
   protected void createRemoveButton() {
-    removeButton = createButton(Messages.ListEditorComposite_btnDelete);
+    addButton(REMOVE, createButton(Messages.ListEditorComposite_btnRemove));
   }
 
   protected Button createButton(String text) {

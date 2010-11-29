@@ -219,9 +219,9 @@ public class Messages extends NLS {
 
   public static String ListEditorComposite_btnCreate;
 
-  public static String ListEditorComposite_btnDelete;
+  public static String ListEditorComposite_btnRemove;
 
-  public static String ListEditorComposite_btnEdit;
+  public static String ListEditorComposite_btnProperties;
 
   public static String MavenPomEditor_action_advanced;
 

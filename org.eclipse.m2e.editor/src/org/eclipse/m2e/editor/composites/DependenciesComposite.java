@@ -195,7 +195,7 @@ public class DependenciesComposite extends Composite {
       }
     });
 
-    dependenciesEditor.setEditListener(new SelectionAdapter() {
+    dependenciesEditor.setPropertiesListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         Dependency dependency = dependenciesEditor.getSelection().get(0);
         EditDependencyDialog d = new EditDependencyDialog(getShell(), false, editorPage.getEditingDomain(), editorPage
@@ -352,7 +352,7 @@ public class DependenciesComposite extends Composite {
       }
     });
     
-    dependencyManagementEditor.setEditListener(new SelectionAdapter() {
+    dependencyManagementEditor.setPropertiesListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         Dependency dependency = dependencyManagementEditor.getSelection().get(0);
         EditDependencyDialog d = new EditDependencyDialog(getShell(), true, editorPage.getEditingDomain(), editorPage
@@ -637,35 +637,31 @@ public class DependenciesComposite extends Composite {
   }
 
   protected class EditableListComposite<T> extends ListEditorComposite<T> {
-    protected Button editButton;
+    private static final String PROPERTIES_BUTTON_KEY = "PROPERTIES"; //$NON-NLS-1$
+    protected Button properties;
 
     public EditableListComposite(Composite parent, int style, boolean includeSearch) {
       super(parent, style, includeSearch);
     }
 
     @Override
-    protected int createButtons(boolean includeSearch) {
-      int n = 3;
-
+    protected void createButtons(boolean includeSearch) {
       if(includeSearch) {
-        n++ ;
-        createSelectButton();
+        createAddButton();
       }
-      createAddButton();
-      editButton = createButton(Messages.ListEditorComposite_btnEdit);
       createRemoveButton();
-
-      return n;
+      properties = createButton(Messages.ListEditorComposite_btnProperties);
+      addButton(PROPERTIES_BUTTON_KEY, properties);
     }
 
-    public void setEditListener(SelectionListener listener) {
-      editButton.addSelectionListener(listener);
+    public void setPropertiesListener(SelectionListener listener) {
+      properties.addSelectionListener(listener);
     }
 
     @Override
-    protected void updateButtons(boolean enable) {
-      super.updateButtons(enable);
-      editButton.setEnabled(enable);
+    protected void viewerSelectionChanged() {
+      super.viewerSelectionChanged();
+      properties.setEnabled(!readOnly && !viewer.getSelection().isEmpty());
     }
   }
 }
