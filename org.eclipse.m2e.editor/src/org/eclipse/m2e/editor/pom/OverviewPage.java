@@ -104,6 +104,8 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.IManagedForm;
+import org.eclipse.ui.forms.events.ExpansionAdapter;
+import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
@@ -197,6 +199,8 @@ public class OverviewPage extends MavenPomEditorPage {
   private Composite noModules;
 
   private Composite modulesSectionComposite;
+
+  protected GridData projectSectionData;
 
   public OverviewPage(MavenPomEditor pomEditor) {
     super(pomEditor, IMavenConstants.PLUGIN_ID + ".pom.overview", Messages.OverviewPage_title); //$NON-NLS-1$
@@ -743,9 +747,16 @@ public class OverviewPage extends MavenPomEditorPage {
   private void createProjectSection(FormToolkit toolkit, Composite composite, WidthGroup widthGroup) {
     projectSection = toolkit.createSection(composite, //
         ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
-    projectSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+    projectSectionData = new GridData(SWT.FILL, SWT.FILL, true, true);
+    projectSection.setLayoutData(projectSectionData);
     projectSection.setText(Messages.OverviewPage_section_project);
     projectSection.setData("name", "projectSection"); //$NON-NLS-1$ //$NON-NLS-2$
+    projectSection.addExpansionListener(new ExpansionAdapter() {
+      public void expansionStateChanged(ExpansionEvent e) {
+        projectSectionData.grabExcessVerticalSpace = e.getState();
+        projectSection.getParent().layout();
+      }
+    });
 
     Composite projectComposite = toolkit.createComposite(projectSection, SWT.NONE);
     projectComposite.setLayout(new GridLayout(2, false));
@@ -1067,8 +1078,10 @@ public class OverviewPage extends MavenPomEditorPage {
     loadModules(model.getModules());
     propertiesSection.setModel(model, POM_PACKAGE.getModel_Properties());
 
-    projectSection.setExpanded(!isEmpty(model.getName()) || !isEmpty(model.getDescription())
-        || !isEmpty(model.getUrl()) || !isEmpty(model.getInceptionYear()));
+    boolean expandProjectSection = !isEmpty(model.getName()) || !isEmpty(model.getDescription())
+    || !isEmpty(model.getUrl()) || !isEmpty(model.getInceptionYear());
+    projectSectionData.grabExcessVerticalSpace = expandProjectSection;
+    projectSection.setExpanded(expandProjectSection);
 
     parentSection.setExpanded(parent != null //
         && (!isEmpty(parent.getGroupId()) || !isEmpty(parent.getArtifactId()) //
