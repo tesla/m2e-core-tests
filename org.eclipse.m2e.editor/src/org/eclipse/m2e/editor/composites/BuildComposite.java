@@ -148,7 +148,7 @@ public class BuildComposite extends Composite {
     filtersEditor.setContentProvider(new ListEditorContentProvider<String>());
     filtersEditor.setLabelProvider(new StringLabelProvider(MavenEditorImages.IMG_FILTER));
     
-    filtersEditor.setAddListener(new SelectionAdapter() {
+    filtersEditor.setCreateButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = parent.getEditingDomain();
@@ -171,7 +171,7 @@ public class BuildComposite extends Composite {
       }
     });
     
-    filtersEditor.setRemoveListener(new SelectionAdapter() {
+    filtersEditor.setRemoveButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = parent.getEditingDomain();
@@ -263,7 +263,7 @@ public class BuildComposite extends Composite {
     resourceIncludesEditor.setContentProvider(new ListEditorContentProvider<String>());
     resourceIncludesEditor.setLabelProvider(new StringLabelProvider(MavenEditorImages.IMG_INCLUDE));
     
-    resourceIncludesEditor.setAddListener(new SelectionAdapter() {
+    resourceIncludesEditor.setCreateButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = parent.getEditingDomain();
@@ -284,7 +284,7 @@ public class BuildComposite extends Composite {
       }
     });
     
-    resourceIncludesEditor.setRemoveListener(new SelectionAdapter() {
+    resourceIncludesEditor.setRemoveButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = parent.getEditingDomain();
@@ -335,7 +335,7 @@ public class BuildComposite extends Composite {
     resourceExcludesEditor.setContentProvider(new ListEditorContentProvider<String>());
     resourceExcludesEditor.setLabelProvider(new StringLabelProvider(MavenEditorImages.IMG_EXCLUDE));
     
-    resourceExcludesEditor.setAddListener(new SelectionAdapter() {
+    resourceExcludesEditor.setCreateButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = parent.getEditingDomain();
@@ -356,7 +356,7 @@ public class BuildComposite extends Composite {
       }
     });
     
-    resourceExcludesEditor.setRemoveListener(new SelectionAdapter() {
+    resourceExcludesEditor.setRemoveButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = parent.getEditingDomain();
@@ -424,7 +424,7 @@ public class BuildComposite extends Composite {
       }
     });
     
-    resourcesEditor.setAddListener(new SelectionAdapter() {
+    resourcesEditor.setCreateButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = parent.getEditingDomain();
@@ -447,7 +447,7 @@ public class BuildComposite extends Composite {
       }
     });
     
-    resourcesEditor.setRemoveListener(new SelectionAdapter() {
+    resourcesEditor.setRemoveButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = parent.getEditingDomain();
@@ -493,7 +493,7 @@ public class BuildComposite extends Composite {
       }
     });
     
-    testResourcesEditor.setAddListener(new SelectionAdapter() {
+    testResourcesEditor.setCreateButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = parent.getEditingDomain();
@@ -516,7 +516,7 @@ public class BuildComposite extends Composite {
       }
     });
     
-    testResourcesEditor.setRemoveListener(new SelectionAdapter() {
+    testResourcesEditor.setRemoveButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = parent.getEditingDomain();

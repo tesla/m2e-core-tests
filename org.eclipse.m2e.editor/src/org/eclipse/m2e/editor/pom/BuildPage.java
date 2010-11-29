@@ -230,13 +230,13 @@ public class BuildPage extends MavenPomEditorPage {
       }
     });
     
-    extensionsEditor.setAddListener(new SelectionAdapter() {
+    extensionsEditor.setCreateButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         createExtension(null, null, null);
       }
     });
     
-    extensionsEditor.setRemoveListener(new SelectionAdapter() {
+    extensionsEditor.setRemoveButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = getEditingDomain();

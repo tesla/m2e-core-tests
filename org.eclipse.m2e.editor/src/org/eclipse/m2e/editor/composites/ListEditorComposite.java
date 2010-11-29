@@ -56,8 +56,8 @@ public class ListEditorComposite<T> extends Composite {
   /*
    * Default button keys
    */
-  private static final String ADD = "SELECT"; //$NON-NLS-1$
-  private static final String CREATE = "ADD"; //$NON-NLS-1$
+  private static final String ADD = "ADD"; //$NON-NLS-1$
+  private static final String CREATE = "CREATE"; //$NON-NLS-1$
   private static final String REMOVE = "REMOVE"; //$NON-NLS-1$
 
   boolean readOnly = false;
@@ -133,14 +133,14 @@ public class ListEditorComposite<T> extends Composite {
     viewer.addSelectionChangedListener(listener);
   }
 
-  public void setSelectListener(SelectionListener listener) {
-    if(getSelectButton() != null) {
-      getSelectButton().addSelectionListener(listener);
-      getSelectButton().setEnabled(true);
+  public void setAddButtonListener(SelectionListener listener) {
+    if(getAddButton() != null) {
+      getAddButton().addSelectionListener(listener);
+      getAddButton().setEnabled(true);
     }
   }
   
-  protected Button getAddButton() {
+  protected Button getCreateButton() {
     return buttons.get(CREATE);
   }
   
@@ -148,16 +148,16 @@ public class ListEditorComposite<T> extends Composite {
     return buttons.get(REMOVE);
   }
 
-  protected Button getSelectButton() {
+  protected Button getAddButton() {
     return buttons.get(ADD);
   }
 
-  public void setAddListener(SelectionListener listener) {
-    getAddButton().addSelectionListener(listener);
-    getAddButton().setEnabled(true);
+  public void setCreateButtonListener(SelectionListener listener) {
+    getCreateButton().addSelectionListener(listener);
+    getCreateButton().setEnabled(true);
   }
 
-  public void setRemoveListener(SelectionListener listener) {
+  public void setRemoveButtonListener(SelectionListener listener) {
     getRemoveButton().addSelectionListener(listener);
   }
 

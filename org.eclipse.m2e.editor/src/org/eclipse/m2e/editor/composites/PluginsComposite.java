@@ -244,13 +244,13 @@ public class PluginsComposite extends Composite{
       }
     });
     
-    pluginsEditor.setAddListener(new SelectionAdapter() {
+    pluginsEditor.setCreateButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         createPlugin(pluginsEditor, buildProvider, POM_PACKAGE.getBuildBase_Plugins(), null, null, null);
       }
     });
     
-    pluginsEditor.setSelectListener(new SelectionAdapter(){
+    pluginsEditor.setAddButtonListener(new SelectionAdapter(){
       public void widgetSelected(SelectionEvent e){
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
         Messages.PluginsComposite_searchDialog_selectPlugin, IIndex.SEARCH_PLUGIN, Collections.<ArtifactKey>emptySet());
@@ -263,7 +263,7 @@ public class PluginsComposite extends Composite{
       }
     });
     
-    pluginsEditor.setRemoveListener(new SelectionAdapter() {
+    pluginsEditor.setRemoveButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = parentEditorPage.getEditingDomain();
@@ -360,14 +360,14 @@ public class PluginsComposite extends Composite{
       }
     });
     
-    pluginManagementEditor.setAddListener(new SelectionAdapter() {
+    pluginManagementEditor.setCreateButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         createPlugin(pluginManagementEditor, pluginManagementProvider, POM_PACKAGE.getPluginManagement_Plugins(), null, null, null);
       }
     });
 
     
-    pluginManagementEditor.setSelectListener(new SelectionAdapter(){
+    pluginManagementEditor.setAddButtonListener(new SelectionAdapter(){
       public void widgetSelected(SelectionEvent e){
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
         Messages.PluginsComposite_seachDialog_selectPlugin, IIndex.SEARCH_PLUGIN, Collections.<ArtifactKey>emptySet());
@@ -380,7 +380,7 @@ public class PluginsComposite extends Composite{
       }
     });
 
-    pluginManagementEditor.setRemoveListener(new SelectionAdapter() {
+    pluginManagementEditor.setRemoveButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = parentEditorPage.getEditingDomain();
@@ -644,7 +644,7 @@ public class PluginsComposite extends Composite{
         }
       });
       
-      pluginExecutionsEditor.setAddListener(new SelectionAdapter() {
+      pluginExecutionsEditor.setCreateButtonListener(new SelectionAdapter() {
         public void widgetSelected(SelectionEvent e) {
           CompoundCommand compoundCommand = new CompoundCommand();
           EditingDomain editingDomain = parentEditorPage.getEditingDomain();
@@ -662,7 +662,7 @@ public class PluginsComposite extends Composite{
         }
       });
       
-      pluginExecutionsEditor.setRemoveListener(new SelectionAdapter() {
+      pluginExecutionsEditor.setRemoveButtonListener(new SelectionAdapter() {
         public void widgetSelected(SelectionEvent e) {
           CompoundCommand compoundCommand = new CompoundCommand();
           EditingDomain editingDomain = parentEditorPage.getEditingDomain();
@@ -744,7 +744,7 @@ public class PluginsComposite extends Composite{
       goalsEditor.setContentProvider(new ListEditorContentProvider<String>());
       goalsEditor.setLabelProvider(new StringLabelProvider(MavenEditorImages.IMG_GOAL));
       
-      goalsEditor.setAddListener(new SelectionAdapter() {
+      goalsEditor.setCreateButtonListener(new SelectionAdapter() {
         public void widgetSelected(SelectionEvent e) {
           CompoundCommand compoundCommand = new CompoundCommand();
           EditingDomain editingDomain = parentEditorPage.getEditingDomain();
@@ -759,7 +759,7 @@ public class PluginsComposite extends Composite{
         }
       });
       
-      goalsEditor.setRemoveListener(new SelectionAdapter() {
+      goalsEditor.setRemoveButtonListener(new SelectionAdapter() {
         public void widgetSelected(SelectionEvent e) {
           CompoundCommand compoundCommand = new CompoundCommand();
           EditingDomain editingDomain = parentEditorPage.getEditingDomain();

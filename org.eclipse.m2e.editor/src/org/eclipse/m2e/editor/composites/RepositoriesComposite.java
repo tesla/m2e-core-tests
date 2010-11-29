@@ -264,7 +264,7 @@ public class RepositoriesComposite extends Composite {
       }
     });
 
-    repositoriesEditor.setAddListener(new SelectionAdapter() {
+    repositoriesEditor.setCreateButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = parent.getEditingDomain();
@@ -282,7 +282,7 @@ public class RepositoriesComposite extends Composite {
       }
     });
 
-    repositoriesEditor.setRemoveListener(new SelectionAdapter() {
+    repositoriesEditor.setRemoveButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = parent.getEditingDomain();
@@ -326,7 +326,7 @@ public class RepositoriesComposite extends Composite {
       }
     });
 
-    pluginRepositoriesEditor.setAddListener(new SelectionAdapter() {
+    pluginRepositoriesEditor.setCreateButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = parent.getEditingDomain();
@@ -344,7 +344,7 @@ public class RepositoriesComposite extends Composite {
       }
     });
 
-    pluginRepositoriesEditor.setRemoveListener(new SelectionAdapter() {
+    pluginRepositoriesEditor.setRemoveButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = parent.getEditingDomain();

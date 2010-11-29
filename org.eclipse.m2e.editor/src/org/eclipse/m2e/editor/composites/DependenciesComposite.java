@@ -21,8 +21,12 @@ import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.project.MavenProject;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.common.notify.Notification;
@@ -35,6 +39,7 @@ import org.eclipse.emf.edit.command.RemoveCommand;
 import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -43,6 +48,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
 import org.eclipse.m2e.core.MavenPlugin;
+import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.core.MavenLogger;
 import org.eclipse.m2e.core.embedder.ArtifactKey;
 import org.eclipse.m2e.core.embedder.IMaven;
@@ -54,6 +60,7 @@ import org.eclipse.m2e.core.ui.dialogs.AddDependencyDialog;
 import org.eclipse.m2e.core.ui.dialogs.EditDependencyDialog;
 import org.eclipse.m2e.core.ui.dialogs.MavenRepositorySearchDialog;
 import org.eclipse.m2e.editor.MavenEditorImages;
+import org.eclipse.m2e.editor.MavenEditorPlugin;
 import org.eclipse.m2e.editor.dialogs.ManageDependenciesDialog;
 import org.eclipse.m2e.editor.internal.Messages;
 import org.eclipse.m2e.editor.pom.MavenPomEditor;
@@ -101,9 +108,9 @@ public class DependenciesComposite extends Composite {
 
   // controls
 
-  EditableListComposite<Dependency> dependencyManagementEditor;
+  PropertiesListComposite<Dependency> dependencyManagementEditor;
 
-  EditableListComposite<Dependency> dependenciesEditor;
+  DependenciesListComposite<Dependency> dependenciesEditor;
 
   Button dependencySelectButton;
 
@@ -134,8 +141,8 @@ public class DependenciesComposite extends Composite {
     this.editorPage = editorPage;
     this.pomEditor = pomEditor;
     createComposite();
-    editorPage.initPopupMenu(dependenciesEditor.getViewer(), ".dependencies");
-    editorPage.initPopupMenu(dependencyManagementEditor.getViewer(), ".dependencyManagement");
+    editorPage.initPopupMenu(dependenciesEditor.getViewer(), ".dependencies"); //$NON-NLS-1$
+    editorPage.initPopupMenu(dependencyManagementEditor.getViewer(), ".dependencyManagement"); //$NON-NLS-1$
   }
 
   private void createComposite() {
@@ -162,24 +169,11 @@ public class DependenciesComposite extends Composite {
     dependenciesSection.marginWidth = 3;
     dependenciesSection.setText(Messages.DependenciesComposite_sectionDependencies);
 
-    dependenciesEditor = new EditableListComposite<Dependency>(dependenciesSection, SWT.NONE, true);
+    dependenciesEditor = new DependenciesListComposite<Dependency>(dependenciesSection, SWT.NONE, true);
     dependenciesEditor.setLabelProvider(dependencyLabelProvider);
     dependenciesEditor.setContentProvider(new ListEditorContentProvider<Dependency>());
 
-    dependenciesEditor.setAddListener(new SelectionAdapter() {
-      public void widgetSelected(SelectionEvent e) {
-        Dependency dependency = createDependency(new ValueProvider<Model>() {
-          @Override
-          public Model getValue() {
-            return model;
-          }
-        }, POM_PACKAGE.getModel_Dependencies(), null, null, null, null, null, null);
-        dependenciesEditor.setInput(model.getDependencies());
-        dependenciesEditor.setSelection(Collections.singletonList(dependency));
-      }
-    });
-
-    dependenciesEditor.setRemoveListener(new SelectionAdapter() {
+    dependenciesEditor.setRemoveButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = editorPage.getEditingDomain();
@@ -222,7 +216,20 @@ public class DependenciesComposite extends Composite {
     toolkit.adapt(dependenciesEditor);
     toolkit.paintBordersFor(dependenciesEditor);
 
-    dependenciesEditor.setSelectListener(new SelectionAdapter() {
+    dependenciesEditor.setManageButtonListener(new SelectionAdapter() {
+      @Override
+      public void widgetSelected(SelectionEvent e) {
+        try {
+          openManageDependenciesDialog();
+        } catch(InvocationTargetException e1) {
+          MavenEditorPlugin.getDefault().getLog().log(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, "Error: ", e1)); //$NON-NLS-1$
+        } catch(InterruptedException e1) {
+          MavenEditorPlugin.getDefault().getLog().log(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, "Error: ", e1)); //$NON-NLS-1$
+        }
+      }
+    });
+    
+    dependenciesEditor.setAddButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         final AddDependencyDialog addDepDialog = new AddDependencyDialog(getShell(), false, editorPage.getProject());
 
@@ -321,22 +328,13 @@ public class DependenciesComposite extends Composite {
     dependencyManagementSection.marginWidth = 3;
     dependencyManagementSection.setText(Messages.DependenciesComposite_sectionDependencyManagement);
 
-    dependencyManagementEditor = new EditableListComposite<Dependency>(dependencyManagementSection, SWT.NONE, true);
+    dependencyManagementEditor = new PropertiesListComposite<Dependency>(dependencyManagementSection, SWT.NONE, true);
     dependencyManagementSection.setClient(dependencyManagementEditor);
 
     dependencyManagementEditor.setLabelProvider(dependencyManagementLabelProvider);
     dependencyManagementEditor.setContentProvider(new ListEditorContentProvider<Dependency>());
 
-    dependencyManagementEditor.setAddListener(new SelectionAdapter() {
-      public void widgetSelected(SelectionEvent e) {
-        Dependency dependency = createDependency(dependencyManagementProvider,
-            POM_PACKAGE.getDependencyManagement_Dependencies(), null, null, null, null, null, null);
-        dependencyManagementEditor.setInput(dependencyManagementProvider.getValue().getDependencies());
-        dependencyManagementEditor.setSelection(Collections.singletonList(dependency));
-      }
-    });
-
-    dependencyManagementEditor.setRemoveListener(new SelectionAdapter() {
+    dependencyManagementEditor.setRemoveButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = editorPage.getEditingDomain();
@@ -378,7 +376,7 @@ public class DependenciesComposite extends Composite {
     toolkit.adapt(dependencyManagementEditor);
     toolkit.paintBordersFor(dependencyManagementEditor);
 
-    dependencyManagementEditor.setSelectListener(new SelectionAdapter() {
+    dependencyManagementEditor.setAddButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         // TODO calculate current list of artifacts for the project
         Set<ArtifactKey> artifacts = Collections.emptySet();
@@ -606,7 +604,7 @@ public class DependenciesComposite extends Composite {
     }
   }
 
-  private void openManageDependenciesDialog() throws InvocationTargetException, InterruptedException {
+  void openManageDependenciesDialog() throws InvocationTargetException, InterruptedException {
     /*
      * A linked list representing the path from child to root parent pom.
      * The head is the child, the tail is the root pom
@@ -619,6 +617,18 @@ public class DependenciesComposite extends Composite {
           IMaven maven = MavenPlugin.getDefault().getMaven();
           MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
           mavenProject = pomEditor.readMavenProject(false, monitor);
+          if (mavenProject == null) {
+            IMarker[] markers = pomEditor.getPomFile().findMarkers(IMavenConstants.MARKER_ID, true, IResource.DEPTH_ZERO);
+            if (markers != null && markers.length > 0) {
+              Display.getDefault().asyncExec(new Runnable() {
+                
+                public void run() {
+                  MessageDialog.openError(getShell(), "Error", "Unable to read project metadata. Please fix the project errors.");                  
+                }
+              });
+              return;
+            }
+          }
           maven.detachFromSession(mavenProject);
           IMavenProjectFacade projectFacade = projectManager.create(pomEditor.getPomFile(), true, monitor);
           hierarchy.addAll(new ParentGatherer(mavenProject, projectFacade).getParentHierarchy(monitor));
@@ -629,18 +639,24 @@ public class DependenciesComposite extends Composite {
 
     };
 
-    PlatformUI.getWorkbench().getProgressService().run(true, true, projectLoader);
+    PlatformUI.getWorkbench().getProgressService().run(false, true, projectLoader);
 
+    if (hierarchy.isEmpty()) {
+      //We were unable to read the project metadata above, so there was an error. 
+      //User has already been notified to fix the problem.
+      return;
+    }
+    
     final ManageDependenciesDialog manageDepDialog = new ManageDependenciesDialog(getShell(), model, hierarchy,
         pomEditor.getEditingDomain());
     manageDepDialog.open();
   }
 
-  protected class EditableListComposite<T> extends ListEditorComposite<T> {
+  protected class PropertiesListComposite<T> extends ListEditorComposite<T> {
     private static final String PROPERTIES_BUTTON_KEY = "PROPERTIES"; //$NON-NLS-1$
     protected Button properties;
 
-    public EditableListComposite(Composite parent, int style, boolean includeSearch) {
+    public PropertiesListComposite(Composite parent, int style, boolean includeSearch) {
       super(parent, style, includeSearch);
     }
 
@@ -661,7 +677,56 @@ public class DependenciesComposite extends Composite {
     @Override
     protected void viewerSelectionChanged() {
       super.viewerSelectionChanged();
+      updatePropertiesButton();
+    }
+
+    protected void updatePropertiesButton() {
       properties.setEnabled(!readOnly && !viewer.getSelection().isEmpty());
+    }
+    
+    @Override
+    public void setReadOnly(boolean readOnly) {
+      super.setReadOnly(readOnly);
+      updatePropertiesButton();
+    }
+  }
+  
+  protected class DependenciesListComposite<T> extends PropertiesListComposite<T> {
+
+    private static final String MANAGE = "MANAGE"; //$NON-NLS-1$
+    protected Button manage;
+    protected Model model;
+
+    public DependenciesListComposite(Composite parent, int style, boolean includeSearch) {
+      super(parent, style, includeSearch);
+    }
+    
+    @Override
+    protected void createButtons(boolean includeSearch) {
+      super.createButtons(includeSearch);
+      manage = createButton("Manage...");
+      addButton(MANAGE, manage);
+    }
+    
+    @Override
+    protected void viewerSelectionChanged() {
+      super.viewerSelectionChanged();
+      updateManageButton();
+    }
+    
+    @Override
+    public void setReadOnly(boolean readOnly) {
+      super.setReadOnly(readOnly);
+      updateManageButton();
+    }
+
+    protected void updateManageButton() {
+      List<Dependency> deps = (List<Dependency>) viewer.getInput();
+      manage.setEnabled(!readOnly && deps != null && !deps.isEmpty());
+    }
+    
+    public void setManageButtonListener(SelectionListener listener) {
+      manage.addSelectionListener(listener);
     }
   }
 }

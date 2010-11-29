@@ -99,12 +99,12 @@ public class PropertiesSection {
     propertiesEditor.setContentProvider(new ListEditorContentProvider<PropertyElement>());
     propertiesEditor.setLabelProvider(new PropertyPairLabelProvider());
 
-    propertiesEditor.setAddListener(new SelectionAdapter() {
+    propertiesEditor.setCreateButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         createNewProperty();
       }
     });
-    propertiesEditor.setRemoveListener(new SelectionAdapter() {
+    propertiesEditor.setRemoveButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         deleteProperties(propertiesEditor.getSelection());
       }

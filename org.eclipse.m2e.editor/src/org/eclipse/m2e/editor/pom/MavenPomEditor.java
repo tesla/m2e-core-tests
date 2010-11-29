@@ -501,6 +501,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     try{
       super.pageChange(newPageIndex);
     }catch(NullPointerException e){
+      MavenEditorPlugin.getDefault().getLog().log(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, "", e)); //$NON-NLS-1$
       this.close(false);
     }
     // a workaround for editor pages not returned 

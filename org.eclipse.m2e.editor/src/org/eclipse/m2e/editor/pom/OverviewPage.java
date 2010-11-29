@@ -552,7 +552,7 @@ public class OverviewPage extends MavenPomEditorPage {
       }
     });
 
-    modulesEditor.setSelectListener(new SelectionAdapter() {
+    modulesEditor.setAddButtonListener(new SelectionAdapter() {
       @Override
       public void widgetSelected(SelectionEvent e) {
         final Set<Object> moduleContainers = new HashSet<Object>();
@@ -623,7 +623,7 @@ public class OverviewPage extends MavenPomEditorPage {
       }
     });
 
-    modulesEditor.setAddListener(new SelectionAdapter() {
+    modulesEditor.setCreateButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         IEditorInput editorInput = OverviewPage.this.pomEditor.getEditorInput();
         if(editorInput instanceof FileEditorInput) {
@@ -638,7 +638,7 @@ public class OverviewPage extends MavenPomEditorPage {
       }
     });
 
-    modulesEditor.setRemoveListener(new SelectionAdapter() {
+    modulesEditor.setRemoveButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = getEditingDomain();

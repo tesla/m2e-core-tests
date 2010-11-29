@@ -210,7 +210,7 @@ public class ProfilesPage extends MavenPomEditorPage {
       }
     });
   
-    profilesEditor.setAddListener(new SelectionAdapter() {
+    profilesEditor.setCreateButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = getEditingDomain();
@@ -227,7 +227,7 @@ public class ProfilesPage extends MavenPomEditorPage {
       }
     });
     
-    profilesEditor.setRemoveListener(new SelectionAdapter() {
+    profilesEditor.setRemoveButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = getEditingDomain();
@@ -303,13 +303,13 @@ public class ProfilesPage extends MavenPomEditorPage {
       }
     });
     
-    modulesEditor.setAddListener(new SelectionAdapter() {
+    modulesEditor.setCreateButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         createNewModule("?");
       }
     });
     
-    modulesEditor.setRemoveListener(new SelectionAdapter() {
+    modulesEditor.setRemoveButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = getEditingDomain();

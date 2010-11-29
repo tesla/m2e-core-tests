@@ -219,13 +219,13 @@ public class ReportingComposite extends Composite {
       }
     });
 
-    reportPluginsEditor.setAddListener(new SelectionAdapter() {
+    reportPluginsEditor.setCreateButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         createReportingPlugin(null, null, null);
       }
     });
 
-    reportPluginsEditor.setRemoveListener(new SelectionAdapter() {
+    reportPluginsEditor.setRemoveButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = editorPage.getEditingDomain();
@@ -246,7 +246,7 @@ public class ReportingComposite extends Composite {
       }
     });
     
-    reportPluginsEditor.setSelectListener(new SelectionAdapter(){
+    reportPluginsEditor.setAddButtonListener(new SelectionAdapter(){
       public void widgetSelected(SelectionEvent e){
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
             Messages.ReportingComposite_searchDialog_addPlugin, IIndex.SEARCH_PLUGIN, Collections.<ArtifactKey>emptySet());
@@ -477,7 +477,7 @@ public class ReportingComposite extends Composite {
       }
     });
 
-    reportSetsEditor.setAddListener(new SelectionAdapter() {
+    reportSetsEditor.setCreateButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         if(currentReportPlugin == null) {
           return;
@@ -501,7 +501,7 @@ public class ReportingComposite extends Composite {
       }
     });
 
-    reportSetsEditor.setRemoveListener(new SelectionAdapter() {
+    reportSetsEditor.setRemoveButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         if(currentReportPlugin == null) {
           return;
@@ -565,7 +565,7 @@ public class ReportingComposite extends Composite {
     reportsEditor.setContentProvider(new ListEditorContentProvider<String>());
     reportsEditor.setLabelProvider(new StringLabelProvider(MavenEditorImages.IMG_REPORT));
 
-    reportsEditor.setAddListener(new SelectionAdapter() {
+    reportsEditor.setCreateButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         if(currentReportSet == null) {
           return;
@@ -582,7 +582,7 @@ public class ReportingComposite extends Composite {
       }
     });
 
-    reportsEditor.setRemoveListener(new SelectionAdapter() {
+    reportsEditor.setRemoveButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         if(currentReportSet == null) {
           return;
