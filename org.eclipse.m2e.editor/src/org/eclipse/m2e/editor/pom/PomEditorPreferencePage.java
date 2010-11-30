@@ -44,6 +44,6 @@ public class PomEditorPreferencePage extends FieldEditorPreferencePage implement
   public void createFieldEditors() {
     parent = getFieldEditorParent();
     addField(new BooleanFieldEditor(P_DEFAULT_POM_EDITOR_PAGE, Messages.getString("pomEditor.defaultPage"), parent)); //$NON-NLS-1$
-    addField(new BooleanFieldEditor(P_SHOW_ADVANCED_TABS, Messages.getString("pomEditor.showAdvancedTabs"), parent)); //$NON-NLS-1$
+//    addField(new BooleanFieldEditor(P_SHOW_ADVANCED_TABS, Messages.getString("pomEditor.showAdvancedTabs"), parent)); //$NON-NLS-1$
   }
 }
