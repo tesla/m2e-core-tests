@@ -50,7 +50,7 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
 
     workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
 
-    WorkspaceHelpers.assertMarkers(cptest, 0);
+    WorkspaceHelpers.assertNoErrors(cptest);
     
     ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(cptest.getFile("TestApp.launch"));
 

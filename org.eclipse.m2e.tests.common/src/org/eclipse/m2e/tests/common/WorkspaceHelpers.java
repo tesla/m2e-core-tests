@@ -128,12 +128,6 @@ public class WorkspaceHelpers {
         + marker.getAttribute(IMarker.LINE_NUMBER);
   }
 
-  public static void assertMarkers(IProject project, int expected) throws CoreException {
-    List<IMarker> markers = WorkspaceHelpers.findErrorMarkers(project);
-    Assert.assertEquals(project.getName() + " : " + toString(markers.toArray(new IMarker[markers.size()])), //
-        expected, markers.size());
-  }
-
   public static List<IMarker> findMarkers(IProject project, int targetSeverity)
       throws CoreException {
     return findMarkers(project, targetSeverity, null /*withAttribute*/);

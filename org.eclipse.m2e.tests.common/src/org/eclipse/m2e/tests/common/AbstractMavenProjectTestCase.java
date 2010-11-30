@@ -421,10 +421,6 @@ public abstract class AbstractMavenProjectTestCase extends TestCase {
     return WorkspaceHelpers.findMarkers(project, targetSeverity);
   }
 
-  protected static void assertMarkers(IProject project, int expected) throws CoreException {
-    WorkspaceHelpers.assertMarkers(project, expected);
-  }
-
   protected static void assertNoErrors(IProject project) throws CoreException {
     WorkspaceHelpers.assertNoErrors(project);
   }
