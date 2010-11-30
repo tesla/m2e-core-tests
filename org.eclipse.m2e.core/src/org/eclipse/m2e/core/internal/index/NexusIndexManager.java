@@ -92,6 +92,10 @@ import org.eclipse.m2e.core.index.IndexListener;
 import org.eclipse.m2e.core.index.IndexManager;
 import org.eclipse.m2e.core.index.IndexedArtifact;
 import org.eclipse.m2e.core.index.IndexedArtifactFile;
+import org.eclipse.m2e.core.index.MatchTyped;
+import org.eclipse.m2e.core.index.MatchTyped.MatchType;
+import org.eclipse.m2e.core.index.SearchExpression;
+import org.eclipse.m2e.core.index.SourcedSearchExpression;
 import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.internal.index.IndexUpdaterJob.IndexCommand;
 import org.eclipse.m2e.core.internal.repository.IRepositoryIndexer;
@@ -228,7 +232,8 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     return minCreators;
   }
 
-  protected IndexedArtifactFile getIndexedArtifactFile(IRepository repository, ArtifactKey gav) throws CoreException {
+  /** for Unit test */
+  public IndexedArtifactFile getIndexedArtifactFile(IRepository repository, ArtifactKey gav) throws CoreException {
 
     try {
       BooleanQuery query = new BooleanQuery();
@@ -254,6 +259,34 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     }
     return null;
   }
+  
+  /** for Unit test */
+  public IndexedArtifactFile getIndexedArtifactFile(ArtifactInfo artifactInfo) {
+    String groupId = artifactInfo.groupId;
+    String artifactId = artifactInfo.artifactId;
+    String repository = artifactInfo.repository;
+    String version = artifactInfo.version;
+    String classifier = artifactInfo.classifier;
+    String packaging = artifactInfo.packaging;
+    String fname = artifactInfo.fname;
+    if(fname == null) {
+      fname = artifactId + '-' + version
+          + (classifier != null ? '-' + classifier : "") + (packaging != null ? ('.' + packaging) : ""); //$NON-NLS-1$ //$NON-NLS-2$
+    }
+
+    long size = artifactInfo.size;
+    Date date = new Date(artifactInfo.lastModified);
+
+    int sourcesExists = artifactInfo.sourcesExists.ordinal();
+    int javadocExists = artifactInfo.javadocExists.ordinal();
+
+    String prefix = artifactInfo.prefix;
+    List<String> goals = artifactInfo.goals;
+
+    return new IndexedArtifactFile(repository, groupId, artifactId, version, packaging, classifier, fname, size, date,
+        sourcesExists, javadocExists, prefix, goals);
+  }
+
 
   public IndexedArtifactFile identify(File file) throws CoreException {
     try {
@@ -286,15 +319,30 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
    * @param type
    * @return
    */
-  public Query constructQuery(Field field, String query, SearchType type) {
-    return getIndexer().constructQuery(field, query, type);
+  public Query constructQuery(Field field, SearchExpression query) {
+    // let the default be "scored" search
+    SearchType st = SearchType.SCORED;
+
+    if(query instanceof MatchTyped) {
+      MatchType mt = ((MatchTyped) query).getMatchType();
+
+      if(MatchType.EXACT.equals(mt)) {
+        st = SearchType.EXACT;
+      }
+    }
+
+    return constructQuery(field, query.getStringValue(), st);
   }
 
-  public Map<String, IndexedArtifact> search(String term, String type) throws CoreException {
+  private Query constructQuery(Field field, String query, SearchType searchType) {
+    return getIndexer().constructQuery(field, query, searchType);
+  }
+
+  public Map<String, IndexedArtifact> search(SearchExpression term, String type) throws CoreException {
     return search(null, term, type, IIndex.SEARCH_ALL);
   }
 
-  public Map<String, IndexedArtifact> search(String term, String type, int classifier) throws CoreException {
+  public Map<String, IndexedArtifact> search(SearchExpression term, String type, int classifier) throws CoreException {
     return search(null, term, type, classifier);
   }
 
@@ -320,57 +368,61 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
   /**
    * @return Map<String, IndexedArtifact>
    */
-  protected Map<String, IndexedArtifact> search(IRepository repository, String term, String type, int classifier)
-      throws CoreException {
+  protected Map<String, IndexedArtifact> search(IRepository repository, SearchExpression term, String type,
+      int classifier) throws CoreException {
     Query query;
     if(IIndex.SEARCH_GROUP.equals(type)) {
-      query = constructQuery(MAVEN.GROUP_ID, term, SearchType.EXACT);
+      query = constructQuery(MAVEN.GROUP_ID, term);
       // query = new TermQuery(new Term(ArtifactInfo.GROUP_ID, term));
       // query = new PrefixQuery(new Term(ArtifactInfo.GROUP_ID, term));
     } else if(IIndex.SEARCH_ARTIFACT.equals(type)) {
       BooleanQuery bq = new BooleanQuery();
-      bq.add(constructQuery(MAVEN.GROUP_ID, term, SearchType.SCORED), Occur.SHOULD); //$NON-NLS-1$
-      bq.add(constructQuery(MAVEN.ARTIFACT_ID, term, SearchType.SCORED), Occur.SHOULD); //$NON-NLS-1$
-      bq.add(constructQuery(MAVEN.SHA1, term, term.length() == 40 ? SearchType.EXACT : SearchType.SCORED), Occur.SHOULD);
+      bq.add(constructQuery(MAVEN.GROUP_ID, term), Occur.SHOULD); //$NON-NLS-1$
+      bq.add(constructQuery(MAVEN.ARTIFACT_ID, term), Occur.SHOULD); //$NON-NLS-1$
+      bq.add(
+          constructQuery(MAVEN.SHA1, term.getStringValue(), term.getStringValue().length() == 40 ? SearchType.EXACT
+              : SearchType.SCORED), Occur.SHOULD);
       addClassifiersToQuery(bq, classifier);
       query = bq;
 
     } else if(IIndex.SEARCH_PARENTS.equals(type)) {
-      if(term == null || "*".equals(term) || "".equals(term)) { //$NON-NLS-1$ //$NON-NLS-2$
+      if(term == null) { //$NON-NLS-1$ //$NON-NLS-2$
         query = constructQuery(MAVEN.PACKAGING, "pom", SearchType.EXACT); //$NON-NLS-1$
       } else {
         BooleanQuery bq = new BooleanQuery();
-        bq.add(constructQuery(MAVEN.GROUP_ID, term, SearchType.SCORED), Occur.SHOULD); //$NON-NLS-1$
-        bq.add(constructQuery(MAVEN.ARTIFACT_ID, term, SearchType.SCORED), Occur.SHOULD); //$NON-NLS-1$
-        bq.add(constructQuery(MAVEN.SHA1, term, term.length() == 40 ? SearchType.EXACT : SearchType.SCORED),
-            Occur.SHOULD);
+        bq.add(constructQuery(MAVEN.GROUP_ID, term), Occur.SHOULD); //$NON-NLS-1$
+        bq.add(constructQuery(MAVEN.ARTIFACT_ID, term), Occur.SHOULD); //$NON-NLS-1$
+        bq.add(
+            constructQuery(MAVEN.SHA1, term.getStringValue(), term.getStringValue().length() == 40 ? SearchType.EXACT
+                : SearchType.SCORED), Occur.SHOULD);
         Query tq = constructQuery(MAVEN.PACKAGING, "pom", SearchType.EXACT); //$NON-NLS-1$
         query = new FilteredQuery(tq, new QueryWrapperFilter(bq));
       }
 
     } else if(IIndex.SEARCH_PLUGIN.equals(type)) {
-      if("*".equals(term)) { //$NON-NLS-1$
+      if(term == null) { //$NON-NLS-1$
         query = constructQuery(MAVEN.PACKAGING, "maven-plugin", SearchType.EXACT); //$NON-NLS-1$
       } else {
         BooleanQuery bq = new BooleanQuery();
-        bq.add(constructQuery(MAVEN.GROUP_ID, term, SearchType.SCORED), Occur.SHOULD); //$NON-NLS-1$
-        bq.add(constructQuery(MAVEN.ARTIFACT_ID, term, SearchType.SCORED), Occur.SHOULD); //$NON-NLS-1$
+        bq.add(constructQuery(MAVEN.GROUP_ID, term), Occur.SHOULD); //$NON-NLS-1$
+        bq.add(constructQuery(MAVEN.ARTIFACT_ID, term), Occur.SHOULD); //$NON-NLS-1$
         Query tq = constructQuery(MAVEN.PACKAGING, "maven-plugin", SearchType.EXACT); //$NON-NLS-1$
         query = new FilteredQuery(tq, new QueryWrapperFilter(bq));
       }
 
     } else if(IIndex.SEARCH_ARCHETYPE.equals(type)) {
       BooleanQuery bq = new BooleanQuery();
-      bq.add(constructQuery(MAVEN.GROUP_ID, term, SearchType.SCORED), Occur.SHOULD); //$NON-NLS-1$
-      bq.add(constructQuery(MAVEN.ARTIFACT_ID, term, SearchType.SCORED), Occur.SHOULD); //$NON-NLS-1$
+      bq.add(constructQuery(MAVEN.GROUP_ID, term), Occur.SHOULD); //$NON-NLS-1$
+      bq.add(constructQuery(MAVEN.ARTIFACT_ID, term), Occur.SHOULD); //$NON-NLS-1$
       Query tq = constructQuery(MAVEN.PACKAGING, "maven-archetype", SearchType.EXACT); //$NON-NLS-1$
       query = new FilteredQuery(tq, new QueryWrapperFilter(bq));
 
     } else if(IIndex.SEARCH_PACKAGING.equals(type)) {
-      query = constructQuery(MAVEN.PACKAGING, term, SearchType.EXACT);
+      query = constructQuery(MAVEN.PACKAGING, term);
     } else if(IIndex.SEARCH_SHA1.equals(type)) {
       // if hash is 40 chars, it is "complete", otherwise assume prefix
-      query = constructQuery(MAVEN.SHA1, term, term.length() == 40 ? SearchType.EXACT : SearchType.SCORED);
+      query = constructQuery(MAVEN.SHA1, term.getStringValue(), term.getStringValue().length() == 40 ? SearchType.EXACT
+          : SearchType.SCORED);
     } else {
       return Collections.emptyMap();
     }
@@ -399,7 +451,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
         if(IIndex.SEARCH_GROUP.equals(type) && context != null) {
           Set<String> groups = context.getAllGroups();
           for(String group : groups) {
-            if(group.startsWith(term) && !group.equals(term)) {
+            if(term == null || group.startsWith(term.getStringValue()) && !group.equals(term.getStringValue())) {
               String key = getArtifactFileKey(group, group, null, null);
               result.put(key, new IndexedArtifact(group, group, null, null, null));
             }
@@ -417,7 +469,8 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
   /**
    * @return Map<String, IndexedArtifact>
    */
-  protected Map<String, IndexedArtifact> search(IRepository repository, String term, String type) throws CoreException {
+  protected Map<String, IndexedArtifact> search(IRepository repository, SearchExpression term, String type)
+      throws CoreException {
     return search(repository, term, type, IIndex.SEARCH_ALL);
   }
 
@@ -465,32 +518,6 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
 
   protected String getArtifactFileKey(String group, String artifact, String packageName, String className) {
     return className + " : " + packageName + " : " + group + " : " + artifact; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-  }
-
-  protected IndexedArtifactFile getIndexedArtifactFile(ArtifactInfo artifactInfo) {
-    String groupId = artifactInfo.groupId;
-    String artifactId = artifactInfo.artifactId;
-    String repository = artifactInfo.repository;
-    String version = artifactInfo.version;
-    String classifier = artifactInfo.classifier;
-    String packaging = artifactInfo.packaging;
-    String fname = artifactInfo.fname;
-    if(fname == null) {
-      fname = artifactId + '-' + version
-          + (classifier != null ? '-' + classifier : "") + (packaging != null ? ('.' + packaging) : ""); //$NON-NLS-1$ //$NON-NLS-2$
-    }
-
-    long size = artifactInfo.size;
-    Date date = new Date(artifactInfo.lastModified);
-
-    int sourcesExists = artifactInfo.sourcesExists.ordinal();
-    int javadocExists = artifactInfo.javadocExists.ordinal();
-
-    String prefix = artifactInfo.prefix;
-    List<String> goals = artifactInfo.goals;
-
-    return new IndexedArtifactFile(repository, groupId, artifactId, version, packaging, classifier, fname, size, date,
-        sourcesExists, javadocExists, prefix, goals);
   }
 
   private void purgeCurrentIndex(IndexingContext context) throws IOException {
@@ -654,7 +681,8 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     }
   }
 
-  protected IndexedArtifactGroup[] getRootIndexedArtifactGroups(IRepository repository) throws CoreException {
+  /** for unit tests */
+  public IndexedArtifactGroup[] getRootIndexedArtifactGroups(IRepository repository) throws CoreException {
     synchronized(getIndexLock(repository)) {
       IndexingContext context = getIndexingContext(repository);
       if(context != null) {
@@ -827,7 +855,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     String prefix = group.getPrefix();
     try {
       IndexedArtifactGroup g = new IndexedArtifactGroup(repository, prefix);
-      for(IndexedArtifact a : search(repository, prefix, IIndex.SEARCH_GROUP).values()) {
+      for(IndexedArtifact a : search(repository, new SourcedSearchExpression(prefix), IIndex.SEARCH_GROUP).values()) {
         String groupId = a.getGroupId();
         if(groupId.equals(prefix)) {
           g.getFiles().put(a.getArtifactId(), a);

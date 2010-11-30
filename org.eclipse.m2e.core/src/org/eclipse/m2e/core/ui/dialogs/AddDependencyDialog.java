@@ -57,6 +57,7 @@ import org.eclipse.m2e.core.index.IIndex;
 import org.eclipse.m2e.core.index.IndexManager;
 import org.eclipse.m2e.core.index.IndexedArtifact;
 import org.eclipse.m2e.core.index.IndexedArtifactFile;
+import org.eclipse.m2e.core.index.UserInputSearchExpression;
 import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.util.ProposalUtil;
 import org.eclipse.m2e.core.util.search.Packaging;
@@ -548,7 +549,7 @@ public class AddDependencyDialog extends AbstractMavenDialog {
         // TODO: before it was searching all indexes, but it should current project? (cstamas)
         // If not, the change getIndex(project) to getAllIndexes() and done
         // TODO: cstamas identified this as "user input", true?
-        Map<String, IndexedArtifact> results = indexManager.getIndex(project).search(query, IIndex.SEARCH_ARTIFACT,
+        Map<String, IndexedArtifact> results = indexManager.getIndex(project).search(new UserInputSearchExpression(query), IIndex.SEARCH_ARTIFACT,
             IIndex.SEARCH_ALL);
         setResults(IStatus.OK, NLS.bind(Messages.AddDependencyDialog_searchDone, results.size()), results);
       } catch(BooleanQuery.TooManyClauses exception) {

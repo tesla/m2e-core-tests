@@ -64,6 +64,7 @@ import org.eclipse.m2e.core.index.IIndex;
 import org.eclipse.m2e.core.index.IndexManager;
 import org.eclipse.m2e.core.index.IndexedArtifact;
 import org.eclipse.m2e.core.index.IndexedArtifactFile;
+import org.eclipse.m2e.core.index.UserInputSearchExpression;
 import org.eclipse.m2e.core.internal.Messages;
 
 
@@ -383,7 +384,7 @@ public class MavenPomSelectionComponent extends Composite {
               null);
 
           // TODO: cstamas identified this as "user input", true?
-          Map<String, IndexedArtifact> res = indexManager.getAllIndexes().search(activeQuery, field, classifier);
+          Map<String, IndexedArtifact> res = indexManager.getAllIndexes().search( new UserInputSearchExpression(activeQuery), field, classifier);
           setResult(IStatus.OK, NLS.bind(Messages.MavenPomSelectionComponent_results, activeQuery, res.size()), res);
         } catch(BooleanQuery.TooManyClauses ex) {
           setResult(IStatus.ERROR, Messages.MavenPomSelectionComponent_toomany,
