@@ -231,7 +231,7 @@ public class MavenMarkerManager implements IMavenMarkerManager {
 
             IMarker mark = addMarker(pomFile, type, NLS.bind(
                 org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_managed_title, managedVersion, artString),
-                document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING, false);
+                document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING, false /*isTransient*/);
             mark.setAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT,
                 IMavenConstants.EDITOR_HINT_MANAGED_DEPENDENCY_OVERRIDE);
             mark.setAttribute(IMarker.CHAR_START, off.getStartOffset());
@@ -366,7 +366,7 @@ public class MavenMarkerManager implements IMavenMarkerManager {
 
             IMarker mark = addMarker(pomFile, type, NLS.bind(
                 org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_managed_title, managedVersion, artString),
-                document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING, false);
+                document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING, false /*isTransient*/);
             mark.setAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT,
                 IMavenConstants.EDITOR_HINT_MANAGED_PLUGIN_OVERRIDE);
             mark.setAttribute(IMarker.CHAR_START, off.getStartOffset());
@@ -399,11 +399,11 @@ public class MavenMarkerManager implements IMavenMarkerManager {
           IndexedRegion off = (IndexedRegion) groupId;
           IMarker mark = addMarker(pomFile, type,
               org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_duplicate_groupid,
-              document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING, false);
+              document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING, false /*isTransient*/);
           mark.setAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, IMavenConstants.EDITOR_HINT_PARENT_GROUP_ID);
           mark.setAttribute(IMarker.CHAR_START, off.getStartOffset());
           mark.setAttribute(IMarker.CHAR_END, off.getEndOffset());
-          mark.setAttribute("problemType", "pomhint"); //only imporant in case we enable the generic xml quick fixes //$NON-NLS-1$ //$NON-NLS-2$
+          mark.setAttribute("problemType", "pomhint"); //only important in case we enable the generic xml quick fixes //$NON-NLS-1$ //$NON-NLS-2$
         }
       }
     }
@@ -502,7 +502,7 @@ public class MavenMarkerManager implements IMavenMarkerManager {
                 int lineNumber = document.getLineOfOffset(offset) + 1;
                 IMarker marker = addMarker(pomFile, type,
                     org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_error_noschema, lineNumber,
-                    IMarker.SEVERITY_WARNING, false);
+                    IMarker.SEVERITY_WARNING, false /*isTransient*/);
                 //the quick fix in the marker view needs to know the offset, since it doesn't have access to the
                 //editor/source viewer
                 if(marker != null){
@@ -535,7 +535,7 @@ public class MavenMarkerManager implements IMavenMarkerManager {
    */
   //just here to satisfy the IMavenMarkerManager contract.
   public IMarker addMarker(IResource resource, String type, String message, int lineNumber, int severity) {
-    return addMarker(resource, type, message, lineNumber, severity, true /*isTransient*/);
+    return addMarker(resource, type, message, lineNumber, severity, false /*isTransient*/);
   }
 
   private IMarker addMarker(IResource resource, String type, String message, int lineNumber, int severity, boolean isTransient) {
@@ -695,16 +695,16 @@ public class MavenMarkerManager implements IMavenMarkerManager {
       CoreException cex = (CoreException) cause;
       IStatus status = cex.getStatus();
       if(status != null) {
-        addMarker(resource, type, status.getMessage(), 1, IMarker.SEVERITY_ERROR, false); //$NON-NLS-1$
+        addMarker(resource, type, status.getMessage(), 1, IMarker.SEVERITY_ERROR, false /*isTransient*/); //$NON-NLS-1$
         IStatus[] children = status.getChildren();
         if(children != null) {
           for(IStatus childStatus : children) {
-            addMarker(resource, type, childStatus.getMessage(), 1, IMarker.SEVERITY_ERROR, false); //$NON-NLS-1$
+            addMarker(resource, type, childStatus.getMessage(), 1, IMarker.SEVERITY_ERROR, false /*isTransient*/); //$NON-NLS-1$
           }
         }
       }
     } else {
-      addMarker(resource, type, cause.getMessage(), 1, IMarker.SEVERITY_ERROR, false); //$NON-NLS-1$
+      addMarker(resource, type, cause.getMessage(), 1, IMarker.SEVERITY_ERROR, false /*isTransient*/); //$NON-NLS-1$
     }
   }
 }
