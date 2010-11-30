@@ -39,6 +39,7 @@ import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.embedder.ArtifactRef;
 import org.eclipse.m2e.core.internal.project.registry.MavenProjectFacade;
 import org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager;
+import org.eclipse.m2e.core.internal.project.registry.ProjectRegistryRefreshJob;
 import org.eclipse.m2e.core.project.IMavenProjectChangedListener;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.MavenProjectChangedEvent;
@@ -98,14 +99,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     return mavenProject.getArtifacts();
   }
 
-  private List<Artifact> getTestArtifacts(IMavenProjectFacade f1) throws CoreException {
-    MavenProject mavenProject = f1.getMavenProject(monitor);
-    return mavenProject.getTestArtifacts();
-  }
-
   public void test000_simple() throws Exception {
-//    System.out.println("ENTER!"); System.in.read();
-
     IProject p1 = createExisting("t000-p1");
     waitForJobsToComplete();
 
@@ -439,7 +433,9 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
   public void test008_staleMissingParent() throws Exception {
     // p1 does not have parent
     IProject p1 = createExisting("t008-p1");
+    assertNotNull(p1);
     IProject p3 = createExisting("t008-p3");
+    assertNotNull(p3);
     waitForJobsToComplete();
 
     IMavenProjectFacade f1 = manager.create(p1, monitor);
@@ -802,16 +798,16 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     String oldSettings = mavenConfiguration.getUserSettingsFile();
     try {
       injectFilexWagon();
-      mavenConfiguration.setUserSettingsFile(new File("projects/MNGECLIPSE-1996/settings.xml").getAbsolutePath());
       IJobChangeListener jobChangeListener = new JobChangeAdapter() {
         public void scheduled(IJobChangeEvent event) {
-          if(event.getJob().getClass().getName().endsWith("MavenProjectManagerRefreshJob")) {
+          if(event.getJob() instanceof ProjectRegistryRefreshJob) {
             // cancel all those concurrent refresh jobs, we want to monitor the main thread only
             event.getJob().cancel();
           }
         }
       };
       Job.getJobManager().addJobChangeListener(jobChangeListener);
+      mavenConfiguration.setUserSettingsFile(new File("projects/MNGECLIPSE-1996/settings.xml").getAbsolutePath());
       waitForJobsToComplete();
       FilexWagon.setRequestFilterPattern("mngeclipse1996/.*xml", true);
       List<String> requests;
