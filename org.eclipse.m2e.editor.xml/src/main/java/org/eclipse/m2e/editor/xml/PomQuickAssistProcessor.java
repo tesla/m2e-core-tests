@@ -23,6 +23,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
@@ -108,8 +110,7 @@ public class PomQuickAssistProcessor implements IQuickAssistProcessor {
             }
           }
         } catch(Exception e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
+          MvnIndexPlugin.getDefault().getLog().log(new Status(IStatus.ERROR, MvnIndexPlugin.PLUGIN_ID, "Exception in pom quick assist.", e));
         }
       }
     }
@@ -651,8 +652,7 @@ static class IgnoreWarningProposal implements ICompletionProposal, ICompletionPr
           }
         }
       } catch(BadLocationException e1) {
-        // TODO Auto-generated catch block
-        e1.printStackTrace();
+        MavenLogger.log("Error while computing completion proposal", e1);
       }
     } finally {
       if (domModel != null) {
