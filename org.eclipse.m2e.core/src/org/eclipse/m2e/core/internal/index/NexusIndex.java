@@ -22,13 +22,13 @@ import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 
 import org.apache.maven.index.MAVEN;
-import org.apache.maven.index.SearchType;
 
 import org.eclipse.m2e.core.embedder.ArtifactKey;
 import org.eclipse.m2e.core.index.IIndex;
 import org.eclipse.m2e.core.index.IMutableIndex;
 import org.eclipse.m2e.core.index.IndexedArtifact;
 import org.eclipse.m2e.core.index.IndexedArtifactFile;
+import org.eclipse.m2e.core.index.SearchExpression;
 import org.eclipse.m2e.core.repository.IRepository;
 
 
@@ -82,24 +82,24 @@ public class NexusIndex implements IIndex, IMutableIndex {
     indexManager.removeDocument(repository, pomFile, artifactKey);
   }
 
-  public Collection<IndexedArtifact> find(String groupId, String artifactId, String version, String packaging)
-      throws CoreException {
+  public Collection<IndexedArtifact> find(SearchExpression groupId, SearchExpression artifactId,
+      SearchExpression version, SearchExpression packaging) throws CoreException {
     BooleanQuery query = new BooleanQuery();
 
-    if(!isBlank(packaging)) {
-      query.add(indexManager.constructQuery(MAVEN.PACKAGING, packaging, SearchType.EXACT), Occur.MUST);
+    if(packaging != null) {
+      query.add(indexManager.constructQuery(MAVEN.PACKAGING, packaging), Occur.MUST);
     }
 
-    if(!isBlank(groupId)) {
-      query.add(indexManager.constructQuery(MAVEN.GROUP_ID, groupId, SearchType.SCORED), Occur.MUST);
+    if(groupId != null) {
+      query.add(indexManager.constructQuery(MAVEN.GROUP_ID, groupId), Occur.MUST);
     }
 
-    if(!isBlank(artifactId)) {
-      query.add(indexManager.constructQuery(MAVEN.ARTIFACT_ID, artifactId, SearchType.SCORED), Occur.MUST);
+    if(artifactId != null) {
+      query.add(indexManager.constructQuery(MAVEN.ARTIFACT_ID, artifactId), Occur.MUST);
     }
 
-    if(!isBlank(version)) {
-      query.add(indexManager.constructQuery(MAVEN.VERSION, version, SearchType.SCORED), Occur.MUST);
+    if(version != null) {
+      query.add(indexManager.constructQuery(MAVEN.VERSION, version), Occur.MUST);
     }
 
     return indexManager.search(repository, query).values();
@@ -145,11 +145,12 @@ public class NexusIndex implements IIndex, IMutableIndex {
     indexManager.setIndexDetails(repository, details, null/*async*/);
   }
 
-  public Map<String, IndexedArtifact> search(String term, String searchType) throws CoreException {
+  public Map<String, IndexedArtifact> search(SearchExpression term, String searchType) throws CoreException {
     return indexManager.search(getRepository(), term, searchType);
   }
 
-  public Map<String, IndexedArtifact> search(String term, String searchType, int classifier) throws CoreException {
+  public Map<String, IndexedArtifact> search(SearchExpression term, String searchType, int classifier)
+      throws CoreException {
     return indexManager.search(getRepository(), term, searchType, classifier);
   }
 }

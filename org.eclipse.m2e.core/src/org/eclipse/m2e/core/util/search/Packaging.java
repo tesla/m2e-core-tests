@@ -11,6 +11,9 @@
 
 package org.eclipse.m2e.core.util.search;
 
+import org.eclipse.m2e.core.index.SearchExpression;
+import org.eclipse.m2e.core.index.SourcedSearchExpression;
+
 
 /**
  * Packaging representation.
@@ -18,8 +21,7 @@ package org.eclipse.m2e.core.util.search;
  * @author Lukas Krecan
  */
 public enum Packaging {
-  ALL(null), //
-  PLUGIN("maven-plugin"), // //$NON-NLS-1$
+  ALL(null), PLUGIN("maven-plugin"), // //$NON-NLS-1$
   POM("pom"); //$NON-NLS-1$
 
   private final String text;
@@ -33,5 +35,13 @@ public enum Packaging {
    */
   public String getText() {
     return text;
+  }
+
+  public SearchExpression toSearchExpression() {
+    if(ALL.equals(this)) {
+      return null;
+    }
+
+    return new SourcedSearchExpression(getText());
   }
 }

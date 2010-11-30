@@ -9,7 +9,6 @@
  *      Sonatype, Inc. - initial API and implementation
  *******************************************************************************/
 
-
 package org.eclipse.m2e.core.util.search;
 
 import java.util.ArrayList;
@@ -20,14 +19,17 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.apache.maven.artifact.versioning.ComparableVersion;
-
 import org.eclipse.core.runtime.CoreException;
+
+import org.apache.maven.artifact.versioning.ComparableVersion;
 
 import org.eclipse.m2e.core.index.IIndex;
 import org.eclipse.m2e.core.index.IndexManager;
 import org.eclipse.m2e.core.index.IndexedArtifact;
 import org.eclipse.m2e.core.index.IndexedArtifactFile;
+import org.eclipse.m2e.core.index.MatchTyped.MatchType;
+import org.eclipse.m2e.core.index.MatchTypedStringSearchExpression;
+import org.eclipse.m2e.core.index.SearchExpression;
 
 
 /**
@@ -44,12 +46,26 @@ public class IndexSearchEngine implements SearchEngine {
     this.index = index;
   }
 
+  protected boolean isBlank(String str) {
+    return str == null || str.trim().length() == 0;
+  }
+
   public Collection<String> findArtifactIds(String groupId, String searchExpression, Packaging packaging,
       ArtifactInfo containingArtifact) {
     // TODO add support for implicit groupIds in plugin dependencies "org.apache.maven.plugins", ...
+    MatchTypedStringSearchExpression groupIdSearchExpression;
+    if(isBlank(groupId)) {
+      // this is not good yet, settings should be used to source groupIds!
+      // also, by default there is also org.codehaus.mojos
+      // one possibility would be to redo these steps multiple times, or simply allow multiple inputs (on IIndexer)?
+      groupIdSearchExpression = new MatchTypedStringSearchExpression("org.apache.maven.plugins", MatchType.EXACT);
+    } else {
+      groupIdSearchExpression = new MatchTypedStringSearchExpression(groupId, MatchType.EXACT);
+    }
+
     try {
       TreeSet<String> ids = new TreeSet<String>();
-      for(IndexedArtifact artifact : index.find(groupId, null, null, packaging.getText())) {
+      for(IndexedArtifact artifact : index.find(groupIdSearchExpression, null, null, packaging.toSearchExpression())) {
         ids.add(artifact.getArtifactId());
       }
       return subSet(ids, searchExpression);
@@ -61,7 +77,8 @@ public class IndexSearchEngine implements SearchEngine {
   public Collection<String> findClassifiers(String groupId, String artifactId, String version, String prefix,
       Packaging packaging) {
     try {
-      Collection<IndexedArtifact> values = index.find(groupId, artifactId, null, packaging.getText());
+      Collection<IndexedArtifact> values = index.find(new MatchTypedStringSearchExpression(groupId, MatchType.EXACT),
+          new MatchTypedStringSearchExpression(artifactId, MatchType.EXACT), null, packaging.toSearchExpression());
       if(values.isEmpty()) {
         return Collections.emptySet();
       }
@@ -83,9 +100,10 @@ public class IndexSearchEngine implements SearchEngine {
     try {
       TreeSet<String> ids = new TreeSet<String>();
 
-      String packagingStr = packaging == Packaging.ALL ? null : packaging.getText();
+      SearchExpression groupSearchExpression = isBlank(searchExpression) ? null : new MatchTypedStringSearchExpression(
+          searchExpression, MatchType.PARTIAL);
 
-      for(IndexedArtifact artifact : index.find(searchExpression, null, null, packagingStr)) {
+      for(IndexedArtifact artifact : index.find(groupSearchExpression, null, null, packaging.toSearchExpression())) {
         ids.add(artifact.getGroupId());
       }
       return subSet(ids, searchExpression);
@@ -97,7 +115,8 @@ public class IndexSearchEngine implements SearchEngine {
   public Collection<String> findTypes(String groupId, String artifactId, String version, String prefix,
       Packaging packaging) {
     try {
-      Collection<IndexedArtifact> values = index.find(groupId, artifactId, null, packaging.getText());
+      Collection<IndexedArtifact> values = index.find(new MatchTypedStringSearchExpression(groupId, MatchType.EXACT),
+          new MatchTypedStringSearchExpression(artifactId, MatchType.EXACT), null, packaging.toSearchExpression());
       if(values.isEmpty()) {
         return Collections.emptySet();
       }
@@ -117,7 +136,8 @@ public class IndexSearchEngine implements SearchEngine {
 
   public Collection<String> findVersions(String groupId, String artifactId, String searchExpression, Packaging packaging) {
     try {
-      Collection<IndexedArtifact> values = index.find(groupId, artifactId, null, packaging.getText());
+      Collection<IndexedArtifact> values = index.find(new MatchTypedStringSearchExpression(groupId, MatchType.EXACT),
+          new MatchTypedStringSearchExpression(artifactId, MatchType.EXACT), null, packaging.toSearchExpression());
       if(values.isEmpty()) {
         return Collections.emptySet();
       }

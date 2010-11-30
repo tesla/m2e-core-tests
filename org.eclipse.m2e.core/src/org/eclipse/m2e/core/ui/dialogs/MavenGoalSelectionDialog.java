@@ -178,8 +178,7 @@ public class MavenGoalSelectionDialog extends ElementTreeSelectionDialog {
       try {
         // TODO: this will search ALL indexes, isn't the right to search _this_ project reposes only?
         // I did not find (at first glance, maybe was hasty) a way to get IProject
-        // TODO: cstamas identified this as "user input", true?
-        Map<String, IndexedArtifact> result = indexManager.getAllIndexes().search("*", IIndex.SEARCH_PLUGIN); //$NON-NLS-1$
+        Map<String, IndexedArtifact> result = indexManager.getAllIndexes().search(null, IIndex.SEARCH_PLUGIN); //$NON-NLS-1$
         TreeMap<String, Group> map = new TreeMap<String, Group>();
         for(IndexedArtifact a : result.values()) {
           IndexedArtifactFile f = a.getFiles().iterator().next();

@@ -95,14 +95,14 @@ public interface IIndex {
    * @return
    * @throws CoreException
    */
-  public Collection<IndexedArtifact> find(String groupId, String artifactId, String version, String packaging)
+  public Collection<IndexedArtifact> find(SearchExpression groupId, SearchExpression artifactId, SearchExpression version, SearchExpression packaging)
       throws CoreException;
 
   /**
    * Convenience method to search in all indexes enabled for repositories defined in settings.xml. This method always
    * performs "scored" search.
    */
-  public Map<String, IndexedArtifact> search(String term, String searchType) throws CoreException;
+  public Map<String, IndexedArtifact> search(SearchExpression expression, String searchType) throws CoreException;
 
   /**
    * Convenience method to search in all indexes enabled for repositories defined in settings.xml. This method always
@@ -113,5 +113,5 @@ public interface IIndex {
    * @param classifier - the type of classifiers to search for, SEARCH_ALL, SEARCH_JAVADOCS, SEARCH_SOURCES,
    *          SEARCH_TESTS
    */
-  public Map<String, IndexedArtifact> search(String term, String searchType, int classifier) throws CoreException;
+  public Map<String, IndexedArtifact> search(SearchExpression expression, String searchType, int classifier) throws CoreException;
 }

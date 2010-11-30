@@ -22,6 +22,8 @@ import org.eclipse.m2e.core.embedder.IMavenConfiguration;
 import org.eclipse.m2e.core.index.IIndex;
 import org.eclipse.m2e.core.index.IndexedArtifact;
 import org.eclipse.m2e.core.index.IndexedArtifactFile;
+import org.eclipse.m2e.core.index.SourcedSearchExpression;
+import org.eclipse.m2e.core.index.UserInputSearchExpression;
 import org.eclipse.m2e.core.internal.index.NexusIndex;
 import org.eclipse.m2e.core.internal.index.NexusIndexManager;
 import org.eclipse.m2e.core.internal.repository.RepositoryRegistry;
@@ -79,25 +81,30 @@ public class NexusIndexManagerSearchTest extends AbstractNexusIndexManagerTest {
   }
 
   public void testPluginSearch() throws Exception {
-    Map<String, IndexedArtifact> search = indexManager.search("maven-tycho", IIndex.SEARCH_PLUGIN);
+    Map<String, IndexedArtifact> search = indexManager.search(new SourcedSearchExpression("maven-tycho"),
+        IIndex.SEARCH_PLUGIN);
     assertTrue(search.size() > 0);
 
-    Map<String, IndexedArtifact> noResultsSearch = indexManager.search("maven-fake-plugin", IIndex.SEARCH_PLUGIN);
+    Map<String, IndexedArtifact> noResultsSearch = indexManager.search(
+        new SourcedSearchExpression("maven-fake-plugin"), IIndex.SEARCH_PLUGIN);
     assertTrue(noResultsSearch.size() == 0);
   }
 
   public void testGroupSearch() throws Exception {
-    Map<String, IndexedArtifact> search = indexManager.search("org.junit", IIndex.SEARCH_GROUP);
+    Map<String, IndexedArtifact> search = indexManager.search(new SourcedSearchExpression("org.junit"),
+        IIndex.SEARCH_GROUP);
     assertTrue(search.size() > 0);
 
     //TODO: this should probably be returning results, but it seems like there result space is too big,
     //so its not returning results now
-    Map<String, IndexedArtifact> noResultsSearch = indexManager.search("orgXX", IIndex.SEARCH_GROUP);
+    Map<String, IndexedArtifact> noResultsSearch = indexManager.search(new UserInputSearchExpression("orgXX"),
+        IIndex.SEARCH_GROUP);
     assertTrue(noResultsSearch.size() == 0);
   }
 
   public void testArtifactSearch() throws Exception {
-    Map<String, IndexedArtifact> search = indexManager.search("junit", IIndex.SEARCH_ARTIFACT);
+    Map<String, IndexedArtifact> search = indexManager.search(new UserInputSearchExpression("junit"),
+        IIndex.SEARCH_ARTIFACT);
     IndexedArtifact ia = search.get("null : null : org.eclipse : org.eclipse.jdt.junit");
     assertNotNull(ia);
     boolean hasVersion = false;
@@ -109,14 +116,15 @@ public class NexusIndexManagerSearchTest extends AbstractNexusIndexManagerTest {
     }
     assertTrue(hasVersion);
 
-    search = indexManager.search("junit", IIndex.SEARCH_ARTIFACT, IIndex.SEARCH_JAVADOCS);
+    search = indexManager.search(new SourcedSearchExpression("junit"), IIndex.SEARCH_ARTIFACT, IIndex.SEARCH_JAVADOCS);
     assertTrue(search.size() > 0);
-    search = indexManager.search("junit", IIndex.SEARCH_ARTIFACT, IIndex.SEARCH_SOURCES);
+    search = indexManager.search(new SourcedSearchExpression("junit"), IIndex.SEARCH_ARTIFACT, IIndex.SEARCH_SOURCES);
     assertTrue(search.size() > 0);
-    search = indexManager.search("junit", IIndex.SEARCH_ARTIFACT, IIndex.SEARCH_TESTS);
+    search = indexManager.search(new SourcedSearchExpression("junit"), IIndex.SEARCH_ARTIFACT, IIndex.SEARCH_TESTS);
     assertTrue(search.size() > 0);
 
-    Map<String, IndexedArtifact> noResultsSearch = indexManager.search("beepbeep-nothing", IIndex.SEARCH_ARTIFACT);
+    Map<String, IndexedArtifact> noResultsSearch = indexManager.search(new SourcedSearchExpression("beepbeep-nothing"),
+        IIndex.SEARCH_ARTIFACT);
     assertTrue(noResultsSearch.size() == 0);
   }
 
@@ -126,18 +134,27 @@ public class NexusIndexManagerSearchTest extends AbstractNexusIndexManagerTest {
    * @throws Exception
    */
   public void testSha1Search() throws Exception {
-    Map<String, IndexedArtifact> search = indexManager.search("what-should-this-be", IIndex.SEARCH_SHA1);
+    Map<String, IndexedArtifact> search = indexManager.search(new SourcedSearchExpression("what-should-this-be"),
+        IIndex.SEARCH_SHA1);
     assertTrue(search.size() == 0);
   }
 
   public void testBogusSearchType() throws Exception {
-    Map<String, IndexedArtifact> search = indexManager.search("commons-logging", "BadSearchType");
+    Map<String, IndexedArtifact> search = indexManager.search(new SourcedSearchExpression("commons-logging"),
+        "BadSearchType");
     assertTrue(search.size() == 0);
   }
 
   public void testSearchGroups() throws CoreException {
-    Collection<IndexedArtifact> result = indexManager.getIndex((IProject) null).find("", null, null, null);
-    assertTrue(String.format("Wrong result set returned! (size=%s)", new Object[] {result.size()}), result.size() == 0);
+    try {
+      Collection<IndexedArtifact> result = indexManager.getIndex((IProject) null).find(new SourcedSearchExpression(""),
+          null, null, null);
+      assertTrue(String.format("Wrong result set returned! (size=%s)", new Object[] {result.size()}),
+          result.size() == 0);
+      fail("We should not get here!");
+    } catch(AssertionError e) {
+      // good
+    }
   }
 
   public void testSearchGroups2() throws CoreException {
@@ -146,7 +163,8 @@ public class NexusIndexManagerSearchTest extends AbstractNexusIndexManagerTest {
   }
 
   public void testSearchGroups3() throws CoreException {
-    Collection<IndexedArtifact> result = indexManager.getIndex((IProject) null).find("org.ju", null, null, null);
+    Collection<IndexedArtifact> result = indexManager.getIndex((IProject) null).find(
+        new UserInputSearchExpression("org.ju"), null, null, null);
     assertTrue(String.format("Wrong result set returned! (size=%s)", new Object[] {result.size()}), result.size() > 0);
   }
 }

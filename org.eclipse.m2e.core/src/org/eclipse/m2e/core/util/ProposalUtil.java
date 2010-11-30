@@ -33,12 +33,11 @@ import org.eclipse.m2e.core.util.search.ControlDecoration;
 import org.eclipse.m2e.core.util.search.Packaging;
 import org.eclipse.m2e.core.util.search.SearchEngine;
 
+
 /**
- * Holds the proposal utility code, previously in the editor.xml plug-in.
+ * Holds the proposal utility code, previously in the editor.xml plug-in. Provides proposal suggestions for text and
+ * combo widgets for various metadata (group, artifact, etc.)
  * 
- * Provides proposal suggestions for text and combo widgets for various 
- * metadata (group, artifact, etc.)
- *
  * @author rgould
  */
 public class ProposalUtil {
@@ -49,23 +48,23 @@ public class ProposalUtil {
 
   public static final class TextProposal implements IContentProposal {
     private final String text;
-  
+
     public TextProposal(String text) {
       this.text = text;
     }
-  
+
     public int getCursorPosition() {
       return text.length();
     }
-  
+
     public String getContent() {
       return text;
     }
-  
+
     public String getLabel() {
       return text;
     }
-  
+
     public String getDescription() {
       return null;
     }
@@ -78,7 +77,7 @@ public class ProposalUtil {
     decoration.setShowOnlyOnFocus(true);
     decoration.setDescriptionText(fieldDecoration.getDescription());
     decoration.setImage(fieldDecoration.getImage());
-  
+
     IContentProposalProvider proposalProvider = new IContentProposalProvider() {
       public IContentProposal[] getProposals(String contents, int position) {
         ArrayList<IContentProposal> proposals = new ArrayList<IContentProposal>();
@@ -86,20 +85,20 @@ public class ProposalUtil {
           for(final String text : searcher.search()) {
             proposals.add(new TextProposal(text));
           }
-        } catch (CoreException e) {
+        } catch(CoreException e) {
           MavenLogger.log(e);
         }
         return proposals.toArray(new IContentProposal[proposals.size()]);
       }
     };
-  
+
     IControlContentAdapter contentAdapter;
     if(control instanceof Text) {
       contentAdapter = new TextContentAdapter();
     } else {
       contentAdapter = new CComboContentAdapter();
     }
-  
+
     ContentAssistCommandAdapter adapter = new ContentAssistCommandAdapter( //
         control, contentAdapter, proposalProvider, //
         ContentAssistCommandAdapter.CONTENT_PROPOSAL_COMMAND, null);
@@ -110,8 +109,8 @@ public class ProposalUtil {
     adapter.setPopupSize(new Point(250, 120));
   }
 
-  public static void addClassifierProposal(final IProject project, final Text groupIdText, final Text artifactIdText, final Text versionText,
-      final Text classifierText, final Packaging packaging) {
+  public static void addClassifierProposal(final IProject project, final Text groupIdText, final Text artifactIdText,
+      final Text versionText, final Text classifierText, final Packaging packaging) {
     addCompletionProposal(classifierText, new Searcher() {
       public Collection<String> search() throws CoreException {
         return getSearchEngine(project).findClassifiers(groupIdText.getText(), //
@@ -120,8 +119,8 @@ public class ProposalUtil {
     });
   }
 
-  public static void addVersionProposal(final IProject project, final Text groupIdText, final Text artifactIdText, final Text versionText,
-      final Packaging packaging) {
+  public static void addVersionProposal(final IProject project, final Text groupIdText, final Text artifactIdText,
+      final Text versionText, final Packaging packaging) {
     addCompletionProposal(versionText, new Searcher() {
       public Collection<String> search() throws CoreException {
         return getSearchEngine(project).findVersions(groupIdText.getText(), //
@@ -130,11 +129,13 @@ public class ProposalUtil {
     });
   }
 
-  public static void addArtifactIdProposal(final IProject project, final Text groupIdText, final Text artifactIdText, final Packaging packaging) {
+  public static void addArtifactIdProposal(final IProject project, final Text groupIdText, final Text artifactIdText,
+      final Packaging packaging) {
     addCompletionProposal(artifactIdText, new Searcher() {
       public Collection<String> search() throws CoreException {
         // TODO handle artifact info
-        return getSearchEngine(project).findArtifactIds(groupIdText.getText(), artifactIdText.getText(), packaging, null);
+        return getSearchEngine(project).findArtifactIds(groupIdText.getText(), artifactIdText.getText(), packaging,
+            null);
       }
     });
   }

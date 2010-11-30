@@ -25,6 +25,7 @@ import org.eclipse.m2e.core.embedder.ArtifactKey;
 import org.eclipse.m2e.core.index.IIndex;
 import org.eclipse.m2e.core.index.IndexedArtifact;
 import org.eclipse.m2e.core.index.IndexedArtifactFile;
+import org.eclipse.m2e.core.index.SearchExpression;
 
 
 /**
@@ -66,7 +67,7 @@ public class CompositeIndex implements IIndex {
     return null;
   }
 
-  public Collection<IndexedArtifact> find(String groupId, String artifactId, String version, String packaging)
+  public Collection<IndexedArtifact> find(SearchExpression groupId, SearchExpression artifactId, SearchExpression version, SearchExpression packaging)
       throws CoreException {
     Set<IndexedArtifact> result = new LinkedHashSet<IndexedArtifact>();
     for(IIndex index : indexes) {
@@ -78,7 +79,7 @@ public class CompositeIndex implements IIndex {
     return result;
   }
 
-  public Map<String, IndexedArtifact> search(String term, String searchType) throws CoreException {
+  public Map<String, IndexedArtifact> search(SearchExpression term, String searchType) throws CoreException {
     Map<String, IndexedArtifact> result = new HashMap<String, IndexedArtifact>();
     for(IIndex index : indexes) {
       Map<String, IndexedArtifact> iresult = index.search(term, searchType);
@@ -89,7 +90,7 @@ public class CompositeIndex implements IIndex {
     return result;
   }
 
-  public Map<String, IndexedArtifact> search(String term, String searchType, int classifier) throws CoreException {
+  public Map<String, IndexedArtifact> search(SearchExpression term, String searchType, int classifier) throws CoreException {
     Map<String, IndexedArtifact> result = new HashMap<String, IndexedArtifact>();
     for(IIndex index : indexes) {
       Map<String, IndexedArtifact> iresult = index.search(term, searchType, classifier);

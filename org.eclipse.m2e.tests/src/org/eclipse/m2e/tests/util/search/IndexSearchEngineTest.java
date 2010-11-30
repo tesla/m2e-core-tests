@@ -3,6 +3,7 @@ package org.eclipse.m2e.tests.util.search;
 import java.io.File;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
@@ -10,6 +11,7 @@ import org.eclipse.m2e.core.embedder.ArtifactKey;
 import org.eclipse.m2e.core.index.IIndex;
 import org.eclipse.m2e.core.index.IndexedArtifact;
 import org.eclipse.m2e.core.index.IndexedArtifactFile;
+import org.eclipse.m2e.core.index.SearchExpression;
 import org.eclipse.m2e.core.util.search.IndexSearchEngine;
 import org.eclipse.m2e.core.util.search.Packaging;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
@@ -42,16 +44,27 @@ public class IndexSearchEngineTest extends AbstractMavenProjectTestCase {
       return null;
     }
 
-    public Collection<IndexedArtifact> find(String groupId, String artifactId, String version, String packaging)
+    public Collection<IndexedArtifact> find(SearchExpression groupId, SearchExpression artifactId, SearchExpression version, SearchExpression packaging)
         throws CoreException {
       Set<IndexedArtifact> results = new HashSet<IndexedArtifact>();
       for (String entry : entries) {
-        if (entry.startsWith(groupId)) {
+        if (entry.startsWith(groupId.getStringValue())) {
           IndexedArtifact artifact = new IndexedArtifact(entry, null, null, null, null);
           results.add(artifact);
         }
       }
       return results;
+    }
+
+    public Map<String, IndexedArtifact> search(SearchExpression expression, String searchType) throws CoreException {
+      // TODO Auto-generated method stub
+      return null;
+    }
+
+    public Map<String, IndexedArtifact> search(SearchExpression expression, String searchType, int classifier)
+        throws CoreException {
+      // TODO Auto-generated method stub
+      return null;
     }
     
   }
