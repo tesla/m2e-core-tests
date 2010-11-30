@@ -467,13 +467,6 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
                   //just ignore
                   MavenLogger.log("Unable to read maven project. Some content assists might not work as advertized.", e); //$NON-NLS-1$
                 }
-//                MavenMarkerManager manager = (MavenMarkerManager) MavenPlugin.getDefault().getMavenMarkerManager();
-//                try {
-//                  manager.deleteEditorHintMarkers(file);
-//                  manager.addEditorHintMarkers(file);
-//                } catch(CoreException e) {
-//                  MavenLogger.log("Unable to process editor markers", e);
-//                }
                 return Status.OK_STATUS;
               }
             };

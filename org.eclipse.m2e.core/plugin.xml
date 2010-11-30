@@ -301,7 +301,7 @@
          id="maven2Problem.pomloading"
          name="%m2.marker.problem.pomloading.name">
       <super type="org.eclipse.m2e.core.maven2Problem"/>
-      <persistent value="false"/>
+      <persistent value="true"/>
    </extension>
    <extension point="org.eclipse.core.resources.markers"
          id="maven2Problem.dependency"

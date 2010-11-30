@@ -231,7 +231,7 @@ public class MavenMarkerManager implements IMavenMarkerManager {
 
             IMarker mark = addMarker(pomFile, type, NLS.bind(
                 org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_managed_title, managedVersion, artString),
-                document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING);
+                document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING, false);
             mark.setAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT,
                 IMavenConstants.EDITOR_HINT_MANAGED_DEPENDENCY_OVERRIDE);
             mark.setAttribute(IMarker.CHAR_START, off.getStartOffset());
@@ -366,7 +366,7 @@ public class MavenMarkerManager implements IMavenMarkerManager {
 
             IMarker mark = addMarker(pomFile, type, NLS.bind(
                 org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_managed_title, managedVersion, artString),
-                document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING);
+                document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING, false);
             mark.setAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT,
                 IMavenConstants.EDITOR_HINT_MANAGED_PLUGIN_OVERRIDE);
             mark.setAttribute(IMarker.CHAR_START, off.getStartOffset());
@@ -399,7 +399,7 @@ public class MavenMarkerManager implements IMavenMarkerManager {
           IndexedRegion off = (IndexedRegion) groupId;
           IMarker mark = addMarker(pomFile, type,
               org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_duplicate_groupid,
-              document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING);
+              document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING, false);
           mark.setAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, IMavenConstants.EDITOR_HINT_PARENT_GROUP_ID);
           mark.setAttribute(IMarker.CHAR_START, off.getStartOffset());
           mark.setAttribute(IMarker.CHAR_END, off.getEndOffset());
@@ -418,7 +418,7 @@ public class MavenMarkerManager implements IMavenMarkerManager {
           IndexedRegion off = (IndexedRegion) version;
           IMarker mark = addMarker(pomFile, type,
               org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_duplicate_version,
-              document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING);
+              document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING, false);
           mark.setAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, IMavenConstants.EDITOR_HINT_PARENT_VERSION);
           mark.setAttribute(IMarker.CHAR_START, off.getStartOffset());
           mark.setAttribute(IMarker.CHAR_END, off.getEndOffset());
@@ -666,13 +666,6 @@ public class MavenMarkerManager implements IMavenMarkerManager {
       resource.deleteMarkers(type, true, IResource.DEPTH_INFINITE);
     }
   }
-
-//  
-//  public void deleteEditorHintMarkers(IResource resource) throws CoreException {
-//    if (resource != null && resource.exists()) {
-//      resource.deleteMarkers(IMavenConstants.MARKER_HINT_ID, true, IResource.DEPTH_INFINITE);
-//    }
-//  }
 
   private void addMissingArtifactMarkers(IResource pomFile, String type, MavenProject mavenProject) {
 //    Set<Artifact> directDependencies = mavenProject.getDependencyArtifacts();
