@@ -95,9 +95,13 @@ public class Messages extends NLS {
 
   public static String DependenciesComposite_action_showgroupid;
 
+  public static String DependenciesComposite_action_showInheritedDependencies;
+
   public static String DependenciesComposite_btnOptional;
 
   public static String DependenciesComposite_btnSelect;
+
+  public static String DependenciesComposite_checkConsoleForErrors;
 
   public static String DependenciesComposite_error;
 

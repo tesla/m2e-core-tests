@@ -33,6 +33,8 @@ public class MavenEditorImages {
   // object images
   
   public static final Image IMG_JAR = createImage("jar_obj.gif");  //$NON-NLS-1$
+  
+  public static final Image IMG_INHERITED = createImage("inherited_obj.gif"); //$NON-NLS-1$
 
   public static final Image IMG_REPOSITORY = createImage("repository_obj.gif");  //$NON-NLS-1$
   
@@ -71,6 +73,8 @@ public class MavenEditorImages {
   public static final ImageDescriptor EXPAND_ALL = create("expandall.gif"); //$NON-NLS-1$
 
   public static final ImageDescriptor SHOW_GROUP = create("show_group.gif"); //$NON-NLS-1$
+  
+  public static final ImageDescriptor SHOW_INHERITED_DEPENDENCIES = create("show_inherited_dependencies.gif"); //$NON-NLS-1$
 
   public static final ImageDescriptor ADD_MODULE = create("new_project.gif"); //$NON-NLS-1$
 

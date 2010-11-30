@@ -14,7 +14,9 @@ package org.eclipse.m2e.editor.composites;
 import static org.eclipse.m2e.editor.pom.FormUtils.nvl;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -30,7 +32,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.common.notify.Notification;
-import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -42,6 +43,7 @@ import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -110,7 +112,8 @@ public class DependenciesComposite extends Composite {
 
   PropertiesListComposite<Dependency> dependencyManagementEditor;
 
-  DependenciesListComposite<Dependency> dependenciesEditor;
+  //This ListComposite takes both m2e and maven Dependencies
+  DependenciesListComposite<Object> dependenciesEditor;
 
   Button dependencySelectButton;
 
@@ -135,6 +138,9 @@ public class DependenciesComposite extends Composite {
   DependencyLabelProvider dependencyLabelProvider = new DependencyLabelProvider();
 
   DependencyLabelProvider dependencyManagementLabelProvider = new DependencyLabelProvider();
+
+  protected boolean showInheritedDependencies = false;
+  IMavenProjectFacade facade = null;
 
   public DependenciesComposite(Composite composite, MavenPomEditorPage editorPage, int flags, MavenPomEditor pomEditor) {
     super(composite, flags);
@@ -169,20 +175,27 @@ public class DependenciesComposite extends Composite {
     dependenciesSection.marginWidth = 3;
     dependenciesSection.setText(Messages.DependenciesComposite_sectionDependencies);
 
-    dependenciesEditor = new DependenciesListComposite<Dependency>(dependenciesSection, SWT.NONE, true);
+    dependenciesEditor = new DependenciesListComposite<Object>(dependenciesSection, SWT.NONE, true);
     dependenciesEditor.setLabelProvider(dependencyLabelProvider);
-    dependenciesEditor.setContentProvider(new ListEditorContentProvider<Dependency>());
+    dependenciesEditor.setContentProvider(new ListEditorContentProvider<Object>());
 
     dependenciesEditor.setRemoveButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = editorPage.getEditingDomain();
 
-        List<Dependency> dependencyList = dependenciesEditor.getSelection();
-        for(Dependency dependency : dependencyList) {
-          Command removeCommand = RemoveCommand.create(editingDomain, model, POM_PACKAGE.getModel_Dependencies(),
-              dependency);
-          compoundCommand.append(removeCommand);
+        List<Object> dependencyList = dependenciesEditor.getSelection();
+        for(Object obj : dependencyList) {
+          if (obj instanceof Dependency) {
+            Dependency dependency = (Dependency) obj;
+            Command removeCommand = RemoveCommand.create(editingDomain, model, POM_PACKAGE.getModel_Dependencies(),
+                dependency);
+            compoundCommand.append(removeCommand);
+          } else if (obj instanceof org.apache.maven.model.Dependency) {
+            /*
+             * TODO: Support a refactoring of removing an inherited/managed dependency.
+             */
+          }
         }
 
         editingDomain.getCommandStack().execute(compoundCommand);
@@ -190,24 +203,22 @@ public class DependenciesComposite extends Composite {
     });
 
     dependenciesEditor.setPropertiesListener(new SelectionAdapter() {
+      @SuppressWarnings("unchecked")
       public void widgetSelected(SelectionEvent e) {
-        Dependency dependency = dependenciesEditor.getSelection().get(0);
-        EditDependencyDialog d = new EditDependencyDialog(getShell(), false, editorPage.getEditingDomain(), editorPage
-            .getProject());
-        d.setDependency(dependency);
-        if(d.open() == Window.OK) {
-          dependenciesEditor.setInput(model.getDependencies());
-          dependenciesEditor.setSelection(Collections.singletonList(dependency));
-        }
-      }
-    });
-
-    dependenciesEditor.addSelectionListener(new ISelectionChangedListener() {
-      public void selectionChanged(SelectionChangedEvent event) {
-        List<Dependency> selection = dependenciesEditor.getSelection();
-
-        if(!selection.isEmpty()) {
-          dependencyManagementEditor.setSelection(Collections.<Dependency> emptyList());
+        Object selection = dependenciesEditor.getSelection().get(0);
+        if (selection instanceof Dependency) {
+          Dependency dependency = (Dependency) selection;
+          EditDependencyDialog d = new EditDependencyDialog(getShell(), false, editorPage.getEditingDomain(), editorPage
+              .getProject());
+          d.setDependency(dependency);
+          if(d.open() == Window.OK) {
+            setDependenciesInput();
+            dependenciesEditor.setSelection(Collections.singletonList((Object) dependency));
+          }
+        } else if (selection instanceof org.apache.maven.model.Dependency) {
+          /*
+           * TODO: Support editing or displaying of inherited/managed dependencies.
+           */
         }
       }
     });
@@ -230,6 +241,7 @@ public class DependenciesComposite extends Composite {
     });
     
     dependenciesEditor.setAddButtonListener(new SelectionAdapter() {
+      @SuppressWarnings("unchecked")
       public void widgetSelected(SelectionEvent e) {
         final AddDependencyDialog addDepDialog = new AddDependencyDialog(getShell(), false, editorPage.getProject());
 
@@ -265,14 +277,75 @@ public class DependenciesComposite extends Composite {
               }
             }, POM_PACKAGE.getModel_Dependencies(), dep);
           }
-          dependenciesEditor.setInput(model.getDependencies());
-          dependenciesEditor.setSelection(Collections.singletonList(deps.get(0)));
+          setDependenciesInput();
+          dependenciesEditor.setSelection(Collections.singletonList((Object) deps.get(0)));
         }
       }
 
     });
 
     ToolBarManager modulesToolBarManager = new ToolBarManager(SWT.FLAT);
+    
+    modulesToolBarManager.add(new Action(Messages.DependenciesComposite_action_showInheritedDependencies, 
+        MavenEditorImages.SHOW_INHERITED_DEPENDENCIES) {
+      {
+        setChecked(false);
+      }
+      
+      @Override
+      public int getStyle() {
+        return AS_CHECK_BOX;
+      }
+      
+      @Override
+      public void run() {
+        if (isChecked()) {
+          IRunnableWithProgress projectLoader = new IRunnableWithProgress() {
+            public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+              try {
+                facade = readMavenProject(monitor);
+                if (facade == null) {
+                  return;
+                }
+                dependencyLabelProvider.setFacade(facade);
+                showInheritedDependencies = true;
+                
+                Display.getDefault().asyncExec(new Runnable() {
+                  public void run() {
+                    setDependenciesInput();
+                    dependenciesEditor.getViewer().refresh();
+                  }
+                });
+              } catch(CoreException e) {
+                throw new InvocationTargetException(e);
+              }
+            }
+          };
+          
+
+          try {
+            PlatformUI.getWorkbench().getProgressService().run(true, true, projectLoader);
+          } catch(InvocationTargetException e) {
+            MavenEditorPlugin.getDefault().getLog().log(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, null, e));
+          } catch(InterruptedException e) {
+            MavenEditorPlugin.getDefault().getLog().log(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, null, e));
+          }
+
+          if (facade == null || facade.getMavenProject() == null 
+              || facade.getMavenProject().getModel() == null) {
+            /*
+             * If this is null here, there was an exception thrown during 
+             * readMavenProject above, so we should uncheck the button
+             */
+            setChecked(false);
+          }
+        } else {
+          showInheritedDependencies  = false;
+          setDependenciesInput();
+        }
+      }
+    });
+    
     modulesToolBarManager.add(new Action(Messages.DependenciesComposite_action_showgroupid,
         MavenEditorImages.SHOW_GROUP) {
       {
@@ -368,7 +441,7 @@ public class DependenciesComposite extends Composite {
         List<Dependency> selection = dependencyManagementEditor.getSelection();
 
         if(!selection.isEmpty()) {
-          dependenciesEditor.setSelection(Collections.<Dependency> emptyList());
+          dependenciesEditor.setSelection(Collections.<Object> emptyList());
         }
       }
     });
@@ -449,13 +522,14 @@ public class DependenciesComposite extends Composite {
   }
 
 
+  @SuppressWarnings("unchecked")
   public void loadData(Model model, ValueProvider<DependencyManagement> dependencyManagementProvider) {
     this.model = model;
     this.dependencyManagementProvider = dependencyManagementProvider;
     this.dependencyLabelProvider.setPomEditor(editorPage.getPomEditor());
     this.dependencyManagementLabelProvider.setPomEditor(editorPage.getPomEditor());
 
-    dependenciesEditor.setInput(model.getDependencies());
+    dependenciesEditor.setInput((List<Object>)(List<?>)model.getDependencies());
 
     DependencyManagement dependencyManagement = dependencyManagementProvider.getValue();
     dependencyManagementEditor.setInput(dependencyManagement == null ? null : dependencyManagement.getDependencies());
@@ -470,6 +544,7 @@ public class DependenciesComposite extends Composite {
 
   public void updateView(final MavenPomEditorPage editorPage, final Notification notification) {
     Display.getDefault().asyncExec(new Runnable() {
+      @SuppressWarnings("unchecked")
       public void run() {
         EObject object = (EObject) notification.getNotifier();
 
@@ -484,7 +559,7 @@ public class DependenciesComposite extends Composite {
           }
 
           if(model2.getDependencies() != null && dependenciesEditor.getInput() == null) {
-            dependenciesEditor.setInput(model2.getDependencies());
+            dependenciesEditor.setInput((List<Object>)(List<?>)model2.getDependencies());
           } else if(model2.getDependencies() == null) {
             dependenciesEditor.setInput(null);
           }
@@ -495,7 +570,7 @@ public class DependenciesComposite extends Composite {
 
         if(object instanceof DependencyManagement) {
           if(dependenciesEditor.getInput() == null) {
-            dependenciesEditor.setInput(((DependencyManagement) object).getDependencies());
+            dependenciesEditor.setInput((List<Object>)(List<?>)((DependencyManagement) object).getDependencies());
           }
           dependencyManagementEditor.refresh();
         }
@@ -559,10 +634,11 @@ public class DependenciesComposite extends Composite {
             POM_PACKAGE.getDependencyManagement_Dependencies());
       }
 
-      private void selectDepenendencies(ListEditorComposite<Dependency> editor, EObject parent,
+      @SuppressWarnings({"unchecked", "rawtypes"})
+      private void selectDepenendencies(ListEditorComposite<?> editor, EObject parent,
           EStructuralFeature feature) {
         if(parent != null) {
-          editor.setSelection((EList<Dependency>) parent.eGet(feature));
+          editor.setSelection((List) parent.eGet(feature));
           editor.refresh();
         }
       }
@@ -599,6 +675,9 @@ public class DependenciesComposite extends Composite {
       if(element instanceof Dependency) {
         Dependency d = (Dependency) element;
         return searchMatcher.isMatchingArtifact(d.getGroupId(), d.getArtifactId());
+      } else if (element instanceof org.apache.maven.model.Dependency) {
+        org.apache.maven.model.Dependency dependency = (org.apache.maven.model.Dependency) element;
+        return searchMatcher.isMatchingArtifact(dependency.getGroupId(), dependency.getArtifactId());
       }
       return false;
     }
@@ -614,29 +693,12 @@ public class DependenciesComposite extends Composite {
     IRunnableWithProgress projectLoader = new IRunnableWithProgress() {
       public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
         try {
-          IMaven maven = MavenPlugin.getDefault().getMaven();
-          MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
-          mavenProject = pomEditor.readMavenProject(false, monitor);
-          if (mavenProject == null) {
-            IMarker[] markers = pomEditor.getPomFile().findMarkers(IMavenConstants.MARKER_ID, true, IResource.DEPTH_ZERO);
-            if (markers != null && markers.length > 0) {
-              Display.getDefault().asyncExec(new Runnable() {
-                
-                public void run() {
-                  MessageDialog.openError(getShell(), Messages.DependenciesComposite_error, Messages.DependenciesComposite_fixProjectErrors);                  
-                }
-              });
-              return;
-            }
-          }
-          maven.detachFromSession(mavenProject);
-          IMavenProjectFacade projectFacade = projectManager.create(pomEditor.getPomFile(), true, monitor);
+          IMavenProjectFacade projectFacade = readMavenProject(monitor);
           hierarchy.addAll(new ParentGatherer(mavenProject, projectFacade).getParentHierarchy(monitor));
         } catch(CoreException e) {
           throw new InvocationTargetException(e);
         }
       }
-
     };
 
     PlatformUI.getWorkbench().getProgressService().run(false, true, projectLoader);
@@ -650,6 +712,79 @@ public class DependenciesComposite extends Composite {
     final ManageDependenciesDialog manageDepDialog = new ManageDependenciesDialog(getShell(), model, hierarchy,
         pomEditor.getEditingDomain());
     manageDepDialog.open();
+  }
+
+  /**
+   * Attempts to completely load the current MavenProject so as to get at the 
+   * effective pom.
+   * 
+   * In the case where the MavenProject cannot be accessed and markers are present,
+   * it will inform the user that they need to fix the problems before they can 
+   * proceed.
+   * 
+   * @param monitor
+   * @return the IMavenProjectFacade that corresponds to the project, or null if one was not loaded.
+   * @throws CoreException
+   */
+  protected IMavenProjectFacade readMavenProject(IProgressMonitor monitor) throws CoreException {
+    IMaven maven = MavenPlugin.getDefault().getMaven();
+    MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
+    mavenProject = pomEditor.readMavenProject(false, monitor);
+    if (mavenProject == null) {
+      IMarker[] markers = pomEditor.getPomFile().findMarkers(IMavenConstants.MARKER_ID, true, IResource.DEPTH_ZERO);
+      if (markers != null && markers.length > 0) {
+        Display.getDefault().asyncExec(new Runnable() {
+          
+          public void run() {
+            MessageDialog.openError(getShell(), Messages.DependenciesComposite_error, Messages.DependenciesComposite_fixProjectErrors);                  
+          }
+        });
+        return null;
+      } else {
+        Display.getDefault().asyncExec(new Runnable() {
+          
+          public void run() {
+            MessageDialog.openError(getShell(), Messages.DependenciesComposite_error, Messages.DependenciesComposite_checkConsoleForErrors);
+          }
+        });
+        return null;
+      }
+    } else {
+      maven.detachFromSession(mavenProject);
+    }
+    IMavenProjectFacade projectFacade = projectManager.create(pomEditor.getPomFile(), true, monitor);
+    return projectFacade;
+  }
+
+  protected void setDependenciesInput() {
+    List<Object> deps = new ArrayList<Object>(model.getDependencies());
+    if (showInheritedDependencies) {
+      
+      /*
+       * Add the inherited dependencies into the bunch. But don't we need to
+       * filter out the dependencies that are duplicated in the M2E model, so
+       * we need to run through each list and only add ones that aren't in both.
+       */
+      List<org.apache.maven.model.Dependency> allDeps = new LinkedList<org.apache.maven.model.Dependency>();
+      allDeps.addAll(facade.getMavenProject().getModel().getDependencies());
+      allDeps.addAll(facade.getMavenProject().getModel().getDependencyManagement().getDependencies());
+      for (org.apache.maven.model.Dependency mavenDep : allDeps) {
+        boolean found = false;
+        Iterator<Dependency> iter = model.getDependencies().iterator();
+        while (!found && iter.hasNext()) {
+          Dependency m2eDep = iter.next();
+          if (mavenDep.getGroupId().equals(m2eDep.getGroupId()) 
+              && mavenDep.getArtifactId().equals(m2eDep.getArtifactId())
+              && mavenDep.getVersion().equals(m2eDep.getVersion())) {
+            found = true;
+          }
+        }
+        if (!found) {
+          deps.add(mavenDep);
+        }
+      }
+    }
+    dependenciesEditor.setInput(deps);
   }
 
   protected class PropertiesListComposite<T> extends ListEditorComposite<T> {
@@ -681,7 +816,14 @@ public class DependenciesComposite extends Composite {
     }
 
     protected void updatePropertiesButton() {
-      properties.setEnabled(!readOnly && !viewer.getSelection().isEmpty());
+      boolean enable = !viewer.getSelection().isEmpty() && !isBadSelection();
+      properties.setEnabled(!readOnly && enable);
+    }
+    
+    @Override
+    protected void updateRemoveButton() {
+      boolean enable = !viewer.getSelection().isEmpty() && !isBadSelection();
+      getRemoveButton().setEnabled(!readOnly && enable);
     }
     
     @Override
@@ -689,13 +831,37 @@ public class DependenciesComposite extends Composite {
       super.setReadOnly(readOnly);
       updatePropertiesButton();
     }
+    
+    /**
+     * Returns true if the viewer has no input or if there is currently
+     * an inherited dependency selected
+     * @return
+     */
+    protected boolean isBadSelection() {
+      @SuppressWarnings("unchecked")
+      List<Object> deps = (List<Object>) viewer.getInput();
+      if (deps == null || deps.isEmpty()) {
+        return true;
+      }
+      boolean bad = false;
+      IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
+      @SuppressWarnings("unchecked")
+      Iterator<Object> iter = selection.iterator();
+      while (iter.hasNext()) {
+        Object obj = iter.next();
+        if (obj instanceof org.apache.maven.model.Dependency) {
+          bad = true;
+          break;
+        }
+      }
+      return bad;
+    }
   }
   
   protected class DependenciesListComposite<T> extends PropertiesListComposite<T> {
 
     private static final String MANAGE = "MANAGE"; //$NON-NLS-1$
     protected Button manage;
-    protected Model model;
 
     public DependenciesListComposite(Composite parent, int style, boolean includeSearch) {
       super(parent, style, includeSearch);
@@ -721,8 +887,7 @@ public class DependenciesComposite extends Composite {
     }
 
     protected void updateManageButton() {
-      List<Dependency> deps = (List<Dependency>) viewer.getInput();
-      manage.setEnabled(!readOnly && deps != null && !deps.isEmpty());
+      manage.setEnabled(!readOnly && model.getDependencies() != null && !model.getDependencies().isEmpty());
     }
     
     public void setManageButtonListener(SelectionListener listener) {
