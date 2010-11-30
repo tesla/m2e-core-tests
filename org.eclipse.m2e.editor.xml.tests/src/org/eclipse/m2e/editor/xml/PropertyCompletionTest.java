@@ -17,7 +17,6 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.wst.sse.ui.internal.contentassist.ContentAssistUtils;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
-import org.eclipse.wst.xml.ui.internal.contentassist.XMLContentAssistProcessor;
 
 /**
  * Hello fellow tester:

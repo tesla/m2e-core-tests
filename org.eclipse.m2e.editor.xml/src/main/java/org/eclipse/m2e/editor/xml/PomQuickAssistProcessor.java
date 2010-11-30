@@ -23,6 +23,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
@@ -108,8 +110,7 @@ public class PomQuickAssistProcessor implements IQuickAssistProcessor {
             }
           }
         } catch(Exception e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
+          MvnIndexPlugin.getDefault().getLog().log(new Status(IStatus.ERROR, MvnIndexPlugin.PLUGIN_ID, "Exception in pom quick assist.", e));
         }
       }
     }
@@ -163,10 +164,11 @@ public class PomQuickAssistProcessor implements IQuickAssistProcessor {
       try {
         int line = doc.getLineOfOffset(reg.getStartOffset());
         int startLine = doc.getLineOffset(line);
-        int prev2 = doc.getLineOffset(line - 2);
+        int prev2 = doc.getLineOffset(Math.max(line - 2, 0));
         String prevString = StringUtils.convertToHTMLContent(doc.get(prev2, startLine - prev2));
         String currentLine = doc.get(startLine, doc.getLineLength(line));
-        int next2End = doc.getLineOffset(line + 2) + doc.getLineLength(line + 2);
+        int nextLine = Math.min(line + 2, doc.getNumberOfLines() - 1);
+        int next2End = doc.getLineOffset(nextLine) + doc.getLineLength(nextLine);
         int next2Start = startLine + doc.getLineLength( line ) + 1;
         String nextString = StringUtils.convertToHTMLContent(doc.get(next2Start, next2End - next2Start));
         return "<html>...<br>" + prevString + /**"<del>" + currentLine + "</del>" +*/ nextString + "...<html>";  //$NON-NLS-1$ //$NON-NLS-2$
@@ -651,8 +653,7 @@ static class IgnoreWarningProposal implements ICompletionProposal, ICompletionPr
           }
         }
       } catch(BadLocationException e1) {
-        // TODO Auto-generated catch block
-        e1.printStackTrace();
+        MavenLogger.log("Error while computing completion proposal", e1);
       }
     } finally {
       if (domModel != null) {

@@ -2,6 +2,7 @@ package org.eclipse.m2e.editor.xml;
 
 import java.util.Collections;
 
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -21,6 +22,7 @@ import org.eclipse.m2e.core.index.IndexedArtifactFile;
 import org.eclipse.m2e.core.ui.dialogs.MavenRepositorySearchDialog;
 import org.eclipse.m2e.editor.xml.internal.Messages;
 
+//TODO eventually rewrite to to customizable and select more than parents..
 public class InsertArtifactProposal implements ICompletionProposal, ICompletionProposalExtension4, ICompletionProposalExtension5 {
 
   private ISourceViewer sourceViewer;
@@ -66,6 +68,12 @@ public class InsertArtifactProposal implements ICompletionProposal, ICompletionP
           buffer.append("<artifactId>").append(af.artifact).append("</artifactId>").append(document.getLegalLineDelimiters()[0]); //$NON-NLS-1$ //$NON-NLS-2$
           buffer.append(spaces).append(ind);
           buffer.append("<version>").append(af.version).append("</version>").append(document.getLegalLineDelimiters()[0]); //$NON-NLS-1$ //$NON-NLS-2$
+          //check if parent is on workspace, if so, add a relative path right away..
+          IPath relativePath = PomContentAssistProcessor.findRelativePath(sourceViewer, af.group, af.artifact, af.version);
+          if (relativePath != null) {
+            buffer.append(spaces).append(ind);
+            buffer.append("<relativePath>").append(relativePath.toOSString()).append("</relativePath>").append(document.getLegalLineDelimiters()[0]); //$NON-NLS-1$ //$NON-NLS-2$
+          }
           buffer.append(spaces);
           buffer.append("</parent>").append(document.getLegalLineDelimiters()[0]); //$NON-NLS-1$
           generatedLength = buffer.toString().length();

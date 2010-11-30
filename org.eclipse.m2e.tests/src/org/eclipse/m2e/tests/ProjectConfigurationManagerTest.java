@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.m2e.core.MavenPlugin;
+import org.eclipse.m2e.core.internal.project.registry.ProjectRegistryRefreshJob;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.IProjectConfigurationManager;
 import org.eclipse.m2e.core.project.MavenProjectInfo;
@@ -40,6 +41,8 @@ import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.m2e.tests.common.FilexWagon;
 
+
+@SuppressWarnings("restriction")
 public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCase {
 
   public void testBasedirRenameRequired() throws Exception {
@@ -91,16 +94,16 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     try {
       injectFilexWagon();
       FilexWagon.setRequestFilterPattern("test/.*", true);
-      mavenConfiguration.setUserSettingsFile(new File("projects/MNGECLIPSE-1990/settings.xml").getAbsolutePath());
       IJobChangeListener jobChangeListener = new JobChangeAdapter() {
         public void scheduled(IJobChangeEvent event) {
-          if(event.getJob().getClass().getName().endsWith("MavenProjectManagerRefreshJob")) {
+          if(event.getJob() instanceof ProjectRegistryRefreshJob) {
             // cancel all those concurrent refresh jobs, we want to monitor the main thread only
             event.getJob().cancel();
           }
         }
       };
       Job.getJobManager().addJobChangeListener(jobChangeListener);
+      mavenConfiguration.setUserSettingsFile(new File("projects/MNGECLIPSE-1990/settings.xml").getAbsolutePath());
       List<String> requests;
       try {
         importProjects("projects/MNGECLIPSE-1990", new String[] {"pom.xml", "dependent/pom.xml", "dependency/pom.xml",
