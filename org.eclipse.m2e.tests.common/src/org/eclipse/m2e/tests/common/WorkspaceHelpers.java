@@ -202,5 +202,8 @@ public class WorkspaceHelpers {
     if(lineNumber != null) {
       Assert.assertEquals(sMarker, lineNumber, actual.getAttribute(IMarker.LINE_NUMBER));
     }
+    if(type != null && type.startsWith(IMavenConstants.MARKER_ID)) {
+      Assert.assertEquals(sMarker, false, actual.getAttribute(IMarker.TRANSIENT));
+    }
   }
 }
