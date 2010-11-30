@@ -310,6 +310,10 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
     String groupId = MavenMarkerManager.getElementTextValue(MavenMarkerManager.findChildElement(parent, "groupId")); //$NON-NLS-1$
     String artifactId = MavenMarkerManager.getElementTextValue(MavenMarkerManager.findChildElement(parent, "artifactId")); //$NON-NLS-1$
     String version = MavenMarkerManager.getElementTextValue(MavenMarkerManager.findChildElement(parent, "version")); //$NON-NLS-1$
+    return findRelativePath(viewer, groupId, artifactId, version);
+  }
+  
+  public static IPath findRelativePath(ISourceViewer viewer, String groupId, String artifactId, String version) {
     if (groupId != null && artifactId != null && version != null) {
       IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectManager().getMavenProject(groupId, artifactId, version);
       if (facade != null) {
