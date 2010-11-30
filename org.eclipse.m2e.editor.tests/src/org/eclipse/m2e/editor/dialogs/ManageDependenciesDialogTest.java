@@ -104,7 +104,7 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
   @Test
   public void testSamePOM() throws Exception {
 
-    Model model = loadModels("projects/same", new String[] { "child/pom.xml" }).get("child");
+    Model model = loadModels("projects/same", new String[] { "parent/pom.xml", "child/pom.xml" }).get("child");
     assertEquals(model.getArtifactId(), "child");
     
     IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectManager().getMavenProject(GROUP_ID+".same", "child", VERSION);
