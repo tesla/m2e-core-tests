@@ -73,6 +73,8 @@ public enum PomTemplateContext {
   
   PARENT("parent"), // //$NON-NLS-1$
   
+  RELATIVE_PATH("relativePath"), // //$NON-NLS-1$
+  
   MODULES("modules"), // //$NON-NLS-1$
 
   PROPERTIES("properties"), // //$NON-NLS-1$

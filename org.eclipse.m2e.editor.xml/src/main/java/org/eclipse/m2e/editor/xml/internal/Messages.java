@@ -33,6 +33,10 @@ public class Messages extends NLS {
   public static String MavenMarkerResolution_error_title;
 
   public static String MavenMarkerResolution_schema_label;
+  public static String PomContentAssistProcessor_insert_relPath_title;
+
+  public static String PomContentAssistProcessor_set_relPath_title;
+
   public static String PomHyperlinkDetector_23;
 
   public static String PomHyperlinkDetector_error_message;

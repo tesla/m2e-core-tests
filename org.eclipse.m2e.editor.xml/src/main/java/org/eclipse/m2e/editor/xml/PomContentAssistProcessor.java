@@ -28,6 +28,8 @@ import org.w3c.dom.Text;
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filesystem.IFileStore;
+import org.eclipse.core.internal.utils.FileUtil;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -39,6 +41,7 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.contentassist.CompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.templates.ContextTypeRegistry;
@@ -49,7 +52,10 @@ import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.jface.text.templates.TemplateProposal;
 import org.eclipse.jface.text.templates.persistence.TemplateStore;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.ui.internal.WorkbenchPlugin;
+import org.eclipse.wst.sse.core.internal.provisional.IndexedRegion;
 import org.eclipse.wst.sse.core.utils.StringUtils;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.eclipse.wst.xml.ui.internal.contentassist.XMLContentAssistProcessor;
@@ -57,6 +63,7 @@ import org.eclipse.wst.xml.ui.internal.contentassist.XMLContentAssistProcessor;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.internal.project.MavenMarkerManager;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
+import org.eclipse.m2e.editor.xml.internal.Messages;
 
 /**
  * @author Lukas Krecan
@@ -221,6 +228,10 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
   });
 
   private void addGenerateProposals(ContentAssistRequest request, PomTemplateContext context, Node node, String prefix) {
+    if (prefix.trim().length() != 0) {
+      //only provide these generate proposals when there is no prefix.
+      return;
+    }
     if (context == PomTemplateContext.PROJECT) {
       //check if we have a parent defined..
       Node project = node;
@@ -244,9 +255,82 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
           } else {
             request.addProposal(proposal);
           }
+        } 
+      }
+    }
+    if (context == PomTemplateContext.PARENT && node.getNodeName().equals("parent")) { //$NON-NLS-1$
+      Element parent = (Element)node;
+      Element relPath = MavenMarkerManager.findChildElement(parent, "relativePath"); //$NON-NLS-1$
+      if (relPath == null) {
+        //only show when no relpath already defined..
+        IPath relative = findRelativePath(sourceViewer, parent);
+        if (relative != null) {
+          Region region = new Region(request.getReplacementBeginPosition() - prefix.length(), prefix.length());
+          ICompletionProposal proposal = new CompletionProposal("<relativePath>" + relative.toOSString() + "</relativePath>",  //$NON-NLS-1$ //$NON-NLS-2$
+              region.getOffset(), region.getLength(), 0, 
+              WorkbenchPlugin.getDefault().getImageRegistry().get(org.eclipse.ui.internal.SharedImages.IMG_OBJ_ADD), 
+              NLS.bind(Messages.PomContentAssistProcessor_insert_relPath_title, relative.toOSString()), null, null);
+          if (request.shouldSeparate()) {
+            request.addMacro(proposal);
+          } else {
+            request.addProposal(proposal);
+          }
         }
       }
     }
+    if (context == PomTemplateContext.RELATIVE_PATH) {
+      //completion in the text portion of relative path
+      Element parent = (Element) node.getParentNode();
+      if (parent != null && "parent".equals(parent.getNodeName())) { //$NON-NLS-1$
+        IPath relative = findRelativePath(sourceViewer, parent);
+        String textContent = MavenMarkerManager.getElementTextValue(node); 
+        if (relative != null && !relative.toOSString().equals(textContent)) {
+          Region region = new Region(request.getReplacementBeginPosition() - prefix.length(), prefix.length());
+          if (request.getNode() instanceof IndexedRegion && request.getNode() instanceof Text) { 
+            //for <relativePath>|</relativePath> the current node is the element node and not the text node
+            //only replace the text node content..
+            IndexedRegion index = (IndexedRegion)request.getNode();
+            region = new Region(index.getStartOffset(), index.getEndOffset() - index.getStartOffset());
+          }
+          ICompletionProposal proposal = new CompletionProposal(relative.toOSString(), 
+              region.getOffset(), region.getLength(), 0, 
+              WorkbenchPlugin.getDefault().getImageRegistry().get(org.eclipse.ui.internal.SharedImages.IMG_OBJ_ADD), 
+              NLS.bind(Messages.PomContentAssistProcessor_set_relPath_title, relative.toOSString()), null, null);
+          if (request.shouldSeparate()) {
+            request.addMacro(proposal);
+          } else {
+            request.addProposal(proposal);
+          }
+        }
+      }
+    }
+  }
+  
+  private static IPath findRelativePath(ISourceViewer viewer, Element parent) {
+    String groupId = MavenMarkerManager.getElementTextValue(MavenMarkerManager.findChildElement(parent, "groupId")); //$NON-NLS-1$
+    String artifactId = MavenMarkerManager.getElementTextValue(MavenMarkerManager.findChildElement(parent, "artifactId")); //$NON-NLS-1$
+    String version = MavenMarkerManager.getElementTextValue(MavenMarkerManager.findChildElement(parent, "version")); //$NON-NLS-1$
+    if (groupId != null && artifactId != null && version != null) {
+      IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectManager().getMavenProject(groupId, artifactId, version);
+      if (facade != null) {
+        //now add the proposal for relativePath
+        IFile parentPomFile = facade.getPom();
+        IPath path = parentPomFile.getLocation();
+        IProject prj = extractProject(viewer);
+        if (prj != null && path != null) {
+          IMavenProjectFacade childFacade = MavenPlugin.getDefault().getMavenProjectManager().getProject(prj);
+          if (childFacade != null) {
+            IFile childPomFile = childFacade.getPom();
+            IPath path2 = childPomFile.getLocation().removeLastSegments(1);
+            IPath relative = path.makeRelativeTo(path2);
+            if (relative != path) {
+              return relative;
+            }
+          }
+        }
+      }
+    }
+    return null;
   }
 
   
