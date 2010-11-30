@@ -13,15 +13,27 @@
       <lifecycleMapping
             class="org.eclipse.m2e.jdt.internal.JarLifecycleMapping"
             id="jar"
-            name="%lifecycleMapping.jar.name">
+            name="%lifecycleMapping.jar.name"
+            packaging-type="jar">
+         <mojo
+               artifactId="maven-compiler-plugin"
+               goals="compile,testCompile"
+               groupId="org.apache.maven.plugins"
+               versionRange="[2.0,)">
+            <configurator
+                  id="org.eclipse.m2e.jdt.javaConfigurator">
+            </configurator>
+         </mojo>
+         <mojo
+               artifactId="maven-resources-plugin"
+               goals="resources,testResources"
+               groupId="org.apache.maven.plugins"
+               versionRange="[2.4,)">
+            <configurator
+                  id="org.eclipse.m2e.core.project.configurator.MavenResourcesProjectConfigurator">
+            </configurator>
+         </mojo>
       </lifecycleMapping>
-   </extension>
-   <extension
-         point="org.eclipse.m2e.core.defaultLifecycleMappings">
-      <defaultLifecycleMapping
-            id="jar"
-            lifecycleMappingId="jar"
-            packaging="jar"/>
    </extension>
 
    <extension point="org.eclipse.jdt.core.classpathContainerInitializer"

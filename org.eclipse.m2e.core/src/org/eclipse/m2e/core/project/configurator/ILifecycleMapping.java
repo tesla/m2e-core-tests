@@ -30,8 +30,6 @@ public interface ILifecycleMapping {
 
   String getName();
   
-  List<String> getPotentialMojoExecutionsForBuildKind(IMavenProjectFacade projectFacade, int kind, IProgressMonitor progressMonitor);
-
   /**
    * Configure Eclipse workspace project according to Maven build project configuration.
    */

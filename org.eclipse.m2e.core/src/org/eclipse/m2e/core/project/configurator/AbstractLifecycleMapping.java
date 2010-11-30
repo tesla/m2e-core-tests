@@ -11,10 +11,7 @@
 
 package org.eclipse.m2e.core.project.configurator;
 
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.core.resources.ICommand;
@@ -27,33 +24,29 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.apache.maven.lifecycle.MavenExecutionPlan;
 import org.apache.maven.plugin.MojoExecution;
 
-import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.core.IMavenConstants;
-import org.eclipse.m2e.core.core.MavenConsole;
-import org.eclipse.m2e.core.embedder.IMavenConfiguration;
-import org.eclipse.m2e.core.internal.ExtensionReader;
-import org.eclipse.m2e.core.project.IMavenMarkerManager;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
-import org.eclipse.m2e.core.project.MavenProjectManager;
 
 
 /**
  * AbstractLifecycleMapping
- *
+ * 
  * @author igor
  */
-public abstract class AbstractLifecycleMapping implements IExtensionLifecycleMapping {
+public abstract class AbstractLifecycleMapping implements ILifecycleMapping {
 
-  private static List<AbstractProjectConfigurator> configurators;
   private String name;
+
   private String id;
+
   private boolean showConfigurators;
 
   /**
    * Calls #configure method of all registered project configurators
    */
-  public void configure(ProjectConfigurationRequest request, IProgressMonitor monitor)
-      throws CoreException {
+  public void configure(ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException {
+    addMavenBuilder(request.getProject(), monitor);
+
     for(AbstractProjectConfigurator configurator : getProjectConfigurators(request.getMavenProjectFacade(), monitor)) {
       if(monitor.isCanceled()) {
         throw new OperationCanceledException();
@@ -62,54 +55,12 @@ public abstract class AbstractLifecycleMapping implements IExtensionLifecycleMap
     }
   }
 
-  public void unconfigure(ProjectConfigurationRequest request, IProgressMonitor monitor)
-      throws CoreException {
+  public void unconfigure(ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException {
     for(AbstractProjectConfigurator configurator : getProjectConfigurators(request.getMavenProjectFacade(), monitor)) {
       if(monitor.isCanceled()) {
         throw new OperationCanceledException();
       }
       configurator.unconfigure(request, monitor);
-    }
-  }
-  
-  public static List<AbstractProjectConfigurator> getProjectConfigurators(){
-    synchronized(AbstractLifecycleMapping.class) {
-      if(configurators == null) {
-        MavenPlugin plugin = MavenPlugin.getDefault();
-        MavenProjectManager projectManager = plugin.getMavenProjectManager();
-        IMavenConfiguration mavenConfiguration;
-        mavenConfiguration = MavenPlugin.getDefault().getMavenConfiguration();
-        IMavenMarkerManager mavenMarkerManager = plugin.getMavenMarkerManager();
-        MavenConsole console = plugin.getConsole();
-        configurators = new ArrayList<AbstractProjectConfigurator>(ExtensionReader
-            .readProjectConfiguratorExtensions(projectManager, mavenConfiguration, mavenMarkerManager, console));
-        Collections.sort(configurators, new ProjectConfiguratorComparator());
-      }
-    }
-    return Collections.unmodifiableList(configurators);
-  }
-
-  public static AbstractProjectConfigurator getProjectConfigurator(String id) {
-    if(id == null) {
-      return null;
-    }
-    for(AbstractProjectConfigurator configurator : getProjectConfigurators()) {
-      if(id.equals(configurator.getId())) {
-        return configurator;
-      }
-    }
-    return null;
-  }
-
-  /**
-   * ProjectConfigurator comparator
-   */
-  static class ProjectConfiguratorComparator implements Comparator<AbstractProjectConfigurator>, Serializable {
-    private static final long serialVersionUID = 1L;
-
-    public int compare(AbstractProjectConfigurator c1, AbstractProjectConfigurator c2) {
-      int res = c1.getPriority() - c2.getPriority();
-      return res == 0 ? c1.getId().compareTo(c2.getId()) : res;
     }
   }
 
@@ -163,18 +114,18 @@ public abstract class AbstractLifecycleMapping implements IExtensionLifecycleMap
   public void setId(String id) {
     this.id = id;
   }
-  
+
   /**
    * @param show Set whether the project configurators should show. Default is true.
    */
-  public void setShowConfigurators(boolean show){
+  public void setShowConfigurators(boolean show) {
     this.showConfigurators = show;
   }
-  
+
   /**
    * Returns whether the project configurators will be shown in the UI. Default is true.
    */
-  public boolean showConfigurators(){
+  public boolean showConfigurators() {
     return this.showConfigurators;
   }
 
@@ -183,10 +134,12 @@ public abstract class AbstractLifecycleMapping implements IExtensionLifecycleMap
     List<AbstractBuildParticipant> participants = new ArrayList<AbstractBuildParticipant>();
 
     for(MojoExecution execution : facade.getExecutionPlan(monitor).getMojoExecutions()) {
-      for (AbstractProjectConfigurator configurator : configurators) {
-        AbstractBuildParticipant participant = configurator.getBuildParticipant(execution);
-        if (participant != null) {
-          participants.add(participant);
+      for(AbstractProjectConfigurator configurator : configurators) {
+        if(configurator.isSupportedExecution(execution)) {
+          AbstractBuildParticipant participant = configurator.getBuildParticipant(execution);
+          if(participant != null) {
+            participants.add(participant);
+          }
         }
       }
     }
@@ -218,4 +171,49 @@ public abstract class AbstractLifecycleMapping implements IExtensionLifecycleMap
     }
     return result;
   }
+
+  public List<AbstractBuildParticipant> getBuildParticipants(IMavenProjectFacade facade, IProgressMonitor monitor)
+      throws CoreException {
+    List<AbstractProjectConfigurator> configurators = getProjectConfigurators(facade, monitor);
+
+    return getBuildParticipants(facade, configurators, monitor);
+  }
+
+  private static final String[] INTERESTING_PHASES = {"validate", //
+      "initialize", //
+      "generate-sources", //
+      "process-sources", //
+      "generate-resources", //
+      "process-resources", //
+      "compile", //
+      "process-classes", //
+      "generate-test-sources", //
+      "process-test-sources", //
+      "generate-test-resources", //
+      "process-test-resources", //
+      "test-compile", //
+      "process-test-classes", //
+  // "test", //
+  // "prepare-package", //
+  // "package", //
+  //"pre-integration-test", //
+  // "integration-test", //
+  // "post-integration-test", //
+  // "verify", //
+  // "install", //
+  // "deploy", //
+  };
+
+  public boolean isInterestingPhase(String phase) {
+    for(String interestingPhase : INTERESTING_PHASES) {
+      if(interestingPhase.equals(phase)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public abstract List<AbstractProjectConfigurator> getProjectConfigurators(IMavenProjectFacade mavenProjectFacade,
+      IProgressMonitor monitor) throws CoreException;
+
 }

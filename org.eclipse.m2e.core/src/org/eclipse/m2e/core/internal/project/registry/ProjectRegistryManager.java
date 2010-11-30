@@ -33,10 +33,12 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
@@ -71,15 +73,19 @@ import org.eclipse.m2e.core.embedder.IMavenConfiguration;
 import org.eclipse.m2e.core.internal.ExtensionReader;
 import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.internal.embedder.MavenImpl;
+import org.eclipse.m2e.core.internal.lifecycle.LifecycleMappingFactory;
 import org.eclipse.m2e.core.internal.project.DependencyResolutionContext;
 import org.eclipse.m2e.core.internal.project.IManagedCache;
 import org.eclipse.m2e.core.internal.project.MissingLifecycleMapping;
+import org.eclipse.m2e.core.internal.project.MojoExecutionProjectConfigurator;
 import org.eclipse.m2e.core.project.IMavenMarkerManager;
 import org.eclipse.m2e.core.project.IMavenProjectChangedListener;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.MavenProjectChangedEvent;
 import org.eclipse.m2e.core.project.MavenUpdateRequest;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
+import org.eclipse.m2e.core.project.configurator.CustomizableLifecycleMapping;
+import org.eclipse.m2e.core.project.configurator.AbstractProjectConfigurator;
 import org.eclipse.m2e.core.project.configurator.ILifecycleMapping;
 import org.eclipse.m2e.core.project.configurator.NoopLifecycleMapping;
 
@@ -126,16 +132,6 @@ public class ProjectRegistryManager {
   private final ProjectRegistryReader stateReader;
 
   private final Set<IMavenProjectChangedListener> projectChangeListeners = new LinkedHashSet<IMavenProjectChangedListener>();
-
-  /**
-   * mappingId->ILifecycleMapping
-   */
-  private Map<String, ILifecycleMapping> lifecycleMappings;
-
-  /**
-   * packaging->mappingId
-   */
-  private Map<String, String> defaultLifecycleMappings;
 
   private volatile Thread syncRefreshThread;
 
@@ -782,8 +778,10 @@ public class ProjectRegistryManager {
 
     Plugin plugin = project.getPlugin( "org.eclipse.m2e:lifecycle-mapping" ); //$NON-NLS-1$
 
+    Xpp3Dom configuration = null;
+
     if (plugin != null) {
-      Xpp3Dom configuration = (Xpp3Dom) plugin.getConfiguration();
+      configuration = (Xpp3Dom) plugin.getConfiguration();
       if (configuration != null) {
         Xpp3Dom mappingIdDom = configuration.getChild("mappingId"); //$NON-NLS-1$
         if (mappingIdDom != null) {
@@ -792,13 +790,45 @@ public class ProjectRegistryManager {
       }
     }
 
+    ILifecycleMapping lifecycleMapping = null;
     if (mappingId == null || mappingId.length() <= 0) {
-      mappingId = getDefaultLifecycleMappingId(project.getPackaging());
+      lifecycleMapping = LifecycleMappingFactory.getLifecycleMappingFor(project.getPackaging());
+    } else {
+      lifecycleMapping = LifecycleMappingFactory.getLifecycleMapping(mappingId);
     }
 
-    ILifecycleMapping lifecycleMapping = null;
-    if(mappingId != null && mappingId.length() > 0) {
-      lifecycleMapping = getLifecycleMapping(mappingId);
+    if(configuration != null && lifecycleMapping instanceof CustomizableLifecycleMapping) {
+      CustomizableLifecycleMapping custmizableMapping = (CustomizableLifecycleMapping) lifecycleMapping;
+      
+      Xpp3Dom configuratorsDom = configuration.getChild("configurators"); //$NON-NLS-1$
+      Xpp3Dom executionsDom = configuration.getChild("mojoExecutions"); //$NON-NLS-1$
+
+      if(configuratorsDom != null) {
+        for(Xpp3Dom configuratorDom : configuratorsDom.getChildren("configurator")) { //$NON-NLS-1$
+          String configuratorId = configuratorDom.getAttribute("id"); //$NON-NLS-1$
+          AbstractProjectConfigurator configurator = LifecycleMappingFactory.getProjectConfigurator(configuratorId);
+          if(configurator == null) {
+            String message = "Configurator '"
+                + configuratorId
+                + "' is not available for project '"
+                + pom.getProject().getName()
+                + "'. To enable full functionality, install the configurator and run Maven->Update Project Configuration.";
+            MavenPlugin.getDefault().getLog().log(new Status(IStatus.WARNING, IMavenConstants.PLUGIN_ID, message));
+            MavenPlugin.getDefault().getConsole().logError(message);
+//            throw new IllegalArgumentException(message);
+          } else {
+            custmizableMapping.addConfigurator(configurator);
+          }
+        }
+      }
+
+      if(executionsDom != null) {
+        for(Xpp3Dom execution : executionsDom.getChildren("mojoExecution")) { //$NON-NLS-1$
+          String strRunOnIncremental = execution.getAttribute("runOnIncremental"); //$NON-NLS-1$
+          custmizableMapping.addConfigurator(MojoExecutionProjectConfigurator.fromString(execution.getValue(),
+              toBool(strRunOnIncremental, true)));
+        }
+      }
     }
 
     if (lifecycleMapping == null) {
@@ -814,26 +844,11 @@ public class ProjectRegistryManager {
     return lifecycleMapping;
   }
 
-  private String getDefaultLifecycleMappingId(String packaging) {
-    Map<String, String> defaultLifecycleMappings;
-    synchronized(this) {
-      if(this.defaultLifecycleMappings == null) {
-        this.defaultLifecycleMappings = ExtensionReader.readDefaultLifecycleMappingExtensions();
-      }
-      defaultLifecycleMappings = this.defaultLifecycleMappings;
+  private boolean toBool(String value, boolean def) {
+    if(value == null || value.length() == 0) {
+      return def;
     }
-    return defaultLifecycleMappings.get(packaging);
+    return Boolean.parseBoolean(value);
   }
 
-  private ILifecycleMapping getLifecycleMapping(String mappingId) {
-    Map<String, ILifecycleMapping> lifecycleMappings;
-    synchronized(this) {
-      if(this.lifecycleMappings == null) {
-        this.lifecycleMappings = ExtensionReader.readLifecycleMappingExtensions();
-      }
-      lifecycleMappings = this.lifecycleMappings;
-    }
-    return lifecycleMappings.get(mappingId);
-  }
-  
 }

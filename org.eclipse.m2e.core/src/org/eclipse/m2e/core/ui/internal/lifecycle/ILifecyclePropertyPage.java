@@ -9,7 +9,7 @@
  *      Sonatype, Inc. - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.m2e.core.internal.lifecycle;
+package org.eclipse.m2e.core.ui.internal.lifecycle;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.swt.widgets.Composite;

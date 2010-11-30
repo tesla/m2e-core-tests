@@ -19,7 +19,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 
-import org.eclipse.m2e.core.internal.lifecycle.AbstractLifecyclePropertyPage;
+import org.eclipse.m2e.core.ui.internal.lifecycle.AbstractLifecyclePropertyPage;
 
 
 /**

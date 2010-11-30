@@ -17,7 +17,7 @@
             <configurator id='org.eclipse.m2e.jdt.javaConfigurator'/>
           </configurators>
           <mojoExecutions>
-            <mojoExecution>org.apache.maven.plugins:maven-resources-plugin::</mojoExecution>
+            <mojoExecution>org.apache.maven.plugins:maven-resources-plugin:[2.4,):resources,testResources</mojoExecution>
           </mojoExecutions>
         </configuration>
       </plugin>

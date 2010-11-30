@@ -86,7 +86,6 @@ import org.eclipse.m2e.core.util.Util.FileStoreEditorInputStub;
 import org.eclipse.m2e.editor.MavenEditorImages;
 import org.eclipse.m2e.editor.MavenEditorPlugin;
 import org.eclipse.m2e.editor.internal.Messages;
-import org.eclipse.m2e.editor.lifecycle.internal.LifecyclePage;
 import org.eclipse.m2e.model.edit.pom.Model;
 import org.eclipse.m2e.model.edit.pom.util.PomResourceFactoryImpl;
 import org.eclipse.m2e.model.edit.pom.util.PomResourceImpl;
@@ -165,8 +164,6 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   TeamPage teamPage;
 
   DependencyTreePage dependencyTreePage;
-
-  LifecyclePage lifecyclePage;
 
   StructuredSourceTextEditor sourcePage;
   
@@ -398,8 +395,6 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       teamPage = new TeamPage(this);
       addPomPage(teamPage);
 
-      lifecyclePage = new LifecyclePage(this);
-      addPomPage(lifecyclePage);
     }
   }
 

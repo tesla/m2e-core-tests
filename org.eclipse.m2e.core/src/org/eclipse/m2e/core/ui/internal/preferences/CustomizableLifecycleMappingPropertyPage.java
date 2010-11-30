@@ -18,8 +18,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.m2e.core.internal.Messages;
-import org.eclipse.m2e.core.internal.lifecycle.AbstractLifecyclePropertyPage;
-import org.eclipse.m2e.core.internal.lifecycle.ProjectConfiguratorsTable;
+import org.eclipse.m2e.core.ui.internal.lifecycle.AbstractLifecyclePropertyPage;
+import org.eclipse.m2e.core.ui.internal.lifecycle.ProjectConfiguratorsTable;
 
 /**
  * CustomizableLifecycleMappingPropertyPage

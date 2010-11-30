@@ -475,15 +475,7 @@ public abstract class AbstractJavaProjectConfigurator extends AbstractProjectCon
     if(isJavaCompilerPlugin(mojoExecution.getGroupId(), mojoExecution.getArtifactId())) {
       return true;
     }
-    
-    if(super.isSupportedExecution(mojoExecution)) {
-      return true;
-    }
-    
-    // Lets say it supports maven-resources-plugin for now
-    if("org.apache.maven.plugins".equals(mojoExecution.getGroupId()) && "maven-resources-plugin".equals(mojoExecution.getArtifactId())) { //$NON-NLS-1$ //$NON-NLS-2$
-      return true;
-    }
+
     return false;
   }
 }

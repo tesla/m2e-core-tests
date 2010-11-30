@@ -54,6 +54,9 @@
          </documentation>
       </annotation>
       <complexType>
+         <sequence minOccurs="0" maxOccurs="unbounded">
+            <element ref="mojo"/>
+         </sequence>
          <attribute name="id" type="string" use="required">
             <annotation>
                <documentation>
@@ -85,13 +88,51 @@
             <annotation>
                <documentation>
                   Priority of given configurator. Smaller number correspond to higher priority, for example, &quot;10&quot; for JDT, &quot;50&quot; - PDE, AJDT and WTP. Tools that build on WTP should use priority bigger then &quot;100&quot;
+
+This attribute is considered for removal from m2e 1.0.
+               </documentation>
+               <appinfo>
+                  <meta.attribute deprecated="true"/>
+               </appinfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="mojo">
+      <annotation>
+         <documentation>
+            mojo element specifies Maven plugin goals the project configurator should be enabled for by default. Maven plugin goals are identified by groupId, artifactId of the Maven plugin, Maven plugin version range using Maven version range syntax and comma separated list of plugin goals.
+
+Project configurators without &lt;mojo/&gt; elements will require explicit enablement in lifecycle mapping configuration in pom.xml.
+         </documentation>
+      </annotation>
+      <complexType>
+         <attribute name="groupId" type="string" use="required">
+            <annotation>
+               <documentation>
+                  Maven plugin groupId
                </documentation>
             </annotation>
          </attribute>
-         <attribute name="requiresExplicitEnablement" type="boolean" use="default" value="true">
+         <attribute name="artifactId" type="string" use="required">
             <annotation>
                <documentation>
-                  If set to true (the default), this project configurator requires explicit enablement/configuration in the lifecycle mapping configuration.
+                  Maven plugin artifactId
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="versionRange" type="string" use="required">
+            <annotation>
+               <documentation>
+                  Maven plugin version range
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="goals" type="string" use="required">
+            <annotation>
+               <documentation>
+                  Comma separated list of Maven plugin goals
                </documentation>
             </annotation>
          </attribute>

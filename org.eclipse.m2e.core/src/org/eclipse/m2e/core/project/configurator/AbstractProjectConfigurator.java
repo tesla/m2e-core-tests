@@ -11,6 +11,9 @@
 
 package org.eclipse.m2e.core.project.configurator;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.runtime.CoreException;
@@ -39,38 +42,45 @@ import org.eclipse.m2e.core.project.MavenProjectManager;
 
 /**
  * Used to configure maven projects.
- *
+ * 
  * @author Igor Fedorenko
  */
 public abstract class AbstractProjectConfigurator implements IExecutableExtension, IMavenProjectChangedListener {
 
   public static final String ATTR_ID = "id"; //$NON-NLS-1$
-  
+
   public static final String ATTR_PRIORITY = "priority"; //$NON-NLS-1$
-  
+
   public static final String ATTR_NAME = "name"; //$NON-NLS-1$
-  
+
   public static final String ATTR_CLASS = "class"; //$NON-NLS-1$
-  
-  public static final String ATTR_REQUIRES_EXPLICIT_ENABLEMENT = "requiresExplicitEnablement"; //$NON-NLS-1$
 
   private int priority;
+
   private String id;
+
   private String name;
 
-  private boolean requiresExplicitEnablement;
+  /**
+   * List of maven plugin goal patterns for which this project configurator is enabled automatically. Can be null, in
+   * which case the project configurator can only be enabled explicitly in pom.xml.
+   */
+  protected List<PluginExecutionFilter> pluginExecutionFilters;
 
   protected MavenProjectManager projectManager;
+
   protected IMavenConfiguration mavenConfiguration;
-  protected IMavenMarkerManager markerManager; 
+
+  protected IMavenMarkerManager markerManager;
+
   protected MavenConsole console;
+
   protected IMaven maven = MavenPlugin.getDefault().getMaven();
 
-  
   public void setProjectManager(MavenProjectManager projectManager) {
     this.projectManager = projectManager;
   }
-  
+
   public void setMavenConfiguration(IMavenConfiguration mavenConfiguration) {
     this.mavenConfiguration = mavenConfiguration;
   }
@@ -78,16 +88,16 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
   public void setMarkerManager(IMavenMarkerManager markerManager) {
     this.markerManager = markerManager;
   }
-  
+
   public void setConsole(MavenConsole console) {
     this.console = console;
   }
-  
+
   /**
-   * Configures Eclipse project passed in ProjectConfigurationRequest, using information
-   * from Maven project and other configuration request parameters
-   * 
-   * <p><i>Should be implemented by subclass</i> 
+   * Configures Eclipse project passed in ProjectConfigurationRequest, using information from Maven project and other
+   * configuration request parameters
+   * <p>
+   * <i>Should be implemented by subclass</i>
    * 
    * @param request a project configuration request
    * @param monitor a progress monitor
@@ -105,9 +115,9 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
   }
 
   /**
-   * Updates project configuration according project changes. 
-   * 
-   * <p><i>Can be overwritten by subclass</i>
+   * Updates project configuration according project changes.
+   * <p>
+   * <i>Can be overwritten by subclass</i>
    * 
    * @param event a project change event
    * @param monitor a progress monitor
@@ -117,9 +127,9 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
   }
 
   // IMavenProjectChangedListener
-  
+
   public final void mavenProjectChanged(MavenProjectChangedEvent[] events, IProgressMonitor monitor) {
-    for (int i = 0; i < events.length; i++) {
+    for(int i = 0; i < events.length; i++ ) {
       try {
         mavenProjectChanged(events[i], monitor);
       } catch(CoreException ex) {
@@ -131,11 +141,11 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
   public int getPriority() {
     return priority;
   }
-  
+
   public String getId() {
     return id;
   }
-  
+
   public String getName() {
     return name;
   }
@@ -147,19 +157,38 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
     String priorityString = config.getAttribute(ATTR_PRIORITY);
     try {
       priority = Integer.parseInt(priorityString);
-    } catch (Exception ex) {
+    } catch(Exception ex) {
       priority = Integer.MAX_VALUE;
     }
-    this.requiresExplicitEnablement = parseBoolean(config.getAttribute(ATTR_REQUIRES_EXPLICIT_ENABLEMENT), true);
+
+    IConfigurationElement[] mojos = config.getChildren("mojo"); //$NON-NLS-1$
+    if(mojos != null && mojos.length > 0) {
+      pluginExecutionFilters = new ArrayList<PluginExecutionFilter>();
+      for(IConfigurationElement mojo : mojos) {
+        String groupId = mojo.getAttribute("groupId"); //$NON-NLS-1$
+        String artifactId = mojo.getAttribute("artifactId"); //$NON-NLS-1$
+        String versionRange = mojo.getAttribute("versionRange"); //$NON-NLS-1$
+        String goals = mojo.getAttribute("goals"); //$NON-NLS-1$
+        addPluginExecutionFilter(groupId, artifactId, versionRange, goals);
+      }
+    }
   }
 
-  private boolean parseBoolean(String value, boolean defaultValue) {
-    return value != null? Boolean.parseBoolean(value): defaultValue;
+  protected void addPluginExecutionFilter(String groupId, String artifactId, String versionRange, String goals) {
+    addPluginExecutionFilter(new PluginExecutionFilter(groupId, artifactId, versionRange, goals));
+  }
+
+  public void addPluginExecutionFilter(PluginExecutionFilter filter) {
+    // TODO validate
+    if(pluginExecutionFilters == null) {
+      pluginExecutionFilters = new ArrayList<PluginExecutionFilter>();
+    }
+    pluginExecutionFilters.add(filter);
   }
 
   // TODO move to a helper
   public static void addNature(IProject project, String natureId, IProgressMonitor monitor) throws CoreException {
-    if (!project.hasNature(natureId)) {
+    if(!project.hasNature(natureId)) {
       IProjectDescription description = project.getDescription();
       String[] prevNatures = description.getNatureIds();
       String[] newNatures = new String[prevNatures.length + 1];
@@ -171,7 +200,8 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
   }
 
   @Deprecated
-  protected <T> T getParameterValue(MavenSession session, MojoExecution execution, String parameter, Class<T> asType) throws CoreException {
+  protected <T> T getParameterValue(MavenSession session, MojoExecution execution, String parameter, Class<T> asType)
+      throws CoreException {
     return maven.getMojoParameterValue(session, execution, parameter, asType);
   }
 
@@ -179,13 +209,14 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
       throws CoreException {
     PluginExecution execution = new PluginExecution();
     execution.setConfiguration(mojoExecution.getConfiguration());
-    return maven.getMojoParameterValue(parameter, asType, session, mojoExecution.getPlugin(), execution, mojoExecution
-        .getGoal());
+    return maven.getMojoParameterValue(parameter, asType, session, mojoExecution.getPlugin(), execution,
+        mojoExecution.getGoal());
   }
 
   protected void assertHasNature(IProject project, String natureId) throws CoreException {
-    if (project.getNature(natureId) == null) {
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, Messages.AbstractProjectConfigurator_error_missing_nature + natureId, null));
+    if(project.getNature(natureId) == null) {
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
+          Messages.AbstractProjectConfigurator_error_missing_nature + natureId, null));
     }
   }
 
@@ -197,12 +228,16 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
   public AbstractBuildParticipant getBuildParticipant(MojoExecution execution) {
     return null;
   }
-  
-  public boolean isSupportedExecution(MojoExecution mojoExecution) {
-    return getBuildParticipant(mojoExecution) != null;
-  }
 
-  public boolean requiresExplicitEnablement() {
-    return this.requiresExplicitEnablement;
+  public boolean isSupportedExecution(MojoExecution mojoExecution) {
+    if(pluginExecutionFilters == null) {
+      return false;
+    }
+    for(PluginExecutionFilter key : pluginExecutionFilters) {
+      if(key.match(mojoExecution)) {
+        return true;
+      }
+    }
+    return false;
   }
 }

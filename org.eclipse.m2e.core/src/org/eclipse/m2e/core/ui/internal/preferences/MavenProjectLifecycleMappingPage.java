@@ -20,9 +20,9 @@ import org.eclipse.ui.dialogs.PropertyPage;
 
 import org.eclipse.m2e.core.core.MavenLogger;
 import org.eclipse.m2e.core.internal.Messages;
-import org.eclipse.m2e.core.internal.lifecycle.ILifecyclePropertyPage;
-import org.eclipse.m2e.core.internal.lifecycle.LifecycleMappingPropertyPageFactory;
 import org.eclipse.m2e.core.project.configurator.ILifecycleMapping;
+import org.eclipse.m2e.core.ui.internal.lifecycle.ILifecyclePropertyPage;
+import org.eclipse.m2e.core.ui.internal.lifecycle.LifecycleMappingPropertyPageFactory;
 
 /**
  * Maven project preference page

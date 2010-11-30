@@ -16,7 +16,6 @@
    <extension-point id="m2menu" name="%extension-point.m2menu.name" schema="schema/m2menu.exsd"/>
    <extension-point id="lifecycleMappings" name="%extension-point.lifecyclemappings.name" schema="schema/lifecycleMappings.exsd"/>
    <extension-point id="lifecycleMappingPropertyPage" name = "%extension-point.mapping.proppage.name" schema = "schema/lifecycleMappingPropertyPage.exsd"/>
-   <extension-point id="defaultLifecycleMappings" name="%extension-point.mappingdefault.name" schema="schema/defaultLifecycleMappings.exsd"/>
    <extension-point id="mavenComponentContributors" name="%extension-point.component.name" schema="schema/mavenComponentContributors.exsd"/>
    <extension-point id="mavenProjectChangedListeners" name="%extension-point.changed.name" schema="schema/mavenProjectChangedListeners.exsd"/>
    <extension point="org.eclipse.ui.intro.configExtension">
@@ -555,7 +554,7 @@
    <extension
          point="org.eclipse.m2e.core.lifecycleMappings">
       <lifecycleMapping
-            class="org.eclipse.m2e.core.internal.project.CustomizableLifecycleMapping"
+            class="org.eclipse.m2e.core.project.configurator.CustomizableLifecycleMapping"
             id="customizable"
             name="%lifecycleMapping.custom.name">
       </lifecycleMapping>
@@ -608,6 +607,12 @@
             id="org.eclipse.m2e.core.project.configurator.MavenResourcesProjectConfigurator"
             name="Maven Resources Project Configurator"
             requiresExplicitEnablement="false">
+         <mojo
+               artifactId="maven-resources-plugin"
+               goals="resources,testResources"
+               groupId="org.apache.maven.plugins"
+               versionRange="[2.4,)">
+         </mojo>
       </configurator>
    </extension>
 </plugin>
