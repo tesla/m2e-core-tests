@@ -15,6 +15,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.actions.AbstractMavenMenuCreator;
@@ -28,6 +29,7 @@ import org.eclipse.m2e.core.actions.OpenPomAction;
 import org.eclipse.m2e.core.actions.OpenUrlAction;
 import org.eclipse.m2e.core.actions.RefreshMavenModelsAction;
 import org.eclipse.m2e.core.actions.SelectionUtil;
+import org.eclipse.m2e.core.actions.UpdateConfigurationAction;
 import org.eclipse.m2e.core.core.Messages;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.MavenProjectManager;
@@ -84,6 +86,8 @@ public class DefaultMavenMenuCreator extends AbstractMavenMenuCreator {
           org.eclipse.m2e.core.internal.Messages.DefaultMavenMenuCreator_action_update_deps, "icons/update_dependencies.gif")); //$NON-NLS-2$
       mgr.appendToGroup(UPDATE, getAction(new RefreshMavenModelsAction(true), RefreshMavenModelsAction.ID_SNAPSHOTS,
           org.eclipse.m2e.core.internal.Messages.DefaultMavenMenuCreator_action_update_snapshots));
+      mgr.appendToGroup(UPDATE, getAction(new UpdateConfigurationAction(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell()), //
+          UpdateConfigurationAction.ID, org.eclipse.m2e.core.internal.Messages.DefaultMavenMenuCreator_action_update_config, "icons/update_source_folders.gif")); //$NON-NLS-2$
 
       mgr.prependToGroup(OPEN, new Separator());
       mgr.appendToGroup(OPEN, getAction(new OpenPomAction(), OpenPomAction.ID, org.eclipse.m2e.core.internal.Messages.DefaultMavenMenuCreator_action_open_pom));
@@ -127,6 +131,8 @@ public class DefaultMavenMenuCreator extends AbstractMavenMenuCreator {
           org.eclipse.m2e.core.internal.Messages.DefaultMavenMenuCreator_action_update_deps, "icons/update_dependencies.gif")); //$NON-NLS-2$
       mgr.appendToGroup(UPDATE, getAction(new RefreshMavenModelsAction(true), RefreshMavenModelsAction.ID_SNAPSHOTS,
           org.eclipse.m2e.core.internal.Messages.DefaultMavenMenuCreator_action_update_snapshots));
+      mgr.appendToGroup(UPDATE, getAction(new UpdateConfigurationAction(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell()), //
+          UpdateConfigurationAction.ID, org.eclipse.m2e.core.internal.Messages.DefaultMavenMenuCreator_action_update_config, "icons/update_source_folders.gif")); //$NON-NLS-2$
     }
   }
 
