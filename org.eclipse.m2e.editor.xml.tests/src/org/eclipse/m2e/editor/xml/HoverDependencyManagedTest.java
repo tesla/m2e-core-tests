@@ -13,10 +13,7 @@ package org.eclipse.m2e.editor.xml;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.Region;
-import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 
 /**

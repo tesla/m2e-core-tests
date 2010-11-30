@@ -30,7 +30,6 @@ import org.eclipse.jface.text.IUndoManager;
 import org.eclipse.jface.text.IViewportListener;
 import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.m2e.editor.xml.PomContentAssistProcessor;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;

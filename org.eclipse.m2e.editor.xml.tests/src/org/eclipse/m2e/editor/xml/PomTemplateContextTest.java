@@ -14,7 +14,6 @@ package org.eclipse.m2e.editor.xml;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.eclipse.jface.text.templates.Template;
-import org.eclipse.m2e.editor.xml.PomTemplateContext;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
