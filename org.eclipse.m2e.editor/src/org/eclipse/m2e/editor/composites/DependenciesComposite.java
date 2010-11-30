@@ -623,7 +623,7 @@ public class DependenciesComposite extends Composite {
               Display.getDefault().asyncExec(new Runnable() {
                 
                 public void run() {
-                  MessageDialog.openError(getShell(), "Error", "Unable to read project metadata. Please fix the project errors.");                  
+                  MessageDialog.openError(getShell(), Messages.DependenciesComposite_error, Messages.DependenciesComposite_fixProjectErrors);                  
                 }
               });
               return;
@@ -704,7 +704,7 @@ public class DependenciesComposite extends Composite {
     @Override
     protected void createButtons(boolean includeSearch) {
       super.createButtons(includeSearch);
-      manage = createButton("Manage...");
+      manage = createButton(Messages.DependenciesComposite_manageButton);
       addButton(MANAGE, manage);
     }
     

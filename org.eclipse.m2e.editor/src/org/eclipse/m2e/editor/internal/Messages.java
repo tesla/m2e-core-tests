@@ -99,6 +99,10 @@ public class Messages extends NLS {
 
   public static String DependenciesComposite_btnSelect;
 
+  public static String DependenciesComposite_error;
+
+  public static String DependenciesComposite_fixProjectErrors;
+
   public static String DependenciesComposite_lblArtifactId;
 
   public static String DependenciesComposite_lblClassifier;
@@ -116,6 +120,8 @@ public class Messages extends NLS {
   public static String DependenciesComposite_lblType;
 
   public static String DependenciesComposite_lblVersion;
+
+  public static String DependenciesComposite_manageButton;
 
   public static String DependenciesComposite_searchDialog_selectExclusion;
 
