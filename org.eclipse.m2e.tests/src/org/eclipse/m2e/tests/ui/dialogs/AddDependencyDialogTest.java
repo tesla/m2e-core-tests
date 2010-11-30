@@ -14,8 +14,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import junit.framework.Assert;
-import junit.framework.AssertionFailedError;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;

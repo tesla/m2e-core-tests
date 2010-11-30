@@ -80,7 +80,6 @@ import org.eclipse.m2e.editor.pom.MavenPomEditorPage;
 import org.eclipse.m2e.editor.pom.SearchControl;
 import org.eclipse.m2e.editor.pom.SearchMatcher;
 import org.eclipse.m2e.editor.pom.ValueProvider;
-import org.eclipse.m2e.editor.xml.MvnIndexPlugin;
 import org.eclipse.m2e.model.edit.pom.BuildBase;
 import org.eclipse.m2e.model.edit.pom.Configuration;
 import org.eclipse.m2e.model.edit.pom.Dependency;

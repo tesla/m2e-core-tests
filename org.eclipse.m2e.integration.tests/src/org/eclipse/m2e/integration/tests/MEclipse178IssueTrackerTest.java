@@ -4,7 +4,6 @@ package org.eclipse.m2e.integration.tests;
 import org.eclipse.m2e.integration.tests.common.SwtbotUtil;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotEditor;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
-import org.junit.Ignore;
 import org.junit.Test;
 
 

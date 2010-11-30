@@ -6,7 +6,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.ui.texteditor.ResourceMarkerAnnotationModelFactory;
-import org.eclipse.wst.sse.ui.internal.StructuredResourceMarkerAnnotationModel;
 
 /**
  * created this file to get the proper lightbulb icon for the warnings with hint

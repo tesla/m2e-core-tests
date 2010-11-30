@@ -11,7 +11,6 @@ package org.eclipse.m2e.integration.tests;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.m2e.core.core.IMavenConstants;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;

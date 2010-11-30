@@ -11,7 +11,6 @@
 
 package org.eclipse.m2e.editor.pom;
 
-import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;

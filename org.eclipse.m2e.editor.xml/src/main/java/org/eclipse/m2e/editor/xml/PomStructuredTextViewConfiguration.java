@@ -11,23 +11,14 @@
 
 package org.eclipse.m2e.editor.xml;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
-import org.eclipse.jface.text.information.IInformationProvider;
 import org.eclipse.jface.text.quickassist.IQuickAssistAssistant;
-import org.eclipse.jface.text.source.Annotation;
-import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
-import org.eclipse.swt.SWT;
-import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.wst.sse.core.text.IStructuredPartitions;
-import org.eclipse.wst.sse.ui.internal.StructuredTextAnnotationHover;
 import org.eclipse.wst.xml.core.text.IXMLPartitions;
 import org.eclipse.wst.xml.ui.StructuredTextViewerConfigurationXML;
-
-import org.eclipse.m2e.core.core.IMavenConstants;
 
 /**
  * @author Lukas Krecan
