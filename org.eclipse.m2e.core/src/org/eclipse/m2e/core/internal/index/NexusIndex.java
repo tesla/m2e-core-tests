@@ -79,7 +79,7 @@ public class NexusIndex implements IIndex, IMutableIndex {
   }
 
   public void removeArtifact(File pomFile, ArtifactKey artifactKey) {
-    indexManager.removeDocument(repository, pomFile, artifactKey);
+    indexManager.removeDocument(repository, pomFile, artifactKey, null);
   }
 
   public Collection<IndexedArtifact> find(SearchExpression groupId, SearchExpression artifactId,
