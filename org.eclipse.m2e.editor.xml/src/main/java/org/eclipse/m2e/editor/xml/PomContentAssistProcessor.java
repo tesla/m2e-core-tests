@@ -234,10 +234,6 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
     if (context == PomTemplateContext.PROJECT) {
       //check if we have a parent defined..
       Node project = node;
-      //is this necessary?
-      while (project != null && !PomTemplateContext.PROJECT.getNodeName().equals(project.getNodeName())) {
-        project = project.getParentNode();
-      }
       if (project != null && project instanceof Element) {
         Element parent = MavenMarkerManager.findChildElement((Element)project, "parent"); //$NON-NLS-1$
         if (parent == null) {
@@ -321,14 +317,10 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
         IPath path = parentPomFile.getLocation();
         IProject prj = extractProject(viewer);
         if (prj != null && path != null) {
-          IMavenProjectFacade childFacade = MavenPlugin.getDefault().getMavenProjectManager().getProject(prj);
-          if (childFacade != null) {
-            IFile childPomFile = childFacade.getPom();
-            IPath path2 = childPomFile.getLocation().removeLastSegments(1);
-            IPath relative = path.makeRelativeTo(path2);
-            if (relative != path) {
+          IPath path2 = prj.getLocation();
+          IPath relative = path.makeRelativeTo(path2);
+          if (relative != path) {
               return relative;
-            }
           }
         }
       }
