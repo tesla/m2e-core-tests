@@ -351,6 +351,9 @@ public class MavenMarkerManager implements IMavenMarkerManager {
     //now we have all the candidates, match them against the effective managed set 
     for(Element dep : candidates) {
       String grpString = getElementTextValue(findChildElement(dep, "groupId")); //$NON-NLS-1$
+      if (grpString == null) {
+        grpString = "org.apache.maven.plugins"; //$NON-NLS-1$
+      }
       String artString = getElementTextValue(findChildElement(dep, "artifactId")); //$NON-NLS-1$
       Element version = findChildElement(dep, "version"); //$NON-NLS-1$
       String versionString = getElementTextValue(version);
