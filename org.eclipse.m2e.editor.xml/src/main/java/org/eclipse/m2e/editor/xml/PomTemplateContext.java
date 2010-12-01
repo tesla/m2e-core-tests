@@ -184,6 +184,7 @@ public enum PomTemplateContext {
           add(proposals, contextTypeId, version, groupId + ":" + artifactId + ":" + version);
         }
       }
+      System.out.println("have project=" + project);
       //mkleint: this concept that all versions out there are equal is questionable..
       if (project != null && "dependency".equals(node.getParentNode().getNodeName())) { //$NON-NLS-1$
         //see if we can complete the properties ending with .version
@@ -191,8 +192,10 @@ public enum PomTemplateContext {
         IMavenProjectFacade mvnproject = MavenPlugin.getDefault().getMavenProjectManager().getProject(project);
         List<String> keys = new ArrayList<String>();
         String contextTypeId = getContextTypeId();
+        System.out.println("have mvn prj-" + mvnproject);
         if(mvnproject != null) {
           MavenProject mvn = mvnproject.getMavenProject();
+          System.out.println("have mvn =" + mvn);
           if (mvn != null) {
             //if groupid is the same, suggest ${project.version}
             if (groupId.equals(mvn.getGroupId())) {
