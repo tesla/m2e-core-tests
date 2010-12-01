@@ -18,7 +18,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.Stack;
+import java.util.TreeSet;
 
 import org.apache.maven.project.MavenProject;
 import org.w3c.dom.Element;
@@ -161,7 +163,7 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
         Region region = new Region(request.getReplacementBeginPosition() - realExpressionPrefix.length(), realExpressionPrefix.length());
         if (prj != null) {
           IMavenProjectFacade mvnproject = MavenPlugin.getDefault().getMavenProjectManager().getProject(prj);
-          List<String> collect = new ArrayList<String>();
+          Set<String> collect = new TreeSet<String>();
           if (mvnproject != null) {
             MavenProject mp = mvnproject.getMavenProject();
             if (mp != null) {
@@ -191,10 +193,6 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
             if ("${project.build.directory}".startsWith(realExpressionPrefix)) { //$NON-NLS-1$
               collect.add("project.build.directory"); //$NON-NLS-1$
             }
-            if ("${project.build.sourceEncoding}".startsWith(realExpressionPrefix)) { //$NON-NLS-1$
-              collect.add("project.build.sourceEncoding"); //$NON-NLS-1$
-            }
-            Collections.sort(collect);
             for (String key : collect) {
               ICompletionProposal proposal = new InsertExpressionProposal(sourceViewer, region, key, mvnproject); 
               if(request.shouldSeparate()) {
