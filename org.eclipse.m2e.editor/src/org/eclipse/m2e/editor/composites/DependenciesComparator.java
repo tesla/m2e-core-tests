@@ -4,11 +4,11 @@ import java.util.Comparator;
 
 import org.eclipse.m2e.model.edit.pom.Dependency;
 
-public class DependenciesComparator implements Comparator<Object> {
+public class DependenciesComparator<T> implements Comparator<T> {
   
   private boolean sortByGroups = true;
   
-  public int compare(Object o1, Object o2) {
+  public int compare(T o1, T o2) {
     String[] gav1;
     String[] gav2;
     

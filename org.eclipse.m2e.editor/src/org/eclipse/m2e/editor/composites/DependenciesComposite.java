@@ -145,7 +145,11 @@ public class DependenciesComposite extends Composite {
 
   ListEditorContentProvider<Object> dependenciesContentProvider = new ListEditorContentProvider<Object>();
 
-  DependenciesComparator dependenciesComparator;
+  DependenciesComparator<Object> dependenciesComparator;
+
+  ListEditorContentProvider<Dependency> dependencyManagementContentProvider = new ListEditorContentProvider<Dependency>();
+
+  DependenciesComparator<Dependency> dependencyManagementComparator;
 
   public DependenciesComposite(Composite composite, MavenPomEditorPage editorPage, int flags, MavenPomEditor pomEditor) {
     super(composite, flags);
@@ -435,9 +439,11 @@ public class DependenciesComposite extends Composite {
 
     dependencyManagementEditor = new PropertiesListComposite<Dependency>(dependencyManagementSection, SWT.NONE, true);
     dependencyManagementSection.setClient(dependencyManagementEditor);
-
+    
+    dependencyManagementComparator = new DependenciesComparator<Dependency>();
+    dependencyManagementContentProvider.setComparator(dependencyManagementComparator);
     dependencyManagementEditor.setLabelProvider(dependencyManagementLabelProvider);
-    dependencyManagementEditor.setContentProvider(new ListEditorContentProvider<Dependency>());
+    dependencyManagementEditor.setContentProvider(dependencyManagementContentProvider);
 
     dependencyManagementEditor.setRemoveButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
@@ -503,10 +509,29 @@ public class DependenciesComposite extends Composite {
 
     ToolBarManager modulesToolBarManager = new ToolBarManager(SWT.FLAT);
 
+    modulesToolBarManager.add(new Action(Messages.DependenciesComposite_action_sortAlphabetically, MavenEditorImages.SORT) {
+      {
+        setChecked(false);
+        dependencyManagementContentProvider.setShouldSort(false);
+      }
+      
+      @Override
+      public int getStyle() {
+        return AS_CHECK_BOX;
+      }
+      
+      @Override
+      public void run() {
+        dependencyManagementContentProvider.setShouldSort(isChecked());
+        dependencyManagementEditor.getViewer().refresh();
+      }
+    });
+    
     modulesToolBarManager.add(new Action(Messages.DependenciesComposite_action_showgroupid,
         MavenEditorImages.SHOW_GROUP) {
       {
         setChecked(false);
+        dependencyManagementComparator.setSortByGroups(false);
       }
 
       public int getStyle() {
@@ -515,6 +540,7 @@ public class DependenciesComposite extends Composite {
 
       public void run() {
         dependencyManagementLabelProvider.setShowGroupId(isChecked());
+        dependencyManagementComparator.setSortByGroups(isChecked());
         dependencyManagementEditor.getViewer().refresh();
       }
     });
