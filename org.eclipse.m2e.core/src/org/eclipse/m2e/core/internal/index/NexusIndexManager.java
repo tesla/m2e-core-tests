@@ -259,7 +259,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     }
     return null;
   }
-  
+
   /** for Unit test */
   public IndexedArtifactFile getIndexedArtifactFile(ArtifactInfo artifactInfo) {
     String groupId = artifactInfo.groupId;
@@ -286,7 +286,6 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     return new IndexedArtifactFile(repository, groupId, artifactId, version, packaging, classifier, fname, size, date,
         sourcesExists, javadocExists, prefix, goals);
   }
-
 
   public IndexedArtifactFile identify(File file) throws CoreException {
     try {
@@ -603,7 +602,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
             "Workspace project with key %s not found!", new Object[] {artifactKey})))); //$NON-NLS-1$ 
   }
 
-  protected void removeDocument(IRepository repository, File file, ArtifactKey key) {
+  protected void removeDocument(IRepository repository, File file, ArtifactKey key, IMavenProjectFacade facade) {
     synchronized(getIndexLock(repository)) {
       try {
         IndexingContext context = getIndexingContext(repository);
@@ -614,7 +613,10 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
         }
         ArtifactContext artifactContext;
         if(repository.isScope(IRepositoryRegistry.SCOPE_WORKSPACE)) {
-          IMavenProjectFacade facade = getProjectByArtifactKey(key);
+          if(facade == null) {
+            // try to get one, but you MUST have facade in case of project deletion, see mavenProjectChanged()
+            facade = getProjectByArtifactKey(key);
+          }
           artifactContext = getWorkspaceArtifactContext(facade, context);
         } else {
           artifactContext = getArtifactContext(file, context);
@@ -766,7 +768,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
           IMavenProjectFacade oldFacade = event.getOldMavenProject();
           if(oldFacade != null) {
             removeDocument(repositoryRegistry.getWorkspaceRepository(), oldFacade.getPomFile(),
-                oldFacade.getArtifactKey());
+                oldFacade.getArtifactKey(), oldFacade);
             fireIndexRemoved(repositoryRegistry.getWorkspaceRepository());
           }
           IMavenProjectFacade facade = event.getMavenProject();
