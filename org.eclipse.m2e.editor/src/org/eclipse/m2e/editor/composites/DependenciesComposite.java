@@ -294,7 +294,7 @@ public class DependenciesComposite extends Composite {
 
     ToolBarManager modulesToolBarManager = new ToolBarManager(SWT.FLAT);
     
-    modulesToolBarManager.add(new Action("Sort alphabetically", MavenEditorImages.SORT) {
+    modulesToolBarManager.add(new Action(Messages.DependenciesComposite_action_sortAlphabetically, MavenEditorImages.SORT) {
       {
         setChecked(false);
       }
