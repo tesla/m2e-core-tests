@@ -12,7 +12,6 @@
 package org.eclipse.m2e.core.wizards;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.resources.IContainer;
@@ -22,7 +21,6 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -34,6 +32,9 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TreeItem;
+import org.eclipse.ui.dialogs.FilteredTree;
+import org.eclipse.ui.dialogs.PatternFilter;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 
 import org.eclipse.m2e.core.core.IMavenConstants;
@@ -49,8 +50,9 @@ public class MavenProjectSelectionDialog extends AbstractMavenDialog {
 
   protected static final String DIALOG_SETTINGS = MavenProjectSelectionDialog.class.getName();
 
-  /** the tree viewer */
-  private TreeViewer viewer;
+  protected static final long SEARCH_DELAY = 500L; //in milliseconds
+
+  private FilteredTree filteredTree;
 
   private boolean useCheckboxTree;
 
@@ -70,8 +72,25 @@ public class MavenProjectSelectionDialog extends AbstractMavenDialog {
 
   /** Produces the result of the selection. */
   protected void computeResult() {
-    setResult(useCheckboxTree ? Arrays.asList(((CheckboxTreeViewer) viewer).getCheckedElements())
-        : ((IStructuredSelection) viewer.getSelection()).toList());
+    if(useCheckboxTree) {
+      List<Object> result = new ArrayList<Object>();
+      collectCheckedItems(getViewer().getTree().getItems(), result);
+      setResult(result);
+    } else {
+      setResult(((IStructuredSelection) getViewer().getSelection()).toList());
+    }
+  }
+
+  private void collectCheckedItems(TreeItem[] items, List<Object> list) {
+    for(TreeItem item : items) {
+      if(item.getChecked()) {
+        Object data = item.getData();
+        if(data != null) {
+          list.add(data);
+        }
+      }
+      collectCheckedItems(item.getItems(), list);
+    }
   }
 
   /** Creates the dialog controls. */
@@ -80,17 +99,14 @@ public class MavenProjectSelectionDialog extends AbstractMavenDialog {
 
     Composite composite = (Composite) super.createDialogArea(parent);
 
-    if(useCheckboxTree) {
-      viewer = new CheckboxTreeViewer(composite, SWT.MULTI | SWT.BORDER);
-    } else {
-      viewer = new TreeViewer(composite);
-    }
-    viewer.getControl().setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, true));
-    viewer.setContentProvider(new MavenContainerContentProvider());
-    viewer.setLabelProvider(WorkbenchLabelProvider.getDecoratingWorkbenchLabelProvider());
-    viewer.setInput(ResourcesPlugin.getWorkspace());
+    filteredTree = new FilteredTree(composite, SWT.BORDER | (useCheckboxTree ? SWT.CHECK : 0), new PatternFilter(),
+        true);
+    filteredTree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+    getViewer().setContentProvider(new MavenContainerContentProvider());
+    getViewer().setLabelProvider(WorkbenchLabelProvider.getDecoratingWorkbenchLabelProvider());
+    getViewer().setInput(ResourcesPlugin.getWorkspace());
 
-    viewer.addDoubleClickListener(new IDoubleClickListener() {
+    getViewer().addDoubleClickListener(new IDoubleClickListener() {
       public void doubleClick(DoubleClickEvent event) {
         okPressed();
       }
@@ -104,7 +120,7 @@ public class MavenProjectSelectionDialog extends AbstractMavenDialog {
   }
 
   protected TreeViewer getViewer() {
-    return viewer;
+    return filteredTree.getViewer();
   }
 
   /** The content provider class. */
