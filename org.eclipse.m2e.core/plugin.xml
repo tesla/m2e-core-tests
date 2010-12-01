@@ -288,13 +288,13 @@
          id="maven2Problem"
          name="%m2.marker.problem.name">
       <super type="org.eclipse.core.resources.problemmarker"/>
-      <persistent value="false"/>
+      <persistent value="true"/>
    </extension>
    <extension point="org.eclipse.core.resources.markers"
          id="maven2Problem.configuration"
          name="%m2.marker.problem.configuration.name">
       <super type="org.eclipse.m2e.core.maven2Problem"/>
-      <persistent value="false"/>
+      <persistent value="true"/>
    </extension>
    <extension point="org.eclipse.core.resources.markers"
          id="maven2Problem.pomloading"
@@ -306,13 +306,13 @@
          id="maven2Problem.dependency"
          name="%m2.marker.problem.dependency.name">
       <super type="org.eclipse.m2e.core.maven2Problem"/>
-      <persistent value="false"/>
+      <persistent value="true"/>
    </extension>
    <extension point="org.eclipse.core.resources.markers"
          id="maven2Problem.build"
          name="%m2.marker.problem.build.name">
       <super type="org.eclipse.m2e.core.maven2Problem"/>
-      <persistent value="false"/>
+      <persistent value="true"/>
    </extension>
 
    <extension point="org.eclipse.ui.keywords">
