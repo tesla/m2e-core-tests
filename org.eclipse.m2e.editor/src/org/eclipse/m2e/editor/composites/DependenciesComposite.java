@@ -42,6 +42,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -142,6 +143,10 @@ public class DependenciesComposite extends Composite {
   protected boolean showInheritedDependencies = false;
   IMavenProjectFacade facade = null;
 
+  ListEditorContentProvider<Object> dependenciesContentProvider = new ListEditorContentProvider<Object>();
+
+  DependenciesComparator dependenciesComparator;
+
   public DependenciesComposite(Composite composite, MavenPomEditorPage editorPage, int flags, MavenPomEditor pomEditor) {
     super(composite, flags);
     this.editorPage = editorPage;
@@ -174,10 +179,13 @@ public class DependenciesComposite extends Composite {
     Section dependenciesSection = toolkit.createSection(verticalSash, ExpandableComposite.TITLE_BAR);
     dependenciesSection.marginWidth = 3;
     dependenciesSection.setText(Messages.DependenciesComposite_sectionDependencies);
+    
+    dependenciesComparator = new DependenciesComparator();
+    dependenciesContentProvider.setComparator(dependenciesComparator);
 
     dependenciesEditor = new DependenciesListComposite<Object>(dependenciesSection, SWT.NONE, true);
     dependenciesEditor.setLabelProvider(dependencyLabelProvider);
-    dependenciesEditor.setContentProvider(new ListEditorContentProvider<Object>());
+    dependenciesEditor.setContentProvider(dependenciesContentProvider);
 
     dependenciesEditor.setRemoveButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
@@ -286,6 +294,23 @@ public class DependenciesComposite extends Composite {
 
     ToolBarManager modulesToolBarManager = new ToolBarManager(SWT.FLAT);
     
+    modulesToolBarManager.add(new Action("Sort alphabetically", MavenEditorImages.SORT) {
+      {
+        setChecked(false);
+      }
+      
+      @Override
+      public int getStyle() {
+        return AS_CHECK_BOX;
+      }
+      
+      @Override
+      public void run() {
+        dependenciesContentProvider.setShouldSort(isChecked());
+        dependenciesEditor.getViewer().refresh();
+      }
+    });
+    
     modulesToolBarManager.add(new Action(Messages.DependenciesComposite_action_showInheritedDependencies, 
         MavenEditorImages.SHOW_INHERITED_DEPENDENCIES) {
       {
@@ -311,9 +336,12 @@ public class DependenciesComposite extends Composite {
                 showInheritedDependencies = true;
                 
                 Display.getDefault().asyncExec(new Runnable() {
+                  
                   public void run() {
+                    ISelection selection = dependenciesEditor.getViewer().getSelection();
                     setDependenciesInput();
                     dependenciesEditor.getViewer().refresh();
+                    dependenciesEditor.getViewer().setSelection(selection, true);
                   }
                 });
               } catch(CoreException e) {
@@ -341,7 +369,9 @@ public class DependenciesComposite extends Composite {
           }
         } else {
           showInheritedDependencies  = false;
+          ISelection selection = dependenciesEditor.getViewer().getSelection();
           setDependenciesInput();
+          dependenciesEditor.getViewer().setSelection(selection, true);
         }
       }
     });
@@ -350,6 +380,7 @@ public class DependenciesComposite extends Composite {
         MavenEditorImages.SHOW_GROUP) {
       {
         setChecked(false);
+        dependenciesComparator.setSortByGroups(false);
       }
 
       public int getStyle() {
@@ -358,6 +389,7 @@ public class DependenciesComposite extends Composite {
 
       public void run() {
         dependencyLabelProvider.setShowGroupId(isChecked());
+        dependenciesComparator.setSortByGroups(isChecked());
         dependenciesEditor.getViewer().refresh();
       }
     });
