@@ -217,6 +217,11 @@ public class AddDependencyDialog extends AbstractMavenDialog {
 
     versionText = new Text(composite, SWT.BORDER);
     versionText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    
+    /*
+     * Fix the tab order (group -> artifact -> version -> scope)
+     */
+    composite.setTabList(new Control[] { groupIDtext, artifactIDtext, versionText, scopeList});
 
     ProposalUtil.addGroupIdProposal(project, groupIDtext, Packaging.ALL);
     ProposalUtil.addArtifactIdProposal(project, groupIDtext, artifactIDtext, Packaging.ALL);
