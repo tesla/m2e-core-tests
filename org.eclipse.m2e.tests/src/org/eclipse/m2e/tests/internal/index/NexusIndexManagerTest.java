@@ -53,6 +53,8 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
 
   private static final String SETTINGS_ECLIPSE_REPO = "src/org/eclipse/m2e/tests/internal/index/public_mirror_repo_settings.xml";
 
+  private static final String SETTINGS_PUBLIC_REPO = "src/org/eclipse/m2e/tests/internal/index/public_settings.xml";
+
   private static final String REPO_URL_ECLIPSE = "http://repository.sonatype.org/content/repositories/eclipse";
 
   private static final String REPO_URL_PUBLIC = "http://repository.sonatype.org/content/groups/public/";
@@ -260,8 +262,10 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
   }
 
   public void testIndexedPublicArtifactGroups() throws Exception {
-//    updateRepo(REPO_URL_ECLIPSE, SETTINGS_ECLIPSE_REPO);
-    Map<String, IndexedArtifact> search = indexManager.getAllIndexes().search(new UserInputSearchExpression("junit"),
+    // updateRepo(REPO_URL_PUBLIC, SETTINGS_PUBLIC_REPO);
+
+    // 
+    Map<String, IndexedArtifact> search = indexManager.getIndex(getRepository(REPO_URL_ECLIPSE)).search(new UserInputSearchExpression("junit"),
         IIndex.SEARCH_ARTIFACT);
     IndexedArtifact ia = search.get("null : null : org.eclipse : org.eclipse.jdt.junit");
     assertNotNull(ia);
@@ -300,8 +304,15 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
     //make sure that the junit jar can be found in the public repo
     NexusIndex index = indexManager.getIndex(eclipseRepo);
     assertNotNull(index);
-    Collection<IndexedArtifact> junitArtifact = index.find(new SourcedSearchExpression("junit"),
-        new SourcedSearchExpression("junit"), new SourcedSearchExpression("3.8.1"), new SourcedSearchExpression("jar"));
+    // This artifact below is NOT in "eclipse" repo!
+    // so, this line is removed and replaced with a search that we know is present
+    // Collection<IndexedArtifact> junitArtifact = index.find(new SourcedSearchExpression("junit"),
+    // new SourcedSearchExpression("junit"), new SourcedSearchExpression("3.8.1"), new SourcedSearchExpression("jar"));
+
+    // This below is present in repo
+    // org.eclipse : org.eclipse.jdt.junit : 3.3.1.r331_v20070829
+    Collection<IndexedArtifact> junitArtifact = index.find(new SourcedSearchExpression("org.eclipse"),
+        new SourcedSearchExpression("org.eclipse.jdt.junit"), new UserInputSearchExpression("3.3.1"), new SourcedSearchExpression("jar"));
     assertTrue(junitArtifact.size() > 0);
   }
 
@@ -373,7 +384,8 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
       mavenConfiguration.setUserSettingsFile(settingsFile.getCanonicalPath());
       waitForJobsToComplete();
 
-      IndexedArtifactGroup[] rootGroups = indexManager.getRootIndexedArtifactGroups(getRepository("http://bad.host/remoterepo"));
+      IndexedArtifactGroup[] rootGroups = indexManager
+          .getRootIndexedArtifactGroups(getRepository("http://bad.host/remoterepo"));
       assertTrue(rootGroups.length > 0);
     } finally {
       httpServer.stop();
@@ -413,8 +425,8 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
       mavenConfiguration.setUserSettingsFile(settingsFile.getCanonicalPath());
       waitForJobsToComplete();
 
-      IndexedArtifactGroup[] rootGroups = indexManager.getRootIndexedArtifactGroups(getRepository(httpServer.getHttpUrl()
-          + "/remoterepo"));
+      IndexedArtifactGroup[] rootGroups = indexManager.getRootIndexedArtifactGroups(getRepository(httpServer
+          .getHttpUrl() + "/remoterepo"));
       assertTrue(rootGroups.length > 0);
     } finally {
       httpServer.stop();
