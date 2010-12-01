@@ -95,8 +95,24 @@ public interface IIndex {
    * @return
    * @throws CoreException
    */
-  public Collection<IndexedArtifact> find(SearchExpression groupId, SearchExpression artifactId, SearchExpression version, SearchExpression packaging)
-      throws CoreException;
+  public Collection<IndexedArtifact> find(SearchExpression groupId, SearchExpression artifactId,
+      SearchExpression version, SearchExpression packaging) throws CoreException;
+
+  /**
+   * Performs a search for artifacts with given parameters. Similar to
+   * {@link IIndex#find(SearchExpression, SearchExpression, SearchExpression, SearchExpression)}, but here you are able
+   * to pass in multiple values for all searches. All elements of collections will form an "OR" of one query.
+   * 
+   * @param groupId
+   * @param artifactId
+   * @param version
+   * @param packaging
+   * @return
+   * @throws CoreException
+   */
+  public Collection<IndexedArtifact> find(Collection<SearchExpression> groupId,
+      Collection<SearchExpression> artifactId, Collection<SearchExpression> version,
+      Collection<SearchExpression> packaging) throws CoreException;
 
   /**
    * Convenience method to search in all indexes enabled for repositories defined in settings.xml. This method always
@@ -113,5 +129,6 @@ public interface IIndex {
    * @param classifier - the type of classifiers to search for, SEARCH_ALL, SEARCH_JAVADOCS, SEARCH_SOURCES,
    *          SEARCH_TESTS
    */
-  public Map<String, IndexedArtifact> search(SearchExpression expression, String searchType, int classifier) throws CoreException;
+  public Map<String, IndexedArtifact> search(SearchExpression expression, String searchType, int classifier)
+      throws CoreException;
 }

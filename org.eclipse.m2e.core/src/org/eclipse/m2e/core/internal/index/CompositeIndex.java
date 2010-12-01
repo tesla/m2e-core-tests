@@ -67,8 +67,21 @@ public class CompositeIndex implements IIndex {
     return null;
   }
 
-  public Collection<IndexedArtifact> find(SearchExpression groupId, SearchExpression artifactId, SearchExpression version, SearchExpression packaging)
-      throws CoreException {
+  public Collection<IndexedArtifact> find(SearchExpression groupId, SearchExpression artifactId,
+      SearchExpression version, SearchExpression packaging) throws CoreException {
+    Set<IndexedArtifact> result = new LinkedHashSet<IndexedArtifact>();
+    for(IIndex index : indexes) {
+      Collection<IndexedArtifact> findResults = index.find(groupId, artifactId, version, packaging);
+      if(findResults != null) {
+        result.addAll(findResults);
+      }
+    }
+    return result;
+  }
+
+  public Collection<IndexedArtifact> find(Collection<SearchExpression> groupId,
+      Collection<SearchExpression> artifactId, Collection<SearchExpression> version,
+      Collection<SearchExpression> packaging) throws CoreException {
     Set<IndexedArtifact> result = new LinkedHashSet<IndexedArtifact>();
     for(IIndex index : indexes) {
       Collection<IndexedArtifact> findResults = index.find(groupId, artifactId, version, packaging);
@@ -90,7 +103,8 @@ public class CompositeIndex implements IIndex {
     return result;
   }
 
-  public Map<String, IndexedArtifact> search(SearchExpression term, String searchType, int classifier) throws CoreException {
+  public Map<String, IndexedArtifact> search(SearchExpression term, String searchType, int classifier)
+      throws CoreException {
     Map<String, IndexedArtifact> result = new HashMap<String, IndexedArtifact>();
     for(IIndex index : indexes) {
       Map<String, IndexedArtifact> iresult = index.search(term, searchType, classifier);

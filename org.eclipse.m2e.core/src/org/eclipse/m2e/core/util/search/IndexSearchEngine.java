@@ -53,19 +53,25 @@ public class IndexSearchEngine implements SearchEngine {
   public Collection<String> findArtifactIds(String groupId, String searchExpression, Packaging packaging,
       ArtifactInfo containingArtifact) {
     // TODO add support for implicit groupIds in plugin dependencies "org.apache.maven.plugins", ...
-    MatchTypedStringSearchExpression groupIdSearchExpression;
+    // Someone, give me here access to settings.xml, to be able to pick up "real" predefined groupIds added by user
+    // Currently, I am just simulating the "factory defaults" of maven, but user changes to settings.xml
+    // will not be picked up this way!
+    ArrayList<SearchExpression> groupIdSearchExpressions = new ArrayList<SearchExpression>();
     if(isBlank(groupId)) {
-      // this is not good yet, settings should be used to source groupIds!
-      // also, by default there is also org.codehaus.mojos
-      // one possibility would be to redo these steps multiple times, or simply allow multiple inputs (on IIndexer)?
-      groupIdSearchExpression = new MatchTypedStringSearchExpression("org.apache.maven.plugins", MatchType.EXACT);
+      // values from effective settings
+      // we are wiring in the defaults only, but user changes are lost!
+      // org.apache.maven.plugins
+      // org.codehaus.mojo
+      groupIdSearchExpressions.add(new MatchTypedStringSearchExpression("org.apache.maven.plugins", MatchType.EXACT));
+      groupIdSearchExpressions.add(new MatchTypedStringSearchExpression("org.codehaus.mojo", MatchType.EXACT));
     } else {
-      groupIdSearchExpression = new MatchTypedStringSearchExpression(groupId, MatchType.EXACT);
+      groupIdSearchExpressions.add(new MatchTypedStringSearchExpression(groupId, MatchType.EXACT));
     }
 
     try {
       TreeSet<String> ids = new TreeSet<String>();
-      for(IndexedArtifact artifact : index.find(groupIdSearchExpression, null, null, packaging.toSearchExpression())) {
+      for(IndexedArtifact artifact : index.find(groupIdSearchExpressions, null, null,
+          Collections.singleton(packaging.toSearchExpression()))) {
         ids.add(artifact.getArtifactId());
       }
       return subSet(ids, searchExpression);

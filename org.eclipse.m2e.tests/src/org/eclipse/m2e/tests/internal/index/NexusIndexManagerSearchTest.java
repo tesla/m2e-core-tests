@@ -22,6 +22,7 @@ import org.eclipse.m2e.core.embedder.IMavenConfiguration;
 import org.eclipse.m2e.core.index.IIndex;
 import org.eclipse.m2e.core.index.IndexedArtifact;
 import org.eclipse.m2e.core.index.IndexedArtifactFile;
+import org.eclipse.m2e.core.index.SearchExpression;
 import org.eclipse.m2e.core.index.SourcedSearchExpression;
 import org.eclipse.m2e.core.index.UserInputSearchExpression;
 import org.eclipse.m2e.core.internal.index.NexusIndex;
@@ -158,7 +159,8 @@ public class NexusIndexManagerSearchTest extends AbstractNexusIndexManagerTest {
   }
 
   public void testSearchGroups2() throws CoreException {
-    Collection<IndexedArtifact> result = indexManager.getIndex((IProject) null).find(null, null, null, null);
+    Collection<IndexedArtifact> result = indexManager.getIndex((IProject) null).find((SearchExpression) null,
+        (SearchExpression) null, (SearchExpression) null, (SearchExpression) null);
     assertTrue(String.format("Wrong result set returned! (size=%s)", new Object[] {result.size()}), result.size() == 0);
   }
 
