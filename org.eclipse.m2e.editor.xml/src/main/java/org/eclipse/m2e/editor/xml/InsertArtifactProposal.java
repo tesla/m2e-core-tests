@@ -69,10 +69,10 @@ public class InsertArtifactProposal implements ICompletionProposal, ICompletionP
           buffer.append(spaces).append(ind);
           buffer.append("<version>").append(af.version).append("</version>").append(document.getLegalLineDelimiters()[0]); //$NON-NLS-1$ //$NON-NLS-2$
           //check if parent is on workspace, if so, add a relative path right away..
-          IPath relativePath = PomContentAssistProcessor.findRelativePath(sourceViewer, af.group, af.artifact, af.version);
+          String relativePath = PomContentAssistProcessor.findRelativePath(sourceViewer, af.group, af.artifact, af.version);
           if (relativePath != null) {
             buffer.append(spaces).append(ind);
-            buffer.append("<relativePath>").append(relativePath.toOSString()).append("</relativePath>").append(document.getLegalLineDelimiters()[0]); //$NON-NLS-1$ //$NON-NLS-2$
+            buffer.append("<relativePath>").append(relativePath).append("</relativePath>").append(document.getLegalLineDelimiters()[0]); //$NON-NLS-1$ //$NON-NLS-2$
           }
           buffer.append(spaces);
           buffer.append("</parent>").append(document.getLegalLineDelimiters()[0]); //$NON-NLS-1$

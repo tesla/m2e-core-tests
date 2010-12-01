@@ -20,7 +20,7 @@ import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 
 /**
  * Hello fellow tester:
- * everytime this test finds a regression add an 'x' here:
+ * everytime this test finds a regression add an 'x' here: x
  * everytime you do mindless test update add an 'y' here: 
  * @author mkleint
  *
@@ -41,7 +41,7 @@ public class RelativePath2Test extends AbstractCompletionTest {
   }
 
   public void testRelativePath() throws Exception {
-    assertEquals("../pom.xml", PomContentAssistProcessor.findRelativePath(sourceViewer, "org.eclipse.m2e", "parent2601", "0.0.1-SNAPSHOT").toOSString());
+    assertEquals("../pom.xml", PomContentAssistProcessor.findRelativePath(sourceViewer, "org.eclipse.m2e", "parent2601", "0.0.1-SNAPSHOT"));
   }
 
 }

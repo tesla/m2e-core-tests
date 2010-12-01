@@ -256,13 +256,13 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
       Element relPath = MavenMarkerManager.findChildElement(parent, "relativePath"); //$NON-NLS-1$
       if (relPath == null) {
         //only show when no relpath already defined..
-        IPath relative = findRelativePath(sourceViewer, parent);
+        String relative = findRelativePath(sourceViewer, parent);
         if (relative != null) {
           Region region = new Region(request.getReplacementBeginPosition() - prefix.length(), prefix.length());
-          ICompletionProposal proposal = new CompletionProposal("<relativePath>" + relative.toOSString() + "</relativePath>",  //$NON-NLS-1$ //$NON-NLS-2$
+          ICompletionProposal proposal = new CompletionProposal("<relativePath>" + relative + "</relativePath>",  //$NON-NLS-1$ //$NON-NLS-2$
               region.getOffset(), region.getLength(), 0, 
               WorkbenchPlugin.getDefault().getImageRegistry().get(org.eclipse.ui.internal.SharedImages.IMG_OBJ_ADD), 
-              NLS.bind(Messages.PomContentAssistProcessor_insert_relPath_title, relative.toOSString()), null, null);
+              NLS.bind(Messages.PomContentAssistProcessor_insert_relPath_title, relative), null, null);
           if (request.shouldSeparate()) {
             request.addMacro(proposal);
           } else {
@@ -275,9 +275,9 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
       //completion in the text portion of relative path
       Element parent = (Element) node.getParentNode();
       if (parent != null && "parent".equals(parent.getNodeName())) { //$NON-NLS-1$
-        IPath relative = findRelativePath(sourceViewer, parent);
+        String relative = findRelativePath(sourceViewer, parent);
         String textContent = MavenMarkerManager.getElementTextValue(node); 
-        if (relative != null && !relative.toOSString().equals(textContent)) {
+        if (relative != null && !relative.equals(textContent)) {
           Region region = new Region(request.getReplacementBeginPosition() - prefix.length(), prefix.length());
           if (request.getNode() instanceof IndexedRegion && request.getNode() instanceof Text) { 
             //for <relativePath>|</relativePath> the current node is the element node and not the text node
@@ -285,10 +285,10 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
             IndexedRegion index = (IndexedRegion)request.getNode();
             region = new Region(index.getStartOffset(), index.getEndOffset() - index.getStartOffset());
           }
-          ICompletionProposal proposal = new CompletionProposal(relative.toOSString(), 
+          ICompletionProposal proposal = new CompletionProposal(relative, 
               region.getOffset(), region.getLength(), 0, 
               WorkbenchPlugin.getDefault().getImageRegistry().get(org.eclipse.ui.internal.SharedImages.IMG_OBJ_ADD), 
-              NLS.bind(Messages.PomContentAssistProcessor_set_relPath_title, relative.toOSString()), null, null);
+              NLS.bind(Messages.PomContentAssistProcessor_set_relPath_title, relative), null, null);
           if (request.shouldSeparate()) {
             request.addMacro(proposal);
           } else {
@@ -299,14 +299,14 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
     }
   }
   
-  private static IPath findRelativePath(ISourceViewer viewer, Element parent) {
+  private static String findRelativePath(ISourceViewer viewer, Element parent) {
     String groupId = MavenMarkerManager.getElementTextValue(MavenMarkerManager.findChildElement(parent, "groupId")); //$NON-NLS-1$
     String artifactId = MavenMarkerManager.getElementTextValue(MavenMarkerManager.findChildElement(parent, "artifactId")); //$NON-NLS-1$
     String version = MavenMarkerManager.getElementTextValue(MavenMarkerManager.findChildElement(parent, "version")); //$NON-NLS-1$
     return findRelativePath(viewer, groupId, artifactId, version);
   }
   
-  public static IPath findRelativePath(ISourceViewer viewer, String groupId, String artifactId, String version) {
+  public static String findRelativePath(ISourceViewer viewer, String groupId, String artifactId, String version) {
     if (groupId != null && artifactId != null && version != null) {
       IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectManager().getMavenProject(groupId, artifactId, version);
       if (facade != null) {
@@ -318,7 +318,7 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
           IPath path2 = prj.getLocation();
           IPath relative = path.makeRelativeTo(path2);
           if (relative != path) {
-              return relative;
+              return relative.toOSString().replace('\\', '/');
           }
         }
       }
