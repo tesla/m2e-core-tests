@@ -970,7 +970,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     }
 
     ArrayList<IndexCreator> indexers = getIndexers(details);
-
+    
     indexingContext = getIndexer().addIndexingContextForced(repository.getUid(), //
         repository.getUrl(), //
         repositoryPath, //
