@@ -13,6 +13,7 @@ package org.eclipse.m2e.core.internal.index;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
@@ -21,6 +22,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 
+import org.apache.maven.index.Field;
 import org.apache.maven.index.MAVEN;
 
 import org.eclipse.m2e.core.embedder.ArtifactKey;
@@ -84,29 +86,51 @@ public class NexusIndex implements IIndex, IMutableIndex {
 
   public Collection<IndexedArtifact> find(SearchExpression groupId, SearchExpression artifactId,
       SearchExpression version, SearchExpression packaging) throws CoreException {
+    return find(wrapIfNotNull(groupId), wrapIfNotNull(artifactId), wrapIfNotNull(version), wrapIfNotNull(packaging));
+  }
+
+  /**
+   * Method wrapping one SearchExpression into a collection, if it is not null.
+   * 
+   * @param sex
+   * @return
+   */
+  private Collection<SearchExpression> wrapIfNotNull(SearchExpression se) {
+    if(se == null) {
+      return null;
+    }
+    return Collections.singleton(se);
+  }
+
+  public Collection<IndexedArtifact> find(Collection<SearchExpression> groupId,
+      Collection<SearchExpression> artifactId, Collection<SearchExpression> version,
+      Collection<SearchExpression> packaging) throws CoreException {
     BooleanQuery query = new BooleanQuery();
 
-    if(packaging != null) {
-      query.add(indexManager.constructQuery(MAVEN.PACKAGING, packaging), Occur.MUST);
-    }
+    addQueryFromSearchExpressionCollection(query, MAVEN.PACKAGING, packaging);
 
-    if(groupId != null) {
-      query.add(indexManager.constructQuery(MAVEN.GROUP_ID, groupId), Occur.MUST);
-    }
+    addQueryFromSearchExpressionCollection(query, MAVEN.GROUP_ID, groupId);
 
-    if(artifactId != null) {
-      query.add(indexManager.constructQuery(MAVEN.ARTIFACT_ID, artifactId), Occur.MUST);
-    }
+    addQueryFromSearchExpressionCollection(query, MAVEN.ARTIFACT_ID, artifactId);
 
-    if(version != null) {
-      query.add(indexManager.constructQuery(MAVEN.VERSION, version), Occur.MUST);
-    }
+    addQueryFromSearchExpressionCollection(query, MAVEN.VERSION, version);
 
     return indexManager.search(repository, query).values();
   }
 
-  private boolean isBlank(String str) {
-    return str == null || str.trim().length() == 0;
+  private void addQueryFromSearchExpressionCollection(final BooleanQuery query, final Field field,
+      final Collection<SearchExpression> sec) {
+    if(sec != null && !sec.isEmpty()) {
+      if(sec.size() > 1) {
+        BooleanQuery q = new BooleanQuery();
+        for(SearchExpression se : sec) {
+          q.add(indexManager.constructQuery(field, se), Occur.SHOULD);
+        }
+        query.add(q, Occur.MUST);
+      } else {
+        query.add(indexManager.constructQuery(field, sec.iterator().next()), Occur.MUST);
+      }
+    }
   }
 
   public IndexedArtifactFile getIndexedArtifactFile(ArtifactKey artifact) throws CoreException {

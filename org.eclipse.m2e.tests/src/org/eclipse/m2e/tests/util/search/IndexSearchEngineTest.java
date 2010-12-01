@@ -66,6 +66,13 @@ public class IndexSearchEngineTest extends AbstractMavenProjectTestCase {
       // TODO Auto-generated method stub
       return null;
     }
+
+    public Collection<IndexedArtifact> find(Collection<SearchExpression> groupId,
+        Collection<SearchExpression> artifactId, Collection<SearchExpression> version,
+        Collection<SearchExpression> packaging) throws CoreException {
+      // TODO Auto-generated method stub
+      return null;
+    }
     
   }
 }
