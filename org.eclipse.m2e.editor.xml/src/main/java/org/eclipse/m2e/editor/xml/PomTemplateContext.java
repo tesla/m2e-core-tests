@@ -159,6 +159,10 @@ public enum PomTemplateContext {
     @Override
     public void addTemplates(IProject project, Collection<Template> proposals, Node node, String prefix) throws CoreException {
       String groupId = getGroupId(node);
+      //#MNGECLIPSE-1832
+      if ("plugin".equals(node.getParentNode().getNodeName())) { //$NON-NLS-1$
+        groupId = "org.apache.maven.plugins";  //$NON-NLS-1$
+      }
       if(groupId != null) {
         String contextTypeId = getContextTypeId();
         for(String artifactId : getSearchEngine(project).findArtifactIds(groupId, prefix, getPackaging(node),
