@@ -11,6 +11,7 @@
 
 package org.eclipse.m2e.editor.xml;
 
+
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.eclipse.jface.text.templates.Template;
@@ -47,7 +48,7 @@ public class PomTemplateContextTest extends AbstractMavenProjectTestCase {
     Element child = addNode(parent, childName);
     Text text = parent.getOwnerDocument().createTextNode(childValue);
     child.appendChild(text);
-    return parent;
+    return child;
   }
 
   public void testGetTemplatesPhase() throws Exception {
@@ -138,4 +139,120 @@ public class PomTemplateContextTest extends AbstractMavenProjectTestCase {
     assertContextTypeId(PREFIX + "goal", templates);
   }
 
+  public void testGetTemplatesArtifactId_WithGroupId() throws Exception {
+    Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+    String groupId = "testGetTemplatesArtifactId_WithGroupId";
+    String artifactId = "testGetTemplatesArtifactId_WithGroupId_artifact";
+    Element plugin = doc.createElement("plugin");
+    addNode(plugin, "groupId", groupId);
+    Element artifactIdElement = addNode(plugin, "artifactId");
+
+    SearchEngineMock searchEngineMock = new SearchEngineMock();
+    searchEngineMock.addArtifact(groupId, artifactId, null, null, null);
+    searchEngineMock.addArtifact("foo", "bar", null, null, null);
+    PomTemplateContext.setSearchEngineForTests(searchEngineMock);
+    try {
+      PomTemplateContext context = PomTemplateContext.fromNodeName("artifactId");
+
+      assertNotNull(context);
+      assertSame(PomTemplateContext.ARTIFACT_ID, context);
+
+      Template[] templates = context.getTemplates(null, artifactIdElement, "");
+      assertNotNull(templates);
+      assertEquals(1, templates.length);
+      assertContextTypeId(PREFIX + "artifactId", templates);
+      assertEquals(artifactId, templates[0].getName());
+    } finally {
+      PomTemplateContext.setSearchEngineForTests(null);
+    }
+  }
+
+  // Missing groupId should default to org.apache.maven.plugins
+  public void testGetTemplatesArtifactId_WithoutGroupId() throws Exception {
+    Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+    //String groupId = "testGetTemplatesArtifactId_WithGroupId";
+    String artifactId = "testGetTemplatesArtifactId_WithoutGroupId_artifact";
+    Element plugin = doc.createElement("plugin");
+    addNode(plugin, "groupId");
+    Element artifactIdElement = addNode(plugin, "artifactId");
+
+    SearchEngineMock searchEngineMock = new SearchEngineMock();
+    searchEngineMock.addArtifact("org.apache.maven.plugins", artifactId, null, null, null);
+    searchEngineMock.addArtifact("foo", "bar", null, null, null);
+    PomTemplateContext.setSearchEngineForTests(searchEngineMock);
+    try {
+      PomTemplateContext context = PomTemplateContext.fromNodeName("artifactId");
+
+      assertNotNull(context);
+      assertSame(PomTemplateContext.ARTIFACT_ID, context);
+
+      Template[] templates = context.getTemplates(null, artifactIdElement, "");
+      assertNotNull(templates);
+      assertEquals(1, templates.length);
+      assertContextTypeId(PREFIX + "artifactId", templates);
+      assertEquals(artifactId, templates[0].getName());
+    } finally {
+      PomTemplateContext.setSearchEngineForTests(null);
+    }
+  }
+
+  public void testGetTemplatesVersion_WithGroupId() throws Exception {
+    Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+    String groupId = "testGetTemplatesVersion_WithGroupId";
+    String artifactId = "testGetTemplatesVersion_WithGroupId_artifact";
+    String version = "1.2.3";
+    Element plugin = doc.createElement("plugin");
+    addNode(plugin, "groupId", groupId);
+    addNode(plugin, "artifactId", artifactId);
+    Element versionElement = addNode(plugin, "version");
+
+    SearchEngineMock searchEngineMock = new SearchEngineMock();
+    searchEngineMock.addArtifact(groupId, artifactId, version, null, null);
+    searchEngineMock.addArtifact("foo", "bar", "1.1.1", null, null);
+    PomTemplateContext.setSearchEngineForTests(searchEngineMock);
+    try {
+      PomTemplateContext context = PomTemplateContext.fromNodeName("version");
+
+      assertNotNull(context);
+      assertSame(PomTemplateContext.VERSION, context);
+
+      Template[] templates = context.getTemplates(null, versionElement, "");
+      assertNotNull(templates);
+      assertEquals(1, templates.length);
+      assertContextTypeId(PREFIX + "version", templates);
+      assertEquals(version, templates[0].getName());
+    } finally {
+      PomTemplateContext.setSearchEngineForTests(null);
+    }
+  }
+
+  // Missing groupId should default to org.apache.maven.plugins
+  public void testGetTemplatesVersion_WithoutGroupId() throws Exception {
+    Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+    String artifactId = "testGetTemplatesVersion_WithoutGroupId_artifact";
+    String version = "1.2.3";
+    Element plugin = doc.createElement("plugin");
+    addNode(plugin, "groupId");
+    addNode(plugin, "artifactId", artifactId);
+    Element versionElement = addNode(plugin, "version");
+
+    SearchEngineMock searchEngineMock = new SearchEngineMock();
+    searchEngineMock.addArtifact("org.apache.maven.plugins", artifactId, version, null, null);
+    searchEngineMock.addArtifact("foo", "bar", "1.1.1", null, null);
+    PomTemplateContext.setSearchEngineForTests(searchEngineMock);
+    try {
+      PomTemplateContext context = PomTemplateContext.fromNodeName("version");
+
+      assertNotNull(context);
+      assertSame(PomTemplateContext.VERSION, context);
+
+      Template[] templates = context.getTemplates(null, versionElement, "");
+      assertNotNull(templates);
+      assertEquals(1, templates.length);
+      assertContextTypeId(PREFIX + "version", templates);
+      assertEquals(version, templates[0].getName());
+    } finally {
+      PomTemplateContext.setSearchEngineForTests(null);
+    }
+  }
 }

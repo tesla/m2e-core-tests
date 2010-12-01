@@ -160,8 +160,8 @@ public enum PomTemplateContext {
     public void addTemplates(IProject project, Collection<Template> proposals, Node node, String prefix) throws CoreException {
       String groupId = getGroupId(node);
       //#MNGECLIPSE-1832
-      if ("plugin".equals(node.getParentNode().getNodeName())) { //$NON-NLS-1$
-        groupId = "org.apache.maven.plugins";  //$NON-NLS-1$
+      if(groupId == null || groupId.trim().length() == 0) {
+        groupId = "org.apache.maven.plugins"; //$NON-NLS-1$
       }
       if(groupId != null) {
         String contextTypeId = getContextTypeId();
@@ -178,8 +178,8 @@ public enum PomTemplateContext {
     public void addTemplates(IProject project, Collection<Template> proposals, Node node, String prefix) throws CoreException {
       String groupId = getGroupId(node);
       //#MNGECLIPSE-1832
-      if ("plugin".equals(node.getParentNode().getNodeName())) { //$NON-NLS-1$
-        groupId = "org.apache.maven.plugins";  //$NON-NLS-1$
+      if(groupId == null || groupId.trim().length() == 0) {
+        groupId = "org.apache.maven.plugins"; //$NON-NLS-1$
       }
       String artifactId = getArtifactId(node);
       if(groupId != null && artifactId != null) {
@@ -504,12 +504,19 @@ public enum PomTemplateContext {
   }
 
   private static SearchEngine getSearchEngine(IProject project) throws CoreException {
+    if(searchEngineForTests != null) {
+      return searchEngineForTests;
+    }
     return MavenPlugin.getDefault().getSearchEngine(project);
   }
   
-  
-  ///
-  
+
+  private static SearchEngine searchEngineForTests;
+
+  public static void setSearchEngineForTests(SearchEngine _searchEngineForTests) {
+    searchEngineForTests = _searchEngineForTests;
+  }
+
   /**
    * Returns containing artifactInfo for exclusions. Otherwise returns null.
    */
