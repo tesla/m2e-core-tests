@@ -81,7 +81,7 @@ public class NexusIndexManagerSearchTest extends AbstractNexusIndexManagerTest {
   }
 
   public void testPluginSearch() throws Exception {
-    Map<String, IndexedArtifact> search = indexManager.search(new SourcedSearchExpression("maven-tycho"),
+    Map<String, IndexedArtifact> search = indexManager.search(new UserInputSearchExpression("maven-tycho"),
         IIndex.SEARCH_PLUGIN);
     assertTrue(search.size() > 0);
 
