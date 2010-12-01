@@ -219,6 +219,22 @@ public enum PomTemplateContext {
               }
             }
           }
+        } else {
+          //if we don't have the maven facade, it means the pom is probably broken.
+          //all we can do is to try guess the groupid and come up with the project.version proposal eventually
+          Element root = node.getOwnerDocument().getDocumentElement();
+          if (root != null && "project".equals(root.getNodeName())) {//$NON-NLS-1$
+            String currentgroupid = MavenMarkerManager.getElementTextValue(MavenMarkerManager.findChildElement(root, "groupId"));//$NON-NLS-1$
+            if (currentgroupid == null) {
+              Element parEl = MavenMarkerManager.findChildElement(root, "parent");//$NON-NLS-1$
+              if (parEl != null) {
+                currentgroupid = MavenMarkerManager.getElementTextValue(MavenMarkerManager.findChildElement(parEl, "groupId"));//$NON-NLS-1$
+              }
+            }
+            if (groupId.equals(currentgroupid)) {
+              proposals.add(new Template("${project.version}", Messages.PomTemplateContext_project_version_hint, contextTypeId, "$${project.version}", false)); //$NON-NLS-1$ //$NON-NLS-3$
+            }
+          }
         }
       }
     }
