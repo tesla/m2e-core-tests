@@ -160,7 +160,7 @@ public enum PomTemplateContext {
     public void addTemplates(IProject project, Collection<Template> proposals, Node node, String prefix) throws CoreException {
       String groupId = getGroupId(node);
       //#MNGECLIPSE-1832
-      if(groupId == null || groupId.trim().length() == 0) {
+      if((groupId == null || groupId.trim().length() == 0) && "plugin".equals(node.getParentNode().getNodeName())) {
         groupId = "org.apache.maven.plugins"; //$NON-NLS-1$
       }
       if(groupId != null) {
@@ -178,7 +178,7 @@ public enum PomTemplateContext {
     public void addTemplates(IProject project, Collection<Template> proposals, Node node, String prefix) throws CoreException {
       String groupId = getGroupId(node);
       //#MNGECLIPSE-1832
-      if(groupId == null || groupId.trim().length() == 0) {
+      if((groupId == null || groupId.trim().length() == 0) && "plugin".equals(node.getParentNode().getNodeName())) {
         groupId = "org.apache.maven.plugins"; //$NON-NLS-1$
       }
       String artifactId = getArtifactId(node);
