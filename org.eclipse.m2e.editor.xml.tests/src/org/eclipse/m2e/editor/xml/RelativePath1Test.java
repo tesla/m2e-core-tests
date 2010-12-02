@@ -13,10 +13,7 @@ package org.eclipse.m2e.editor.xml;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
-import org.eclipse.wst.sse.ui.internal.contentassist.ContentAssistUtils;
-import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 
 /**
  * Hello fellow tester:

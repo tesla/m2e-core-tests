@@ -21,7 +21,6 @@ import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.internal.project.MissingLifecycleMapping;
 import org.eclipse.m2e.core.internal.project.MojoExecutionProjectConfigurator;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
-import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.core.project.configurator.AbstractProjectConfigurator;
 import org.eclipse.m2e.core.project.configurator.CustomizableLifecycleMapping;
 import org.eclipse.m2e.core.project.configurator.ILifecycleMapping;
