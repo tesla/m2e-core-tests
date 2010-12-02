@@ -36,10 +36,6 @@ public class ManagedArtifactMarkerTest extends AbstractMavenProjectTestCase {
     IProject project = projects[0];
     IMarker[] markers = XmlEditorHelpers.findEditorHintWarningMarkers(project).toArray(new IMarker[0]);
     assertEquals(2, markers.length);
-    //mkleint: how are the $?# markers sorted? in xml dependency comes first.
-    // potential source of test non-reliability..
-    //HAHA.. in the second test the dependency one comes first.. so much for reproducibility..
-    //..not even remotely funny now.. on cmd line it resolves differently than in the IDE
     XmlEditorHelpers.assertEditorHintWarningMarker(IMavenConstants.MARKER_POM_LOADING_ID,
         IMavenConstants.EDITOR_HINT_MANAGED_DEPENDENCY_OVERRIDE, null /*message*/, 18 /*lineNumber*/,
         2 /*resolutions*/, markers[0]);
