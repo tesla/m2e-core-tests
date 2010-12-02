@@ -33,6 +33,7 @@ import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -344,7 +345,16 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
     }
   }
 
-  static IProject extractProject(ITextViewer sourceViewer) {
+  /**
+   * what is this method supposed to do? for the sourceViewer find the associated file on disk and for
+   * that one find the IProject it belongs to. The required condition for the IProject instance is that
+   * project relative path of the file shall only be pom.xml (thus no nested, unopened maven pom). 
+   * So that when MavenPlugin.getDefault().getMavenProjectManager().getProject(prj); is called later on
+   * the instance, it actually returns the maven model facade for the pom.xml backing the sourceViewer.
+   * @param sourceViewer
+   * @return
+   */
+  public static IProject extractProject(ITextViewer sourceViewer) {
     ITextFileBuffer buf = FileBuffers.getTextFileBufferManager().getTextFileBuffer(sourceViewer.getDocument());
     IFileStore folder = buf.getFileStore();
     File file = new File(folder.toURI());
@@ -353,13 +363,18 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
     //here we need to find the most inner project to the path.
     //we do so by shortening the path and remembering all the resources identified.
     // at the end we pick the last one from the stack. is there a catch to it?
-    while (path.segmentCount() > 1) {
-        IResource ifile = ResourcesPlugin.getWorkspace().getRoot().findMember(path);
-        if (ifile != null) {
+    IResource ifile = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(path);
+    if (ifile != null) {
+      stack.push(ifile);
+    } else {
+      while(path.segmentCount() > 1) {
+        ResourcesPlugin.getWorkspace().getRoot().findMember(path);
+        if(ifile != null) {
           stack.push(ifile);
         }
         path = path.removeFirstSegments(1);
       }
+    }
     IResource res = stack.empty() ? null : stack.pop();
     if (res != null) {
       IProject prj = res.getProject();
