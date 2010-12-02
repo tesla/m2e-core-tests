@@ -414,8 +414,8 @@ public enum PomTemplateContext {
         }
       }
       
-      File currentPom = new File(project.getLocationURI());
-      File directory = currentPom;
+      File directory = new File(project.getLocationURI());
+      final File currentPom = new File(directory, "pom.xml");
       String path = prefix;
       boolean endingSlash = path.endsWith("/"); //$NON-NLS-1$
       String[] elems = StringUtils.split(path, "/"); //$NON-NLS-1$
@@ -436,7 +436,7 @@ public enum PomTemplateContext {
             if (pathname.isDirectory()) {
               File pom = new File(pathname, "pom.xml"); //$NON-NLS-1$
               //TODO shall also handle polyglot maven :)
-              return pom.exists() && pom.isFile();
+              return pom.exists() && pom.isFile() && !pom.equals(currentPom);
             }
             return false;
           }
