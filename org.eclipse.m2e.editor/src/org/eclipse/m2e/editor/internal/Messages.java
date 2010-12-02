@@ -329,6 +329,8 @@ public class Messages extends NLS {
 
   public static String OverviewPage_title;
 
+  public static String OverviewPage_updateModulePoms;
+
   public static String PluginsComposite_action_Filter;
 
   public static String PluginsComposite_action_openWeb;

@@ -22,6 +22,7 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -39,16 +40,14 @@ import org.eclipse.emf.edit.command.SetCommand;
 import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ToolBarManager;
-import org.eclipse.jface.viewers.CheckStateChangedEvent;
-import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.ICellModifier;
-import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.m2e.core.MavenImages;
@@ -96,11 +95,13 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.IManagedForm;
@@ -559,30 +560,44 @@ public class OverviewPage extends MavenPomEditorPage {
         for(String module : model.getModules()) {
           IMavenProjectFacade facade = findModuleProject(module);
           if(facade != null) {
-            moduleContainers.add(facade.getProject());
+            moduleContainers.add(facade.getProject().getLocation());
           }
           IFile file = findModuleFile(module);
           if(file != null) {
-            moduleContainers.add(file.getParent());
+            moduleContainers.add(file.getParent().getLocation());
           }
         }
-        moduleContainers.add(getProject());
+        moduleContainers.add(getProject().getLocation());
+        final boolean[] updateParentSection = new boolean[] {true};
 
         MavenProjectSelectionDialog dialog = new MavenProjectSelectionDialog(getSite().getShell(), true) {
           @Override
           protected Control createDialogArea(Composite parent) {
             Control control = super.createDialogArea(parent);
 
-            final CheckboxTreeViewer viewer = (CheckboxTreeViewer) getViewer();
+            final TreeViewer viewer = getViewer();
             viewer.setLabelProvider(new ProjectLabelProvider());
-            viewer.addCheckStateListener(new ICheckStateListener() {
-              public void checkStateChanged(CheckStateChangedEvent event) {
-                if(event.getChecked()) {
-                  Object element = event.getElement();
-                  if(moduleContainers.contains(element)) {
-                    viewer.setChecked(element, false);
+            viewer.getTree().addSelectionListener(new SelectionAdapter() {
+              @Override
+              public void widgetSelected(SelectionEvent e) {
+                if(e.detail == SWT.CHECK) {
+                  TreeItem item = (TreeItem) e.item;
+                  Object data = item.getData();
+                  if(item.getChecked() && data instanceof IResource
+                      && moduleContainers.contains(((IResource) data).getLocation())) {
+                    item.setChecked(false);
                   }
                 }
+              }
+            });
+
+            final Button checkbox = new Button((Composite) control, SWT.CHECK);
+            checkbox.setSelection(true);
+            checkbox.setText(Messages.OverviewPage_updateModulePoms);
+            checkbox.addSelectionListener(new SelectionAdapter() {
+              @Override
+              public void widgetSelected(SelectionEvent e) {
+                updateParentSection[0] = checkbox.getSelection();
               }
             });
 
@@ -603,7 +618,7 @@ public class OverviewPage extends MavenPomEditorPage {
             }
 
             public Color getForeground(Object element) {
-              if(moduleContainers.contains(element)) {
+              if(element instanceof IResource && moduleContainers.contains(((IResource) element).getLocation())) {
                 return Display.getDefault().getSystemColor(SWT.COLOR_GRAY);
               }
               return null;
@@ -618,7 +633,7 @@ public class OverviewPage extends MavenPomEditorPage {
         dialog.setTitle(Messages.OverviewPage_selectModuleProjects);
 
         if(dialog.open() == Window.OK) {
-          addSelectedModules(dialog.getResult());
+          addSelectedModules(dialog.getResult(), updateParentSection[0]);
         }
       }
     });
@@ -697,7 +712,7 @@ public class OverviewPage extends MavenPomEditorPage {
           @Override
           public void drop(DropTargetEvent event) {
             if(event.data instanceof Object[]) {
-              addSelectedModules((Object[]) event.data);
+              addSelectedModules((Object[]) event.data, true);
             }
           }
         });
@@ -722,7 +737,7 @@ public class OverviewPage extends MavenPomEditorPage {
 //        }
 //      }
 //    };
-    
+
     ToolBarManager modulesToolBarManager = new ToolBarManager(SWT.FLAT);
     modulesToolBarManager.add(newModuleElementAction);
 //    modulesToolBarManager.add(newModuleProjectAction);
@@ -1079,7 +1094,7 @@ public class OverviewPage extends MavenPomEditorPage {
     propertiesSection.setModel(model, POM_PACKAGE.getModel_Properties());
 
     boolean expandProjectSection = !isEmpty(model.getName()) || !isEmpty(model.getDescription())
-    || !isEmpty(model.getUrl()) || !isEmpty(model.getInceptionYear());
+        || !isEmpty(model.getUrl()) || !isEmpty(model.getInceptionYear());
     projectSectionData.grabExcessVerticalSpace = expandProjectSection;
     projectSection.setExpanded(expandProjectSection);
 
@@ -1338,7 +1353,7 @@ public class OverviewPage extends MavenPomEditorPage {
     modulesEditor.setInput(model.getModules());
   }
 
-  protected void addSelectedModules(Object[] result) {
+  protected void addSelectedModules(Object[] result, boolean updateParentSection) {
     String groupId = model.getGroupId();
     if(groupId == null) {
       Parent parent = model.getParent();
@@ -1383,27 +1398,37 @@ public class OverviewPage extends MavenPomEditorPage {
       String path = resultPath.makeRelativeTo(projectPath).toString();
 
       if(!model.getModules().contains(path)) {
-        final String relativePath = projectPath.makeRelativeTo(resultPath).toString();
-        MavenPlugin.getDefault().getMavenModelManager().updateProject(pomFile, new ProjectUpdater() {
-          public void update(Model model) {
-            Parent parent = model.getParent();
-            if(parent == null) {
-              parent = PomFactory.eINSTANCE.createParent();
-              model.setParent(parent);
+        if(updateParentSection) {
+          final String relativePath = projectPath.makeRelativeTo(resultPath).toString();
+          MavenPlugin.getDefault().getMavenModelManager().updateProject(pomFile, new ProjectUpdater() {
+            public void update(Model model) {
+              Parent parent = model.getParent();
+              if(parent == null) {
+                parent = PomFactory.eINSTANCE.createParent();
+                model.setParent(parent);
+              }
+              parent.setGroupId(parentGroupId);
+              parent.setArtifactId(parentArtifactId);
+              parent.setVersion(parentVersion);
+              parent.setRelativePath(relativePath);
+
+              if(model.getGroupId() == null || model.getGroupId().equals(parentGroupId)) {
+                model.setGroupId(null);
+
+                if(model.getVersion() != null && model.getVersion().equals(parentVersion)) {
+                  model.setVersion(null);
+                }
+              }
             }
-            parent.setGroupId(parentGroupId);
-            parent.setArtifactId(parentArtifactId);
-            parent.setVersion(parentVersion);
-            parent.setRelativePath(relativePath);
-          }
-        });
+          });
+        }
 
         createNewModule(path);
       }
     }
   }
-  
-  private boolean checkDrop( ){
+
+  private boolean checkDrop() {
     return true;
   }
 }

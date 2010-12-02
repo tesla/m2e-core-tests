@@ -21,8 +21,6 @@ import org.eclipse.m2e.core.project.IMavenProjectFacade;
 
 
 /**
- * AbstractCustomizableLifecycleMapping
- * 
  * @author igor
  */
 public class CustomizableLifecycleMapping extends AbstractLifecycleMapping {
