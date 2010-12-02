@@ -51,6 +51,7 @@ public class Messages extends NLS {
   public static String AddDependencyDialog_info_transitive;
 
   public static String AddDependencyDialog_itemsSelected;
+  public static String AddDependencyDialog_itemSelected;
 
   public static String AddDependencyDialog_multipleValuesSelected;
 
