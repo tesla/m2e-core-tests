@@ -590,9 +590,10 @@ public class OverviewPage extends MavenPomEditorPage {
                 }
               }
             });
+            viewer.getTree().setFocus();
 
             final Button checkbox = new Button((Composite) control, SWT.CHECK);
-            checkbox.setSelection(true);
+            checkbox.setSelection(false);
             checkbox.setText(Messages.OverviewPage_updateModulePoms);
             checkbox.addSelectionListener(new SelectionAdapter() {
               @Override
