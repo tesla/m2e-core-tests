@@ -605,8 +605,7 @@
       <configurator
             class="org.eclipse.m2e.core.project.configurator.MavenResourcesProjectConfigurator"
             id="org.eclipse.m2e.core.project.configurator.MavenResourcesProjectConfigurator"
-            name="Maven Resources Project Configurator"
-            requiresExplicitEnablement="false">
+            name="Maven Resources Project Configurator">
          <mojo
                artifactId="maven-resources-plugin"
                goals="resources,testResources"
