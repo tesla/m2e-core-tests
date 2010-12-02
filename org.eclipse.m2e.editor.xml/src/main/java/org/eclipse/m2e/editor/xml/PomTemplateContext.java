@@ -430,22 +430,36 @@ public enum PomTemplateContext {
         }
       }
       path = lastElement != null ? path.substring(0, path.length() - lastElement.length()) : path;
-      if (directory != null && directory.exists() && directory.isDirectory()) {
-        File[] offerings = directory.listFiles(new FileFilter() {
-          public boolean accept(File pathname) {
-            if (pathname.isDirectory()) {
-              File pom = new File(pathname, "pom.xml"); //$NON-NLS-1$
-              //TODO shall also handle polyglot maven :)
-              return pom.exists() && pom.isFile() && !pom.equals(currentPom);
-            }
-            return false;
+      FileFilter filter = new FileFilter() {
+        public boolean accept(File pathname) {
+          if (pathname.isDirectory()) {
+            File pom = new File(pathname, "pom.xml"); //$NON-NLS-1$
+            //TODO shall also handle polyglot maven :)
+            return pom.exists() && pom.isFile() && !pom.equals(currentPom);
           }
-        });
+          return false;
+        }
+      };
+      if (directory != null && directory.exists() && directory.isDirectory()) {
+        File[] offerings = directory.listFiles(filter);
         for (File candidate : offerings) {
           if(lastElement == null || candidate.getName().startsWith(lastElement) ) {
             String val = path + candidate.getName();
             if (!existings.contains(val)) { //only those not already being added in the surrounding area
               add(proposals, getContextTypeId(), val, NLS.bind(Messages.PomTemplateContext_candidate, candidate));
+            }
+          }
+        }
+        if (path.length() == 0 && directory.equals(currentPom.getParentFile())) {
+          //for the empty value, when searching in current directory, propose also stuff one level up.
+          File currentParent = directory.getParentFile();
+          if (currentParent != null && currentParent.exists()) {
+            offerings = currentParent.listFiles(filter);
+            for (File candidate : offerings) {
+              String val = "../" + candidate.getName();
+              if (!existings.contains(val)) { //only those not already being added in the surrounding area
+                add(proposals, getContextTypeId(), val, NLS.bind(Messages.PomTemplateContext_candidate, candidate));
+              }
             }
           }
         }
