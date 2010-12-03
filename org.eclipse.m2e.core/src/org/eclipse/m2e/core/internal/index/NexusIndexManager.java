@@ -1077,7 +1077,8 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     }
   }
 
-  protected void updateIndex(IRepository repository, boolean force, IProgressMonitor monitor) throws CoreException {
+  //Public for testing purpose.
+  public void updateIndex(IRepository repository, boolean force, IProgressMonitor monitor) throws CoreException {
     synchronized(getIndexLock(repository)) {
       if(repository.isScope(IRepositoryRegistry.SCOPE_WORKSPACE)) {
         reindexWorkspace(force, monitor);
