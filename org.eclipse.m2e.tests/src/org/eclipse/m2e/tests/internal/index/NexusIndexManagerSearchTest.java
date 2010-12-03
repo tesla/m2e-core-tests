@@ -147,9 +147,15 @@ public class NexusIndexManagerSearchTest extends AbstractNexusIndexManagerTest {
   }
 
   public void testSearchGroups() throws CoreException {
-    Collection<IndexedArtifact> result = indexManager.getIndex((IProject) null).find(new SourcedSearchExpression(""),
-        null, null, null);
-    assertTrue(String.format("Wrong result set returned! (size=%s)", new Object[] {result.size()}), result.size() != 0);
+    try {
+      Collection<IndexedArtifact> result = indexManager.getIndex((IProject) null).find(new SourcedSearchExpression(""),
+          null, null, null);
+      assertTrue(String.format("Wrong result set returned! (size=%s)", new Object[] {result.size()}),
+          result.size() == 0);
+      fail("We should not get here!");
+    } catch(AssertionError e) {
+      // good
+    }
   }
 
   public void testSearchGroups2() throws CoreException {
