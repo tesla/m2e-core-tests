@@ -12,6 +12,8 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension4;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension5;
 import org.eclipse.jface.text.contentassist.IContextInformation;
+import org.eclipse.jface.text.formatter.IContentFormatter;
+import org.eclipse.jface.text.formatter.IContentFormatterExtension;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.graphics.Image;
@@ -31,12 +33,14 @@ public class InsertArtifactProposal implements ICompletionProposal, ICompletionP
   private int generatedLength = 0;
   private int generatedOffset;
   private Configuration config;
+  private PomStructuredTextViewConfiguration textConfig;
 
-  public InsertArtifactProposal(ISourceViewer sourceViewer, Region region, Configuration config) {
+  public InsertArtifactProposal(ISourceViewer sourceViewer, Region region, Configuration config, PomStructuredTextViewConfiguration config2) {
     this.sourceViewer = sourceViewer;
     this.region = region;
     generatedOffset = region.getOffset();
     this.config = config;
+    this.textConfig = config2;
     assert config.getType() != null;
   }
 
@@ -53,35 +57,23 @@ public class InsertArtifactProposal implements ICompletionProposal, ICompletionP
         if(af != null) {
           int offset = region.getOffset();
           try {
-            int line = document.getLineOfOffset(offset);
-            int initialSpace = offset - document.getLineOffset(line);
-            
             StringBuffer buffer = new StringBuffer();
             buffer.append("<parent>").append(document.getLegalLineDelimiters()[0]); //do we care? or just append \n always? //$NON-NLS-1$
-            // now append the correct number of spaces or tabs (how to find out what the preference is)
-            String spaces = document.get(document.getLineOffset(line), initialSpace);
-            if (spaces.trim().length() != 0) {
-              //hmm got, non whitespace chars on the line.. purge
-              spaces = "\t"; //$NON-NLS-1$
-            }
-            String ind = spaces.endsWith("\t") ? "\t" : "  "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-            
-            buffer.append(spaces).append(ind);
             buffer.append("<groupId>").append(af.group).append("</groupId>").append(document.getLegalLineDelimiters()[0]); //$NON-NLS-1$ //$NON-NLS-2$
-            buffer.append(spaces).append(ind);
             buffer.append("<artifactId>").append(af.artifact).append("</artifactId>").append(document.getLegalLineDelimiters()[0]); //$NON-NLS-1$ //$NON-NLS-2$
-            buffer.append(spaces).append(ind);
             buffer.append("<version>").append(af.version).append("</version>").append(document.getLegalLineDelimiters()[0]); //$NON-NLS-1$ //$NON-NLS-2$
-            //check if parent is on workspace, if so, add a relative path right away..
             String relativePath = PomContentAssistProcessor.findRelativePath(sourceViewer, af.group, af.artifact, af.version);
             if (relativePath != null) {
-              buffer.append(spaces).append(ind);
               buffer.append("<relativePath>").append(relativePath).append("</relativePath>").append(document.getLegalLineDelimiters()[0]); //$NON-NLS-1$ //$NON-NLS-2$
             }
-            buffer.append(spaces);
             buffer.append("</parent>").append(document.getLegalLineDelimiters()[0]); //$NON-NLS-1$
             generatedLength = buffer.toString().length();
             document.replace(offset, region.getLength(), buffer.toString());
+            
+            IContentFormatter formatter = textConfig.getContentFormatter(sourceViewer);
+            Region resRegion = format(formatter, document, generatedOffset, generatedLength);
+            generatedOffset = resRegion.getOffset();
+            generatedLength =resRegion.getLength(); 
           } catch(BadLocationException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -89,9 +81,17 @@ public class InsertArtifactProposal implements ICompletionProposal, ICompletionP
         }
       }
       if (config.getType() == SearchType.PLUGIN) {
-        
       }
     }
+  }
+  
+  public static Region format(IContentFormatter formatter, IDocument document, int offset, int length) throws BadLocationException {
+    int startLine = document.getLineOfOffset(offset);
+    int endLine = document.getLineOfOffset(offset + length - 1); // -1 to make sure to be before the end of line char
+    int startLineOffset = document.getLineOffset(startLine);
+    formatter.format(document, new Region(startLineOffset, (document.getLineOffset(endLine) + document.getLineLength(endLine)) - startLineOffset));
+    startLineOffset = document.getLineOffset(startLine); //should be same, just being paranoid
+    return new Region (startLineOffset, (document.getLineOffset(endLine) + document.getLineLength(endLine)) - startLineOffset);
   }
 
   public Point getSelection(IDocument document) {
