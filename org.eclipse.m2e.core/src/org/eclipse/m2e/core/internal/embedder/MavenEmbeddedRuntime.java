@@ -47,7 +47,7 @@ public class MavenEmbeddedRuntime implements MavenRuntime {
 
   private static final String MAVEN_EXECUTOR_CLASS = org.apache.maven.cli.MavenCli.class.getName();
 
-  private static final String PLEXUS_CLASSWORLD_NAME = "plexus.core"; //$NON-NLS-1$
+  public static final String PLEXUS_CLASSWORLD_NAME = "plexus.core"; //$NON-NLS-1$
 
   private static String[] LAUNCHER_CLASSPATH;
   private static String[] CLASSPATH;
@@ -88,7 +88,10 @@ public class MavenEmbeddedRuntime implements MavenRuntime {
 
     collector.addRealm(PLEXUS_CLASSWORLD_NAME);
     for(String entry : CLASSPATH) {
-      collector.addArchiveEntry(entry);
+      // https://issues.sonatype.org/browse/MNGECLIPSE-2507
+      if(!entry.contains("plexus-build-api")) {
+        collector.addArchiveEntry(entry);
+      }
     }
  }
 

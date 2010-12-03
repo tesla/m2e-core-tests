@@ -14,6 +14,7 @@ package org.eclipse.m2e.tests.embedder;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import junit.framework.TestCase;
 
@@ -22,12 +23,14 @@ import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.IMavenLauncherConfiguration;
 import org.eclipse.m2e.core.embedder.MavenRuntime;
 import org.eclipse.m2e.core.embedder.MavenRuntimeManager;
+import org.eclipse.m2e.core.internal.embedder.MavenEmbeddedRuntime;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 
 
 /**
  * @author Eugene Kuleshov
  */
+@SuppressWarnings("restriction")
 public class MavenRuntimeManagerTest extends TestCase {
 
   private MavenRuntimeManager runtimeManager;
@@ -60,25 +63,37 @@ public class MavenRuntimeManagerTest extends TestCase {
     assertFalse(runtimeManager.getMavenRuntimes().isEmpty());
   }
 
+  @SuppressWarnings("restriction")
   public void testDefaultRuntime() throws Exception {
-     MavenRuntime runtime = runtimeManager.getDefaultRuntime();
+    MavenRuntime runtime = runtimeManager.getDefaultRuntime();
     assertFalse(runtime.isEditable());
     assertTrue(runtime.isAvailable());
     assertEquals(MavenRuntimeManager.EMBEDDED, runtime.getLocation());
     assertNull(runtime.getSettings());
 
+    assertTrue(runtime.equals(runtime));
+    assertFalse(runtime.equals(null));
+    assertTrue(runtime.hashCode() != 0);
+    assertTrue(runtime.toString().startsWith("Embedded"));
+
     DummyLauncherConfig m2conf = new DummyLauncherConfig();
     runtime.createLauncherConfiguration(m2conf, null);
-    
+
     assertNotNull(m2conf.mainRealm);
     assertNotNull(m2conf.mainType);
     assertTrue(m2conf.realms.get(m2conf.mainRealm).size() > 0);
     assertTrue(m2conf.realms.get(IMavenLauncherConfiguration.LAUNCHER_REALM).size() > 0);
-
-    assertTrue(runtime.equals(runtime));
-    assertFalse(runtime.equals(null));
-    assertTrue(runtime.hashCode()!=0);
-    assertTrue(runtime.toString().startsWith("Embedded"));
+    List<String> classpathEntries = m2conf.realms.get(MavenEmbeddedRuntime.PLEXUS_CLASSWORLD_NAME);
+    assertNotNull("Realm " + MavenEmbeddedRuntime.PLEXUS_CLASSWORLD_NAME + " does not exist", classpathEntries);
+    assertTrue(classpathEntries.size() > 0);
+    boolean found = false;
+    for(String classpathEntry : classpathEntries) {
+      if(classpathEntry.contains("plexus-build-api")) {
+        found = true;
+        break;
+      }
+    }
+    assertFalse("plexus-build-api jar is in classpath", found);
   }
 
   public void testExternalRuntime() throws Exception {
@@ -108,7 +123,8 @@ public class MavenRuntimeManagerTest extends TestCase {
     
     public String mainType;
     public String mainRealm;
-    public LinkedHashMap<String, ArrayList<String>> realms = new LinkedHashMap<String, ArrayList<String>>();
+
+    public LinkedHashMap<String, List<String>> realms = new LinkedHashMap<String, List<String>>();
     public ArrayList<String> curRealm;
     
     public void addArchiveEntry(String entry) throws CoreException {
