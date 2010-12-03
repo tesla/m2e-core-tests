@@ -68,6 +68,8 @@ public enum PomTemplateContext {
   
   PROJECT("project"), // //$NON-NLS-1$
   
+  BUILD("build"), // //$NON-NLS-1$
+  
   PARENT("parent"), // //$NON-NLS-1$
   
   RELATIVE_PATH("relativePath"), // //$NON-NLS-1$
@@ -83,6 +85,8 @@ public enum PomTemplateContext {
   PLUGINS("plugins"), // //$NON-NLS-1$
 
   PLUGIN("plugin"), // //$NON-NLS-1$
+  
+  PLUGIN_MANAGEMENT("pluginManagement"), // //$NON-NLS-1$
 
   EXECUTIONS("executions"), // //$NON-NLS-1$
   

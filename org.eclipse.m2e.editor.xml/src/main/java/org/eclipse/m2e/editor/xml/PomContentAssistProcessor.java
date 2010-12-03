@@ -236,13 +236,15 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
         Element parent = MavenMarkerManager.findChildElement((Element)project, "parent"); //$NON-NLS-1$
         if (parent == null) {
           //now add the proposal for parent inclusion
-          Region region = new Region(request.getReplacementBeginPosition() - prefix.length(), prefix.length());
+          Region region = new Region(request.getReplacementBeginPosition(), 0);
           Element groupId = MavenMarkerManager.findChildElement((Element)project, "groupId"); //$NON-NLS-1$
           String groupString = null;
           if (groupId != null) {
             groupString = MavenMarkerManager.getElementTextValue(groupId);
           }
-          ICompletionProposal proposal = new InsertArtifactProposal(sourceViewer, region, groupString); 
+          InsertArtifactProposal.Configuration config = new InsertArtifactProposal.Configuration(InsertArtifactProposal.SearchType.PARENT);
+          config.setInitiaSearchString(groupString);
+          ICompletionProposal proposal = new InsertArtifactProposal(sourceViewer, region, config); 
           if(request.shouldSeparate()) {
             request.addMacro(proposal);
           } else {
@@ -258,7 +260,7 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
         //only show when no relpath already defined..
         String relative = findRelativePath(sourceViewer, parent);
         if (relative != null) {
-          Region region = new Region(request.getReplacementBeginPosition() - prefix.length(), prefix.length());
+          Region region = new Region(request.getReplacementBeginPosition(), 0);
           ICompletionProposal proposal = new CompletionProposal("<relativePath>" + relative + "</relativePath>",  //$NON-NLS-1$ //$NON-NLS-2$
               region.getOffset(), region.getLength(), 0, 
               WorkbenchPlugin.getDefault().getImageRegistry().get(org.eclipse.ui.internal.SharedImages.IMG_OBJ_ADD), 
@@ -297,6 +299,42 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
         }
       }
     }
+    if (context == PomTemplateContext.PLUGINS || context == PomTemplateContext.BUILD 
+        || context == PomTemplateContext.PLUGIN_MANAGEMENT || context == PomTemplateContext.PROJECT) {
+      //now add the proposal for plugin inclusion
+      Region region = new Region(request.getReplacementBeginPosition(), 0);
+      InsertArtifactProposal.Configuration config = new InsertArtifactProposal.Configuration(InsertArtifactProposal.SearchType.PLUGIN);
+      config.setCurrentNode(node);
+      
+      ICompletionProposal proposal = new InsertArtifactProposal(sourceViewer, region, config); 
+      if(request.shouldSeparate()) {
+        request.addMacro(proposal);
+      } else {
+        request.addProposal(proposal);
+      }
+
+    }
+    
+  }
+  /*
+   * calculates the path of the node up in the hierarchy, example of result is project/build/plugins/plugin
+   * level parameter designates the number of parents to climb eg. for level 2 the result would be plugins/plugin
+   * level -1 means all the way to the top. 
+   */
+  static String pathUp(Node node, int level) {
+    StringBuffer buf = new StringBuffer();
+    int current = level;
+    while (node != null && level > 0) {
+      if (node instanceof Element) {
+        if (buf.length() > 0) {
+          buf.insert(0, "/");
+        }
+        buf.insert(0, node.getNodeName());
+        current = current -1;
+      }
+      node = node.getParentNode();
+    }
+    return buf.toString();
   }
   
   private static String findRelativePath(ISourceViewer viewer, Element parent) {
@@ -318,7 +356,7 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
           IPath path2 = prj.getLocation();
           IPath relative = path.makeRelativeTo(path2);
           if (relative != path) {
-              return relative.toOSString().replace('\\', '/');
+              return relative.toString();
           }
         }
       }
