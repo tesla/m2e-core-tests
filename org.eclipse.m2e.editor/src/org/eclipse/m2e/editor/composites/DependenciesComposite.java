@@ -184,7 +184,7 @@ public class DependenciesComposite extends Composite {
     dependenciesSection.marginWidth = 3;
     dependenciesSection.setText(Messages.DependenciesComposite_sectionDependencies);
     
-    dependenciesComparator = new DependenciesComparator();
+    dependenciesComparator = new DependenciesComparator<Object>();
     dependenciesContentProvider.setComparator(dependenciesComparator);
 
     dependenciesEditor = new DependenciesListComposite<Object>(dependenciesSection, SWT.NONE, true);
@@ -211,11 +211,11 @@ public class DependenciesComposite extends Composite {
         }
 
         editingDomain.getCommandStack().execute(compoundCommand);
+        setDependenciesInput();
       }
     });
 
     dependenciesEditor.setPropertiesListener(new SelectionAdapter() {
-      @SuppressWarnings("unchecked")
       public void widgetSelected(SelectionEvent e) {
         Object selection = dependenciesEditor.getSelection().get(0);
         if (selection instanceof Dependency) {
@@ -253,7 +253,6 @@ public class DependenciesComposite extends Composite {
     });
     
     dependenciesEditor.setAddButtonListener(new SelectionAdapter() {
-      @SuppressWarnings("unchecked")
       public void widgetSelected(SelectionEvent e) {
         final AddDependencyDialog addDepDialog = new AddDependencyDialog(getShell(), false, editorPage.getProject());
 
