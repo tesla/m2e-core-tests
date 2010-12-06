@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -329,8 +330,8 @@ public class AddDependencyDialog extends AbstractMavenDialog {
     resultsViewer = new TreeViewer(resultsTree);
     resultsViewer.setContentProvider(new MavenPomSelectionComponent.SearchResultContentProvider());
     //TODO we want to have the artifacts marked for presence and management..
-    resultsViewer.setLabelProvider(new MavenPomSelectionComponent.SearchResultLabelProvider(Collections.EMPTY_SET, Collections.EMPTY_SET,
-        IIndex.SEARCH_ARTIFACT));
+    resultsViewer.setLabelProvider(new DelegatingStyledCellLabelProvider(new MavenPomSelectionComponent.SearchResultLabelProvider(Collections.EMPTY_SET, Collections.EMPTY_SET,
+        IIndex.SEARCH_ARTIFACT)));
 
     /*
      * Hook up events
