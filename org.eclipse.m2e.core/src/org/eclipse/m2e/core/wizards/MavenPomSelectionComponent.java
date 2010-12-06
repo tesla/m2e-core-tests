@@ -353,7 +353,7 @@ public class MavenPomSelectionComponent extends Composite {
     return file.group + ":" + file.artifact + ":" + file.version; //$NON-NLS-1$ //$NON-NLS-2$
   }
   static String getKey(IndexedArtifact art) {
-    return art.getGroupId() + ":" + art.getGroupId(); //$NON-NLS-1$
+    return art.getGroupId() + ":" + art.getArtifactId(); //$NON-NLS-1$
   }
   
 
