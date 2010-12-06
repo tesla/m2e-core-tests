@@ -2,6 +2,7 @@ package org.eclipse.m2e.editor.xml;
 
 import java.util.Collections;
 
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -18,10 +19,13 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.wst.sse.core.internal.provisional.IndexedRegion;
 
+import org.eclipse.m2e.core.core.MavenLogger;
 import org.eclipse.m2e.core.embedder.ArtifactKey;
 import org.eclipse.m2e.core.index.IIndex;
 import org.eclipse.m2e.core.index.IndexedArtifactFile;
+import org.eclipse.m2e.core.internal.project.MavenMarkerManager;
 import org.eclipse.m2e.core.ui.dialogs.MavenRepositorySearchDialog;
 import org.eclipse.m2e.editor.xml.InsertArtifactProposal.Configuration;
 import org.eclipse.m2e.editor.xml.internal.Messages;
@@ -52,39 +56,134 @@ public class InsertArtifactProposal implements ICompletionProposal, ICompletionP
       dialog.setQuery(config.getInitiaSearchString());
     }
     if(dialog.open() == Window.OK) {
-      if (config.getType() == SearchType.PARENT) {
-        IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
-        if(af != null) {
-          int offset = region.getOffset();
+      String lineDelim = document.getLegalLineDelimiters()[0];//do we care? or just append \n always? 
+      IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
+      int offset = region.getOffset();
+      if(af != null) {
+        if (config.getType() == SearchType.PARENT) {
           try {
             StringBuffer buffer = new StringBuffer();
-            buffer.append("<parent>").append(document.getLegalLineDelimiters()[0]); //do we care? or just append \n always? //$NON-NLS-1$
-            buffer.append("<groupId>").append(af.group).append("</groupId>").append(document.getLegalLineDelimiters()[0]); //$NON-NLS-1$ //$NON-NLS-2$
-            buffer.append("<artifactId>").append(af.artifact).append("</artifactId>").append(document.getLegalLineDelimiters()[0]); //$NON-NLS-1$ //$NON-NLS-2$
-            buffer.append("<version>").append(af.version).append("</version>").append(document.getLegalLineDelimiters()[0]); //$NON-NLS-1$ //$NON-NLS-2$
+            buffer.append("<parent>").append(lineDelim); //$NON-NLS-1$
+            buffer.append("<groupId>").append(af.group).append("</groupId>").append(lineDelim); //$NON-NLS-1$ //$NON-NLS-2$
+            buffer.append("<artifactId>").append(af.artifact).append("</artifactId>").append(lineDelim); //$NON-NLS-1$ //$NON-NLS-2$
+            buffer.append("<version>").append(af.version).append("</version>").append(lineDelim); //$NON-NLS-1$ //$NON-NLS-2$
             String relativePath = PomContentAssistProcessor.findRelativePath(sourceViewer, af.group, af.artifact, af.version);
             if (relativePath != null) {
-              buffer.append("<relativePath>").append(relativePath).append("</relativePath>").append(document.getLegalLineDelimiters()[0]); //$NON-NLS-1$ //$NON-NLS-2$
+              buffer.append("<relativePath>").append(relativePath).append("</relativePath>").append(lineDelim); //$NON-NLS-1$ //$NON-NLS-2$
             }
-            buffer.append("</parent>").append(document.getLegalLineDelimiters()[0]); //$NON-NLS-1$
+            buffer.append("</parent>").append(lineDelim); //$NON-NLS-1$
             generatedLength = buffer.toString().length();
             document.replace(offset, region.getLength(), buffer.toString());
             
             IContentFormatter formatter = textConfig.getContentFormatter(sourceViewer);
             Region resRegion = format(formatter, document, generatedOffset, generatedLength);
             generatedOffset = resRegion.getOffset();
-            generatedLength =resRegion.getLength(); 
+            generatedLength = resRegion.getLength(); 
           } catch(BadLocationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            MavenLogger.log("Failed inserting parent element", e);
           }
         }
-      }
-      if (config.getType() == SearchType.PLUGIN) {
+        if (config.getType() == SearchType.PLUGIN) {
+          Node current = config.getCurrentNode();
+          if ("project".equals(current.getNodeName())) {
+            //in project section go with build/plugins.
+            Element build = MavenMarkerManager.findChildElement((Element)current, "build");
+            if (build == null) {
+              try {
+                StringBuffer buffer = new StringBuffer();
+                generateBuild(buffer, lineDelim, af);
+                generatedLength = buffer.toString().length();
+                document.replace(offset, 0, buffer.toString());
+                
+                IContentFormatter formatter = textConfig.getContentFormatter(sourceViewer);
+                Region resRegion = format(formatter, document, generatedOffset, generatedLength);
+                generatedOffset = resRegion.getOffset();
+                generatedLength = resRegion.getLength(); 
+              } catch (BadLocationException e) {
+                MavenLogger.log("Failed inserting build element", e);
+              }
+              return;
+            } else {
+              
+              current = build;
+              IndexedRegion reg = (IndexedRegion)current;
+              //we need to update the offset to where we found the existing build element..
+              offset = reg.getEndOffset() - "</build>".length();
+            }
+          }
+          if ("build".equals(current.getNodeName()) || "pluginManagement".equals(current.getNodeName())) {
+            Element plugins = MavenMarkerManager.findChildElement((Element)current, "plugins");
+            if (plugins == null) {
+              //we need to create it.
+              try {
+                StringBuffer buffer = new StringBuffer();
+                generatePlugins(buffer, lineDelim, af);
+                generatedLength = buffer.toString().length();
+                document.replace(offset, 0, buffer.toString());
+                
+                IContentFormatter formatter = textConfig.getContentFormatter(sourceViewer);
+                Region resRegion = format(formatter, document, offset, generatedLength);
+                generatedOffset = resRegion.getOffset();
+                generatedLength = resRegion.getLength(); 
+              } catch (BadLocationException e) {
+                MavenLogger.log("Failed inserting plugins element", e);
+              }
+              return;
+            } else {
+              current = plugins;
+              IndexedRegion reg = (IndexedRegion)current;
+              //we need to update the offset to where we found the existing plugins element..
+              offset = reg.getEndOffset() - "</plugins>".length();
+            }
+          }
+          if ("plugins".equals(current.getNodeName())) {
+            
+            //simple, just add the plugin here..
+            //TODO we might want to look if the plugin is already defined in this section or not..
+            try {
+              StringBuffer buffer = new StringBuffer();
+              generatePlugin(buffer, lineDelim, af);
+              generatedLength = buffer.toString().length();
+              document.replace(offset, 0, buffer.toString());
+              IContentFormatter formatter = textConfig.getContentFormatter(sourceViewer);
+              Region resRegion = format(formatter, document, offset, generatedLength);
+              generatedOffset = resRegion.getOffset();
+              generatedLength = resRegion.getLength();
+            } catch (BadLocationException e) {
+              MavenLogger.log("Failed inserting plugin element", e);
+            }
+          }
+        }
       }
     }
   }
   
+  private void generatePlugin(StringBuffer buffer, String lineDelim, IndexedArtifactFile af) {
+    buffer.append("<plugin>").append(lineDelim);
+    buffer.append("<groupId>").append(af.group).append("</groupId>").append(lineDelim); //$NON-NLS-1$ //$NON-NLS-2$
+    buffer.append("<artifactId>").append(af.artifact).append("</artifactId>").append(lineDelim); //$NON-NLS-1$ //$NON-NLS-2$
+    //TODO for managed plugins (if version matches only?), don't add the version element
+    buffer.append("<version>").append(af.version).append("</version>").append(lineDelim); //$NON-NLS-1$ //$NON-NLS-2$
+    buffer.append("</plugin>").append(lineDelim);
+  }
+  
+  private void generatePlugins(StringBuffer buffer, String lineDelim, IndexedArtifactFile af) {
+    buffer.append("<plugins>").append(lineDelim);
+    generatePlugin(buffer, lineDelim, af);
+    buffer.append("</plugins>").append(lineDelim);
+  }
+  
+  private void generateBuild(StringBuffer buffer, String lineDelim, IndexedArtifactFile af) {
+    buffer.append("<build>").append(lineDelim);
+    generatePlugins(buffer, lineDelim, af);
+    buffer.append("</build>").append(lineDelim);
+  }  
+  
+  /**
+   * take the document and format the region specified by the supplied formatter.
+   * operates on whole line (determined by the region specified)
+   * returns the new region encompassing the original region after formatting
+   */
   public static Region format(IContentFormatter formatter, IDocument document, int offset, int length) throws BadLocationException {
     int startLine = document.getLineOfOffset(offset);
     int endLine = document.getLineOfOffset(offset + length - 1); // -1 to make sure to be before the end of line char
