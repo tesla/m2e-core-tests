@@ -179,18 +179,6 @@
         &lt;/exclusion&gt;</pattern>
     </template>
 
-    <template id="org.eclipse.m2e.editor.xml.templates.plugin.skeleton"
-         contextTypeId="org.eclipse.m2e.editor.xml.templates.contextType.plugins"
-         name="%template.plugin.name" 
-         description="%template.plugin.description">
-      <pattern>&lt;plugin&gt;
-        &lt;groupId&gt;${cursor}&lt;/groupId&gt;
-        &lt;artifactId&gt;&lt;/artifactId&gt;
-        &lt;version&gt;&lt;/version&gt;
-        &lt;configuration&gt;
-        &lt;/configuration&gt;
-      &lt;/plugin&gt;</pattern>
-    </template>
 
     <template id="org.eclipse.m2e.editor.xml.templates.plugin.javac"
          contextTypeId="org.eclipse.m2e.editor.xml.templates.contextType.plugins"

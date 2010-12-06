@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -142,6 +143,7 @@ public class AddDependencyDialog extends AbstractMavenDialog {
 
     setShellStyle(getShellStyle() | SWT.RESIZE);
     setTitle(Messages.AddDependencyDialog_title);
+//    setStatusLineAboveButtons(true);
 
     if(!isForDependencyManagement) {
       this.scopes = SCOPES;
@@ -174,6 +176,7 @@ public class AddDependencyDialog extends AbstractMavenDialog {
     return composite;
   }
 
+  
   /**
    * Sets the up group-artifact-version controls
    */
@@ -246,7 +249,7 @@ public class AddDependencyDialog extends AbstractMavenDialog {
   }
 
   void updateInfo() {
-    infoTextarea.setText(""); //$NON-NLS-1$
+//    infoTextarea.setText(""); //$NON-NLS-1$
     if(dependencyNode == null) {
       return;
     }
@@ -277,22 +280,24 @@ public class AddDependencyDialog extends AbstractMavenDialog {
     sashForm.setLayout(new FillLayout());
 
     Composite resultsComposite = new Composite(sashForm, SWT.NONE);
-    GridLayout resultsLayout = new GridLayout(2, false);
+    GridLayout resultsLayout = new GridLayout(1, false);
     resultsLayout.marginWidth = 0;
     resultsComposite.setLayout(resultsLayout);
 
     Label queryLabel = new Label(resultsComposite, SWT.NONE);
     queryLabel.setText(Messages.AddDependencyDialog_search_label);
-    widthGroup.addControl(queryLabel);
+//    widthGroup.addControl(queryLabel);
 
-    queryText = new Text(resultsComposite, SWT.BORDER | SWT.SEARCH | SWT.ICON_SEARCH);
+    queryText = new Text(resultsComposite, SWT.BORDER | SWT.SEARCH);
     queryText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-    queryText.setMessage(Messages.AddDependencyDialog_search_message);
+    queryText.setFocus();
+    
+//    queryText.setMessage(Messages.AddDependencyDialog_search_message);
 
     Label resultsLabel = new Label(resultsComposite, SWT.NONE);
     resultsLabel.setText(Messages.AddDependencyDialog_results_label);
     resultsLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
-    widthGroup.addControl(resultsLabel);
+//    widthGroup.addControl(resultsLabel);
 
     Tree resultsTree = new Tree(resultsComposite, SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
     GridData treeData = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -301,14 +306,14 @@ public class AddDependencyDialog extends AbstractMavenDialog {
     resultsTree.setLayoutData(treeData);
 
     Composite infoComposite = new Composite(sashForm, SWT.NONE);
-    GridLayout infoLayout = new GridLayout(2, false);
+    GridLayout infoLayout = new GridLayout(1, false);
     infoLayout.marginWidth = 0;
     infoComposite.setLayout(infoLayout);
 
     Label infoLabel = new Label(infoComposite, SWT.NONE);
     infoLabel.setText(Messages.AddDependencyDialog_info_label);
     infoLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
-    widthGroup.addControl(infoLabel);
+//    widthGroup.addControl(infoLabel);
 
     infoTextarea = new Text(infoComposite, SWT.MULTI | SWT.READ_ONLY | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
     GridData infoData = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -324,8 +329,9 @@ public class AddDependencyDialog extends AbstractMavenDialog {
 
     resultsViewer = new TreeViewer(resultsTree);
     resultsViewer.setContentProvider(new MavenPomSelectionComponent.SearchResultContentProvider());
-    resultsViewer.setLabelProvider(new MavenPomSelectionComponent.SearchResultLabelProvider(Collections.EMPTY_SET,
-        IIndex.SEARCH_ARTIFACT));
+    //TODO we want to have the artifacts marked for presence and management..
+    resultsViewer.setLabelProvider(new DelegatingStyledCellLabelProvider(new MavenPomSelectionComponent.SearchResultLabelProvider(Collections.EMPTY_SET, Collections.EMPTY_SET,
+        IIndex.SEARCH_ARTIFACT)));
 
     /*
      * Hook up events
@@ -507,7 +513,7 @@ public class AddDependencyDialog extends AbstractMavenDialog {
           group = chooseWidgetText(group, file.group);
           version = chooseWidgetText(version, file.version);
         }
-        setInfo(OK, NLS.bind(Messages.AddDependencyDialog_itemsSelected, artifactFiles.size()));
+        setInfo(OK, NLS.bind(artifactFiles.size() == 1 ? Messages.AddDependencyDialog_itemSelected : Messages.AddDependencyDialog_itemsSelected, artifactFiles.size()));
         infoTextarea.setText(buffer.toString());
         artifactIDtext.setText(artifact);
         groupIDtext.setText(group);

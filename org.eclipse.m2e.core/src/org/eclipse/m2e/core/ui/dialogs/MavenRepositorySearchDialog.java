@@ -48,6 +48,8 @@ public class MavenRepositorySearchDialog extends AbstractMavenDialog {
   
   private final Set<ArtifactKey> artifacts;
 
+  private final Set<ArtifactKey> managed;
+
   /**
    * One of 
    *   {@link IIndex#SEARCH_ARTIFACT}, 
@@ -67,6 +69,7 @@ public class MavenRepositorySearchDialog extends AbstractMavenDialog {
 
   private Combo scopeCombo;
 
+
   /**
    * Create repository search dialog
    * 
@@ -76,14 +79,26 @@ public class MavenRepositorySearchDialog extends AbstractMavenDialog {
    *   {@link IIndex#SEARCH_ARTIFACT}, 
    *   {@link IIndex#SEARCH_CLASS_NAME}, 
    * @param artifacts Set&lt;Artifact&gt;
+   * @deprecated
    */
   public MavenRepositorySearchDialog(Shell parent, String title, String queryType, Set<ArtifactKey> artifacts) {
-    this(parent, title, queryType, artifacts, false);
+    this(parent, title, queryType, artifacts, Collections.<ArtifactKey>emptySet(), false);
+  }
+  
+  public MavenRepositorySearchDialog(Shell parent, String title, String queryType, Set<ArtifactKey> artifacts, Set<ArtifactKey> managed) {
+    this(parent, title, queryType, artifacts, managed, false);
+  }
+  /**
+   * @deprecated
+   */
+  public MavenRepositorySearchDialog(Shell parent, String title, String queryType, Set<ArtifactKey> artifacts, boolean showScope) {
+    this(parent, title, queryType, artifacts, Collections.<ArtifactKey>emptySet(), showScope);
   }
 
-  public MavenRepositorySearchDialog(Shell parent, String title, String queryType, Set<ArtifactKey> artifacts, boolean showScope) {
+  public MavenRepositorySearchDialog(Shell parent, String title, String queryType, Set<ArtifactKey> artifacts, Set<ArtifactKey> managed, boolean showScope) {
     super(parent, DIALOG_SETTINGS);
     this.artifacts = artifacts;
+    this.managed = managed;
     this.queryType = queryType;
     this.showScope = showScope;
 
@@ -102,7 +117,7 @@ public class MavenRepositorySearchDialog extends AbstractMavenDialog {
     Composite composite = (Composite) super.createDialogArea(parent);
 
     pomSelectionComponent = new MavenPomSelectionComponent(composite, SWT.NONE);
-    pomSelectionComponent.init(queryText, queryType, artifacts);
+    pomSelectionComponent.init(queryText, queryType, artifacts, managed);
     
     pomSelectionComponent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     

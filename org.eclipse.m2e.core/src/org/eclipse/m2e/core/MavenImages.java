@@ -13,7 +13,9 @@ package org.eclipse.m2e.core;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
+import org.eclipse.jface.viewers.DecorationOverlayIcon;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import org.eclipse.m2e.core.core.IMavenConstants;
@@ -31,11 +33,19 @@ public class MavenImages {
   
   public static final Image IMG_CLEAR_DISABLED = createImage("clear_disabled.gif"); //$NON-NLS-1$
 
-  public static final Image IMG_JAR = createImage("jar_obj.gif"); //$NON-NLS-1$
+  public static final String PATH_JAR = "jar_obj.gif"; //$NON-NLS-1$
+
+  public static final Image IMG_JAR = createImage(PATH_JAR); 
   
-  public static final Image IMG_VERSION = createImage("jar_version.gif"); //$NON-NLS-1$
+  public static final String PATH_LOCK = "lock_ovr.gif"; //$NON-NLS-1$
   
-  public static final Image IMG_VERSION_SRC = createImage("jar_src_version.gif"); //$NON-NLS-1$
+  public static final String PATH_VERSION = "jar_version.gif"; //$NON-NLS-1$
+  
+  public static final Image IMG_VERSION = createImage(PATH_VERSION);
+  
+  public static final String PATH_VERSION_SRC = "jar_src_version.gif"; //$NON-NLS-1$
+  
+  public static final Image IMG_VERSION_SRC = createImage(PATH_VERSION_SRC); 
   
   public static final Image IMG_JAVA = createImage("java_obj.gif"); //$NON-NLS-1$
   
@@ -69,49 +79,49 @@ public class MavenImages {
   
   // wizard images
   
-  public static final ImageDescriptor WIZ_IMPORT_WIZ = create("import_project.png"); //$NON-NLS-1$
+  public static final ImageDescriptor WIZ_IMPORT_WIZ = createDescriptor("import_project.png"); //$NON-NLS-1$
 
-  public static final ImageDescriptor WIZ_NEW_PROJECT = create("new_m2_project_wizard.gif"); //$NON-NLS-1$
+  public static final ImageDescriptor WIZ_NEW_PROJECT = createDescriptor("new_m2_project_wizard.gif"); //$NON-NLS-1$
   
   // descriptors
   
-  public static final ImageDescriptor M2 = create("m2.gif"); //$NON-NLS-1$
+  public static final ImageDescriptor M2 = createDescriptor("m2.gif"); //$NON-NLS-1$
   
-  public static final ImageDescriptor DEBUG = create("debug.gif"); //$NON-NLS-1$
+  public static final ImageDescriptor DEBUG = createDescriptor("debug.gif"); //$NON-NLS-1$
   
-  public static final ImageDescriptor ADD_INDEX = create("add_index.gif"); //$NON-NLS-1$
+  public static final ImageDescriptor ADD_INDEX = createDescriptor("add_index.gif"); //$NON-NLS-1$
 
-  public static final ImageDescriptor CLOSE = create("close.gif"); //$NON-NLS-1$
+  public static final ImageDescriptor CLOSE = createDescriptor("close.gif"); //$NON-NLS-1$
   
-  public static final ImageDescriptor COPY = create("copy.gif"); //$NON-NLS-1$
+  public static final ImageDescriptor COPY = createDescriptor("copy.gif"); //$NON-NLS-1$
 
-  public static final ImageDescriptor COLLAPSE_ALL = create("collapseall.gif"); //$NON-NLS-1$
+  public static final ImageDescriptor COLLAPSE_ALL = createDescriptor("collapseall.gif"); //$NON-NLS-1$
   
-  public static final ImageDescriptor EXPAND_ALL = create("expandall.gif"); //$NON-NLS-1$
+  public static final ImageDescriptor EXPAND_ALL = createDescriptor("expandall.gif"); //$NON-NLS-1$
   
-  public static final ImageDescriptor NEW_POM = create("new_m2_pom.gif"); //$NON-NLS-1$
+  public static final ImageDescriptor NEW_POM = createDescriptor("new_m2_pom.gif"); //$NON-NLS-1$
 
-  public static final ImageDescriptor REFRESH = create("refresh.gif"); //$NON-NLS-1$
+  public static final ImageDescriptor REFRESH = createDescriptor("refresh.gif"); //$NON-NLS-1$
   
-  public static final ImageDescriptor UPD_INDEX = create("update_index.gif"); //$NON-NLS-1$
+  public static final ImageDescriptor UPD_INDEX = createDescriptor("update_index.gif"); //$NON-NLS-1$
   
-  public static final ImageDescriptor REBUILD_INDEX = create("rebuild_index.gif"); //$NON-NLS-1$
+  public static final ImageDescriptor REBUILD_INDEX = createDescriptor("rebuild_index.gif"); //$NON-NLS-1$
 
-  public static final ImageDescriptor POM = create("pom_obj.gif"); //$NON-NLS-1$
+  public static final ImageDescriptor POM = createDescriptor("pom_obj.gif"); //$NON-NLS-1$
   
-  public static final ImageDescriptor IMPORT_PROJECT = create("import_m2_project.gif"); //$NON-NLS-1$
+  public static final ImageDescriptor IMPORT_PROJECT = createDescriptor("import_m2_project.gif"); //$NON-NLS-1$
   
-  public static final ImageDescriptor SHOW_CONSOLE_ERR = create("stderr.gif"); //$NON-NLS-1$
+  public static final ImageDescriptor SHOW_CONSOLE_ERR = createDescriptor("stderr.gif"); //$NON-NLS-1$
   
-  public static final ImageDescriptor SHOW_CONSOLE_OUT = create("stdout.gif"); //$NON-NLS-1$
+  public static final ImageDescriptor SHOW_CONSOLE_OUT = createDescriptor("stdout.gif"); //$NON-NLS-1$
   
-  private static ImageDescriptor create(String key) {
+  private static ImageDescriptor createDescriptor(String key) {
     try {
       ImageRegistry imageRegistry = getImageRegistry();
       if(imageRegistry != null) {
         ImageDescriptor imageDescriptor = imageRegistry.getDescriptor(key);
         if(imageDescriptor==null) {
-          imageDescriptor = createDescriptor(key);
+          imageDescriptor = doCreateDescriptor(key);
           imageRegistry.put(key, imageDescriptor);
         }
         return imageDescriptor;
@@ -123,7 +133,7 @@ public class MavenImages {
   }
 
   private static Image createImage(String key) {
-    create(key);
+    createDescriptor(key);
     ImageRegistry imageRegistry = getImageRegistry();
     return imageRegistry == null ? null : imageRegistry.get(key);
   }
@@ -133,8 +143,80 @@ public class MavenImages {
     return plugin == null ? null : plugin.getImageRegistry();
   }
 
-  private static ImageDescriptor createDescriptor(String image) {
+  private static ImageDescriptor doCreateDescriptor(String image) {
     return AbstractUIPlugin.imageDescriptorFromPlugin(IMavenConstants.PLUGIN_ID, "icons/" + image); //$NON-NLS-1$
+  }
+  
+
+
+  private static ImageDescriptor createImageDescriptor( String key, ImageData imageData )
+  {
+      try
+      {
+          ImageRegistry imageRegistry = getImageRegistry();
+          if ( imageRegistry != null )
+          {
+              ImageDescriptor imageDescriptor = imageRegistry.getDescriptor( key );
+              if ( imageDescriptor != null )
+              {
+                  imageRegistry.remove( key );
+              }
+              {
+                  imageDescriptor = ImageDescriptor.createFromImageData( imageData );
+                  imageRegistry.put( key, imageDescriptor );
+              }
+              return imageDescriptor;
+          }
+      }
+      catch ( Exception ex )
+      {
+        MavenLogger.log(key, ex);
+      }
+      return null;
+  }
+
+  private static ImageDescriptor getOverlayImageDescriptor( String basekey, String overlaykey, int quadrant )
+  {
+      String key = basekey + overlaykey;
+      try
+      {
+          ImageRegistry imageRegistry = getImageRegistry();
+          if ( imageRegistry != null )
+          {
+              ImageDescriptor imageDescriptor = imageRegistry.getDescriptor( key );
+              if ( imageDescriptor == null )
+              {
+                  ImageDescriptor base = createDescriptor( basekey );
+                  ImageDescriptor overlay = createDescriptor( overlaykey );
+                  if ( base == null || overlay == null )
+                  {
+                      MavenLogger.log( "cannot construct overlay image descriptor for " + basekey + " " + overlaykey );
+                      return null;
+                  }
+                  imageDescriptor = createOverlayDescriptor( base, overlay, quadrant );
+                  imageRegistry.put( key, imageDescriptor );
+              }
+              return imageDescriptor;
+          }
+      }
+      catch ( Exception ex )
+      {
+        MavenLogger.log(key, ex);
+      }
+      return null;
+  }
+
+  public static Image getOverlayImage( String base, String overlay, int quadrant )
+  {
+      getOverlayImageDescriptor( base, overlay, quadrant );
+      ImageRegistry imageRegistry = getImageRegistry();
+      return imageRegistry == null ? null : imageRegistry.get( base + overlay );
+  }
+
+
+  private static ImageDescriptor createOverlayDescriptor( ImageDescriptor base, ImageDescriptor overlay, int quadrant )
+  {
+      return new DecorationOverlayIcon( base.createImage(), overlay, quadrant );
   }
 
 }

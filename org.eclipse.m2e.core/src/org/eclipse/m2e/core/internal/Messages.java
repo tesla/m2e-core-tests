@@ -51,6 +51,7 @@ public class Messages extends NLS {
   public static String AddDependencyDialog_info_transitive;
 
   public static String AddDependencyDialog_itemsSelected;
+  public static String AddDependencyDialog_itemSelected;
 
   public static String AddDependencyDialog_multipleValuesSelected;
 
@@ -539,6 +540,8 @@ public class Messages extends NLS {
   public static String MavenPomSelectionComponent_error;
 
   public static String MavenPomSelectionComponent_lblResults;
+
+  public static String MavenPomSelectionComponent_managed_decoration;
 
   public static String MavenPomSelectionComponent_nosel;
 
