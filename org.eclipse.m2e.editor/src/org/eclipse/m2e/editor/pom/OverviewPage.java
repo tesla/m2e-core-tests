@@ -336,11 +336,18 @@ public class OverviewPage extends MavenPomEditorPage {
 
     parentSelectAction = new Action(Messages.OverviewPage_action_selectParent, MavenEditorImages.SELECT_ARTIFACT) {
       public void run() {
-        // TODO calculate current list of artifacts for the project
+        // calculate current list of artifacts for the project - that's the current parent..
+        Set<ArtifactKey> current = new HashSet<ArtifactKey>();
+        String parentGroup = parentGroupIdText.getText();
+        String parentArtifact = parentArtifactIdText.getText();
+        String parentVersion = parentVersionText.getText();
+        if (parentGroup != null && parentArtifact != null && parentVersion != null) {
+          current.add(new ArtifactKey(parentGroup, parentArtifact, parentVersion, null));
+        }
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getEditorSite().getShell(), //
             Messages.OverviewPage_searchDialog_selectParent, IIndex.SEARCH_PARENTS,
-            Collections.<ArtifactKey> emptySet(), false);
-        if(parentGroupIdText.getText() != null && parentGroupIdText.getText().trim().length() != 0) {
+            current, Collections.<ArtifactKey>emptySet(), false);
+        if(parentGroup != null && parentGroup.trim().length() != 0) {
           //chances are we will get good match by adding the groupid here..
           dialog.setQuery(parentGroupIdText.getText());
         } else if(artifactGroupIdText.getText() != null && artifactGroupIdText.getText().trim().length() != 0) {
