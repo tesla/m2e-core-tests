@@ -350,10 +350,10 @@ public class MavenPomSelectionComponent extends Composite {
   }
   
   static String getKey(IndexedArtifactFile file) {
-    return file.group + ":" + file.artifact + ":" + file.version;
+    return file.group + ":" + file.artifact + ":" + file.version; //$NON-NLS-1$ //$NON-NLS-2$
   }
   static String getKey(IndexedArtifact art) {
-    return art.getGroupId() + ":" + art.getGroupId();
+    return art.getGroupId() + ":" + art.getGroupId(); //$NON-NLS-1$
   }
   
 
@@ -525,16 +525,16 @@ public class MavenPomSelectionComponent extends Composite {
         StyledString ss = new StyledString();
         ss.append(name);
         if (managedKeys.contains(getKey(a))) {
-          ss.append("  (managed)", StyledString.DECORATIONS_STYLER);
+          ss.append(Messages.MavenPomSelectionComponent_managed_decoration, StyledString.DECORATIONS_STYLER);
         }
         return ss;
       } else if(element instanceof IndexedArtifactFile) {
         IndexedArtifactFile f = (IndexedArtifactFile) element;
         StyledString ss = new StyledString();
-        String name = f.version + " [" + (f.type == null ? "jar" : f.type) + (f.classifier != null ? ", " + f.classifier : "") +  "]"; 
+        String name = f.version + " [" + (f.type == null ? "jar" : f.type) + (f.classifier != null ? ", " + f.classifier : "") +  "]";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
         ss.append(name);
         if (managedKeys.contains(getKey(f))) {
-          ss.append("  (managed)", StyledString.DECORATIONS_STYLER);
+          ss.append(Messages.MavenPomSelectionComponent_managed_decoration, StyledString.DECORATIONS_STYLER);
         }
         return ss;
       }

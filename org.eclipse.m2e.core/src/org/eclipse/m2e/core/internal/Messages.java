@@ -541,6 +541,8 @@ public class Messages extends NLS {
 
   public static String MavenPomSelectionComponent_lblResults;
 
+  public static String MavenPomSelectionComponent_managed_decoration;
+
   public static String MavenPomSelectionComponent_nosel;
 
   public static String MavenPomSelectionComponent_results;
