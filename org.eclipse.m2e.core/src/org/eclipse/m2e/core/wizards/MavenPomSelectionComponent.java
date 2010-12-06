@@ -315,11 +315,9 @@ public class MavenPomSelectionComponent extends Composite {
       //the idea here is that if we have a managed version for something, then the IndexedArtifact shall
       //represent that value..
       IndexedArtifact ia = (IndexedArtifact)element;
-      String key = ia.getGroupId() +":" + ia.getArtifactId();
-      if (managedKeys.contains(key)) {
+      if (managedKeys.contains(getKey(ia))) {
         for (IndexedArtifactFile file : ia.getFiles()) {
-          String key2 = file.group + ":" + file.artifact + ":" + file.version;
-          if (managedKeys.contains(key2)) {
+          if (managedKeys.contains(getKey(file))) {
             return file;
           }
         }
@@ -350,6 +348,14 @@ public class MavenPomSelectionComponent extends Composite {
       }
     }
   }
+  
+  static String getKey(IndexedArtifactFile file) {
+    return file.group + ":" + file.artifact + ":" + file.version;
+  }
+  static String getKey(IndexedArtifact art) {
+    return art.getGroupId() + ":" + art.getGroupId();
+  }
+  
 
   /**
    * Search Job
@@ -471,14 +477,12 @@ public class MavenPomSelectionComponent extends Composite {
     public Color getForeground(Object element) {
       if(element instanceof IndexedArtifactFile) {
         IndexedArtifactFile f = (IndexedArtifactFile) element;
-        String key = f.group + ":" + f.artifact + ":" + f.version;//$NON-NLS-1$ //$NON-NLS-2$
-        if(artifactKeys.contains(key)) { 
+        if(artifactKeys.contains(getKey(f))) { 
           return Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY);
         }
       } else if(element instanceof IndexedArtifact) {
         IndexedArtifact i = (IndexedArtifact) element;
-        String key = i.getGroupId() + ":" + i.getArtifactId();  //$NON-NLS-1$
-        if(artifactKeys.contains(key)) {
+        if(artifactKeys.contains(getKey(i))) {
           return Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY);
         }
       }
@@ -492,8 +496,7 @@ public class MavenPomSelectionComponent extends Composite {
     public Image getImage(Object element) {
       if(element instanceof IndexedArtifactFile) {
         IndexedArtifactFile f = (IndexedArtifactFile) element;
-        String key = f.group + ":" + f.artifact + ":" + f.version;
-        if (managedKeys.contains(key)) {
+        if (managedKeys.contains(getKey(f))) {
           return MavenImages.getOverlayImage(f.sourcesExists==IIndex.PRESENT ? MavenImages.PATH_VERSION_SRC : MavenImages.PATH_VERSION, 
               MavenImages.PATH_LOCK, IDecoration.BOTTOM_LEFT);
         }
@@ -504,8 +507,7 @@ public class MavenPomSelectionComponent extends Composite {
         return MavenImages.IMG_VERSION;
       } else if(element instanceof IndexedArtifact) {
         IndexedArtifact i = (IndexedArtifact) element;
-        String key = i.getGroupId() + ":" + i.getArtifactId();
-        if (managedKeys.contains(key)) {
+        if (managedKeys.contains(getKey(i))) {
           return MavenImages.getOverlayImage(MavenImages.PATH_JAR, MavenImages.PATH_LOCK, IDecoration.BOTTOM_LEFT);
         }
         return MavenImages.IMG_JAR;
@@ -519,21 +521,19 @@ public class MavenPomSelectionComponent extends Composite {
     public StyledString getStyledText(Object element) {
       if(element instanceof IndexedArtifact) {
         IndexedArtifact a = (IndexedArtifact) element;
-        String key = a.getGroupId() + ":" + a.getArtifactId();  //$NON-NLS-1$
         String name = (a.getClassname() == null ? "" : a.getClassname() + "   " + a.getPackageName() + "   ") + a.getGroupId() + "   " + a.getArtifactId(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
         StyledString ss = new StyledString();
         ss.append(name);
-        if (managedKeys.contains(key)) {
+        if (managedKeys.contains(getKey(a))) {
           ss.append("  (managed)", StyledString.DECORATIONS_STYLER);
         }
         return ss;
       } else if(element instanceof IndexedArtifactFile) {
         IndexedArtifactFile f = (IndexedArtifactFile) element;
-        String key = f.group + ":" + f.artifact + ":" + f.version;//$NON-NLS-1$ //$NON-NLS-2$
         StyledString ss = new StyledString();
         String name = f.version + " [" + (f.type == null ? "jar" : f.type) + (f.classifier != null ? ", " + f.classifier : "") +  "]"; 
         ss.append(name);
-        if (managedKeys.contains(key)) {
+        if (managedKeys.contains(getKey(f))) {
           ss.append("  (managed)", StyledString.DECORATIONS_STYLER);
         }
         return ss;
