@@ -80,14 +80,14 @@ public class InsertArtifactProposal implements ICompletionProposal, ICompletionP
             generatedOffset = resRegion.getOffset();
             generatedLength = resRegion.getLength(); 
           } catch(BadLocationException e) {
-            MavenLogger.log("Failed inserting parent element", e);
+            MavenLogger.log("Failed inserting parent element", e); //$NON-NLS-1$
           }
         }
         if (config.getType() == SearchType.PLUGIN) {
           Node current = config.getCurrentNode();
-          if ("project".equals(current.getNodeName())) {
+          if ("project".equals(current.getNodeName())) { //$NON-NLS-1$
             //in project section go with build/plugins.
-            Element build = MavenMarkerManager.findChildElement((Element)current, "build");
+            Element build = MavenMarkerManager.findChildElement((Element)current, "build"); //$NON-NLS-1$
             if (build == null) {
               try {
                 StringBuffer buffer = new StringBuffer();
@@ -100,7 +100,7 @@ public class InsertArtifactProposal implements ICompletionProposal, ICompletionP
                 generatedOffset = resRegion.getOffset();
                 generatedLength = resRegion.getLength(); 
               } catch (BadLocationException e) {
-                MavenLogger.log("Failed inserting build element", e);
+                MavenLogger.log("Failed inserting build element", e); //$NON-NLS-1$
               }
               return;
             } else {
@@ -108,11 +108,11 @@ public class InsertArtifactProposal implements ICompletionProposal, ICompletionP
               current = build;
               IndexedRegion reg = (IndexedRegion)current;
               //we need to update the offset to where we found the existing build element..
-              offset = reg.getEndOffset() - "</build>".length();
+              offset = reg.getEndOffset() - "</build>".length(); //$NON-NLS-1$
             }
           }
-          if ("build".equals(current.getNodeName()) || "pluginManagement".equals(current.getNodeName())) {
-            Element plugins = MavenMarkerManager.findChildElement((Element)current, "plugins");
+          if ("build".equals(current.getNodeName()) || "pluginManagement".equals(current.getNodeName())) { //$NON-NLS-1$ //$NON-NLS-2$
+            Element plugins = MavenMarkerManager.findChildElement((Element)current, "plugins"); //$NON-NLS-1$
             if (plugins == null) {
               //we need to create it.
               try {
@@ -126,17 +126,17 @@ public class InsertArtifactProposal implements ICompletionProposal, ICompletionP
                 generatedOffset = resRegion.getOffset();
                 generatedLength = resRegion.getLength(); 
               } catch (BadLocationException e) {
-                MavenLogger.log("Failed inserting plugins element", e);
+                MavenLogger.log("Failed inserting plugins element", e); //$NON-NLS-1$
               }
               return;
             } else {
               current = plugins;
               IndexedRegion reg = (IndexedRegion)current;
               //we need to update the offset to where we found the existing plugins element..
-              offset = reg.getEndOffset() - "</plugins>".length();
+              offset = reg.getEndOffset() - "</plugins>".length(); //$NON-NLS-1$
             }
           }
-          if ("plugins".equals(current.getNodeName())) {
+          if ("plugins".equals(current.getNodeName())) { //$NON-NLS-1$
             
             //simple, just add the plugin here..
             //TODO we might want to look if the plugin is already defined in this section or not..
@@ -150,7 +150,7 @@ public class InsertArtifactProposal implements ICompletionProposal, ICompletionP
               generatedOffset = resRegion.getOffset();
               generatedLength = resRegion.getLength();
             } catch (BadLocationException e) {
-              MavenLogger.log("Failed inserting plugin element", e);
+              MavenLogger.log("Failed inserting plugin element", e); //$NON-NLS-1$
             }
           }
         }
@@ -159,24 +159,24 @@ public class InsertArtifactProposal implements ICompletionProposal, ICompletionP
   }
   
   private void generatePlugin(StringBuffer buffer, String lineDelim, IndexedArtifactFile af) {
-    buffer.append("<plugin>").append(lineDelim);
+    buffer.append("<plugin>").append(lineDelim); //$NON-NLS-1$
     buffer.append("<groupId>").append(af.group).append("</groupId>").append(lineDelim); //$NON-NLS-1$ //$NON-NLS-2$
     buffer.append("<artifactId>").append(af.artifact).append("</artifactId>").append(lineDelim); //$NON-NLS-1$ //$NON-NLS-2$
     //TODO for managed plugins (if version matches only?), don't add the version element
     buffer.append("<version>").append(af.version).append("</version>").append(lineDelim); //$NON-NLS-1$ //$NON-NLS-2$
-    buffer.append("</plugin>").append(lineDelim);
+    buffer.append("</plugin>").append(lineDelim); //$NON-NLS-1$
   }
   
   private void generatePlugins(StringBuffer buffer, String lineDelim, IndexedArtifactFile af) {
-    buffer.append("<plugins>").append(lineDelim);
+    buffer.append("<plugins>").append(lineDelim); //$NON-NLS-1$
     generatePlugin(buffer, lineDelim, af);
-    buffer.append("</plugins>").append(lineDelim);
+    buffer.append("</plugins>").append(lineDelim); //$NON-NLS-1$
   }
   
   private void generateBuild(StringBuffer buffer, String lineDelim, IndexedArtifactFile af) {
-    buffer.append("<build>").append(lineDelim);
+    buffer.append("<build>").append(lineDelim); //$NON-NLS-1$
     generatePlugins(buffer, lineDelim, af);
-    buffer.append("</build>").append(lineDelim);
+    buffer.append("</build>").append(lineDelim); //$NON-NLS-1$
   }  
   
   /**
@@ -230,7 +230,7 @@ public class InsertArtifactProposal implements ICompletionProposal, ICompletionP
   public static enum SearchType {
     
     PARENT(IIndex.SEARCH_PARENTS, Messages.InsertArtifactProposal_searchDialog_title, Messages.InsertArtifactProposal_display_name, MvnImages.IMG_OPEN_POM, Messages.InsertArtifactProposal_additionals), 
-    PLUGIN(IIndex.SEARCH_PLUGIN, "Select Plugin", "Insert plugin", MvnImages.IMG_OPEN_POM, "Opens a search dialog where you can select a Maven plugin to add to this project");
+    PLUGIN(IIndex.SEARCH_PLUGIN, Messages.InsertArtifactProposal_insert_plugin_title, Messages.InsertArtifactProposal_insert_plugin_display_name, MvnImages.IMG_OPEN_POM, Messages.InsertArtifactProposal_insert_plugin_description);
     
     private final String type;
     private final String windowTitle;
