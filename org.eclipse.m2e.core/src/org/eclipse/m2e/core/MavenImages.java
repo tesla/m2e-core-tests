@@ -13,7 +13,9 @@ package org.eclipse.m2e.core;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
+import org.eclipse.jface.viewers.DecorationOverlayIcon;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import org.eclipse.m2e.core.core.IMavenConstants;
@@ -31,11 +33,19 @@ public class MavenImages {
   
   public static final Image IMG_CLEAR_DISABLED = createImage("clear_disabled.gif"); //$NON-NLS-1$
 
-  public static final Image IMG_JAR = createImage("jar_obj.gif"); //$NON-NLS-1$
+  public static final String PATH_JAR = "jar_obj.gif"; //$NON-NLS-1$
+
+  public static final Image IMG_JAR = createImage(PATH_JAR); 
   
-  public static final Image IMG_VERSION = createImage("jar_version.gif"); //$NON-NLS-1$
+  public static final String PATH_LOCK = "lock_ovr.gif"; //$NON-NLS-1$
   
-  public static final Image IMG_VERSION_SRC = createImage("jar_src_version.gif"); //$NON-NLS-1$
+  public static final String PATH_VERSION = "jar_version.gif"; //$NON-NLS-1$
+  
+  public static final Image IMG_VERSION = createImage(PATH_VERSION);
+  
+  public static final String PATH_VERSION_SRC = "jar_src_version.gif"; //$NON-NLS-1$
+  
+  public static final Image IMG_VERSION_SRC = createImage(PATH_VERSION_SRC); 
   
   public static final Image IMG_JAVA = createImage("java_obj.gif"); //$NON-NLS-1$
   
@@ -135,6 +145,78 @@ public class MavenImages {
 
   private static ImageDescriptor createDescriptor(String image) {
     return AbstractUIPlugin.imageDescriptorFromPlugin(IMavenConstants.PLUGIN_ID, "icons/" + image); //$NON-NLS-1$
+  }
+  
+
+
+  private static ImageDescriptor createImageDescriptor( String key, ImageData imageData )
+  {
+      try
+      {
+          ImageRegistry imageRegistry = getImageRegistry();
+          if ( imageRegistry != null )
+          {
+              ImageDescriptor imageDescriptor = imageRegistry.getDescriptor( key );
+              if ( imageDescriptor != null )
+              {
+                  imageRegistry.remove( key );
+              }
+              {
+                  imageDescriptor = ImageDescriptor.createFromImageData( imageData );
+                  imageRegistry.put( key, imageDescriptor );
+              }
+              return imageDescriptor;
+          }
+      }
+      catch ( Exception ex )
+      {
+        MavenLogger.log(key, ex);
+      }
+      return null;
+  }
+
+  private static ImageDescriptor getOverlayImageDescriptor( String basekey, String overlaykey, int quadrant )
+  {
+      String key = basekey + overlaykey;
+      try
+      {
+          ImageRegistry imageRegistry = getImageRegistry();
+          if ( imageRegistry != null )
+          {
+              ImageDescriptor imageDescriptor = imageRegistry.getDescriptor( key );
+              if ( imageDescriptor == null )
+              {
+                  ImageDescriptor base = create( basekey );
+                  ImageDescriptor overlay = create( overlaykey );
+                  if ( base == null || overlay == null )
+                  {
+                      MavenLogger.log( "cannot construct overlay image descriptor for " + basekey + " " + overlaykey );
+                      return null;
+                  }
+                  imageDescriptor = createOverlayDescriptor( base, overlay, quadrant );
+                  imageRegistry.put( key, imageDescriptor );
+              }
+              return imageDescriptor;
+          }
+      }
+      catch ( Exception ex )
+      {
+        MavenLogger.log(key, ex);
+      }
+      return null;
+  }
+
+  public static Image getOverlayImage( String base, String overlay, int quadrant )
+  {
+      getOverlayImageDescriptor( base, overlay, quadrant );
+      ImageRegistry imageRegistry = getImageRegistry();
+      return imageRegistry == null ? null : imageRegistry.get( base + overlay );
+  }
+
+
+  private static ImageDescriptor createOverlayDescriptor( ImageDescriptor base, ImageDescriptor overlay, int quadrant )
+  {
+      return new DecorationOverlayIcon( base.createImage(), overlay, quadrant );
   }
 
 }

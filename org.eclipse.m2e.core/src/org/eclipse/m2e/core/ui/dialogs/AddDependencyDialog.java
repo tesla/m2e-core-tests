@@ -328,7 +328,8 @@ public class AddDependencyDialog extends AbstractMavenDialog {
 
     resultsViewer = new TreeViewer(resultsTree);
     resultsViewer.setContentProvider(new MavenPomSelectionComponent.SearchResultContentProvider());
-    resultsViewer.setLabelProvider(new MavenPomSelectionComponent.SearchResultLabelProvider(Collections.EMPTY_SET,
+    //TODO we want to have the artifacts marked for presence and management..
+    resultsViewer.setLabelProvider(new MavenPomSelectionComponent.SearchResultLabelProvider(Collections.EMPTY_SET, Collections.EMPTY_SET,
         IIndex.SEARCH_ARTIFACT));
 
     /*

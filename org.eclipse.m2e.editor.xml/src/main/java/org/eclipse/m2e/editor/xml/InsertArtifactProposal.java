@@ -1,10 +1,16 @@
 package org.eclipse.m2e.editor.xml;
 
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
+import org.apache.maven.model.Plugin;
+import org.apache.maven.model.PluginManagement;
+import org.apache.maven.project.MavenProject;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -21,11 +27,13 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.wst.sse.core.internal.provisional.IndexedRegion;
 
+import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.core.MavenLogger;
 import org.eclipse.m2e.core.embedder.ArtifactKey;
 import org.eclipse.m2e.core.index.IIndex;
 import org.eclipse.m2e.core.index.IndexedArtifactFile;
 import org.eclipse.m2e.core.internal.project.MavenMarkerManager;
+import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.ui.dialogs.MavenRepositorySearchDialog;
 import org.eclipse.m2e.editor.xml.InsertArtifactProposal.Configuration;
 import org.eclipse.m2e.editor.xml.internal.Messages;
@@ -49,9 +57,28 @@ public class InsertArtifactProposal implements ICompletionProposal, ICompletionP
   }
 
   public void apply(IDocument document) {
+    IProject prj = PomContentAssistProcessor.extractProject(sourceViewer);
+    Set<ArtifactKey> managedKeys = new HashSet<ArtifactKey>();
+    Set<ArtifactKey> usedKeys = new HashSet<ArtifactKey>();
+    if (prj != null) {
+      IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectManager().getProject(prj);
+      if (facade != null) {
+        MavenProject mp = facade.getMavenProject();
+        if (mp != null) {
+          PluginManagement pm = mp.getPluginManagement();
+          if (pm != null && pm.getPlugins() != null) {
+            for (Plugin plug : pm.getPlugins()) {
+              managedKeys.add(new ArtifactKey(plug.getGroupId(), plug.getArtifactId(), plug.getVersion(), null));
+            }
+          }
+        }
+      }
+    }
+    //TODO also collect the used plugin's list
+    
     MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(sourceViewer.getTextWidget().getShell(),
         config.getType().getWindowTitle(), config.getType().getIIndexType(),
-        Collections.<ArtifactKey> emptySet(), false);
+        usedKeys, managedKeys, false);
     if (config.getInitiaSearchString() != null) {
       dialog.setQuery(config.getInitiaSearchString());
     }
@@ -91,7 +118,7 @@ public class InsertArtifactProposal implements ICompletionProposal, ICompletionP
             if (build == null) {
               try {
                 StringBuffer buffer = new StringBuffer();
-                generateBuild(buffer, lineDelim, af);
+                generateBuild(buffer, lineDelim, af, skipVersion(current, af, managedKeys));
                 generatedLength = buffer.toString().length();
                 document.replace(offset, 0, buffer.toString());
                 
@@ -104,7 +131,6 @@ public class InsertArtifactProposal implements ICompletionProposal, ICompletionP
               }
               return;
             } else {
-              
               current = build;
               IndexedRegion reg = (IndexedRegion)current;
               //we need to update the offset to where we found the existing build element..
@@ -117,7 +143,7 @@ public class InsertArtifactProposal implements ICompletionProposal, ICompletionP
               //we need to create it.
               try {
                 StringBuffer buffer = new StringBuffer();
-                generatePlugins(buffer, lineDelim, af);
+                generatePlugins(buffer, lineDelim, af, skipVersion(current, af, managedKeys));
                 generatedLength = buffer.toString().length();
                 document.replace(offset, 0, buffer.toString());
                 
@@ -137,12 +163,11 @@ public class InsertArtifactProposal implements ICompletionProposal, ICompletionP
             }
           }
           if ("plugins".equals(current.getNodeName())) { //$NON-NLS-1$
-            
             //simple, just add the plugin here..
             //TODO we might want to look if the plugin is already defined in this section or not..
             try {
               StringBuffer buffer = new StringBuffer();
-              generatePlugin(buffer, lineDelim, af);
+              generatePlugin(buffer, lineDelim, af, skipVersion(current, af, managedKeys));
               generatedLength = buffer.toString().length();
               document.replace(offset, 0, buffer.toString());
               IContentFormatter formatter = textConfig.getContentFormatter(sourceViewer);
@@ -158,24 +183,41 @@ public class InsertArtifactProposal implements ICompletionProposal, ICompletionP
     }
   }
   
-  private void generatePlugin(StringBuffer buffer, String lineDelim, IndexedArtifactFile af) {
+  /**
+   * decide if we want to generate the version element or not..
+   * @param currentNode
+   * @param af
+   * @param managedList
+   * @return
+   */
+  private boolean skipVersion(Node currentNode, IndexedArtifactFile af, Set<ArtifactKey> managedList) {
+    if ("pluginManagement".equals(currentNode.getNodeName()) || "pluginManagement".equals(currentNode.getParentNode().getNodeName())) {
+      return false;
+    }
+    ArtifactKey key = new ArtifactKey(af.group, af.artifact, af.version, null);
+    return managedList.contains(key);
+  }
+  
+  private void generatePlugin(StringBuffer buffer, String lineDelim, IndexedArtifactFile af, boolean skipVersion) {
     buffer.append("<plugin>").append(lineDelim); //$NON-NLS-1$
     buffer.append("<groupId>").append(af.group).append("</groupId>").append(lineDelim); //$NON-NLS-1$ //$NON-NLS-2$
     buffer.append("<artifactId>").append(af.artifact).append("</artifactId>").append(lineDelim); //$NON-NLS-1$ //$NON-NLS-2$
-    //TODO for managed plugins (if version matches only?), don't add the version element
-    buffer.append("<version>").append(af.version).append("</version>").append(lineDelim); //$NON-NLS-1$ //$NON-NLS-2$
+    //for managed plugins (if version matches only?), don't add the version element
+    if (!skipVersion) {
+      buffer.append("<version>").append(af.version).append("</version>").append(lineDelim); //$NON-NLS-1$ //$NON-NLS-2$
+    }
     buffer.append("</plugin>").append(lineDelim); //$NON-NLS-1$
   }
   
-  private void generatePlugins(StringBuffer buffer, String lineDelim, IndexedArtifactFile af) {
+  private void generatePlugins(StringBuffer buffer, String lineDelim, IndexedArtifactFile af, boolean skipVersion) {
     buffer.append("<plugins>").append(lineDelim); //$NON-NLS-1$
-    generatePlugin(buffer, lineDelim, af);
+    generatePlugin(buffer, lineDelim, af, skipVersion);
     buffer.append("</plugins>").append(lineDelim); //$NON-NLS-1$
   }
   
-  private void generateBuild(StringBuffer buffer, String lineDelim, IndexedArtifactFile af) {
+  private void generateBuild(StringBuffer buffer, String lineDelim, IndexedArtifactFile af, boolean skipVersion) {
     buffer.append("<build>").append(lineDelim); //$NON-NLS-1$
-    generatePlugins(buffer, lineDelim, af);
+    generatePlugins(buffer, lineDelim, af, skipVersion);
     buffer.append("</build>").append(lineDelim); //$NON-NLS-1$
   }  
   

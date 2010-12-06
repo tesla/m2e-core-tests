@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.IColorProvider;
+import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -115,8 +116,9 @@ public class MavenPomSelectionComponent extends Composite {
   private static final long SHORT_DELAY = 150L;
 
   private static final long LONG_DELAY = 500L;
-
-  HashSet<String> artifactKeys = new HashSet<String>();
+  
+  final HashSet<String> artifactKeys = new HashSet<String>();
+  final HashSet<String> managedKeys = new HashSet<String>();
 
   public MavenPomSelectionComponent(Composite parent, int style) {
     super(parent, style);
@@ -202,7 +204,7 @@ public class MavenPomSelectionComponent extends Composite {
     });
   }
 
-  public void init(String queryText, String queryType, Set<ArtifactKey> artifacts) {
+  public void init(String queryText, String queryType, Set<ArtifactKey> artifacts, Set<ArtifactKey> managed) {
     this.queryType = queryType;
 
     if(queryText != null) {
@@ -215,9 +217,15 @@ public class MavenPomSelectionComponent extends Composite {
         artifactKeys.add(a.getGroupId() + ":" + a.getArtifactId() + ":" + a.getVersion()); //$NON-NLS-1$ //$NON-NLS-2$
       }
     }
-
+    if (managed != null) {
+      for (ArtifactKey a : managed) {
+        managedKeys.add(a.getGroupId() + ":" + a.getArtifactId()); //$NON-NLS-1$
+        managedKeys.add(a.getGroupId() + ":" + a.getArtifactId() + ":" + a.getVersion()); //$NON-NLS-1$ //$NON-NLS-2$
+      }
+    }
+    
     searchResultViewer.setContentProvider(new SearchResultContentProvider());
-    searchResultViewer.setLabelProvider(new SearchResultLabelProvider(artifactKeys, queryType));
+    searchResultViewer.setLabelProvider(new SearchResultLabelProvider(artifactKeys, managedKeys, queryType));
     searchResultViewer.addSelectionChangedListener(new ISelectionChangedListener() {
       public void selectionChanged(SelectionChangedEvent event) {
         IStructuredSelection selection = (IStructuredSelection) event.getSelection();
@@ -302,7 +310,19 @@ public class MavenPomSelectionComponent extends Composite {
 
   IndexedArtifactFile getSelectedIndexedArtifactFile(Object element) {
     if(element instanceof IndexedArtifact) {
-      return ((IndexedArtifact) element).getFiles().iterator().next();
+      //the idea here is that if we have a managed version for something, then the IndexedArtifact shall
+      //represent that value..
+      IndexedArtifact ia = (IndexedArtifact)element;
+      String key = ia.getGroupId() +":" + ia.getArtifactId();
+      if (managedKeys.contains(key)) {
+        for (IndexedArtifactFile file : ia.getFiles()) {
+          String key2 = file.group + ":" + file.artifact + ":" + file.version;
+          if (managedKeys.contains(key2)) {
+            return file;
+          }
+        }
+      }
+      return ia.getFiles().iterator().next();
     }
     return (IndexedArtifactFile) element;
   }
@@ -424,10 +444,18 @@ public class MavenPomSelectionComponent extends Composite {
     private final Set<String> artifactKeys;
 
     private final String queryType;
+    private final Set<String> managedKeys;
 
-    public SearchResultLabelProvider(Set<String> artifactKeys, String queryType) {
+    /**
+     * both managedkeys and artifctkeys are supposed to hold both gr:art:ver combos and gr:art combos
+     * @param artifactKeys
+     * @param managedKeys
+     * @param queryType
+     */
+    public SearchResultLabelProvider(Set<String> artifactKeys, Set<String> managedKeys, String queryType) {
       this.artifactKeys = artifactKeys;
       this.queryType = queryType;
+      this.managedKeys = managedKeys;
     }
 
     public String getText(Object element) {
@@ -438,7 +466,7 @@ public class MavenPomSelectionComponent extends Composite {
       } else if(element instanceof IndexedArtifactFile) {
         IndexedArtifactFile f = (IndexedArtifactFile) element;
 //        String displayName = getRepoDisplayName(f.repository);
-        return f.version + " [" + f.type + (f.classifier != null ? ", " + f.classifier : "") + "]"; //unless there is something reasonably short " [" + displayName + "]";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+        return f.version + " [" + (f.type == null ? "jar" : f.type) + (f.classifier != null ? ", " + f.classifier : "") +  "]"; //unless there is something reasonably short " [" + displayName + "]";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
       }
       return super.getText(element);
     }
@@ -450,13 +478,21 @@ public class MavenPomSelectionComponent extends Composite {
     public Color getForeground(Object element) {
       if(element instanceof IndexedArtifactFile) {
         IndexedArtifactFile f = (IndexedArtifactFile) element;
-        if(artifactKeys.contains(f.group + ":" + f.artifact + ":" + f.version)) { //$NON-NLS-1$ //$NON-NLS-2$
+        String key = f.group + ":" + f.artifact + ":" + f.version;//$NON-NLS-1$ //$NON-NLS-2$
+        if(artifactKeys.contains(key)) { 
           return Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY);
+        }
+        if (managedKeys.contains(key)) {
+          return Display.getDefault().getSystemColor(SWT.COLOR_DARK_GREEN); //TODO do we care? or is an icon overlay better?
         }
       } else if(element instanceof IndexedArtifact) {
         IndexedArtifact i = (IndexedArtifact) element;
-        if(artifactKeys.contains(i.getGroupId() + ":" + i.getArtifactId())) { //$NON-NLS-1$
+        String key = i.getGroupId() + ":" + i.getArtifactId();  //$NON-NLS-1$
+        if(artifactKeys.contains(key)) {
           return Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY);
+        }
+        if (managedKeys.contains(key)) {
+          return Display.getDefault().getSystemColor(SWT.COLOR_DARK_GREEN);//TODO do we care? or is an icon overlay better?
         }
       }
       return null;
@@ -469,12 +505,22 @@ public class MavenPomSelectionComponent extends Composite {
     public Image getImage(Object element) {
       if(element instanceof IndexedArtifactFile) {
         IndexedArtifactFile f = (IndexedArtifactFile) element;
-        if(f.sourcesExists == IIndex.PRESENT) {
+        String key = f.group + ":" + f.artifact + ":" + f.version;
+        if (managedKeys.contains(key)) {
+          return MavenImages.getOverlayImage(f.sourcesExists==IIndex.PRESENT ? MavenImages.PATH_VERSION_SRC : MavenImages.PATH_VERSION, 
+              MavenImages.PATH_LOCK, IDecoration.BOTTOM_LEFT);
+        }
+        
+        if(f.sourcesExists==IIndex.PRESENT) {
           return MavenImages.IMG_VERSION_SRC;
         }
         return MavenImages.IMG_VERSION;
       } else if(element instanceof IndexedArtifact) {
-        // IndexedArtifact i = (IndexedArtifact) element;
+        IndexedArtifact i = (IndexedArtifact) element;
+        String key = i.getGroupId() + ":" + i.getArtifactId();
+        if (managedKeys.contains(key)) {
+          return MavenImages.getOverlayImage(MavenImages.PATH_JAR, MavenImages.PATH_LOCK, IDecoration.BOTTOM_LEFT);
+        }
         return MavenImages.IMG_JAR;
       }
       return null;
