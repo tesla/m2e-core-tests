@@ -31,8 +31,10 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusEvent;
@@ -225,7 +227,7 @@ public class MavenPomSelectionComponent extends Composite {
     }
     
     searchResultViewer.setContentProvider(new SearchResultContentProvider());
-    searchResultViewer.setLabelProvider(new SearchResultLabelProvider(artifactKeys, managedKeys, queryType));
+    searchResultViewer.setLabelProvider(new DelegatingStyledCellLabelProvider(new SearchResultLabelProvider(artifactKeys, managedKeys, queryType)));
     searchResultViewer.addSelectionChangedListener(new ISelectionChangedListener() {
       public void selectionChanged(SelectionChangedEvent event) {
         IStructuredSelection selection = (IStructuredSelection) event.getSelection();
@@ -440,7 +442,7 @@ public class MavenPomSelectionComponent extends Composite {
     }
   }
 
-  public static class SearchResultLabelProvider extends LabelProvider implements IColorProvider {
+  public static class SearchResultLabelProvider extends LabelProvider implements IColorProvider, DelegatingStyledCellLabelProvider.IStyledLabelProvider {
     private final Set<String> artifactKeys;
 
     private final String queryType;
@@ -459,15 +461,6 @@ public class MavenPomSelectionComponent extends Composite {
     }
 
     public String getText(Object element) {
-      if(element instanceof IndexedArtifact) {
-        IndexedArtifact a = (IndexedArtifact) element;
-        String name = (a.getClassname() == null ? "" : a.getClassname() + "   " + a.getPackageName() + "   ") + a.getGroupId() + "   " + a.getArtifactId(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-        return name;
-      } else if(element instanceof IndexedArtifactFile) {
-        IndexedArtifactFile f = (IndexedArtifactFile) element;
-//        String displayName = getRepoDisplayName(f.repository);
-        return f.version + " [" + (f.type == null ? "jar" : f.type) + (f.classifier != null ? ", " + f.classifier : "") +  "]"; //unless there is something reasonably short " [" + displayName + "]";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-      }
       return super.getText(element);
     }
 
@@ -482,17 +475,11 @@ public class MavenPomSelectionComponent extends Composite {
         if(artifactKeys.contains(key)) { 
           return Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY);
         }
-        if (managedKeys.contains(key)) {
-          return Display.getDefault().getSystemColor(SWT.COLOR_DARK_GREEN); //TODO do we care? or is an icon overlay better?
-        }
       } else if(element instanceof IndexedArtifact) {
         IndexedArtifact i = (IndexedArtifact) element;
         String key = i.getGroupId() + ":" + i.getArtifactId();  //$NON-NLS-1$
         if(artifactKeys.contains(key)) {
           return Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY);
-        }
-        if (managedKeys.contains(key)) {
-          return Display.getDefault().getSystemColor(SWT.COLOR_DARK_GREEN);//TODO do we care? or is an icon overlay better?
         }
       }
       return null;
@@ -524,6 +511,34 @@ public class MavenPomSelectionComponent extends Composite {
         return MavenImages.IMG_JAR;
       }
       return null;
+    }
+
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider#getStyledText(java.lang.Object)
+     */
+    public StyledString getStyledText(Object element) {
+      if(element instanceof IndexedArtifact) {
+        IndexedArtifact a = (IndexedArtifact) element;
+        String key = a.getGroupId() + ":" + a.getArtifactId();  //$NON-NLS-1$
+        String name = (a.getClassname() == null ? "" : a.getClassname() + "   " + a.getPackageName() + "   ") + a.getGroupId() + "   " + a.getArtifactId(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+        StyledString ss = new StyledString();
+        ss.append(name);
+        if (managedKeys.contains(key)) {
+          ss.append("  (managed)", StyledString.DECORATIONS_STYLER);
+        }
+        return ss;
+      } else if(element instanceof IndexedArtifactFile) {
+        IndexedArtifactFile f = (IndexedArtifactFile) element;
+        String key = f.group + ":" + f.artifact + ":" + f.version;//$NON-NLS-1$ //$NON-NLS-2$
+        StyledString ss = new StyledString();
+        String name = f.version + " [" + (f.type == null ? "jar" : f.type) + (f.classifier != null ? ", " + f.classifier : "") +  "]"; 
+        ss.append(name);
+        if (managedKeys.contains(key)) {
+          ss.append("  (managed)", StyledString.DECORATIONS_STYLER);
+        }
+        return ss;
+      }
+      return new StyledString();
     }
 
   }
