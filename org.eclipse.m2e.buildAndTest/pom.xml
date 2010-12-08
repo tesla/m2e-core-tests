@@ -10,6 +10,12 @@
 	<artifactId>org.eclipse.m2e.buildAndTest</artifactId>
 	<packaging>pom</packaging>
 
+	<repositories>
+		<repository>
+			<id>snapshots</id>
+			<url>https://repository.sonatype.org/content/repositories/snapshots/</url>
+		</repository>
+	</repositories>
 	<profiles>
 		<profile>
 			<id>latest</id>
