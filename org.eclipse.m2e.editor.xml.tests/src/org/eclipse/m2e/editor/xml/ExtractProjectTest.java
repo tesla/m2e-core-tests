@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
+import org.eclipse.m2e.editor.xml.internal.XmlUtils;
 
 /**
  * Hello fellow tester:
@@ -47,7 +48,7 @@ public class ExtractProjectTest extends AbstractCompletionTest {
 
   //NOTE: this test is no extensive and doesn't cover scenario when the project is located outside of the workspace
   public void testExtractProject() throws Exception {
-    IProject prj = PomContentAssistProcessor.extractProject(sourceViewer);
+    IProject prj = XmlUtils.extractProject(sourceViewer);
     assertNotNull(prj);
     assertEquals(projects[1], prj);
     Job job = new Job("XXX") {
@@ -65,7 +66,7 @@ public class ExtractProjectTest extends AbstractCompletionTest {
     };
     job.schedule();
     job.join();
-    prj = PomContentAssistProcessor.extractProject(sourceViewer);
+    prj = XmlUtils.extractProject(sourceViewer);
     assertNull(prj);
   }
 
