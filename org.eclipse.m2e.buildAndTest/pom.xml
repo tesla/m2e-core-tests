@@ -10,12 +10,18 @@
 	<artifactId>org.eclipse.m2e.buildAndTest</artifactId>
 	<packaging>pom</packaging>
 
-    <modules>
-    	<module>../org.eclipse.m2e.tests.common</module>
-        <module>../org.eclipse.m2e.integration.tests.common</module>
-    	<module>../../m2e-core/org.eclipse.m2e.parent</module>
-    </modules>
 	<profiles>
+		<profile>
+			<id>latest</id>
+			<repositories>
+				<repository>
+					<id>m2e-lastest-build</id>
+					<layout>p2</layout>
+					<url>https://grid.sonatype.org/ci/view/M2E/job/pascal-experiment/jdk=java-5x,label=m2e/lastSuccessfulBuild/artifact/org.eclipse.m2e.site/target/site/</url>
+
+				</repository>
+			</repositories>
+		</profile>
 		<profile>
 			<id>uts</id>
 			<modules>
