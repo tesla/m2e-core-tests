@@ -23,8 +23,7 @@
 				<repository>
 					<id>m2e-lastest-build</id>
 					<layout>p2</layout>
-					<url>https://grid.sonatype.org/ci/view/M2E/job/pascal-experiment/jdk=java-5x,label=m2e/lastSuccessfulBuild/artifact/org.eclipse.m2e.site/target/site/</url>
-
+					<url>https://grid.sonatype.org/ci/view/M2E/job/m2eclipse-core-e37-at-eclipse/jdk=java-5x,label=m2e/lastSuccessfulBuild/artifact/org.eclipse.m2e.site/target/site/</url>
 				</repository>
 			</repositories>
 		</profile>
