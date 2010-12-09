@@ -46,7 +46,7 @@ import org.eclipse.m2e.tests.common.HttpServer;
 /**
  * @author dyocum
  */
-public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
+public abstract class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
   private static final String SETTINGS_NO_MIRROR = "src/org/eclipse/m2e/tests/internal/index/no_mirror_settings.xml";
 
   private static final String SETTINGS_PUBLIC_JBOSS_NOTMIRRORED = "src/org/eclipse/m2e/tests/internal/index/public_nonmirrored_repo_settings.xml";
