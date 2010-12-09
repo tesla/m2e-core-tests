@@ -44,7 +44,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertTrue(lifecycleMapping instanceof JarLifecycleMapping);
 
     List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
-    assertEquals(2, configurators.size());
+    assertEquals(configurators.toString(), 2, configurators.size());
     assertTrue(configurators.get(0) instanceof MavenResourcesProjectConfigurator);
     assertTrue(configurators.get(1) instanceof JavaProjectConfigurator);
 
@@ -64,7 +64,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertTrue(lifecycleMapping instanceof CustomizableLifecycleMapping);
 
     List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
-    assertEquals(2, configurators.size());
+    assertEquals(configurators.toString(), 2, configurators.size());
     assertTrue(configurators.get(1) instanceof MojoExecutionProjectConfigurator);
 
     List<MojoExecution> notCoveredMojoExecutions = lifecycleMapping.getNotCoveredMojoExecutions(facade, monitor);
@@ -87,7 +87,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertTrue(lifecycleMapping instanceof CustomizableLifecycleMapping);
 
     List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
-    assertEquals(1, configurators.size());
+    assertEquals(configurators.toString(), 1, configurators.size());
     assertTrue(configurators.get(0) instanceof JavaProjectConfigurator);
 
     List<MojoExecution> notCoveredMojoExecutions = lifecycleMapping.getNotCoveredMojoExecutions(facade, monitor);
