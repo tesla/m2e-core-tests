@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lifecycleMappingMetadata>
+	<lifecycleMappings>
+		<lifecycleMapping>
+			<!-- The id matches the id declared in the eclipse extension for the lifecycle 
+				mapping -->
+			<id>jar</id>
+			<packaging-type>jar</packaging-type>
+		</lifecycleMapping>
+	</lifecycleMappings>
+
+	<mojos>
+		<mojo>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-jar-plugin</artifactId>
+			<goals>
+				<goal>jar</goal>
+			</goals>
+			<versionRange>[2.0,)</versionRange>
+			<action>
+				<ignore />
+			</action>
+		</mojo>
+		<mojo>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-resources-plugin</artifactId>
+			<goals>
+				<goal>resources</goal>
+			</goals>
+			<versionRange>[2.0,)</versionRange>
+			<action>
+				<execute />
+			</action>
+		</mojo>
+	</mojos>
+</lifecycleMappingMetadata>

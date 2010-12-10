@@ -11,20 +11,26 @@
 
 package org.eclipse.m2e.tests.configurators;
 
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.maven.plugin.MojoExecution;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.m2e.core.core.IMavenConstants;
+import org.eclipse.m2e.core.internal.lifecycle.LifecycleMappingFactory;
 import org.eclipse.m2e.core.internal.project.MissingLifecycleMapping;
 import org.eclipse.m2e.core.internal.project.MojoExecutionProjectConfigurator;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.configurator.AbstractProjectConfigurator;
 import org.eclipse.m2e.core.project.configurator.CustomizableLifecycleMapping;
 import org.eclipse.m2e.core.project.configurator.ILifecycleMapping;
+import org.eclipse.m2e.core.project.configurator.LifecycleMappingMetadata;
 import org.eclipse.m2e.core.project.configurator.MavenResourcesProjectConfigurator;
+import org.eclipse.m2e.core.project.configurator.PluginExecutionAction;
+import org.eclipse.m2e.core.project.configurator.PluginExecutionMetadata;
 import org.eclipse.m2e.jdt.internal.JarLifecycleMapping;
 import org.eclipse.m2e.jdt.internal.JavaProjectConfigurator;
 import org.eclipse.m2e.tests.common.AbstractLifecycleMappingTest;
@@ -33,6 +39,100 @@ import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
 @SuppressWarnings("restriction")
 public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
+  public void testGetLifecycleMappingMetadata() throws Exception {
+    IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/lifecycleMappingMetadata",
+        "testGetLifecycleMappingMetadata/pom.xml");
+    assertNotNull("Expected not null MavenProjectFacade", facade);
+    IProject project = facade.getProject();
+    WorkspaceHelpers.assertNoErrors(project);
+
+    List<LifecycleMappingMetadata> metadata = LifecycleMappingFactory.getLifecycleMappingMetadata(facade
+        .getMavenProject());
+    assertNotNull(metadata);
+    assertEquals(1, metadata.size());
+    assertEquals("testLifecycleMappingMetadata", metadata.get(0).getGroupId());
+    assertEquals("testLifecycleMappingMetadata1", metadata.get(0).getArtifactId());
+    assertEquals("0.0.1", metadata.get(0).getVersion());
+
+    List<PluginExecutionMetadata> pluginExecutions = metadata.get(0).getPluginExecutions();
+    assertEquals(3, pluginExecutions.size());
+    Set<String> goals = new LinkedHashSet<String>();
+
+    goals.add("compile");
+    goals.add("testCompile");
+    assertPluginExecutionMetadata("org.apache.maven.plugins", "maven-compiler-plugin", "[2.0,)", goals,
+        PluginExecutionAction.CONFIGURATOR, "org.eclipse.m2e.jdt.javaConfigurator", pluginExecutions.get(0));
+
+    goals = new LinkedHashSet<String>();
+    goals.add("jar");
+    assertPluginExecutionMetadata("org.apache.maven.plugins", "maven-jar-plugin", "[2.0,)", goals,
+        PluginExecutionAction.IGNORE, null, pluginExecutions.get(1));
+
+    goals = new LinkedHashSet<String>();
+    goals.add("resources");
+    assertPluginExecutionMetadata("org.apache.maven.plugins", "maven-resources-plugin", "[2.0,)", goals,
+        PluginExecutionAction.EXECUTE, null, pluginExecutions.get(2));
+  }
+
+  public void testGetLifecycleMappingMetadataOverride() throws Exception {
+    IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/lifecycleMappingMetadata",
+        "testGetLifecycleMappingMetadataOverride/pom.xml");
+    assertNotNull("Expected not null MavenProjectFacade", facade);
+    IProject project = facade.getProject();
+    WorkspaceHelpers.assertNoErrors(project);
+
+    List<LifecycleMappingMetadata> metadata = LifecycleMappingFactory.getLifecycleMappingMetadata(facade
+        .getMavenProject());
+    assertNotNull(metadata);
+    assertEquals(1, metadata.size());
+    assertEquals("testLifecycleMappingMetadata", metadata.get(0).getGroupId());
+    assertEquals("testLifecycleMappingMetadata2", metadata.get(0).getArtifactId());
+    assertEquals("0.0.2", metadata.get(0).getVersion());
+
+    List<PluginExecutionMetadata> pluginExecutions = metadata.get(0).getPluginExecutions();
+    assertEquals(2, pluginExecutions.size());
+    Set<String> goals = new LinkedHashSet<String>();
+
+    goals.add("compile");
+    goals.add("testCompile");
+    assertPluginExecutionMetadata("org.apache.maven.plugins", "maven-compiler-plugin", "[3.0,)", goals,
+        PluginExecutionAction.CONFIGURATOR, "org.eclipse.m2e.jdt.javaConfigurator", pluginExecutions.get(0));
+
+    goals = new LinkedHashSet<String>();
+    goals.add("jar");
+    assertPluginExecutionMetadata("org.apache.maven.plugins", "maven-jar-plugin", "[3.0,)", goals,
+        PluginExecutionAction.IGNORE, null, pluginExecutions.get(1));
+  }
+
+  public void testGetLifecycleMappingMetadataMerge() throws Exception {
+    IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/lifecycleMappingMetadata",
+        "testGetLifecycleMappingMetadataMerge/pom.xml");
+    assertNotNull("Expected not null MavenProjectFacade", facade);
+    IProject project = facade.getProject();
+    WorkspaceHelpers.assertNoErrors(project);
+
+    List<LifecycleMappingMetadata> metadata = LifecycleMappingFactory.getLifecycleMappingMetadata(facade
+        .getMavenProject());
+    assertNotNull(metadata);
+    assertEquals(2, metadata.size());
+    assertEquals("testLifecycleMappingMetadata", metadata.get(0).getGroupId());
+    assertEquals("testLifecycleMappingMetadata2", metadata.get(0).getArtifactId());
+    assertEquals("0.0.2", metadata.get(0).getVersion());
+    assertEquals("testLifecycleMappingMetadata", metadata.get(1).getGroupId());
+    assertEquals("testLifecycleMappingMetadata1", metadata.get(1).getArtifactId());
+    assertEquals("0.0.1", metadata.get(1).getVersion());
+  }
+
+  private void assertPluginExecutionMetadata(String groupId, String artifactId, String versionRange, Set<String> goals,
+      PluginExecutionAction action, String configuratorId, PluginExecutionMetadata metadata) {
+    assertEquals(groupId, metadata.getFilter().getGroupId());
+    assertEquals(artifactId, metadata.getFilter().getArtifactId());
+    assertEquals(versionRange, metadata.getFilter().getVersionRange());
+    assertEquals(goals, metadata.getFilter().getGoals());
+    assertEquals(action, metadata.getAction());
+    assertEquals(configuratorId, metadata.getConfiguratorId());
+  }
+
   public void testDefaultJarLifecycleMapping() throws Exception {
     IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping", "default-jar/pom.xml");
     assertNotNull("Expected not null MavenProjectFacade", facade);

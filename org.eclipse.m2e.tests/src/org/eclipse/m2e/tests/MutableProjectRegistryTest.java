@@ -212,6 +212,6 @@ public class MutableProjectRegistryTest extends AbstractMavenProjectTestCase {
 
   private MavenProjectFacade newProjectFacade(IFile pom) throws Exception {
     MavenProject mavenProject = maven.readProject(pom.getLocation().toFile(), monitor);
-    return new MavenProjectFacade(null, pom, mavenProject, null, null);
+    return new MavenProjectFacade(null, pom, mavenProject, null);
   }
 }
