@@ -117,14 +117,14 @@ public class NexusIndexManagerSearchTest extends AbstractNexusIndexManagerTest {
     }
     assertTrue(hasVersion);
 
-    search = indexManager.search(new SourcedSearchExpression("junit"), IIndex.SEARCH_ARTIFACT, IIndex.SEARCH_JAVADOCS);
+    search = indexManager.search(new UserInputSearchExpression("junit"), IIndex.SEARCH_ARTIFACT, IIndex.SEARCH_JAVADOCS);
+      assertTrue(search.size() > 0);
+    search = indexManager.search(new UserInputSearchExpression("junit"), IIndex.SEARCH_ARTIFACT, IIndex.SEARCH_SOURCES);
     assertTrue(search.size() > 0);
-    search = indexManager.search(new SourcedSearchExpression("junit"), IIndex.SEARCH_ARTIFACT, IIndex.SEARCH_SOURCES);
-    assertTrue(search.size() > 0);
-    search = indexManager.search(new SourcedSearchExpression("junit"), IIndex.SEARCH_ARTIFACT, IIndex.SEARCH_TESTS);
+    search = indexManager.search(new UserInputSearchExpression("junit"), IIndex.SEARCH_ARTIFACT, IIndex.SEARCH_TESTS);
     assertTrue(search.size() > 0);
 
-    Map<String, IndexedArtifact> noResultsSearch = indexManager.search(new SourcedSearchExpression("beepbeep-nothing"),
+    Map<String, IndexedArtifact> noResultsSearch = indexManager.search(new UserInputSearchExpression("beepbeep-nothing"),
         IIndex.SEARCH_ARTIFACT);
     assertTrue(noResultsSearch.size() == 0);
   }
