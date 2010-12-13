@@ -21,6 +21,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.internal.lifecycle.LifecycleMappingFactory;
+import org.eclipse.m2e.core.internal.project.IgnoreMojoProjectConfiguration;
 import org.eclipse.m2e.core.internal.project.MissingLifecycleMapping;
 import org.eclipse.m2e.core.internal.project.MojoExecutionProjectConfigurator;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
@@ -39,6 +40,54 @@ import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
 @SuppressWarnings("restriction")
 public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
+  public void testMojoExecutionIgnore() throws Exception {
+    IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/lifecycleMappingMetadata",
+        "testMojoExecutionIgnore/pom.xml");
+    assertNotNull("Expected not null MavenProjectFacade", facade);
+    IProject project = facade.getProject();
+    WorkspaceHelpers.assertNoErrors(project);
+
+    ILifecycleMapping lifecycleMapping = facade.getLifecycleMapping(monitor);
+    assertNotNull(lifecycleMapping);
+    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
+    assertEquals(configurators.toString(), 3, configurators.size());
+    AbstractProjectConfigurator configurator = configurators.get(0);
+    assertNotNull(configurator);
+    assertTrue(configurator.getClass().getCanonicalName(), configurator instanceof IgnoreMojoProjectConfiguration);
+  }
+
+  public void testMojoExecutionExecute() throws Exception {
+    IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/lifecycleMappingMetadata",
+        "testMojoExecutionExecute/pom.xml");
+    assertNotNull("Expected not null MavenProjectFacade", facade);
+    IProject project = facade.getProject();
+    WorkspaceHelpers.assertNoErrors(project);
+
+    ILifecycleMapping lifecycleMapping = facade.getLifecycleMapping(monitor);
+    assertNotNull(lifecycleMapping);
+    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
+    assertEquals(configurators.toString(), 3, configurators.size());
+    AbstractProjectConfigurator configurator = configurators.get(0);
+    assertNotNull(configurator);
+    assertTrue(configurator.getClass().getCanonicalName(), configurator instanceof MojoExecutionProjectConfigurator);
+  }
+
+  public void testMojoExecutionConfigurator() throws Exception {
+    IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/lifecycleMappingMetadata",
+        "testMojoExecutionConfigurator/pom.xml");
+    assertNotNull("Expected not null MavenProjectFacade", facade);
+    IProject project = facade.getProject();
+    WorkspaceHelpers.assertNoErrors(project);
+
+    ILifecycleMapping lifecycleMapping = facade.getLifecycleMapping(monitor);
+    assertNotNull(lifecycleMapping);
+    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
+    assertEquals(configurators.toString(), 3, configurators.size());
+    AbstractProjectConfigurator configurator = configurators.get(0);
+    assertNotNull(configurator);
+    assertTrue(configurator.getClass().getCanonicalName(), configurator instanceof MavenResourcesProjectConfigurator);
+  }
+
   public void testGetLifecycleMappingMetadata() throws Exception {
     IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/lifecycleMappingMetadata",
         "testGetLifecycleMappingMetadata/pom.xml");
