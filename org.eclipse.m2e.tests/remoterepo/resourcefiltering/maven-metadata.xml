@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?><metadata>
-  <plugins>
-    <plugin>
-      <name>Unnamed - resourcefiltering:p006helper:maven-plugin:0.0.1-SNAPSHOT</name>
-      <prefix>p006helper</prefix>
-      <artifactId>p006helper</artifactId>
-    </plugin>
-  </plugins>
-</metadata>
