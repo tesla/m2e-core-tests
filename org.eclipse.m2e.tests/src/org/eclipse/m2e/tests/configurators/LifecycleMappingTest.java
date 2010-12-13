@@ -130,7 +130,9 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertEquals(versionRange, metadata.getFilter().getVersionRange());
     assertEquals(goals, metadata.getFilter().getGoals());
     assertEquals(action, metadata.getAction());
-    assertEquals(configuratorId, metadata.getConfiguratorId());
+    if(configuratorId != null) {
+      assertEquals(configuratorId, metadata.getConfiguration().getChild("id").getValue());
+    }
   }
 
   public void testDefaultJarLifecycleMapping() throws Exception {

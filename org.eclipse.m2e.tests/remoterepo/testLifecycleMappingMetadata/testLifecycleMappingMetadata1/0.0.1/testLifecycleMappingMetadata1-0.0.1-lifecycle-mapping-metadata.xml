@@ -45,7 +45,9 @@
 			</goals>
 			<versionRange>[2.0,)</versionRange>
 			<action>
-				<execute />
+				<execute>
+					<runOnIncremental>true</runOnIncremental>
+				</execute>
 			</action>
 		</mojo>
 	</mojos>
