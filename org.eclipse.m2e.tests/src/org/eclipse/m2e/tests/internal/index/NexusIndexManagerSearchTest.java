@@ -13,6 +13,7 @@ package org.eclipse.m2e.tests.internal.index;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
@@ -170,5 +171,18 @@ public class NexusIndexManagerSearchTest extends AbstractNexusIndexManagerTest {
     Collection<IndexedArtifact> result = indexManager.getIndex((IProject) null).find(
         new UserInputSearchExpression("org.ju"), null, null, null);
     assertTrue(String.format("Wrong result set returned! (size=%s)", new Object[] {result.size()}), result.size() > 0);
+  }
+  
+  public void testSorting() throws CoreException {
+    Collection<IndexedArtifact> result = indexManager.getIndex((IProject) null).find(new UserInputSearchExpression("junit"), null, null, null);
+    assertTrue(result.size() > 1);
+    
+    Iterator<IndexedArtifact> iterator = result.iterator();
+    IndexedArtifact previous =  iterator.next();
+    while(iterator.hasNext()) {
+      IndexedArtifact indexedArtifact = iterator.next();
+      assertTrue(previous.compareTo(indexedArtifact) < 0);
+      previous = indexedArtifact;
+    }
   }
 }
