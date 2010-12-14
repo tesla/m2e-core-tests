@@ -4,5 +4,5 @@
   <groupId>lifecyclemapping</groupId>
   <artifactId>unknownPackagingType</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <packaging>war</packaging>
+  <packaging>rar</packaging>
 </project>

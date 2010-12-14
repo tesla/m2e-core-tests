@@ -1,14 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <lifecycleMappingMetadata>
-	<lifecycleMappings>
-		<lifecycleMapping>
-			<!-- The id matches the id declared in the eclipse extension for the lifecycle 
-				mapping -->
-			<id>jar</id>
-			<packaging-type>jar</packaging-type>
-		</lifecycleMapping>
-	</lifecycleMappings>
-
 	<mojos>
 		<mojo>
 			<groupId>org.codehaus.modello</groupId>

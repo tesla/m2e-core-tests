@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+
+<model>
+  <id>test</id>
+  <name>Test</name>
+
+  <defaults>
+    <default>
+      <key>package</key>
+      <value>generated.test</value>
+    </default>
+  </defaults>
+
+  <classes>
+    <class rootElement="true">
+      <name>GeneratedTest</name>
+    </class>
+  </classes>
+
+</model>

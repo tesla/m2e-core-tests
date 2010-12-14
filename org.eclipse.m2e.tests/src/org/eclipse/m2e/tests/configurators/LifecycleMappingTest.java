@@ -22,7 +22,6 @@ import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.internal.lifecycle.LifecycleMappingFactory;
 import org.eclipse.m2e.core.internal.project.IgnoreMojoProjectConfiguration;
-import org.eclipse.m2e.core.internal.project.MissingLifecycleMapping;
 import org.eclipse.m2e.core.internal.project.MojoExecutionProjectConfigurator;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.configurator.AbstractProjectConfigurator;
@@ -40,6 +39,18 @@ import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
 @SuppressWarnings("restriction")
 public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
+  public void testLifecycleMappingSpecifiedInMetadata() throws Exception {
+    IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/lifecycleMappingMetadata",
+        "testLifecycleMappingSpecifiedInMetadata/pom.xml");
+    assertNotNull("Expected not null MavenProjectFacade", facade);
+    IProject project = facade.getProject();
+    WorkspaceHelpers.assertNoErrors(project);
+
+    ILifecycleMapping lifecycleMapping = facade.getLifecycleMapping(monitor);
+    assertNotNull(lifecycleMapping);
+    assertTrue(lifecycleMapping.getClass().getCanonicalName(), lifecycleMapping instanceof JarLifecycleMapping);
+  }
+
   public void testMojoExecutionIgnore() throws Exception {
     IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/lifecycleMappingMetadata",
         "testMojoExecutionIgnore/pom.xml");
@@ -88,6 +99,29 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertTrue(configurator.getClass().getCanonicalName(), configurator instanceof MavenResourcesProjectConfigurator);
   }
 
+  public void testMissingLifecycleMappingMetadata() throws Exception {
+    IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/lifecycleMappingMetadata",
+        "testMissingLifecycleMappingMetadata/pom.xml");
+    assertNotNull("Expected not null MavenProjectFacade", facade);
+
+    IProject project = facade.getProject();
+
+    List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
+    assertNotNull(errorMarkers);
+    assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
+
+    String expectedErrorMessage = "Could not resolve artifact testLifecycleMappingMetadata:missing:xml:lifecycle-mapping-metadata:0.0.1";
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+        1 /*lineNumber*/, errorMarkers.get(0));
+
+    expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"jar\")";
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+        1 /*lineNumber*/, errorMarkers.get(1));
+
+    ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade, monitor);
+    assertNull(lifecycleMapping);
+  }
+
   public void testGetLifecycleMappingMetadata() throws Exception {
     IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/lifecycleMappingMetadata",
         "testGetLifecycleMappingMetadata/pom.xml");
@@ -103,6 +137,11 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertEquals("testLifecycleMappingMetadata1", metadata.get(0).getArtifactId());
     assertEquals("0.0.1", metadata.get(0).getVersion());
 
+    // Assert lifecycle mappings
+    assertEquals("fakeid", metadata.get(0).getLifecycleMappingId("war"));
+    assertNull(metadata.get(0).getLifecycleMappingId("jar"));
+
+    // Assert mojo/plugin executions
     List<PluginExecutionMetadata> pluginExecutions = metadata.get(0).getPluginExecutions();
     assertEquals(3, pluginExecutions.size());
     Set<String> goals = new LinkedHashSet<String>();
@@ -260,14 +299,12 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping", "missing/pom.xml");
     assertNotNull("Expected not null MavenProjectFacade", facade);
     IProject project = facade.getProject();
-    String expectedErrorMessage = "Unknown or missing lifecycle mapping with id=\"MISSING\" (project packaging type=\"jar\")";
+    String expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"jar\")";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
         1 /*lineNumber*/, project);
 
     ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade, monitor);
-    assertTrue(lifecycleMapping instanceof MissingLifecycleMapping);
-    assertEquals("unknown-or-missing", ((MissingLifecycleMapping) lifecycleMapping).getMissingMappingId());
-    assertEquals(0, lifecycleMapping.getNotCoveredMojoExecutions(facade, monitor).size());
+    assertNull(lifecycleMapping);
 
     project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
     waitForJobsToComplete();
@@ -282,13 +319,12 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping", "unknownPackagingType/pom.xml");
     assertNotNull("Expected not null MavenProjectFacade", facade);
     IProject project = facade.getProject();
-    String expectedErrorMessage = "Unknown or missing lifecycle mapping with id=\"MISSING\" (project packaging type=\"war\")";
+    String expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"rar\")";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
         1 /*lineNumber*/, project);
 
     ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade, monitor);
-    assertTrue(lifecycleMapping instanceof MissingLifecycleMapping);
-    assertEquals(0, lifecycleMapping.getNotCoveredMojoExecutions(facade, monitor).size());
+    assertNull(lifecycleMapping);
 
     project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
     waitForJobsToComplete();

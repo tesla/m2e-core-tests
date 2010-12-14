@@ -1,33 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project>
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>lifecycleMappingMetadataTests</groupId>
-	<artifactId>testMojoExecutionConfigurator</artifactId>
-	<name></name>
+	<groupId>lifecycleMappingMetadata</groupId>
+	<artifactId>testLifecycleMappingSpecifiedInMetadata</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	<packaging>war</packaging>
 
 	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.codehaus.modello</groupId>
-				<artifactId>modello-maven-plugin</artifactId>
-				<version>1.1</version>
-				<configuration>
-					<version>4.0.0</version>
-					<models>
-						<model>src/main/mdo/model.mdo</model>
-					</models>
-				</configuration>
-				<executions>
-					<execution>
-						<id>standard</id>
-						<goals>
-							<goal>java</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
 		<pluginManagement>
 			<plugins>
 				<plugin>
@@ -41,7 +20,7 @@
 						<sources>
 							<source>
 								<groupId>testLifecycleMappingMetadata</groupId>
-								<artifactId>testMojoExecutionConfigurator</artifactId>
+								<artifactId>testLifecycleMappingSpecifiedInMetadata</artifactId>
 								<version>0.0.1</version>
 							</source>
 						</sources>

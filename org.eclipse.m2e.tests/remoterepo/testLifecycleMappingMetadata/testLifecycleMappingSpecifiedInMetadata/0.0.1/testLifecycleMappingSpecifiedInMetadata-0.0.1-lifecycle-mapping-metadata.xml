@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lifecycleMappingMetadata>
+	<lifecycleMappings>
+		<lifecycleMapping>
+			<!-- The id matches the id declared in the eclipse extension for the lifecycle 
+				mapping -->
+			<id>org.eclipse.m2e.jdt.JarLifecycleMapping</id>
+			<packagingType>war</packagingType>
+		</lifecycleMapping>
+	</lifecycleMappings>
+</lifecycleMappingMetadata>

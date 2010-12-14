@@ -4,8 +4,8 @@
 		<lifecycleMapping>
 			<!-- The id matches the id declared in the eclipse extension for the lifecycle 
 				mapping -->
-			<id>jar</id>
-			<packaging-type>jar</packaging-type>
+			<id>fakeid</id>
+			<packagingType>war</packagingType>
 		</lifecycleMapping>
 	</lifecycleMappings>
 
