@@ -75,12 +75,14 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
   }
 
   protected void tearDown() throws Exception {
-    manager.removeMavenProjectChangedListener(listener);
-    listener = null;
-    events = null;
-    manager = null;
-
-    super.tearDown();
+    try {
+      manager.removeMavenProjectChangedListener(listener);
+      listener = null;
+      events = null;
+      manager = null;
+    } finally {
+      super.tearDown();
+    }
   }
 
   private IProject createExisting(String name) throws Exception {
@@ -803,6 +805,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
           if(event.getJob() instanceof ProjectRegistryRefreshJob) {
             // cancel all those concurrent refresh jobs, we want to monitor the main thread only
             event.getJob().cancel();
+            System.out.println(getName() + ": ProjectRegistryRefreshJob was cancelled");
           }
         }
       };
