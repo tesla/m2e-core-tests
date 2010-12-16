@@ -26,7 +26,7 @@
       <id>latest-http</id>
       <repositories>
         <repository>
-          <id>m2e-lastest-build</id>
+          <id>m2e-latest-build</id>
           <layout>p2</layout>
           <url>https://grid.sonatype.org/ci/view/M2E/job/m2eclipse-core-e37-at-eclipse/jdk=java-5x,label=m2e/lastSuccessfulBuild/artifact/org.eclipse.m2e.site/target/site/</url>
         </repository>
@@ -37,7 +37,7 @@
       <id>latest</id>
       <repositories>
         <repository>
-          <id>m2e-lastest-build</id>
+          <id>m2e-latest-build</id>
           <layout>p2</layout>
           <url>file:/C:/slave/workspace/m2eclipse-core-e37-at-eclipse/jdk/java-5x/label/m2e/org.eclipse.m2e.site/target/site</url>
         </repository>
