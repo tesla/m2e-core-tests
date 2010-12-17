@@ -15,10 +15,6 @@
       <url>https://repository.sonatype.org/content/repositories/snapshots/</url>
     </repository>
   </repositories>
-  <modules>
-    <module>../org.eclipse.m2e.pr</module>
-    <module>../org.eclipse.m2e.sonatype.feature</module>
-  </modules>
   
   <profiles>
     <profile>
