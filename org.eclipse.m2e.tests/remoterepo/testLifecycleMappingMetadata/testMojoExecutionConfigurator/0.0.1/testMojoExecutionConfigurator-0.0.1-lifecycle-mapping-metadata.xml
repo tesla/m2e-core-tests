@@ -1,18 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <lifecycleMappingMetadata>
-	<pluginExecutions>
-		<pluginExecution>
-			<groupId>org.codehaus.modello</groupId>
-			<artifactId>modello-maven-plugin</artifactId>
-			<goals>
-				<goal>java</goal>
-			</goals>
-			<versionRange>[1.0,)</versionRange>
-			<action>
-				<configurator>
-					<id>org.eclipse.m2e.core.project.configurator.MavenResourcesProjectConfigurator</id>
-				</configurator>
-			</action>
-		</pluginExecution>
-	</pluginExecutions>
+  <pluginExecutions>
+    <pluginExecution>
+      <filter>
+        <groupId>org.codehaus.modello</groupId>
+        <artifactId>modello-maven-plugin</artifactId>
+        <goals>
+          <goal>java</goal>
+        </goals>
+        <versionRange>[1.0,)</versionRange>
+      </filter>
+      <action>
+        <configurator>
+          <id>org.eclipse.m2e.core.project.configurator.MavenResourcesProjectConfigurator</id>
+        </configurator>
+      </action>
+    </pluginExecution>
+  </pluginExecutions>
 </lifecycleMappingMetadata>
