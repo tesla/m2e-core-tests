@@ -10,27 +10,27 @@
 
   <pluginExecutions>
     <pluginExecution>
-      <filter>
+      <pluginExecutionFilter>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
         <goals>
           <goal>jar</goal>
         </goals>
         <versionRange>[2.0,)</versionRange>
-      </filter>
+      </pluginExecutionFilter>
       <action>
         <ignore />
       </action>
     </pluginExecution>
     <pluginExecution>
-      <filter>
+      <pluginExecutionFilter>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
         <goals>
           <goal>resources</goal>
         </goals>
         <versionRange>[2.0,)</versionRange>
-      </filter>
+      </pluginExecutionFilter>
       <action>
         <execute />
       </action>

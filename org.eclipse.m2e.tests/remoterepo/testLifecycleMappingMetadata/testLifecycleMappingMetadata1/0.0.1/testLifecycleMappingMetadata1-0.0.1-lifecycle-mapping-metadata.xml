@@ -10,7 +10,7 @@
 
   <pluginExecutions>
     <pluginExecution>
-      <filter>
+      <pluginExecutionFilter>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <goals>
@@ -18,7 +18,7 @@
           <goal>testCompile</goal>
         </goals>
         <versionRange>[2.0,)</versionRange>
-      </filter>
+      </pluginExecutionFilter>
       <action>
         <configurator>
           <!-- The id matches the id declared in the eclipse extension for the project configurator -->
@@ -27,27 +27,27 @@
       </action>
     </pluginExecution>
     <pluginExecution>
-      <filter>
+      <pluginExecutionFilter>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
         <goals>
           <goal>jar</goal>
         </goals>
         <versionRange>[2.0,)</versionRange>
-      </filter>
+      </pluginExecutionFilter>
       <action>
         <ignore />
       </action>
     </pluginExecution>
     <pluginExecution>
-      <filter>
+      <pluginExecutionFilter>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
         <goals>
           <goal>resources</goal>
         </goals>
         <versionRange>[2.0,)</versionRange>
-      </filter>
+      </pluginExecutionFilter>
       <action>
         <execute>
           <runOnIncremental>true</runOnIncremental>

@@ -2,14 +2,14 @@
 <lifecycleMappingMetadata>
   <pluginExecutions>
     <pluginExecution>
-      <filter>
+      <pluginExecutionFilter>
         <groupId>org.codehaus.modello</groupId>
         <artifactId>modello-maven-plugin</artifactId>
         <goals>
           <goal>java</goal>
         </goals>
         <versionRange>[1.0,)</versionRange>
-      </filter>
+      </pluginExecutionFilter>
       <action>
         <ignore />
       </action>
