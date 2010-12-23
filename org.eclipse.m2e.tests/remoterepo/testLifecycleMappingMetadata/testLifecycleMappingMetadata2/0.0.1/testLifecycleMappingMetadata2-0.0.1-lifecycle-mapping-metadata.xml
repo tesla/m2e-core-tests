@@ -4,13 +4,13 @@
 		<lifecycleMapping>
 			<!-- The id matches the id declared in the eclipse extension for the lifecycle 
 				mapping -->
-			<id>fakeid</id>
+			<lifecycleMappingId>fakeid</lifecycleMappingId>
 			<packagingType>war</packagingType>
 		</lifecycleMapping>
 	</lifecycleMappings>
 
-	<mojos>
-		<mojo>
+	<pluginExecutions>
+		<pluginExecution>
 			<groupId>org.apache.maven.plugins</groupId>
 			<artifactId>maven-jar-plugin</artifactId>
 			<goals>
@@ -20,8 +20,8 @@
 			<action>
 				<ignore />
 			</action>
-		</mojo>
-		<mojo>
+		</pluginExecution>
+		<pluginExecution>
 			<groupId>org.apache.maven.plugins</groupId>
 			<artifactId>maven-resources-plugin</artifactId>
 			<goals>
@@ -31,6 +31,6 @@
 			<action>
 				<execute />
 			</action>
-		</mojo>
-	</mojos>
+		</pluginExecution>
+	</pluginExecutions>
 </lifecycleMappingMetadata>

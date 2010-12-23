@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <lifecycleMappingMetadata>
-	<mojos>
-		<mojo>
+	<pluginExecutions>
+		<pluginExecution>
 			<groupId>org.codehaus.modello</groupId>
 			<artifactId>modello-maven-plugin</artifactId>
 			<goals>
@@ -13,6 +13,6 @@
 					<id>org.eclipse.m2e.core.project.configurator.MavenResourcesProjectConfigurator</id>
 				</configurator>
 			</action>
-		</mojo>
-	</mojos>
+		</pluginExecution>
+	</pluginExecutions>
 </lifecycleMappingMetadata>

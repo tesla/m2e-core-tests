@@ -4,13 +4,13 @@
 		<lifecycleMapping>
 			<!-- The id matches the id declared in the eclipse extension for the lifecycle 
 				mapping -->
-			<id>fakeid</id>
+			<lifecycleMappingId>fakeid</lifecycleMappingId>
 			<packagingType>war</packagingType>
 		</lifecycleMapping>
 	</lifecycleMappings>
 
-	<mojos>
-		<mojo>
+	<pluginExecutions>
+		<pluginExecution>
 			<groupId>org.apache.maven.plugins</groupId>
 			<artifactId>maven-compiler-plugin</artifactId>
 			<goals>
@@ -25,8 +25,8 @@
 					<id>org.eclipse.m2e.jdt.javaConfigurator</id>
 				</configurator>
 			</action>
-		</mojo>
-		<mojo>
+		</pluginExecution>
+		<pluginExecution>
 			<groupId>org.apache.maven.plugins</groupId>
 			<artifactId>maven-jar-plugin</artifactId>
 			<goals>
@@ -36,6 +36,6 @@
 			<action>
 				<ignore />
 			</action>
-		</mojo>
-	</mojos>
+		</pluginExecution>
+	</pluginExecutions>
 </lifecycleMappingMetadata>
