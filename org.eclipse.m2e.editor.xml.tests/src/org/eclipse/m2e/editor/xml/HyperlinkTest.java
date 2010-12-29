@@ -17,6 +17,8 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
+import org.eclipse.m2e.core.MavenPlugin;
+import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.editor.pom.MavenPomEditor;
 import org.eclipse.ui.IEditorPart;
@@ -26,15 +28,15 @@ import org.eclipse.ui.internal.UIPlugin;
 /**
  * Hello fellow tester:
  * everytime this test finds a regression add an 'x' here:
- * everytime you do mindless test update add an 'y' here: y
+ * everytime you do mindless test update add an 'y' here: yy
  * @author mkleint
  *
  */
 public class HyperlinkTest extends AbstractPOMEditorTestCase {
   private IFile parentPom;
-  
+  IProject[] projects;
   public IFile loadProjectsAndFiles() throws Exception {
-    IProject[] projects = importProjects("projects/Hyperlink", new String[] {
+    projects = importProjects("projects/Hyperlink", new String[] {
         "hyperlinkParent/pom.xml",
         "hyperlinkChild/pom.xml"
         }, new ResolverConfiguration());
@@ -49,6 +51,10 @@ public class HyperlinkTest extends AbstractPOMEditorTestCase {
   public void testHasLink() throws BadLocationException {
     //Locate the area where we want to detect the link
     IRegion region = new Region(sourceViewer.getDocument().getLineOffset(12) + 17, 10);
+    IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectManager().getProject(projects[1]);
+    assertNotNull(facade);
+    assertNotNull(facade.getMavenProject());
+    sourceViewer.setMavenProject(facade.getMavenProject());
     
     IHyperlink[] links = new PomHyperlinkDetector().detectHyperlinks(sourceViewer, region, true);
     assertNotNull(links);
