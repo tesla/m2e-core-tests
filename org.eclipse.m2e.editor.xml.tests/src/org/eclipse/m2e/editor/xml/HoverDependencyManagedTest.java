@@ -14,19 +14,22 @@ package org.eclipse.m2e.editor.xml;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.m2e.core.MavenPlugin;
+import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 
 /**
  * Hello fellow tester:
  * everytime this test finds a regression add an 'x' here:
- * everytime you do mindless test update add an 'y' here: y
+ * everytime you do mindless test update add an 'y' here: yy
  * @author mkleint
  *
  */
 public class HoverDependencyManagedTest extends AbstractPOMEditorTestCase {
-
+  private IProject[] projects;
+  
   public IFile loadProjectsAndFiles() throws Exception {
-    IProject[] projects = importProjects("projects/MNGECLIPSE-2541", new String[] {
+    projects = importProjects("projects/MNGECLIPSE-2541", new String[] {
         "parent2541/pom.xml",
         "child2541/pom.xml" 
      }, new ResolverConfiguration());
@@ -39,6 +42,12 @@ public class HoverDependencyManagedTest extends AbstractPOMEditorTestCase {
   public void testHasHover() {
     //Locate the area where we want to detect the hover
     String docString = sourceViewer.getDocument().get();
+    IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectManager().getProject(projects[1]);
+    assertNotNull(facade);
+    assertNotNull(facade.getMavenProject());
+    sourceViewer.setMavenProject(facade.getMavenProject());
+    
+    
     int offset = docString.indexOf("<artifactId>org.junit</artifactId>");
     
     PomTextHover hover = new PomTextHover(null, null, 0);

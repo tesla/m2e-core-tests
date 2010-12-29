@@ -19,7 +19,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.emf.ecore.edit,
  org.eclipse.ui.ide,
  org.eclipse.search,
- org.eclipse.ui.forms
+ org.eclipse.ui.forms,
+ org.eclipse.m2e.maven.runtime
 Bundle-Name: %Bundle-Name
 Bundle-Version: 0.13.0.qualifier
 MavenArtifact-ArtifactId: org.eclipse.m2e.editor.xml.tests

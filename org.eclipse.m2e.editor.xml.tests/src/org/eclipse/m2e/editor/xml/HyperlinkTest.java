@@ -51,6 +51,7 @@ public class HyperlinkTest extends AbstractPOMEditorTestCase {
     IRegion region = new Region(sourceViewer.getDocument().getLineOffset(12) + 17, 10);
     
     IHyperlink[] links = new PomHyperlinkDetector().detectHyperlinks(sourceViewer, region, true);
+    assertNotNull(links);
     assertEquals(1, links.length);
     assertNotNull(links[0].getHyperlinkText());
     assertTrue(links[0].getHyperlinkText().contains("aProperty"));

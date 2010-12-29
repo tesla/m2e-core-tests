@@ -15,8 +15,12 @@ import java.io.IOException;
 
 import junit.framework.Assert;
 
+import org.apache.maven.project.MavenProject;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.jface.text.source.IOverviewRuler;
+import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
@@ -34,7 +38,7 @@ import org.eclipse.wst.xml.ui.StructuredTextViewerConfigurationXML;
 
 
 public abstract class AbstractPOMEditorTestCase extends AbstractMavenProjectTestCase {
-  protected StructuredTextViewer sourceViewer;
+  protected DummyStructuredTextViewer sourceViewer;
 
   private IFile file;
 
@@ -78,16 +82,43 @@ public abstract class AbstractPOMEditorTestCase extends AbstractMavenProjectTest
       parent = new Composite(shell, SWT.NONE);
 
       // dummy viewer
-      sourceViewer = new StructuredTextViewer(parent, null, null, false, SWT.NONE);
+      sourceViewer = new DummyStructuredTextViewer(parent, null, null, false, SWT.NONE);
+      sourceViewer.setMavenProject(new MavenProject());
     } else {
       Assert.fail("Unable to run the test as a display must be available.");
     }
 
     configureSourceViewer();
   }
+  
+  class DummyStructuredTextViewer extends StructuredTextViewer implements IAdaptable {
+
+    private MavenProject mavenProject;
+
+    public DummyStructuredTextViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler,
+        boolean showAnnotationsOverview, int styles) {
+      super(parent, verticalRuler, overviewRuler, showAnnotationsOverview, styles);
+      // TODO Auto-generated constructor stub
+    }
+    
+    public void setMavenProject(MavenProject mp) {
+      this.mavenProject = mp;
+    }
+
+    public Object getAdapter(Class adapter) {
+      // TODO Auto-generated method stub
+      if (MavenProject.class.equals(adapter)) {
+        return mavenProject;
+      }
+      return null;
+    }
+    
+  }
 
   protected void tearDown() throws Exception {
       super.tearDown();
       model.releaseFromEdit();
   }
+  
+  
 }
