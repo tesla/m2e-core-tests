@@ -25,7 +25,7 @@ public abstract class AbstractCompletionTest extends AbstractPOMEditorTestCase {
 
   protected void setUp() throws Exception {
     super.setUp();
-    xmlContentAssistProcessor = new PomContentAssistProcessor(sourceViewer, null);
+    xmlContentAssistProcessor = new PomContentAssistProcessor(sourceViewer);
   }
   
 
