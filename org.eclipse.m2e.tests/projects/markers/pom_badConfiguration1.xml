@@ -8,22 +8,6 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.eclipse.m2e</groupId>
-        <artifactId>lifecycle-mapping</artifactId>
-        <version>0.10.0</version>
-        <configuration>
-          <mappingId>customizable</mappingId>
-          <configurators>
-            <configurator id='org.eclipse.m2e.jdt.javaConfigurator'/>
-            <configurator id='org.eclipse.m2e.core.project.configurator.MavenResourcesProjectConfigurator'/>
-            <!--
-            <configurator id='org.maven.ide.eclipse.modello.modelloConfigurator'/>
-             -->
-          </configurators>
-        </configuration>
-      </plugin>
-
-      <plugin>
         <groupId>org.codehaus.modello</groupId>
         <artifactId>modello-maven-plugin</artifactId>
         <version>1.1</version>
