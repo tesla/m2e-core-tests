@@ -9,7 +9,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
-import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
+import org.eclipse.m2e.editor.AbstractMavenProjectTestJunit4;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Composite;
@@ -19,7 +19,7 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.junit.Test;
 
 
-public class MavenModuleSelectionDialogTest extends AbstractMavenProjectTestCase {
+public class MavenModuleSelectionDialogTest extends AbstractMavenProjectTestJunit4 {
 
   private static final String PROJECT1 = "project1";
 

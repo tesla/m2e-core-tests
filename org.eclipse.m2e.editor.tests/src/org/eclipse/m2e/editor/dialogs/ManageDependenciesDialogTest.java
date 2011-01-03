@@ -25,28 +25,21 @@ import org.eclipse.m2e.core.embedder.IMaven;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.MavenProjectManager;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
+import org.eclipse.m2e.editor.AbstractMavenProjectTestJunit4;
 import org.eclipse.m2e.model.edit.pom.Dependency;
 import org.eclipse.m2e.model.edit.pom.Model;
 import org.eclipse.m2e.model.edit.pom.util.PomResourceImpl;
-import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.junit.Before;
 import org.junit.Test;
 
 
-public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
-  
+public class ManageDependenciesDialogTest extends AbstractMavenProjectTestJunit4 {
   private static final String VERSION = "1.0.0";
   public static String GROUP_ID = "org.eclipse.m2e.tests";
   private TestDialog dialog;
   private Color foreground;
-
-  @Before
-  public void setUp() throws Exception {
-    super.setUp();
-  }
   
   /*
    * Cases to test:
