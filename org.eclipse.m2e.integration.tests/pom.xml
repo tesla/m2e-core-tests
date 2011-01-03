@@ -27,7 +27,7 @@
         <artifactId>maven-osgi-test-plugin</artifactId>
         <configuration>
           <useUIThread>false</useUIThread>
-          <forkedProcessTimeoutInSeconds>3600</forkedProcessTimeoutInSeconds>
+          <forkedProcessTimeoutInSeconds>1200</forkedProcessTimeoutInSeconds>
           <appArgLine>-pluginCustomization ${project.basedir}/plugin_customization.ini</appArgLine>
         </configuration>
       </plugin>
