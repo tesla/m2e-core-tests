@@ -7,11 +7,7 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.junit.Test;
 
 
-public class MEclipse178IssueTrackerTest extends M2EUIIntegrationTestCase {
-
-  /**
-   * 
-   */
+public abstract class MEclipse178IssueTrackerTest extends M2EUIIntegrationTestCase {
   private static final String TEST_PROJECT = "test-project";
 
   @Test
