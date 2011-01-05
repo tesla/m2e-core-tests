@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
+import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
 
 public class JavaProjectConfiguratorTest extends AbstractMavenProjectTestCase {
@@ -25,6 +26,7 @@ public class JavaProjectConfiguratorTest extends AbstractMavenProjectTestCase {
   public void testMNGECLIPSE2313_markAllRawClasspathEntries() throws Exception {
     IProject project = importProject("projects/MNGECLIPSE-2313_markAllRawClasspathEntries/pom.xml");
     IJavaProject javaProject = JavaCore.create(project);
+    WorkspaceHelpers.assertNoErrors(project);
 
     for(IClasspathEntry cpe : javaProject.getRawClasspath()) {
       assertHasAttribute(MNGECLIPSE2313MarkAllRawClasspathEntriesConfigurator.ATTR, cpe);

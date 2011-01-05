@@ -11,6 +11,58 @@
 
   <build>
     <defaultGoal>package</defaultGoal>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>0.9.9-SNAPSHOT</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <lifecycleMappings>
+                <lifecycleMapping>
+                  <packagingType>jar</packagingType>
+                  <lifecycleMappingId>customizable</lifecycleMappingId>
+                  <pluginExecutions>
+                    <pluginExecution>
+                      <pluginExecutionFilter>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <versionRange>[2.0,)</versionRange>
+                        <goals>
+                          <goal>compile</goal>
+                          <goal>testCompile</goal>
+                        </goals>
+                      </pluginExecutionFilter>
+                      <action>
+                        <configurator>
+                          <id>org.eclipse.m2e.jdt.javaConfigurator</id>
+                        </configurator>
+                      </action>
+                    </pluginExecution>
+                    <pluginExecution>
+                      <pluginExecutionFilter>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <versionRange>[2.4,)</versionRange>
+                        <goals>
+                          <goal>resources</goal>
+                          <goal>testResources</goal>
+                        </goals>
+                      </pluginExecutionFilter>
+                      <action>
+                        <execute />
+                      </action>
+                    </pluginExecution>
+                  </pluginExecutions>
+                </lifecycleMapping>
+              </lifecycleMappings>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+    
     <plugins>
       <plugin>
         <!-- This plugin is unresolvable (e.g. due to a repository issue) but the failure to resolve it must not prevent extraction of the compiler settings -->
@@ -32,21 +84,6 @@
         <configuration>
           <source>1.6</source>
           <target>1.5</target>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.eclipse.m2e</groupId>
-        <artifactId>lifecycle-mapping</artifactId>
-        <version>0.10.0</version>
-        <configuration>
-          <mappingId>customizable</mappingId>
-          <configurators>
-            <configurator id="org.eclipse.m2e.jdt.javaConfigurator" />
-            <configurator id="org.eclipse.m2e.buildhelper.buildhelperConfigurator" />
-            <configurator id="org.eclipse.m2e.modello.modelloConfigurator" />
-            <configurator id="org.eclipse.m2e.antlr.antlrConfigurator" />
-            <configurator id="org.eclipse.m2e.mavenarchiver.pomProperties" />
-          </configurators>
         </configuration>
       </plugin>
     </plugins>

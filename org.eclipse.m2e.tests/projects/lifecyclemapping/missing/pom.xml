@@ -6,16 +6,24 @@
   <version>0.0.1-SNAPSHOT</version>
 
   <build>
-    <plugins>
-      <plugin>
-        <groupId>org.eclipse.m2e</groupId>
-        <artifactId>lifecycle-mapping</artifactId>
-        <version>0.9.9-SNAPSHOT</version>
-        <configuration>
-          <mappingId>unknown-or-missing</mappingId>
-        </configuration>
-      </plugin>
-    </plugins>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>0.9.9-SNAPSHOT</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <lifecycleMappings>
+                <lifecycleMapping>
+                  <packagingType>jar</packagingType>
+                  <lifecycleMappingId>unknown-or-missing</lifecycleMappingId>
+                </lifecycleMapping>
+              </lifecycleMappings>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
-
 </project>

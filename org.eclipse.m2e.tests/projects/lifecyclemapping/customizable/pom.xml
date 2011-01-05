@@ -6,22 +6,59 @@
   <version>0.0.1-SNAPSHOT</version>
 
   <build>
-    <plugins>
-      <plugin>
-        <groupId>org.eclipse.m2e</groupId>
-        <artifactId>lifecycle-mapping</artifactId>
-        <version>0.9.9-SNAPSHOT</version>
-        <configuration>
-          <mappingId>customizable</mappingId>
-          <configurators>
-            <configurator id='org.eclipse.m2e.jdt.javaConfigurator'/>
-          </configurators>
-          <mojoExecutions>
-            <mojoExecution>org.apache.maven.plugins:maven-resources-plugin:[2.4,):resources,testResources</mojoExecution>
-          </mojoExecutions>
-        </configuration>
-      </plugin>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>0.9.9-SNAPSHOT</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <lifecycleMappings>
+                <lifecycleMapping>
+                  <packagingType>jar</packagingType>
+                  <lifecycleMappingId>customizable</lifecycleMappingId>
+                  <pluginExecutions>
+                    <pluginExecution>
+                      <pluginExecutionFilter>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <versionRange>[2.0,)</versionRange>
+                        <goals>
+                          <goal>compile</goal>
+                          <goal>testCompile</goal>
+                        </goals>
+                      </pluginExecutionFilter>
+                      <action>
+                        <configurator>
+                          <id>org.eclipse.m2e.jdt.javaConfigurator</id>
+                        </configurator>
+                      </action>
+                    </pluginExecution>
+                    <pluginExecution>
+                      <pluginExecutionFilter>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <versionRange>[2.4,)</versionRange>
+                        <goals>
+                          <goal>resources</goal>
+                          <goal>testResources</goal>
+                        </goals>
+                      </pluginExecutionFilter>
+                      <action>
+                        <execute />
+                      </action>
+                    </pluginExecution>
+                  </pluginExecutions>
+                </lifecycleMapping>
+              </lifecycleMappings>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
 
+    <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>2.0.2</version>

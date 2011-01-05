@@ -313,20 +313,32 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping", "missing/pom.xml");
     assertNotNull("Expected not null MavenProjectFacade", facade);
     IProject project = facade.getProject();
-    String expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"jar\")";
+    List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
+    assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
+    String expectedErrorMessage = "Lifecycle mapping 'unknown-or-missing' is not available. To enable full functionality, install the lifecycle mapping and run Maven->Update Project Configuration.";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
-        1 /*lineNumber*/, project);
+        1 /*lineNumber*/,
+        errorMarkers.get(0));
+    expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"jar\")";
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+        1 /*lineNumber*/,
+        errorMarkers.get(1));
 
     ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade, monitor);
     assertNull(lifecycleMapping);
 
     project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
     waitForJobsToComplete();
-    List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
-    assertNotNull(errorMarkers);
-    assertEquals(WorkspaceHelpers.toString(errorMarkers), 1, errorMarkers.size());
+    errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
+    assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
+    expectedErrorMessage = "Lifecycle mapping 'unknown-or-missing' is not available. To enable full functionality, install the lifecycle mapping and run Maven->Update Project Configuration.";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
-        1 /*lineNumber*/, project);
+        1 /*lineNumber*/,
+        errorMarkers.get(0));
+    expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"jar\")";
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+        1 /*lineNumber*/,
+        errorMarkers.get(1));
   }
 
   public void testUnknownPackagingType() throws Exception {
