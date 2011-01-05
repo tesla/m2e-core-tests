@@ -133,6 +133,22 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     return null;
   }
 
+  public void testUseDefaultLifecycleMappingMetadataSource() throws Exception {
+    // By default, the use of default lifecycle metadata is disabled for unit tests
+    LifecycleMappingFactory.setUseDefaultLifecycleMappingMetadataSource(true);
+
+    IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/lifecycleMappingMetadata",
+        "testUseDefaultLifecycleMappingMetadataSource/pom.xml");
+    assertNotNull("Expected not null MavenProjectFacade", facade);
+    IProject project = facade.getProject();
+    WorkspaceHelpers.assertNoErrors(project);
+
+    List<LifecycleMappingMetadataSource> metadataSources = LifecycleMappingFactory
+        .getLifecycleMappingMetadataSources(facade.getMavenProject());
+    assertNotNull(metadataSources);
+    assertEquals(1, metadataSources.size());
+  }
+
   public void testGetLifecycleMappingMetadata() throws Exception {
     IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/lifecycleMappingMetadata",
         "testGetLifecycleMappingMetadata/pom.xml");
