@@ -19,14 +19,6 @@
         <artifactId>maven-plugin-plugin</artifactId>
         <version>2.5</version>
       </plugin>
-      <plugin>
-        <groupId>org.eclipse.m2e</groupId>
-        <artifactId>lifecycle-mapping</artifactId>
-        <version>0.10.0</version>
-        <configuration>
-          <mappingId>customizable</mappingId>
-        </configuration>
-      </plugin>
     </plugins>
   </build>
 </project>
