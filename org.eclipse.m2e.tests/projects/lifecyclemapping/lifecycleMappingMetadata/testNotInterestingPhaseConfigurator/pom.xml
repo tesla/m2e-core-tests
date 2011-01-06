@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>lifecycleMappingMetadataTests</groupId>
+	<artifactId>testNotInterestingPhaseConfigurator</artifactId>
+	<name></name>
+	<version>0.0.1-SNAPSHOT</version>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.modello</groupId>
+				<artifactId>modello-maven-plugin</artifactId>
+				<version>1.1</version>
+				<configuration>
+					<version>4.0.0</version>
+					<models>
+						<model>src/main/mdo/model.mdo</model>
+					</models>
+				</configuration>
+				<executions>
+					<execution>
+						<id>standard</id>
+                        <phase>package</phase>
+						<goals>
+							<goal>java</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<!-- Well-known groupId and artifactId (used to find lifecycle mapping 
+						metadata sources. -->
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping-metadata-sources</artifactId>
+					<version>0.9.9-SNAPSHOT</version>
+
+					<configuration>
+						<sources>
+							<source>
+								<groupId>testLifecycleMappingMetadata</groupId>
+								<artifactId>testNotInterestingPhaseConfigurator</artifactId>
+								<version>0.0.1</version>
+							</source>
+						</sources>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+</project>

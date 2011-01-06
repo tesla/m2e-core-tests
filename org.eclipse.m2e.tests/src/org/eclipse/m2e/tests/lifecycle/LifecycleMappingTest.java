@@ -150,8 +150,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     WorkspaceHelpers.assertNoErrors(project);
 
     List<LifecycleMappingMetadataSource> metadataSources = LifecycleMappingFactory
-        .getLifecycleMappingMetadataSources(facade
-        .getMavenProject());
+        .getLifecycleMappingMetadataSources(facade.getMavenProject());
     assertNotNull(metadataSources);
     assertEquals(1, metadataSources.size());
     LifecycleMappingMetadataSource metadataSource = metadataSources.get(0);
@@ -289,7 +288,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping", "customizableNotComplete/pom.xml");
     assertNotNull("Expected not null MavenProjectFacade", facade);
     IProject project = facade.getProject();
-    
+
     List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
     assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
     String expectedErrorMessage = "Mojo execution not covered by lifecycle configuration: org.apache.maven.plugins:maven-resources-plugin:2.4.1:resources {execution: default-resources} (maven lifecycle phase: process-resources)";
@@ -305,10 +304,11 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
 
     List<MojoExecution> notCoveredMojoExecutions = lifecycleMapping.getNotCoveredMojoExecutions(facade, monitor);
     assertEquals(notCoveredMojoExecutions.toString(), 2, notCoveredMojoExecutions.size());
-    assertEquals("org.apache.maven.plugins:maven-resources-plugin:2.4.1:resources {execution: default-resources}", notCoveredMojoExecutions
-        .get(0).toString());
-    assertEquals("org.apache.maven.plugins:maven-resources-plugin:2.4.1:testResources {execution: default-testResources}", notCoveredMojoExecutions
-        .get(1).toString());
+    assertEquals("org.apache.maven.plugins:maven-resources-plugin:2.4.1:resources {execution: default-resources}",
+        notCoveredMojoExecutions.get(0).toString());
+    assertEquals(
+        "org.apache.maven.plugins:maven-resources-plugin:2.4.1:testResources {execution: default-testResources}",
+        notCoveredMojoExecutions.get(1).toString());
 
     project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
     waitForJobsToComplete();
@@ -326,12 +326,10 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
     String expectedErrorMessage = "Lifecycle mapping \"unknown-or-missing\" is not available. To enable full functionality, install the lifecycle mapping and run Maven->Update Project Configuration.";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
-        1 /*lineNumber*/,
-        errorMarkers.get(0));
+        1 /*lineNumber*/, errorMarkers.get(0));
     expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"jar\")";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
-        1 /*lineNumber*/,
-        errorMarkers.get(1));
+        1 /*lineNumber*/, errorMarkers.get(1));
 
     ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade, monitor);
     assertNull(lifecycleMapping);
@@ -342,12 +340,10 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
     expectedErrorMessage = "Lifecycle mapping \"unknown-or-missing\" is not available. To enable full functionality, install the lifecycle mapping and run Maven->Update Project Configuration.";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
-        1 /*lineNumber*/,
-        errorMarkers.get(0));
+        1 /*lineNumber*/, errorMarkers.get(0));
     expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"jar\")";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
-        1 /*lineNumber*/,
-        errorMarkers.get(1));
+        1 /*lineNumber*/, errorMarkers.get(1));
   }
 
   public void testUnknownPackagingType() throws Exception {
@@ -368,5 +364,17 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertEquals(WorkspaceHelpers.toString(errorMarkers), 1, errorMarkers.size());
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
         1 /*lineNumber*/, project);
+  }
+
+  public void testNotInterestingPhaseConfigurator() throws Exception {
+    IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/lifecycleMappingMetadata/testNotInterestingPhaseConfigurator", "pom.xml");
+    assertNotNull("Expected not null MavenProjectFacade", facade);
+
+    ILifecycleMapping lifecycleMapping = facade.getLifecycleMapping(monitor);
+
+    // TODO check modello execution from package phase is actually mapped to mojo execution configurator
+    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
+    assertEquals( 3, configurators.size() );
+    assertTrue( configurators.get(2) instanceof MojoExecutionProjectConfigurator );
   }
 }
