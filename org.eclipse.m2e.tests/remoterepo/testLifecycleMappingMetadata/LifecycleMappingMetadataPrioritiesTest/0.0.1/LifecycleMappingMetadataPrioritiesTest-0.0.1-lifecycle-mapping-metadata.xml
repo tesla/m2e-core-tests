@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lifecycleMappingMetadata>
+  <lifecycleMappings>
+    <lifecycleMapping>
+      <lifecycleMappingId>no such lifecycle mapping for jar - referenced from pom</lifecycleMappingId>
+      <packagingType>jar</packagingType>
+    </lifecycleMapping>
+  </lifecycleMappings>
+</lifecycleMappingMetadata>

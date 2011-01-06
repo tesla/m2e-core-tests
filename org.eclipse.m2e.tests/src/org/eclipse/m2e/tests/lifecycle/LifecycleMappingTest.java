@@ -9,7 +9,7 @@
  *      Sonatype, Inc. - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.m2e.tests.configurators;
+package org.eclipse.m2e.tests.lifecycle;
 
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -25,7 +25,7 @@ import org.eclipse.m2e.core.internal.lifecycle.model.LifecycleMappingMetadata;
 import org.eclipse.m2e.core.internal.lifecycle.model.LifecycleMappingMetadataSource;
 import org.eclipse.m2e.core.internal.lifecycle.model.PluginExecutionAction;
 import org.eclipse.m2e.core.internal.lifecycle.model.PluginExecutionMetadata;
-import org.eclipse.m2e.core.internal.project.IgnoreMojoProjectConfiguration;
+import org.eclipse.m2e.core.internal.project.IgnoreMojoProjectConfigurator;
 import org.eclipse.m2e.core.internal.project.MojoExecutionProjectConfigurator;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.configurator.AbstractProjectConfigurator;
@@ -63,9 +63,9 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertNotNull(lifecycleMapping);
     List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
     assertEquals(configurators.toString(), 3, configurators.size());
-    AbstractProjectConfigurator configurator = configurators.get(0);
+    AbstractProjectConfigurator configurator = configurators.get(2);
     assertNotNull(configurator);
-    assertTrue(configurator.getClass().getCanonicalName(), configurator instanceof IgnoreMojoProjectConfiguration);
+    assertTrue(configurator.getClass().getCanonicalName(), configurator instanceof IgnoreMojoProjectConfigurator);
   }
 
   public void testMojoExecutionExecute() throws Exception {
@@ -79,7 +79,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertNotNull(lifecycleMapping);
     List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
     assertEquals(configurators.toString(), 3, configurators.size());
-    AbstractProjectConfigurator configurator = configurators.get(0);
+    AbstractProjectConfigurator configurator = configurators.get(2);
     assertNotNull(configurator);
     assertTrue(configurator.getClass().getCanonicalName(), configurator instanceof MojoExecutionProjectConfigurator);
   }
@@ -94,7 +94,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     ILifecycleMapping lifecycleMapping = facade.getLifecycleMapping(monitor);
     assertNotNull(lifecycleMapping);
     List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
-    assertEquals(configurators.toString(), 3, configurators.size());
+    assertEquals(configurators.toString(), 2, configurators.size());
     AbstractProjectConfigurator configurator = configurators.get(0);
     assertNotNull(configurator);
     assertTrue(configurator.getClass().getCanonicalName(), configurator instanceof MavenResourcesProjectConfigurator);
@@ -134,19 +134,12 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
   }
 
   public void testUseDefaultLifecycleMappingMetadataSource() throws Exception {
+    assertNull(LifecycleMappingFactory.getDefaultLifecycleMappingMetadataSource());
+
     // By default, the use of default lifecycle metadata is disabled for unit tests
     LifecycleMappingFactory.setUseDefaultLifecycleMappingMetadataSource(true);
 
-    IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/lifecycleMappingMetadata",
-        "testUseDefaultLifecycleMappingMetadataSource/pom.xml");
-    assertNotNull("Expected not null MavenProjectFacade", facade);
-    IProject project = facade.getProject();
-    WorkspaceHelpers.assertNoErrors(project);
-
-    List<LifecycleMappingMetadataSource> metadataSources = LifecycleMappingFactory
-        .getLifecycleMappingMetadataSources(facade.getMavenProject());
-    assertNotNull(metadataSources);
-    assertEquals(1, metadataSources.size());
+    assertNotNull(LifecycleMappingFactory.getDefaultLifecycleMappingMetadataSource());
   }
 
   public void testGetLifecycleMappingMetadata() throws Exception {
@@ -331,7 +324,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     IProject project = facade.getProject();
     List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
     assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
-    String expectedErrorMessage = "Lifecycle mapping 'unknown-or-missing' is not available. To enable full functionality, install the lifecycle mapping and run Maven->Update Project Configuration.";
+    String expectedErrorMessage = "Lifecycle mapping \"unknown-or-missing\" is not available. To enable full functionality, install the lifecycle mapping and run Maven->Update Project Configuration.";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
         1 /*lineNumber*/,
         errorMarkers.get(0));
@@ -347,7 +340,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     waitForJobsToComplete();
     errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
     assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
-    expectedErrorMessage = "Lifecycle mapping 'unknown-or-missing' is not available. To enable full functionality, install the lifecycle mapping and run Maven->Update Project Configuration.";
+    expectedErrorMessage = "Lifecycle mapping \"unknown-or-missing\" is not available. To enable full functionality, install the lifecycle mapping and run Maven->Update Project Configuration.";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
         1 /*lineNumber*/,
         errorMarkers.get(0));

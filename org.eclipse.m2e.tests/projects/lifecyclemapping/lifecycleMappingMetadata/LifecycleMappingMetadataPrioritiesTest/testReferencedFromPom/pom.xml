@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>LifecycleMappingMetadataPrioritiesTest</groupId>
+  <artifactId>testReferencedFromPom</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping-metadata-sources</artifactId>
+          <version>0.9.9-SNAPSHOT</version>
+
+          <configuration>
+            <sources>
+              <source>
+                <groupId>testLifecycleMappingMetadata</groupId>
+                <artifactId>LifecycleMappingMetadataPrioritiesTest</artifactId>
+                <version>0.0.1</version>
+              </source>
+            </sources>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>
