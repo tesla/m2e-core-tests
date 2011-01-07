@@ -24,9 +24,6 @@
             class="org.eclipse.m2e.tests.configurators.TestProjectConfigurator"
             name="TEST" priority="1000"/>
 
-      <configurator id="org.eclipse.m2e.configurator.testMaven"
-            class="org.eclipse.m2e.core.project.configurator.MavenProjectConfigurator:group:artifact|goal1|goal2"
-            name="TestMaven" priority="1001"/>
 
       <configurator id="org.eclipse.m2e.configurator.incompatibleApi"
             class="org.eclipse.m2e.tests.configurators.IncompatibleProjectConfigurator"
