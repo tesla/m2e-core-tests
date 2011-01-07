@@ -9,12 +9,12 @@ Bundle-RequiredExecutionEnvironment: J2SE-1.5,
 Bundle-ClassPath: .
 Bundle-Vendor: %Bundle-Vendor
 Require-Bundle: org.junit;bundle-version="4.0.0",
- org.maven.ide.eclipse.maven_embedder;bundle-version="0.10.3",
- org.maven.ide.eclipse;bundle-version="0.10.3",
+ org.eclipse.m2e.maven.runtime,
+ org.eclipse.m2e.core,
  org.eclipse.equinox.common;bundle-version="3.5.0",
  org.eclipse.core.resources;bundle-version="3.5.0",
  org.eclipse.core.jobs;bundle-version="3.5.0",
- org.maven.ide.eclipse.tests.common;bundle-version="0.10.3",
+ org.eclipse.m2e.tests.common,
  org.eclipse.test.performance;bundle-version="3.6.0",
  org.apache.derby.core;bundle-version="10.6.1",
  org.eclipse.osgi;bundle-version="3.6.0"
