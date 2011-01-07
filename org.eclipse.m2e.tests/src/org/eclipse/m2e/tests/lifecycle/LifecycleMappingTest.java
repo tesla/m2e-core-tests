@@ -29,7 +29,7 @@ import org.eclipse.m2e.core.internal.project.IgnoreMojoProjectConfigurator;
 import org.eclipse.m2e.core.internal.project.MojoExecutionProjectConfigurator;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.configurator.AbstractProjectConfigurator;
-import org.eclipse.m2e.core.project.configurator.CustomizableLifecycleMapping;
+import org.eclipse.m2e.core.project.configurator.CustomLifecycleMapping;
 import org.eclipse.m2e.core.project.configurator.ILifecycleMapping;
 import org.eclipse.m2e.core.project.configurator.MavenResourcesProjectConfigurator;
 import org.eclipse.m2e.jdt.internal.JarLifecycleMapping;
@@ -273,7 +273,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
 
     ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade, monitor);
 
-    assertTrue(lifecycleMapping instanceof CustomizableLifecycleMapping);
+    assertTrue(lifecycleMapping instanceof CustomLifecycleMapping);
 
     List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
     assertEquals(configurators.toString(), 2, configurators.size());
@@ -296,7 +296,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
         1 /*lineNumber*/, errorMarkers.get(0));
 
     ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade, monitor);
-    assertTrue(lifecycleMapping instanceof CustomizableLifecycleMapping);
+    assertTrue(lifecycleMapping instanceof CustomLifecycleMapping);
 
     List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
     assertEquals(configurators.toString(), 1, configurators.size());

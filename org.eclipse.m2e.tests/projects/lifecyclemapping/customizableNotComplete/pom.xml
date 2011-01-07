@@ -18,7 +18,7 @@
               <lifecycleMappings>
                 <lifecycleMapping>
                   <packagingType>jar</packagingType>
-                  <lifecycleMappingId>customizable</lifecycleMappingId>
+                  <lifecycleMappingId>custom</lifecycleMappingId>
                   <pluginExecutions>
                     <pluginExecution>
                       <pluginExecutionFilter>

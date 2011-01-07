@@ -2,7 +2,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>lifecyclemapping</groupId>
-  <artifactId>customizable</artifactId>
+  <artifactId>custom</artifactId>
   <version>0.0.1-SNAPSHOT</version>
 
   <build>
@@ -17,7 +17,7 @@
               <lifecycleMappings>
                 <lifecycleMapping>
                   <packagingType>jar</packagingType>
-                  <lifecycleMappingId>customizable</lifecycleMappingId>
+                  <lifecycleMappingId>custom</lifecycleMappingId>
                   <pluginExecutions>
                     <pluginExecution>
                       <pluginExecutionFilter>
