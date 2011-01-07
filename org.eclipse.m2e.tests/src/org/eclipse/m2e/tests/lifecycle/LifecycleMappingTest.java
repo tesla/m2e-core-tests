@@ -61,9 +61,9 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
 
     ILifecycleMapping lifecycleMapping = facade.getLifecycleMapping(monitor);
     assertNotNull(lifecycleMapping);
-    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
+    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(monitor);
     assertEquals(configurators.toString(), 3, configurators.size());
-    AbstractProjectConfigurator configurator = configurators.get(2);
+    AbstractProjectConfigurator configurator = configurators.get(0);
     assertNotNull(configurator);
     assertTrue(configurator.getClass().getCanonicalName(), configurator instanceof IgnoreMojoProjectConfigurator);
   }
@@ -77,9 +77,9 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
 
     ILifecycleMapping lifecycleMapping = facade.getLifecycleMapping(monitor);
     assertNotNull(lifecycleMapping);
-    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
+    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(monitor);
     assertEquals(configurators.toString(), 3, configurators.size());
-    AbstractProjectConfigurator configurator = configurators.get(2);
+    AbstractProjectConfigurator configurator = configurators.get(0);
     assertNotNull(configurator);
     assertTrue(configurator.getClass().getCanonicalName(), configurator instanceof MojoExecutionProjectConfigurator);
   }
@@ -93,7 +93,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
 
     ILifecycleMapping lifecycleMapping = facade.getLifecycleMapping(monitor);
     assertNotNull(lifecycleMapping);
-    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
+    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(monitor);
     assertEquals(configurators.toString(), 2, configurators.size());
     AbstractProjectConfigurator configurator = configurators.get(0);
     assertNotNull(configurator);
@@ -255,13 +255,13 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
 
     assertTrue(lifecycleMapping instanceof JarLifecycleMapping);
 
-    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
+    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(monitor);
     assertEquals(configurators.toString(), 2, configurators.size());
     assertTrue(configurators.get(0) instanceof MavenResourcesProjectConfigurator);
     assertTrue(configurators.get(1) instanceof JavaProjectConfigurator);
 
-    List<MojoExecution> notCoveredMojoExecutions = lifecycleMapping.getNotCoveredMojoExecutions(facade, monitor);
-    assertEquals(notCoveredMojoExecutions.toString(), 0, lifecycleMapping.getNotCoveredMojoExecutions(facade, monitor)
+    List<MojoExecution> notCoveredMojoExecutions = lifecycleMapping.getNotCoveredMojoExecutions(monitor);
+    assertEquals(notCoveredMojoExecutions.toString(), 0, lifecycleMapping.getNotCoveredMojoExecutions(monitor)
         .size());
   }
 
@@ -275,12 +275,13 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
 
     assertTrue(lifecycleMapping instanceof CustomLifecycleMapping);
 
-    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
+    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(monitor);
     assertEquals(configurators.toString(), 2, configurators.size());
-    assertTrue(configurators.get(1) instanceof MojoExecutionProjectConfigurator);
+    assertTrue(configurators.get(0).toString(), configurators.get(0) instanceof MojoExecutionProjectConfigurator);
+    assertTrue(configurators.get(1).toString(), configurators.get(1) instanceof JavaProjectConfigurator);
 
-    List<MojoExecution> notCoveredMojoExecutions = lifecycleMapping.getNotCoveredMojoExecutions(facade, monitor);
-    assertEquals(notCoveredMojoExecutions.toString(), 0, lifecycleMapping.getNotCoveredMojoExecutions(facade, monitor)
+    List<MojoExecution> notCoveredMojoExecutions = lifecycleMapping.getNotCoveredMojoExecutions(monitor);
+    assertEquals(notCoveredMojoExecutions.toString(), 0, lifecycleMapping.getNotCoveredMojoExecutions(monitor)
         .size());
   }
 
@@ -298,11 +299,11 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade, monitor);
     assertTrue(lifecycleMapping instanceof CustomLifecycleMapping);
 
-    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
+    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(monitor);
     assertEquals(configurators.toString(), 1, configurators.size());
     assertTrue(configurators.get(0) instanceof JavaProjectConfigurator);
 
-    List<MojoExecution> notCoveredMojoExecutions = lifecycleMapping.getNotCoveredMojoExecutions(facade, monitor);
+    List<MojoExecution> notCoveredMojoExecutions = lifecycleMapping.getNotCoveredMojoExecutions(monitor);
     assertEquals(notCoveredMojoExecutions.toString(), 2, notCoveredMojoExecutions.size());
     assertEquals("org.apache.maven.plugins:maven-resources-plugin:2.4.1:resources {execution: default-resources}",
         notCoveredMojoExecutions.get(0).toString());
@@ -373,7 +374,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     ILifecycleMapping lifecycleMapping = facade.getLifecycleMapping(monitor);
 
     // TODO check modello execution from package phase is actually mapped to mojo execution configurator
-    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
+    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(monitor);
     assertEquals( 3, configurators.size() );
     assertTrue( configurators.get(2) instanceof MojoExecutionProjectConfigurator );
   }

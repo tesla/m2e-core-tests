@@ -20,14 +20,13 @@ import org.eclipse.m2e.core.internal.project.MojoExecutionProjectConfigurator;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.configurator.AbstractProjectConfigurator;
 import org.eclipse.m2e.core.project.configurator.ILifecycleMapping;
-import org.eclipse.m2e.core.project.configurator.MavenResourcesProjectConfigurator;
 import org.eclipse.m2e.jdt.internal.JarLifecycleMapping;
 import org.eclipse.m2e.tests.common.AbstractLifecycleMappingTest;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
 
+@SuppressWarnings("restriction")
 public class PluginExecutionMetadataPrioritiesTest extends AbstractLifecycleMappingTest {
-  // Tests plugin execution declared in default lifecycle mapping metadata
   public void testDefaultMetadataSource() throws Exception {
     LifecycleMappingMetadataSource defaultMetadata = loadLifecycleMappingMetadataSource("projects/lifecyclemapping/lifecycleMappingMetadata/PluginExecutionMetadataPrioritiesTest/defaultMetadata.xml");
     LifecycleMappingFactory.setDefaultLifecycleMappingMetadataSource(defaultMetadata);
@@ -46,7 +45,6 @@ public class PluginExecutionMetadataPrioritiesTest extends AbstractLifecycleMapp
         1 /*lineNumber*/, errorMarkers.get(1));
   }
 
-  // Tests that a plugin execution declared in an eclipse extension has priority over default lifecycle mapping metadata
   public void testEclipseExtension() throws Exception {
     LifecycleMappingMetadataSource defaultMetadata = loadLifecycleMappingMetadataSource("projects/lifecyclemapping/lifecycleMappingMetadata/PluginExecutionMetadataPrioritiesTest/defaultMetadata.xml");
     LifecycleMappingFactory.setDefaultLifecycleMappingMetadataSource(defaultMetadata);
@@ -63,7 +61,6 @@ public class PluginExecutionMetadataPrioritiesTest extends AbstractLifecycleMapp
     assertTrue(lifecycleMapping.getClass().getCanonicalName(), lifecycleMapping instanceof JarLifecycleMapping);
   }
 
-  // Tests that a plugin execution declared in a metadata source is added to those declared in eclipse extensions
   public void testReferencedFromPom() throws Exception {
     LifecycleMappingMetadataSource defaultMetadata = loadLifecycleMappingMetadataSource("projects/lifecyclemapping/lifecycleMappingMetadata/PluginExecutionMetadataPrioritiesTest/defaultMetadata.xml");
     LifecycleMappingFactory.setDefaultLifecycleMappingMetadataSource(defaultMetadata);
@@ -77,17 +74,13 @@ public class PluginExecutionMetadataPrioritiesTest extends AbstractLifecycleMapp
 
     ILifecycleMapping lifecycleMapping = facade.getLifecycleMapping(monitor);
     assertNotNull(lifecycleMapping);
-    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
-    assertEquals(configurators.toString(), 3, configurators.size());
+    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(monitor);
+    assertEquals(configurators.toString(), 2, configurators.size());
     AbstractProjectConfigurator configurator = configurators.get(0);
-    assertNotNull(configurator);
-    assertTrue(configurator.getClass().getCanonicalName(), configurator instanceof MavenResourcesProjectConfigurator);
-    configurator = configurators.get(2);
     assertNotNull(configurator);
     assertTrue(configurator.getClass().getCanonicalName(), configurator instanceof IgnoreMojoProjectConfigurator);
   }
 
-  // Tests that a plugin execution embedded in pom is added to those declared in declared in a metadata source referenced from pom
   public void testEmbeddedInPom() throws Exception {
     LifecycleMappingMetadataSource defaultMetadata = loadLifecycleMappingMetadataSource("projects/lifecyclemapping/lifecycleMappingMetadata/PluginExecutionMetadataPrioritiesTest/defaultMetadata.xml");
     LifecycleMappingFactory.setDefaultLifecycleMappingMetadataSource(defaultMetadata);
@@ -101,17 +94,11 @@ public class PluginExecutionMetadataPrioritiesTest extends AbstractLifecycleMapp
 
     ILifecycleMapping lifecycleMapping = facade.getLifecycleMapping(monitor);
     assertNotNull(lifecycleMapping);
-    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
-    assertEquals(configurators.toString(), 4, configurators.size());
+    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(monitor);
+    assertEquals(configurators.toString(), 2, configurators.size());
     AbstractProjectConfigurator configurator = configurators.get(0);
     assertNotNull(configurator);
-    assertTrue(configurator.getClass().getCanonicalName(), configurator instanceof MavenResourcesProjectConfigurator);
-    configurator = configurators.get(2);
-    assertNotNull(configurator);
     assertTrue(configurator.getClass().getCanonicalName(), configurator instanceof MojoExecutionProjectConfigurator);
-    configurator = configurators.get(3);
-    assertNotNull(configurator);
-    assertTrue(configurator.getClass().getCanonicalName(), configurator instanceof IgnoreMojoProjectConfigurator);
   }
 
   private LifecycleMappingMetadataSource loadLifecycleMappingMetadataSource(String metadataFilename)

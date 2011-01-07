@@ -21,7 +21,8 @@ import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
 
-public class JavaProjectConfiguratorTest extends AbstractMavenProjectTestCase {
+//TODO Re-enable it when we'll have support for secondary project configurators
+public abstract class JavaProjectConfiguratorTest extends AbstractMavenProjectTestCase {
 
   public void testMNGECLIPSE2313_markAllRawClasspathEntries() throws Exception {
     IProject project = importProject("projects/MNGECLIPSE-2313_markAllRawClasspathEntries/pom.xml");
