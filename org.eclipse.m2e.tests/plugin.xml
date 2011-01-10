@@ -47,5 +47,8 @@
             class="org.eclipse.m2e.tests.internal.project.TestMavenProjectChangedListener">
       </listener>
    </extension>
+   <extension
+         point="org.eclipse.m2e.core.lifecycleMappingMetadataSource">
+   </extension>
 
 </plugin>

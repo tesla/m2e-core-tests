@@ -134,6 +134,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
   }
 
   public void testUseDefaultLifecycleMappingMetadataSource() throws Exception {
+    LifecycleMappingFactory.setUseDefaultLifecycleMappingMetadataSource(false);
     assertNull(LifecycleMappingFactory.getDefaultLifecycleMappingMetadataSource());
 
     // By default, the use of default lifecycle metadata is disabled for unit tests

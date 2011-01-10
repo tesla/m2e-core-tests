@@ -38,15 +38,21 @@ public class PluginExecutionMetadataPrioritiesTest extends AbstractLifecycleMapp
     IProject project = facade.getProject();
     List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
     assertNotNull(errorMarkers);
-    assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
+    assertEquals(WorkspaceHelpers.toString(errorMarkers), 3, errorMarkers.size());
 
-    String expectedErrorMessage = "Project configurator \"no such project configurator for maven-deploy-plugin\" is not available. To enable full functionality, install the project configurator and run Maven->Update Project Configuration.";
+    String expectedErrorMessage = "Project configurator \"no such project configurator for maven-resources-plugin\" is not available. To enable full functionality, install the project configurator and run Maven->Update Project Configuration.";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
-        1 /*lineNumber*/, errorMarkers.get(1));
+        1 /*lineNumber*/, errorMarkers.get(2));
   }
 
+  /**
+   * This test verifies that pluginExecution mapping metadtata contributed via eclipse extension
+   * point takes preference over default metadata. 
+   * 
+   * The test relies on specific implementation of m2e.jdt bundle 
+   */
   public void testEclipseExtension() throws Exception {
-    LifecycleMappingMetadataSource defaultMetadata = loadLifecycleMappingMetadataSource("projects/lifecyclemapping/lifecycleMappingMetadata/PluginExecutionMetadataPrioritiesTest/defaultMetadata.xml");
+    LifecycleMappingMetadataSource defaultMetadata = loadLifecycleMappingMetadataSource("projects/lifecyclemapping/lifecycleMappingMetadata/PluginExecutionMetadataPrioritiesTest/testEclipseExtension/defaultMetadata.xml");
     LifecycleMappingFactory.setDefaultLifecycleMappingMetadataSource(defaultMetadata);
 
     IMavenProjectFacade facade = importMavenProject(
