@@ -8,30 +8,17 @@
 
 package org.eclipse.m2e.tests.ui.dialogs;
 
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-
 import junit.framework.Assert;
 
 import org.apache.maven.project.MavenProject;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
-import org.eclipse.m2e.core.index.IndexedArtifact;
-import org.eclipse.m2e.core.index.IndexedArtifactFile;
 import org.eclipse.m2e.core.ui.dialogs.AddDependencyDialog;
 import org.eclipse.m2e.model.edit.pom.Dependency;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.sonatype.aether.artifact.Artifact;
-import org.sonatype.aether.graph.DependencyNode;
-import org.sonatype.aether.graph.DependencyVisitor;
-import org.sonatype.aether.util.artifact.DefaultArtifact;
-import org.sonatype.aether.util.graph.DefaultDependencyNode;
 
 public class AddDependencyDialogTest extends AbstractMavenProjectTestCase {
 
