@@ -103,12 +103,4 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     waitForJobsToComplete();
     WorkspaceHelpers.assertNoErrors(project);
   }
-
-  protected IMavenProjectFacade importMavenProject(String basedir, String pomName) throws Exception {
-    ResolverConfiguration configuration = new ResolverConfiguration();
-    IProject[] project = importProjects(basedir, new String[] {pomName}, configuration);
-    waitForJobsToComplete();
-
-    return MavenPlugin.getDefault().getMavenProjectManager().create(project[0], monitor);
-  }
 }
