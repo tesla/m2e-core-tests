@@ -10,7 +10,8 @@
   <packaging>pom</packaging>
   
   <properties>
-    <m2e-core.localurl>file:/C:/slave/workspace/m2eclipse-core-e37-at-eclipse/jdk/java-5x/label/m2e/org.eclipse.m2e.site/target/site</m2e-core.localurl>
+      <!-- References the latest m2eclipse build over https by default -->
+    <m2e-core.url>https://grid.sonatype.org/ci/view/M2E/job/m2eclipse-core-e37-at-eclipse/jdk=java-5x,label=m2e/lastSuccessfulBuild/artifact/org.eclipse.m2e.site/target/site/</m2e-core.url>
   </properties>
 
   <repositories>
@@ -18,31 +19,14 @@
       <id>snapshots</id>
       <url>https://repository.sonatype.org/content/repositories/snapshots/</url>
     </repository>
+    <repository>
+      <id>m2e-latest-build</id>
+      <layout>p2</layout>
+      <url>${m2e-core.url}</url>
+    </repository>
   </repositories>
-  
+
   <profiles>
-    <profile>
-      <!-- References the latest m2eclipse build over https -->
-      <id>latest-http</id>
-      <repositories>
-        <repository>
-          <id>m2e-latest-build</id>
-          <layout>p2</layout>
-          <url>https://grid.sonatype.org/ci/view/M2E/job/m2eclipse-core-e37-at-eclipse/jdk=java-5x,label=m2e/lastSuccessfulBuild/artifact/org.eclipse.m2e.site/target/site/</url>
-        </repository>
-      </repositories>
-    </profile>
-    <profile>
-      <!-- References the latest m2eclipse build locally on the m2e build machine - much faster and more reliable -->
-      <id>latest</id>
-      <repositories>
-        <repository>
-          <id>m2e-latest-build</id>
-          <layout>p2</layout>
-          <url>${m2e-core.localurl}</url>
-        </repository>
-      </repositories>
-    </profile>
     
     <profile>
       <id>uts</id>
