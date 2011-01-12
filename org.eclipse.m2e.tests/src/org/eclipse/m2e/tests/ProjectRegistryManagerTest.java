@@ -239,7 +239,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     WorkspaceHelpers
         .assertErrorMarker(
             IMavenConstants.MARKER_POM_LOADING_ID,
-            "Project build error: Non-resolvable parent POM: Failure to find t001:t001-p3:pom:0.0.1-SNAPSHOT in file:remoterepo was cached in the local repository, resolution will not be reattempted until the update interval of central has elapsed or updates are forced and 'parent.relativePath' points at wrong local POM",
+            "Project build error: Non-resolvable parent POM: Failure to find t001:t001-p3:pom:0.0.1-SNAPSHOT in file:repositories/remoterepo was cached in the local repository, resolution will not be reattempted until the update interval of central has elapsed or updates are forced and 'parent.relativePath' points at wrong local POM",
             1 /*lineNumber*/, markers[0]);
 
     IProject p3 = createExisting("t001-p3");

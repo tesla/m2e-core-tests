@@ -8,6 +8,10 @@
   <modelVersion>4.0.0</modelVersion>
   <artifactId>org.eclipse.m2e.buildAndTest</artifactId>
   <packaging>pom</packaging>
+  
+  <properties>
+    <m2e-core.localurl>file:/C:/slave/workspace/m2eclipse-core-e37-at-eclipse/jdk/java-5x/label/m2e/org.eclipse.m2e.site/target/site</m2e-core.localurl>
+  </properties>
 
   <repositories>
     <repository>
@@ -35,7 +39,7 @@
         <repository>
           <id>m2e-latest-build</id>
           <layout>p2</layout>
-          <url>file:/C:/slave/workspace/m2eclipse-core-e37-at-eclipse/jdk/java-5x/label/m2e/org.eclipse.m2e.site/target/site</url>
+          <url>${m2e-core.localurl}</url>
         </repository>
       </repositories>
     </profile>

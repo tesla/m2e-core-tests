@@ -5,7 +5,7 @@
       <repositories>
         <repository>
           <id>central</id>
-          <url>file:remoterepo</url>
+          <url>file:repositories/remoterepo</url>
           <releases>
             <enabled>true</enabled>
           </releases>
@@ -15,7 +15,7 @@
         </repository>
         <repository>
           <id>customremote</id>
-          <url>http:customremote</url>
+          <url>http:repositories/customremote</url>
           <releases>
             <enabled>true</enabled>
           </releases>
@@ -27,7 +27,7 @@
       <pluginRepositories>
         <pluginRepository>
           <id>central</id>
-          <url>file:remoterepo</url>
+          <url>file:repositories/remoterepo</url>
           <releases>
             <enabled>true</enabled>
           </releases>

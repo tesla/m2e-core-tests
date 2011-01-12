@@ -6,7 +6,7 @@
       <repositories>
         <repository>
           <id>central</id>
-          <url>https://localhost:@port.https@/remoterepo</url>
+          <url>https://localhost:@port.https@/repositories/remoterepo</url>
           <releases>
             <enabled>true</enabled>
             <checksumPolicy>ignore</checksumPolicy>
@@ -20,7 +20,7 @@
       <pluginRepositories>
         <pluginRepository>
           <id>central</id>
-          <url>https://localhost:@port.https@/remoterepo</url>
+          <url>https://localhost:@port.https@/repositories/remoterepo</url>
           <releases>
             <enabled>true</enabled>
             <checksumPolicy>ignore</checksumPolicy>

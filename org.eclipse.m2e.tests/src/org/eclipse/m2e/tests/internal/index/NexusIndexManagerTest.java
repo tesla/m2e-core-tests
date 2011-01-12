@@ -385,7 +385,7 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
       waitForJobsToComplete();
 
       IndexedArtifactGroup[] rootGroups = indexManager
-          .getRootIndexedArtifactGroups(getRepository("http://bad.host/remoterepo"));
+          .getRootIndexedArtifactGroups(getRepository("http://bad.host/repositories/remoterepo"));
       assertTrue(rootGroups.length > 0);
     } finally {
       httpServer.stop();
@@ -426,7 +426,7 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
       waitForJobsToComplete();
 
       IndexedArtifactGroup[] rootGroups = indexManager.getRootIndexedArtifactGroups(getRepository(httpServer
-          .getHttpUrl() + "/remoterepo"));
+          .getHttpUrl() + "/repositories/remoterepo"));
       assertTrue(rootGroups.length > 0);
     } finally {
       httpServer.stop();

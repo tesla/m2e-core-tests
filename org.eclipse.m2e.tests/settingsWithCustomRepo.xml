@@ -3,7 +3,7 @@
     <mirror>
       <id>nexus</id>
       <mirrorOf>external:*,!custom</mirrorOf>
-      <url>file:remoterepo</url>
+      <url>file:repositories/remoterepo</url>
     </mirror>
   </mirrors>
   <profiles>

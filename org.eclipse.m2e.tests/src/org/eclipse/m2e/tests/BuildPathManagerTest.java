@@ -561,7 +561,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     localIndex.updateIndex(true, monitor);
 
     for (IRepository repository : repositoryRegistry.getRepositories(IRepositoryRegistry.SCOPE_SETTINGS)) {
-      if ("file:remoterepo".equals(repository.getUrl())) {
+      if ("file:repositories/remoterepo".equals(repository.getUrl())) {
         NexusIndex remoteIndex = indexManager.getIndex(repository);
         remoteIndex.updateIndex(true, monitor); // actually scan the repo
       }
@@ -569,10 +569,10 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
 
     IProject project = createExisting("downloadsources-p006", "projects/downloadsources/p006");
 
-    File log4jJar = new File("remoterepo/log4j/log4j/1.2.13/log4j-1.2.13.jar");
+    File log4jJar = new File("repositories/remoterepo/log4j/log4j/1.2.13/log4j-1.2.13.jar");
     Path log4jPath = new Path(log4jJar.getAbsolutePath());
 
-    File junitJar = new File("remoterepo/junit/junit/3.8.1/junit-3.8.1.jar");
+    File junitJar = new File("repositories/remoterepo/junit/junit/3.8.1/junit-3.8.1.jar");
     Path junitPath = new Path(junitJar.getAbsolutePath());
 
     IJavaProject javaProject = JavaCore.create(project);

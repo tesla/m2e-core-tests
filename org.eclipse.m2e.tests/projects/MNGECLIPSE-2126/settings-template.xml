@@ -14,7 +14,7 @@
     <mirror>
       <id>nexus</id>
       <mirrorOf>*</mirrorOf>
-      <url>http://bad.host/remoterepo</url>
+      <url>http://bad.host/repositories/remoterepo</url>
     </mirror>
   </mirrors>
   <servers>

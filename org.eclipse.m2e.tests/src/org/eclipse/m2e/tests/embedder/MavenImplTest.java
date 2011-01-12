@@ -115,7 +115,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
       repositories = maven.getArtifactRepositories(true);
       assertEquals(2, repositories.size());
       assertEquals("nexus", repositories.get(0).getId());
-      assertEquals("file:remoterepo", repositories.get(0).getUrl());
+      assertEquals("file:repositories/remoterepo", repositories.get(0).getUrl());
       assertEquals("http:customrepo", repositories.get(1).getUrl());
     } finally {
       configuration.setUserSettingsFile(origSettings);
@@ -156,7 +156,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
       assertEquals("http://repo1.maven.org/maven2", maven.getArtifactRepositories().get(0).getUrl());
       
       configuration.setGlobalSettingsFile(new File("settingsWithCustomRepo.xml").getCanonicalPath());
-      assertEquals("file:remoterepo", maven.getArtifactRepositories().get(0).getUrl());
+      assertEquals("file:repositories/remoterepo", maven.getArtifactRepositories().get(0).getUrl());
     } finally {
       configuration.setUserSettingsFile(userSettings);
       configuration.setGlobalSettingsFile(globalSettings);

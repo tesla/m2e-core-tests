@@ -7,7 +7,7 @@
   <repositories>
     <repository>
       <id>customremote</id>
-      <url>http:customremote</url>
+      <url>http:repositories/customremote</url>
       <releases>
         <enabled>true</enabled>
       </releases>

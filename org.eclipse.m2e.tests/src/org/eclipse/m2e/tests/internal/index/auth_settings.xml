@@ -10,7 +10,7 @@
     <mirror>
       <id>nexus</id>
       <mirrorOf>external:*</mirrorOf>
-      <url>http://localhost:@port.http@/remoterepo</url>
+      <url>http://localhost:@port.http@/repositories/remoterepo</url>
     </mirror>
   </mirrors>
 </settings>

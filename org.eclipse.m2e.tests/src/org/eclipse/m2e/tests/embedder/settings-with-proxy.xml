@@ -13,6 +13,6 @@
     <mirror>
       <id>void</id>
       <mirrorOf>*</mirrorOf>
-      <url>file:remoterepo</url>
+      <url>file:repositories/remoterepo</url>
     </mirror>
 </settings>
