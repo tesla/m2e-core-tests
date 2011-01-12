@@ -95,12 +95,119 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     waitForJobsToComplete();
     WorkspaceHelpers.assertNoErrors(project);
 
-    // Add a maven build marker
+    // Add a fake maven build marker
     project.createMarker(IMavenConstants.MARKER_BUILD_ID);
 
     // Building the project should remove the marker
     project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
     waitForJobsToComplete();
     WorkspaceHelpers.assertNoErrors(project);
+
+    // Add a maven build marker
+    copyContent(project, "pom_buildException.xml", "pom.xml");
+    waitForJobsToComplete();
+    WorkspaceHelpers.assertNoErrors(project);
+    MavenPlugin.getDefault().getProjectConfigurationManager()
+        .updateProjectConfiguration(project, new ResolverConfiguration(), monitor);
+    project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+    waitForJobsToComplete();
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_BUILD_ID,
+        ThrowBuildExceptionProjectConfigurator.ERROR_MESSAGE, null /*lineNumber*/, project);
   }
+//
+//  public void testSearchMarkers() throws Exception {
+//    IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/lifecycleMappingMetadata",
+//        "testLifecycleMappingSpecifiedInMetadata/pom.xml");
+//    assertNotNull("Expected not null MavenProjectFacade", facade);
+//    IProject project = facade.getProject();
+//    WorkspaceHelpers.assertNoErrors(project);
+//    IResource resource = facade.getPom();
+//
+//    int totalMarkers = 100;
+//    int percentForFind = 10;
+//    List<String> idsToFind = new ArrayList<String>();
+//    long start = System.currentTimeMillis();
+//    String markerType = IMavenConstants.MARKER_CONFIGURATION_ID;
+//    for(int i = 0; i < totalMarkers; i++ ) {
+//      IMarker marker = resource.createMarker(markerType);
+//      marker.setAttribute(IMarker.MESSAGE, "Some reasonably error message here. Or maybe a little bit longer.");
+//      marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
+//      marker.setAttribute(IMarker.TRANSIENT, true);
+//      String id = "org.apache.maven.plugins:maven-compiler-plugin:2.0.1:testCompile:standard:org.eclipse.m2e.jdt.internal.JavaProjectConfigurator"
+//          + System.currentTimeMillis() + System.nanoTime();
+//      marker.setAttribute("buildParticipant", id);
+//      if(i % percentForFind == 0) {
+//        idsToFind.add(id);
+//      }
+//    }
+//    System.err.println("Time to create " + totalMarkers + " markers: " + (System.currentTimeMillis() - start) + "ms");
+//    IMarker[] allMarkers = resource
+//        .findMarkers(markerType, false /*includeSubtypes*/, 0 /*depth*/);
+//    assertEquals(totalMarkers, allMarkers.length);
+//
+//    start = System.currentTimeMillis();
+//    for(String idToFind : idsToFind) {
+//      int found = 0;
+//      allMarkers = resource
+//          .findMarkers(markerType, false /*includeSubtypes*/, 0 /*depth*/);
+//      for(IMarker marker : allMarkers) {
+//        String id = marker.getAttribute("buildParticipant", null);
+//        if(idToFind.equals(id)) {
+//          found++ ;
+//        }
+//      }
+//      assertEquals(1, found);
+//    }
+//    long elapsed = (System.currentTimeMillis() - start);
+//    System.err.println("Time to find " + idsToFind.size() + " markers: " + elapsed + "ms");
+//    System.err.println("Average time to find 1 marker: " + (elapsed / idsToFind.size()) + "ms");
+//  }
+//
+//  public void testSearchMarkers1() throws Exception {
+//    IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/lifecycleMappingMetadata",
+//        "testLifecycleMappingSpecifiedInMetadata/pom.xml");
+//    assertNotNull("Expected not null MavenProjectFacade", facade);
+//    IProject project = facade.getProject();
+//    WorkspaceHelpers.assertNoErrors(project);
+//    IResource resource = facade.getPom();
+//
+//    int totalMarkers = 10000;
+//    int percentForFind = 10;
+//    List<String> idsToFind = new ArrayList<String>();
+//    long start = System.currentTimeMillis();
+//    String markerType = IMavenConstants.MARKER_CONFIGURATION_ID;
+//    for(int i = 0; i < totalMarkers; i++ ) {
+//      String id = "org.apache.maven.plugins:maven-compiler-plugin:2.0.1:testCompile:standard:org.eclipse.m2e.jdt.internal.JavaProjectConfigurator"
+//          + System.currentTimeMillis() + System.nanoTime();
+//      IMarker marker = resource.createMarker(markerType + "." + id);
+//      marker.setAttribute(IMarker.MESSAGE, "Some reasonably error message here. Or maybe a little bit longer.");
+//      marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
+//      marker.setAttribute(IMarker.TRANSIENT, true);
+//      if(i % percentForFind == 0) {
+//        idsToFind.add(id);
+//      }
+//    }
+//    System.err.println("Time to create " + totalMarkers + " markers: " + (System.currentTimeMillis() - start) + "ms");
+////    IMarker[] allMarkers = resource.findMarkers(markerType, true /*includeSubtypes*/, 0 /*depth*/);
+////    assertEquals(totalMarkers, allMarkers.length);
+//
+//    start = System.currentTimeMillis();
+//    for(String idToFind : idsToFind) {
+//      IMarker[] allMarkers = resource
+//          .findMarkers(markerType + "." + idToFind, false /*includeSubtypes*/, 0 /*depth*/);
+//      assertEquals(1, allMarkers.length);
+//    }
+//    long elapsed = (System.currentTimeMillis() - start);
+//    System.err.println("Time to find " + idsToFind.size() + " markers: " + elapsed + "ms");
+//    System.err.println("Average time to find 1 marker: " + (elapsed / idsToFind.size()) + "ms");
+//  }
+//
+//  protected IMavenProjectFacade importMavenProject(String basedir, String pomName) throws Exception {
+//    ResolverConfiguration configuration = new ResolverConfiguration();
+//    IProject[] project = importProjects(basedir, new String[] {pomName}, configuration);
+//    waitForJobsToComplete();
+//
+//    MavenProjectManager mavenProjectManager = MavenPlugin.getDefault().getMavenProjectManager();
+//    return mavenProjectManager.create(project[0], monitor);
+//  }
 }

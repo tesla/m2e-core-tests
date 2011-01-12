@@ -23,8 +23,6 @@
       <configurator id="org.eclipse.m2e.configurator.test"
             class="org.eclipse.m2e.tests.configurators.TestProjectConfigurator"
             name="TEST" priority="1000"/>
-
-
       <configurator id="org.eclipse.m2e.configurator.incompatibleApi"
             class="org.eclipse.m2e.tests.configurators.IncompatibleProjectConfigurator"
             name="AJDT-0.9.8" priority="1002"/>
@@ -32,8 +30,12 @@
             class="org.eclipse.m2e.tests.configurators.MNGECLIPSE2313MarkAllRawClasspathEntriesConfigurator"
             id="MNGECLIPSE-2313_markAllRawClasspathEntries">
       </configurator>
-            
+      <configurator
+            class="org.eclipse.m2e.tests.ThrowBuildExceptionProjectConfigurator"
+            id="org.eclipse.m2e.tests.ThrowBuildExceptionProjectConfigurator">
+      </configurator>
    </extension>
+   
    <extension
          point="org.eclipse.m2e.core.indexes">
       <index
