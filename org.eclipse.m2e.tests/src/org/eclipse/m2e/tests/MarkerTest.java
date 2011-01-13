@@ -27,7 +27,7 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
   @SuppressWarnings("restriction")
   public void test() throws Exception {
     // Import a project with bad pom.xml
-    IProject project = createExisting("markerTest", "projects/markers");
+    IProject project = createExisting("markerTest", "projects/markers/testWorkflow");
     waitForJobsToComplete();
     assertNotNull("Expected not null project", project);
     IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectManagerImpl().create(project, monitor);
@@ -86,9 +86,9 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     // Fix the current dependency problem
     copyContent(project, "pom_good.xml", "pom.xml");
     waitForJobsToComplete();
-    WorkspaceHelpers.assertErrorMarker("org.eclipse.jdt.core.problem",
-        "The project cannot be built until build path errors are resolved", null /*lineNumber*/,
-        project);
+    WorkspaceHelpers
+        .assertErrorMarker("org.eclipse.jdt.core.problem",
+            "The project cannot be built until build path errors are resolved", null /*lineNumber*/, project, null /*resourceRelativePath*/);
 
     // Building the project should fix the problem
     project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
@@ -103,7 +103,7 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     waitForJobsToComplete();
     WorkspaceHelpers.assertNoErrors(project);
 
-    // Add a maven build marker
+    // Add a maven build marker based on build participant exception
     copyContent(project, "pom_buildException.xml", "pom.xml");
     waitForJobsToComplete();
     WorkspaceHelpers.assertNoErrors(project);
@@ -111,10 +111,138 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
         .updateProjectConfiguration(project, new ResolverConfiguration(), monitor);
     project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
     waitForJobsToComplete();
-    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_BUILD_ID,
-        ThrowBuildExceptionProjectConfigurator.ERROR_MESSAGE, null /*lineNumber*/, project);
+    expectedErrorMessage = "Exception: " + ThrowBuildExceptionProjectConfigurator.ERROR_MESSAGE;
+    IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_BUILD_ID, expectedErrorMessage,
+        null /*lineNumber*/, project);
+
+    // Verify that the marker is removed by a new build
+    project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+    waitForJobsToComplete();
+    IMarker newMarker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_BUILD_ID, expectedErrorMessage,
+        null /*lineNumber*/, project);
+    assertNotSame(marker.getId(), newMarker.getId());
+    assertNotSame(marker.getAttribute(IMarker.MESSAGE, null), newMarker.getAttribute(IMarker.MESSAGE, null));
   }
-//
+
+  public void testBuildContextWithOneProjectConfigurator() throws Exception {
+    IProject project = createExisting("markerTest", "projects/markers/testBuildContextWithOneProjectConfigurator");
+    waitForJobsToComplete();
+    assertNotNull("Expected not null project", project);
+    IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectManagerImpl().create(project, monitor);
+    assertNotNull("Expected not null MavenProjectFacade", facade);
+    WorkspaceHelpers.assertNoErrors(project);
+
+    project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+    waitForJobsToComplete();
+    IMarker errorMarker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_BUILD_PARTICIPANT_ID,
+        AddMarkersProjectConfiguratorFoo.ERROR_MESSAGE, AddMarkersProjectConfiguratorFoo.ERROR_LINE_NUMBER, project,
+        AddMarkersProjectConfiguratorFoo.FILE_NAME);
+    IMarker warningMarker = WorkspaceHelpers.assertWarningMarker(IMavenConstants.MARKER_BUILD_PARTICIPANT_ID,
+        AddMarkersProjectConfiguratorFoo.WARNING_MESSAGE, AddMarkersProjectConfiguratorFoo.WARNING_LINE_NUMBER, project,
+        AddMarkersProjectConfiguratorFoo.FILE_NAME);
+
+    // An incremental build without interesting changes should not remove the markers
+    copyContent(project, AddMarkersProjectConfiguratorFoo.FILE_NAME, "x.txt");
+    project.build(IncrementalProjectBuilder.INCREMENTAL_BUILD, monitor);
+    waitForJobsToComplete();
+    IMarker newErrorMarker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_BUILD_PARTICIPANT_ID,
+        AddMarkersProjectConfiguratorFoo.ERROR_MESSAGE, AddMarkersProjectConfiguratorFoo.ERROR_LINE_NUMBER, project,
+        AddMarkersProjectConfiguratorFoo.FILE_NAME);
+    IMarker newWarningMarker = WorkspaceHelpers.assertWarningMarker(IMavenConstants.MARKER_BUILD_PARTICIPANT_ID,
+        AddMarkersProjectConfiguratorFoo.WARNING_MESSAGE, AddMarkersProjectConfiguratorFoo.WARNING_LINE_NUMBER, project,
+        AddMarkersProjectConfiguratorFoo.FILE_NAME);
+    assertSame(errorMarker.getId(), newErrorMarker.getId());
+    assertSame(errorMarker.getAttribute(IMarker.MESSAGE, null), newErrorMarker.getAttribute(IMarker.MESSAGE, null));
+    assertSame(warningMarker.getId(), newWarningMarker.getId());
+    assertSame(warningMarker.getAttribute(IMarker.MESSAGE, null),
+        newWarningMarker.getAttribute(IMarker.MESSAGE, null));
+
+    // A full build should remove the markers
+    project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+    waitForJobsToComplete();
+    newErrorMarker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_BUILD_PARTICIPANT_ID,
+        AddMarkersProjectConfiguratorFoo.ERROR_MESSAGE, AddMarkersProjectConfiguratorFoo.ERROR_LINE_NUMBER, project,
+        AddMarkersProjectConfiguratorFoo.FILE_NAME);
+    newWarningMarker = WorkspaceHelpers.assertWarningMarker(IMavenConstants.MARKER_BUILD_PARTICIPANT_ID,
+        AddMarkersProjectConfiguratorFoo.WARNING_MESSAGE, AddMarkersProjectConfiguratorFoo.WARNING_LINE_NUMBER, project,
+        AddMarkersProjectConfiguratorFoo.FILE_NAME);
+    assertNotSame(errorMarker.getId(), newErrorMarker.getId());
+    assertNotSame(errorMarker.getAttribute(IMarker.MESSAGE, null), newErrorMarker.getAttribute(IMarker.MESSAGE, null));
+    assertNotSame(warningMarker.getId(), newWarningMarker.getId());
+    assertNotSame(warningMarker.getAttribute(IMarker.MESSAGE, null),
+        newWarningMarker.getAttribute(IMarker.MESSAGE, null));
+
+    // An incremental build with interesting changes should remove the old markers
+    errorMarker = newErrorMarker;
+    warningMarker = newWarningMarker;
+    copyContent(project, "x.txt", AddMarkersProjectConfiguratorFoo.FILE_NAME);
+    project.build(IncrementalProjectBuilder.INCREMENTAL_BUILD, monitor);
+    waitForJobsToComplete();
+    newErrorMarker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_BUILD_PARTICIPANT_ID,
+        AddMarkersProjectConfiguratorFoo.ERROR_MESSAGE, AddMarkersProjectConfiguratorFoo.ERROR_LINE_NUMBER, project,
+        AddMarkersProjectConfiguratorFoo.FILE_NAME);
+    newWarningMarker = WorkspaceHelpers.assertWarningMarker(IMavenConstants.MARKER_BUILD_PARTICIPANT_ID,
+        AddMarkersProjectConfiguratorFoo.WARNING_MESSAGE, AddMarkersProjectConfiguratorFoo.WARNING_LINE_NUMBER, project,
+        AddMarkersProjectConfiguratorFoo.FILE_NAME);
+    assertNotSame(errorMarker.getId(), newErrorMarker.getId());
+    assertNotSame(errorMarker.getAttribute(IMarker.MESSAGE, null), newErrorMarker.getAttribute(IMarker.MESSAGE, null));
+    assertNotSame(warningMarker.getId(), newWarningMarker.getId());
+    assertNotSame(warningMarker.getAttribute(IMarker.MESSAGE, null),
+        newWarningMarker.getAttribute(IMarker.MESSAGE, null));
+
+    // A clean build should remove the markers
+    errorMarker = newErrorMarker;
+    warningMarker = newWarningMarker;
+    project.build(IncrementalProjectBuilder.CLEAN_BUILD, monitor);
+    waitForJobsToComplete();
+    WorkspaceHelpers.assertNoErrors(project);
+  }
+
+  public void testBuildContextWithTwoProjectConfigurators() throws Exception {
+    IProject project = createExisting("markerTest", "projects/markers/testBuildContextWithTwoProjectConfigurators");
+    waitForJobsToComplete();
+    assertNotNull("Expected not null project", project);
+    IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectManagerImpl().create(project, monitor);
+    assertNotNull("Expected not null MavenProjectFacade", facade);
+    WorkspaceHelpers.assertNoErrors(project);
+
+    project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+    waitForJobsToComplete();
+    IMarker errorMarker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_BUILD_PARTICIPANT_ID,
+        AddMarkersProjectConfiguratorFoo.ERROR_MESSAGE, AddMarkersProjectConfiguratorFoo.ERROR_LINE_NUMBER, project,
+        AddMarkersProjectConfiguratorFoo.FILE_NAME);
+    IMarker warningMarker = WorkspaceHelpers.assertWarningMarker(IMavenConstants.MARKER_BUILD_PARTICIPANT_ID,
+        AddMarkersProjectConfiguratorFoo.WARNING_MESSAGE, AddMarkersProjectConfiguratorFoo.WARNING_LINE_NUMBER,
+        project, AddMarkersProjectConfiguratorFoo.FILE_NAME);
+
+    // An incremental build with interesting changes for only one of the project configurators should not remove the markers created by the other project configurator
+    copyContent(project, AddMarkersProjectConfiguratorFoo.FILE_NAME, AddMarkersProjectConfiguratorBar.FILE_NAME);
+    project.build(IncrementalProjectBuilder.INCREMENTAL_BUILD, monitor);
+    waitForJobsToComplete();
+    List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
+    assertEquals(toString(errorMarkers), 2, errorMarkers.size());
+    List<IMarker> warningMarkers = WorkspaceHelpers.findWarningMarkers(project);
+    assertEquals(toString(warningMarkers), 2, errorMarkers.size());
+    // Verify that the old markers for AddMarkersProjectConfiguratorFoo where not removed
+    IMarker newErrorMarker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_BUILD_PARTICIPANT_ID,
+        AddMarkersProjectConfiguratorFoo.ERROR_MESSAGE, AddMarkersProjectConfiguratorFoo.ERROR_LINE_NUMBER,
+        AddMarkersProjectConfiguratorFoo.FILE_NAME, errorMarkers.get(1));
+    IMarker newWarningMarker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_BUILD_PARTICIPANT_ID,
+        AddMarkersProjectConfiguratorFoo.WARNING_MESSAGE, AddMarkersProjectConfiguratorFoo.WARNING_LINE_NUMBER,
+        AddMarkersProjectConfiguratorFoo.FILE_NAME, warningMarkers.get(1));
+    assertSame(errorMarker.getId(), newErrorMarker.getId());
+    assertSame(errorMarker.getAttribute(IMarker.MESSAGE, null), newErrorMarker.getAttribute(IMarker.MESSAGE, null));
+    assertSame(warningMarker.getId(), newWarningMarker.getId());
+    assertSame(warningMarker.getAttribute(IMarker.MESSAGE, null), newWarningMarker.getAttribute(IMarker.MESSAGE, null));
+    // Verify that the new markers for AddMarkersProjectConfiguratorBar where created
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_BUILD_PARTICIPANT_ID,
+        AddMarkersProjectConfiguratorBar.ERROR_MESSAGE, AddMarkersProjectConfiguratorBar.ERROR_LINE_NUMBER,
+        AddMarkersProjectConfiguratorBar.FILE_NAME, errorMarkers.get(0));
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_BUILD_PARTICIPANT_ID,
+        AddMarkersProjectConfiguratorBar.WARNING_MESSAGE, AddMarkersProjectConfiguratorBar.WARNING_LINE_NUMBER,
+        AddMarkersProjectConfiguratorBar.FILE_NAME, warningMarkers.get(0));
+  }
+
 //  public void testSearchMarkers() throws Exception {
 //    IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/lifecycleMappingMetadata",
 //        "testLifecycleMappingSpecifiedInMetadata/pom.xml");

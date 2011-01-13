@@ -12,7 +12,7 @@ import org.eclipse.m2e.core.project.configurator.ProjectConfigurationRequest;
 
 
 public class ThrowBuildExceptionProjectConfigurator extends AbstractProjectConfigurator {
-  public static final String ERROR_MESSAGE = "ThrowBuildExceptionProjectConfigurator exception";
+  public static final String ERROR_MESSAGE = "ThrowBuildExceptionProjectConfigurator exception ";
   @Override
   public void configure(ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException {
   }
@@ -21,7 +21,7 @@ public class ThrowBuildExceptionProjectConfigurator extends AbstractProjectConfi
   public AbstractBuildParticipant getBuildParticipant(MojoExecution execution) {
     return new AbstractBuildParticipant() {
       public Set<IProject> build(int kind, IProgressMonitor monitor) throws Exception {
-        throw new Exception(ERROR_MESSAGE);
+        throw new Exception(ERROR_MESSAGE + System.currentTimeMillis() + System.nanoTime());
       }
     };
   }

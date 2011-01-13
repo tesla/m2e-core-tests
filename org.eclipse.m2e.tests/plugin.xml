@@ -34,6 +34,14 @@
             class="org.eclipse.m2e.tests.ThrowBuildExceptionProjectConfigurator"
             id="org.eclipse.m2e.tests.ThrowBuildExceptionProjectConfigurator">
       </configurator>
+      <configurator
+            class="org.eclipse.m2e.tests.AddMarkersProjectConfiguratorFoo"
+            id="org.eclipse.m2e.tests.AddMarkersProjectConfiguratorFoo">
+      </configurator>
+      <configurator
+            class="org.eclipse.m2e.tests.AddMarkersProjectConfiguratorBar"
+            id="org.eclipse.m2e.tests.AddMarkersProjectConfiguratorBar">
+      </configurator>
    </extension>
    
    <extension
