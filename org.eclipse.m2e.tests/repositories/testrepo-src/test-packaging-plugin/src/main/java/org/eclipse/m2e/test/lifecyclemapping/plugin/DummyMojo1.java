@@ -5,9 +5,9 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
 /**
- * @goal test-goal-a
+ * @goal test-goal-1
  */
-public class DummyMojoA extends AbstractMojo
+public class DummyMojo1 extends AbstractMojo
 {
     public void execute()
         throws MojoExecutionException, MojoFailureException

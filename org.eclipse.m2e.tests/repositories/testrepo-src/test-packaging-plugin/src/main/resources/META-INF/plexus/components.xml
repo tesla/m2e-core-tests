@@ -15,10 +15,10 @@
               <validate>
               </validate>
               <process-resources>
-                org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:${project.version}:test-goal-a
+                org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:${project.version}:test-goal-1
               </process-resources>
               <compile>
-                org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:${project.version}:test-goal-b
+                org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:${project.version}:test-goal-2
               </compile>
               <process-test-resources>
               </process-test-resources>
@@ -71,10 +71,10 @@
               <validate>
               </validate>
               <process-resources>
-                org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:${project.version}:test-goal-a
+                org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:${project.version}:test-goal-1
               </process-resources>
               <compile>
-                org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:${project.version}:test-goal-b
+                org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:${project.version}:test-goal-2
               </compile>
               <process-test-resources>
               </process-test-resources>

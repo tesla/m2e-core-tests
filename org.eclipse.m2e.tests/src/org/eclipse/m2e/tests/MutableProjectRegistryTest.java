@@ -29,6 +29,7 @@ import org.eclipse.m2e.core.internal.project.registry.ProjectRegistryReader;
 import org.eclipse.m2e.core.project.MavenProjectChangedEvent;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 
+@SuppressWarnings("restriction")
 public class MutableProjectRegistryTest extends AbstractMavenProjectTestCase {
 
   private IMaven maven = MavenPlugin.getDefault().getMaven();

@@ -1,0 +1,70 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>lifecycleMappingMetadataTests</groupId>
+  <artifactId>testProfilesAndProperties</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+
+  <properties>
+    <metadata-format.version>0.9.9-SNAPSHOT</metadata-format.version>
+    <metadata.version2>0.0.2</metadata.version2>
+  </properties>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <!-- Well-known groupId and artifactId (used to find lifecycle mapping 
+               metadata sources. -->
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping-metadata-sources</artifactId>
+          <version>${metadata-format.version}</version>
+
+          <configuration>
+            <sources>
+              <source>
+                <groupId>testLifecycleMappingMetadata</groupId>
+                <artifactId>testLifecycleMappingMetadata2</artifactId>
+                <version>${metadata.version2}</version>
+              </source>
+            </sources>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
+  <profiles>
+    <profile>
+      <id>test-profile</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+            <!-- Well-known groupId and artifactId (used to find lifecycle mapping 
+                 metadata sources. -->
+              <groupId>org.eclipse.m2e</groupId>
+              <artifactId>lifecycle-mapping-metadata-sources</artifactId>
+              <version>${metadata-format.version}</version>
+
+              <configuration>
+                <sources>
+                  <source>
+                    <groupId>testLifecycleMappingMetadata</groupId>
+                    <artifactId>testLifecycleMappingMetadata1</artifactId>
+                    <version>0.0.1</version>
+                  </source>
+                </sources>
+              </configuration>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+      </build>
+    </profile>
+
+  </profiles>
+</project>
