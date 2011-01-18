@@ -22,7 +22,7 @@
             description="%connectorDescriptor.description.tycho"
             groupId="lifecycles"
             id="com.sonatype.m2e.discovery-directories.lifecycles.tycho_feature"
-            kind="lifecycles"
+            kind="lifecycles, unknown-or-missing, my.lifecycle.id"
             license="%connectorDescriptor.license.tycho"
             name="%connectorDescriptor.name.tycho"
             provider="%connectorDescriptor.provider.tycho"
