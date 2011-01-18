@@ -13,6 +13,7 @@ package org.eclipse.m2e.tests.lifecycle;
 
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.maven.execution.MavenExecutionRequest;
@@ -30,10 +31,13 @@ import org.eclipse.m2e.core.internal.lifecycle.model.PluginExecutionMetadata;
 import org.eclipse.m2e.core.internal.project.IgnoreMojoProjectConfigurator;
 import org.eclipse.m2e.core.internal.project.MojoExecutionProjectConfigurator;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
+import org.eclipse.m2e.core.project.configurator.AbstractBuildParticipant;
 import org.eclipse.m2e.core.project.configurator.AbstractProjectConfigurator;
 import org.eclipse.m2e.core.project.configurator.CustomLifecycleMapping;
 import org.eclipse.m2e.core.project.configurator.ILifecycleMapping;
 import org.eclipse.m2e.core.project.configurator.MavenResourcesProjectConfigurator;
+import org.eclipse.m2e.core.project.configurator.MojoExecutionBuildParticipant;
+import org.eclipse.m2e.core.project.configurator.MojoExecutionKey;
 import org.eclipse.m2e.jdt.internal.JarLifecycleMapping;
 import org.eclipse.m2e.jdt.internal.JavaProjectConfigurator;
 import org.eclipse.m2e.tests.common.AbstractLifecycleMappingTest;
@@ -64,10 +68,9 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     ILifecycleMapping lifecycleMapping = facade.getLifecycleMapping(monitor);
     assertNotNull(lifecycleMapping);
     List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(monitor);
-    assertEquals(configurators.toString(), 3, configurators.size());
-    AbstractProjectConfigurator configurator = configurators.get(0);
-    assertNotNull(configurator);
-    assertTrue(configurator.getClass().getCanonicalName(), configurator instanceof IgnoreMojoProjectConfigurator);
+    assertEquals(configurators.toString(), 2, configurators.size());
+    assertTrue(configurators.get(0) instanceof MavenResourcesProjectConfigurator);
+    assertTrue(configurators.get(1) instanceof JavaProjectConfigurator);
   }
 
   public void testMojoExecutionExecute() throws Exception {
@@ -80,10 +83,9 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     ILifecycleMapping lifecycleMapping = facade.getLifecycleMapping(monitor);
     assertNotNull(lifecycleMapping);
     List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(monitor);
-    assertEquals(configurators.toString(), 3, configurators.size());
-    AbstractProjectConfigurator configurator = configurators.get(0);
-    assertNotNull(configurator);
-    assertTrue(configurator.getClass().getCanonicalName(), configurator instanceof MojoExecutionProjectConfigurator);
+    assertEquals(configurators.toString(), 2, configurators.size());
+    assertTrue(configurators.get(0) instanceof MavenResourcesProjectConfigurator);
+    assertTrue(configurators.get(1) instanceof JavaProjectConfigurator);
   }
 
   public void testMojoExecutionConfigurator() throws Exception {
@@ -302,9 +304,8 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertTrue(lifecycleMapping instanceof CustomLifecycleMapping);
 
     List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(monitor);
-    assertEquals(configurators.toString(), 2, configurators.size());
-    assertTrue(configurators.get(0).toString(), configurators.get(0) instanceof MojoExecutionProjectConfigurator);
-    assertTrue(configurators.get(1).toString(), configurators.get(1) instanceof JavaProjectConfigurator);
+    assertEquals(configurators.toString(), 1, configurators.size());
+    assertTrue(configurators.get(0).toString(), configurators.get(0) instanceof JavaProjectConfigurator);
 
     List<MojoExecution> notCoveredMojoExecutions = lifecycleMapping.getNotCoveredMojoExecutions(monitor);
     assertEquals(notCoveredMojoExecutions.toString(), 0, lifecycleMapping.getNotCoveredMojoExecutions(monitor).size());
@@ -399,10 +400,14 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
 
     ILifecycleMapping lifecycleMapping = facade.getLifecycleMapping(monitor);
 
-    // TODO check modello execution from package phase is actually mapped to mojo execution configurator
-    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(monitor);
-    assertEquals(3, configurators.size());
-    assertTrue(configurators.get(2) instanceof MojoExecutionProjectConfigurator);
+    Map<MojoExecutionKey, List<AbstractBuildParticipant>> buildParticipants = lifecycleMapping
+        .getBuildParticipants(monitor);
+    assertEquals(1, buildParticipants.size());
+    MojoExecutionKey executionKey = buildParticipants.keySet().iterator().next();
+    assertEquals("package", executionKey.getMojoExecution().getLifecyclePhase());
+    assertEquals("test-lifecyclemapping-plugin", executionKey.getMojoExecution().getArtifactId());
+    assertEquals(1, buildParticipants.get(executionKey).size());
+    assertTrue(buildParticipants.get(executionKey).get(0) instanceof MojoExecutionBuildParticipant);
   }
 
   public void testDuplicatePackagingTypeMetadata() throws Exception {
@@ -443,5 +448,5 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
         "Conflicting lifecycle mapping (plugin execution \"org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 {execution: default-test-goal-1}\"). To enable full functionality, remove the conflicting mapping and run Maven->Update Project Configuration.",
         lifecycleMapping.getProblems().get(0).getMessage());
   }
-  
+
 }

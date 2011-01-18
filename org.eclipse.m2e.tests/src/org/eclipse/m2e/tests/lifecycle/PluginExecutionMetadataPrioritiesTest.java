@@ -21,6 +21,7 @@ import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.configurator.AbstractProjectConfigurator;
 import org.eclipse.m2e.core.project.configurator.ILifecycleMapping;
 import org.eclipse.m2e.jdt.internal.JarLifecycleMapping;
+import org.eclipse.m2e.jdt.internal.JavaProjectConfigurator;
 import org.eclipse.m2e.tests.common.AbstractLifecycleMappingTest;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
@@ -40,6 +41,8 @@ public class PluginExecutionMetadataPrioritiesTest extends AbstractLifecycleMapp
     assertNotNull(errorMarkers);
     assertEquals(WorkspaceHelpers.toString(errorMarkers), 3, errorMarkers.size());
 
+    // resources mojo execution not covered
+    // testResources mojo execution not covered
     String expectedErrorMessage = "Project configurator \"no such project configurator for maven-resources-plugin\" is not available. To enable full functionality, install the project configurator and run Maven->Update Project Configuration.";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
         1 /*lineNumber*/, errorMarkers.get(2));
@@ -81,10 +84,11 @@ public class PluginExecutionMetadataPrioritiesTest extends AbstractLifecycleMapp
     ILifecycleMapping lifecycleMapping = facade.getLifecycleMapping(monitor);
     assertNotNull(lifecycleMapping);
     List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(monitor);
-    assertEquals(configurators.toString(), 2, configurators.size());
+    assertEquals(configurators.toString(), 1, configurators.size());
     AbstractProjectConfigurator configurator = configurators.get(0);
     assertNotNull(configurator);
-    assertTrue(configurator.getClass().getCanonicalName(), configurator instanceof IgnoreMojoProjectConfigurator);
+    assertTrue(configurator.getClass().getCanonicalName(), configurator instanceof JavaProjectConfigurator);
+    // this _implies_ that resources-plugin has been ignoted as per metadata source referenced from the pom
   }
 
   public void testEmbeddedInPom() throws Exception {
@@ -101,10 +105,11 @@ public class PluginExecutionMetadataPrioritiesTest extends AbstractLifecycleMapp
     ILifecycleMapping lifecycleMapping = facade.getLifecycleMapping(monitor);
     assertNotNull(lifecycleMapping);
     List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(monitor);
-    assertEquals(configurators.toString(), 2, configurators.size());
+    assertEquals(configurators.toString(), 1, configurators.size());
     AbstractProjectConfigurator configurator = configurators.get(0);
     assertNotNull(configurator);
-    assertTrue(configurator.getClass().getCanonicalName(), configurator instanceof MojoExecutionProjectConfigurator);
+    assertTrue(configurator.getClass().getCanonicalName(), configurator instanceof JavaProjectConfigurator);
+    // this _implies_ that resources-plugin has been ignoted as per metadata source embedded the pom
   }
 
   private LifecycleMappingMetadataSource loadLifecycleMappingMetadataSource(String metadataFilename)
