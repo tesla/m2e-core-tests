@@ -30,6 +30,7 @@ import org.eclipse.m2e.core.internal.lifecycle.model.PluginExecutionAction;
 import org.eclipse.m2e.core.internal.lifecycle.model.PluginExecutionMetadata;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.configurator.AbstractBuildParticipant;
+import org.eclipse.m2e.core.project.configurator.AbstractLifecycleMapping;
 import org.eclipse.m2e.core.project.configurator.AbstractProjectConfigurator;
 import org.eclipse.m2e.core.project.configurator.CustomLifecycleMapping;
 import org.eclipse.m2e.core.project.configurator.ILifecycleMapping;
@@ -428,7 +429,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     IMavenProjectFacade facade = importMavenProject(
         "projects/lifecyclemapping/lifecycleMappingMetadata/DuplicateMetadata/testDuplicatePluginExecution1", "pom.xml");
 
-    InvalidLifecycleMapping lifecycleMapping = (InvalidLifecycleMapping) projectConfigurationManager
+    AbstractLifecycleMapping lifecycleMapping = (AbstractLifecycleMapping) projectConfigurationManager
         .getLifecycleMapping(facade, monitor);
 
     assertEquals(2, lifecycleMapping.getProblems().size());
@@ -441,7 +442,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     IMavenProjectFacade facade = importMavenProject(
         "projects/lifecyclemapping/lifecycleMappingMetadata/DuplicateMetadata/testDuplicatePluginExecution2", "pom.xml");
 
-    InvalidLifecycleMapping lifecycleMapping = (InvalidLifecycleMapping) projectConfigurationManager
+    AbstractLifecycleMapping lifecycleMapping = (AbstractLifecycleMapping) projectConfigurationManager
         .getLifecycleMapping(facade, monitor);
 
     assertEquals(1, lifecycleMapping.getProblems().size());
