@@ -28,8 +28,6 @@ import org.eclipse.m2e.core.internal.lifecycle.model.LifecycleMappingMetadata;
 import org.eclipse.m2e.core.internal.lifecycle.model.LifecycleMappingMetadataSource;
 import org.eclipse.m2e.core.internal.lifecycle.model.PluginExecutionAction;
 import org.eclipse.m2e.core.internal.lifecycle.model.PluginExecutionMetadata;
-import org.eclipse.m2e.core.internal.project.IgnoreMojoProjectConfigurator;
-import org.eclipse.m2e.core.internal.project.MojoExecutionProjectConfigurator;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.configurator.AbstractBuildParticipant;
 import org.eclipse.m2e.core.project.configurator.AbstractProjectConfigurator;
@@ -201,10 +199,13 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     List<LifecycleMappingMetadataSource> metadata = LifecycleMappingFactory.getPomMappingMetadataSources(
         facade.getMavenProject(), request, monitor);
     assertNotNull(metadata);
-    assertEquals(1, metadata.size());
+    assertEquals(2, metadata.size());
     assertEquals("testLifecycleMappingMetadata", metadata.get(0).getGroupId());
     assertEquals("testLifecycleMappingMetadata2", metadata.get(0).getArtifactId());
     assertEquals("0.0.2", metadata.get(0).getVersion());
+    assertEquals("testLifecycleMappingMetadata", metadata.get(1).getGroupId());
+    assertEquals("testLifecycleMappingMetadata1", metadata.get(1).getArtifactId());
+    assertEquals("0.0.1", metadata.get(1).getVersion());
 
     List<PluginExecutionMetadata> pluginExecutions = metadata.get(0).getPluginExecutions();
     assertEquals(2, pluginExecutions.size());
@@ -253,7 +254,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     List<LifecycleMappingMetadataSource> metadata = LifecycleMappingFactory.getPomMappingMetadataSources(
         facade.getMavenProject(), request, monitor);
     assertNotNull(metadata);
-    assertEquals(3, metadata.size());
+    assertEquals(2, metadata.size());
     assertEquals("testLifecycleMappingMetadata", metadata.get(0).getGroupId());
     assertEquals("testLifecycleMappingMetadata2", metadata.get(0).getArtifactId());
     assertEquals("0.0.2", metadata.get(0).getVersion());
