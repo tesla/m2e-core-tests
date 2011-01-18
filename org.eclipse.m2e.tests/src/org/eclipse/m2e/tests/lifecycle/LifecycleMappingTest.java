@@ -112,15 +112,11 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
 
     List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
     assertNotNull(errorMarkers);
-    assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
+    assertEquals(WorkspaceHelpers.toString(errorMarkers), 1, errorMarkers.size());
 
     String expectedErrorMessage = "Could not resolve artifact testLifecycleMappingMetadata:missing:xml:lifecycle-mapping-metadata:0.0.1";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
         1 /*lineNumber*/, errorMarkers.get(0));
-
-    expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"jar\")";
-    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
-        1 /*lineNumber*/, errorMarkers.get(1));
 
     ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade, monitor);
     assertTrue(lifecycleMapping instanceof InvalidLifecycleMapping);
@@ -352,13 +348,10 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertNotNull("Expected not null MavenProjectFacade", facade);
     IProject project = facade.getProject();
     List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
-    assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
+    assertEquals(WorkspaceHelpers.toString(errorMarkers), 1, errorMarkers.size());
     String expectedErrorMessage = "Lifecycle mapping \"unknown-or-missing\" is not available. To enable full functionality, install the lifecycle mapping and run Maven->Update Project Configuration.";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
         1 /*lineNumber*/, errorMarkers.get(0));
-    expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"jar\")";
-    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
-        1 /*lineNumber*/, errorMarkers.get(1));
 
     ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade, monitor);
     assertTrue(lifecycleMapping instanceof InvalidLifecycleMapping);
@@ -366,13 +359,10 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
     waitForJobsToComplete();
     errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
-    assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
+    assertEquals(WorkspaceHelpers.toString(errorMarkers), 1, errorMarkers.size());
     expectedErrorMessage = "Lifecycle mapping \"unknown-or-missing\" is not available. To enable full functionality, install the lifecycle mapping and run Maven->Update Project Configuration.";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
         1 /*lineNumber*/, errorMarkers.get(0));
-    expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"jar\")";
-    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
-        1 /*lineNumber*/, errorMarkers.get(1));
   }
 
   public void testUnknownPackagingType() throws Exception {
