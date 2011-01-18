@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>PluginExecutionMetadataPrioritiesTest</groupId>
+  <artifactId>testParent</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.eclipse.m2e.test.lifecyclemapping</groupId>
+        <artifactId>test-lifecyclemapping-plugin</artifactId>
+        <version>1.0.0</version>
+        <extensions>true</extensions>
+      </plugin>
+    </plugins>
+
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>0.9.9-SNAPSHOT</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <lifecycleMappings>
+                <lifecycleMapping>
+                  <packagingType>test-packaging-a</packagingType>
+                  <lifecycleMappingId>TEST</lifecycleMappingId>
+                </lifecycleMapping>
+              </lifecycleMappings>
+              <pluginExecutions>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.eclipse.m2e.test.lifecyclemapping</groupId>
+                    <artifactId>test-lifecyclemapping-plugin</artifactId>
+                    <versionRange>[1.0.0,)</versionRange>
+                    <goals>
+                      <goal>test-goal-1</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <configurator>
+                      <id>no such project configurator id for test-lifecyclemapping-plugin:test-goal-1 - parent</id>
+                    </configurator>
+                  </action>
+                </pluginExecution>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.eclipse.m2e.test.lifecyclemapping</groupId>
+                    <artifactId>test-lifecyclemapping-plugin</artifactId>
+                    <versionRange>[1.0.0,)</versionRange>
+                    <goals>
+                      <goal>test-goal-2</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore/>
+                  </action>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>

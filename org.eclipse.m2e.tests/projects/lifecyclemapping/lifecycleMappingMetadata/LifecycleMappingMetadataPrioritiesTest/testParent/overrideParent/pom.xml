@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>LifecycleMappingMetadataPrioritiesTest</groupId>
+    <artifactId>testParent</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>overrideParent</artifactId>
+  <packaging>test-packaging-a</packaging>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>0.9.9-SNAPSHOT</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <lifecycleMappings>
+                <lifecycleMapping>
+                  <packagingType>test-packaging-a</packagingType>
+                  <lifecycleMappingId>no such lifecycle mapping for test-packaging-a - override</lifecycleMappingId>
+                </lifecycleMapping>
+              </lifecycleMappings>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>

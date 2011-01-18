@@ -103,4 +103,43 @@ public class PluginExecutionMetadataPrioritiesTest extends AbstractLifecycleMapp
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
         1 /*lineNumber*/, errorMarkers.get(1));
   }
+
+  public void testParent() throws Exception {
+    IMavenProjectFacade facade = importMavenProject(
+        "projects/lifecyclemapping/lifecycleMappingMetadata/PluginExecutionMetadataPrioritiesTest",
+        "testParent/pom.xml");
+    assertNotNull("Expected not null MavenProjectFacade", facade);
+    IProject project = facade.getProject();
+    WorkspaceHelpers.assertNoErrors(project);
+
+    facade = importMavenProject(
+        "projects/lifecyclemapping/lifecycleMappingMetadata/PluginExecutionMetadataPrioritiesTest",
+        "testParent/useParent/pom.xml");
+    assertNotNull("Expected not null MavenProjectFacade", facade);
+    project = facade.getProject();
+    List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
+    assertNotNull(errorMarkers);
+    assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
+    String expectedErrorMessage = "Mojo execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 {execution: default-test-goal-1} (maven lifecycle phase: process-resources)";
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+        1 /*lineNumber*/, errorMarkers.get(0));
+    expectedErrorMessage = "Project configurator \"no such project configurator id for test-lifecyclemapping-plugin:test-goal-1 - parent\" is not available. To enable full functionality, install the project configurator and run Maven->Update Project Configuration.";
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+        1 /*lineNumber*/, errorMarkers.get(1));
+
+    facade = importMavenProject(
+        "projects/lifecyclemapping/lifecycleMappingMetadata/PluginExecutionMetadataPrioritiesTest",
+        "testParent/overrideParent/pom.xml");
+    assertNotNull("Expected not null MavenProjectFacade", facade);
+    project = facade.getProject();
+    errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
+    assertNotNull(errorMarkers);
+    assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
+    expectedErrorMessage = "Mojo execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 {execution: default-test-goal-1} (maven lifecycle phase: process-resources)";
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+        1 /*lineNumber*/, errorMarkers.get(0));
+    expectedErrorMessage = "Project configurator \"no such project configurator id for test-lifecyclemapping-plugin:test-goal-1 - override\" is not available. To enable full functionality, install the project configurator and run Maven->Update Project Configuration.";
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+        1 /*lineNumber*/, errorMarkers.get(1));
+  }
 }

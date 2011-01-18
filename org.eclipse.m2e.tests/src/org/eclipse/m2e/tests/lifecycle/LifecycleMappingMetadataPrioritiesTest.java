@@ -101,4 +101,43 @@ public class LifecycleMappingMetadataPrioritiesTest extends AbstractLifecycleMap
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
         1 /*lineNumber*/, errorMarkers.get(1));
   }
+
+  public void testParent() throws Exception {
+    IMavenProjectFacade facade = importMavenProject(
+        "projects/lifecyclemapping/lifecycleMappingMetadata/LifecycleMappingMetadataPrioritiesTest",
+        "testParent/pom.xml");
+    assertNotNull("Expected not null MavenProjectFacade", facade);
+    IProject project = facade.getProject();
+    WorkspaceHelpers.assertNoErrors(project);
+
+    facade = importMavenProject(
+        "projects/lifecyclemapping/lifecycleMappingMetadata/LifecycleMappingMetadataPrioritiesTest",
+        "testParent/useParent/pom.xml");
+    assertNotNull("Expected not null MavenProjectFacade", facade);
+    project = facade.getProject();
+    List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
+    assertNotNull(errorMarkers);
+    assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
+    String expectedErrorMessage = "Lifecycle mapping \"no such lifecycle mapping for test-packaging-a - parent\" is not available. To enable full functionality, install the lifecycle mapping and run Maven->Update Project Configuration.";
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+        1 /*lineNumber*/, errorMarkers.get(0));
+    expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"test-packaging-a\")";
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+        1 /*lineNumber*/, errorMarkers.get(1));
+
+    facade = importMavenProject(
+        "projects/lifecyclemapping/lifecycleMappingMetadata/LifecycleMappingMetadataPrioritiesTest",
+        "testParent/overrideParent/pom.xml");
+    assertNotNull("Expected not null MavenProjectFacade", facade);
+    project = facade.getProject();
+    errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
+    assertNotNull(errorMarkers);
+    assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
+    expectedErrorMessage = "Lifecycle mapping \"no such lifecycle mapping for test-packaging-a - override\" is not available. To enable full functionality, install the lifecycle mapping and run Maven->Update Project Configuration.";
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+        1 /*lineNumber*/, errorMarkers.get(0));
+    expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"test-packaging-a\")";
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+        1 /*lineNumber*/, errorMarkers.get(1));
+  }
 }
