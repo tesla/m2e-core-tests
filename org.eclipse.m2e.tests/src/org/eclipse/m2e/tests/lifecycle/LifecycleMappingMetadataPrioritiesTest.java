@@ -35,7 +35,7 @@ public class LifecycleMappingMetadataPrioritiesTest extends AbstractLifecycleMap
     IProject project = facade.getProject();
     List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
     assertNotNull(errorMarkers);
-    assertEquals(WorkspaceHelpers.toString(errorMarkers), 1, errorMarkers.size());
+    assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
 
     String expectedErrorMessage = "Lifecycle mapping \"no such lifecycle mapping for rar\" is not available. To enable full functionality, install the lifecycle mapping and run Maven->Update Project Configuration.";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
@@ -71,7 +71,7 @@ public class LifecycleMappingMetadataPrioritiesTest extends AbstractLifecycleMap
     IProject project = facade.getProject();
     List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
     assertNotNull(errorMarkers);
-    assertEquals(WorkspaceHelpers.toString(errorMarkers), 1, errorMarkers.size());
+    assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
 
     String expectedErrorMessage = "Lifecycle mapping \"no such lifecycle mapping for jar - referenced from pom\" is not available. To enable full functionality, install the lifecycle mapping and run Maven->Update Project Configuration.";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
@@ -90,7 +90,7 @@ public class LifecycleMappingMetadataPrioritiesTest extends AbstractLifecycleMap
     IProject project = facade.getProject();
     List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
     assertNotNull(errorMarkers);
-    assertEquals(WorkspaceHelpers.toString(errorMarkers), 1, errorMarkers.size());
+    assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
 
     String expectedErrorMessage = "Lifecycle mapping \"no such lifecycle mapping for jar - embedded in pom\" is not available. To enable full functionality, install the lifecycle mapping and run Maven->Update Project Configuration.";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
