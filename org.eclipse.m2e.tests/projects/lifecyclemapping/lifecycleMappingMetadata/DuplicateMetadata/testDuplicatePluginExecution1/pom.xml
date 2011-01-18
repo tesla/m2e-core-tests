@@ -34,7 +34,7 @@
               <lifecycleMappings>
                 <lifecycleMapping>
                   <packagingType>test-packaging-a</packagingType>
-                  <lifecycleMappingId>TEST</lifecycleMappingId>
+                  <lifecycleMappingId>custom</lifecycleMappingId>
                 </lifecycleMapping>
               </lifecycleMappings>
               <pluginExecutions>
