@@ -1,32 +1,20 @@
 
 package org.eclipse.m2e.tests.lifecycle;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
-import org.codehaus.plexus.util.IOUtil;
-import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.internal.lifecycle.LifecycleMappingFactory;
 import org.eclipse.m2e.core.internal.lifecycle.model.LifecycleMappingMetadataSource;
-import org.eclipse.m2e.core.internal.lifecycle.model.io.xpp3.LifecycleMappingMetadataSourceXpp3Reader;
-import org.eclipse.m2e.core.internal.project.IgnoreMojoProjectConfigurator;
-import org.eclipse.m2e.core.internal.project.MojoExecutionProjectConfigurator;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
-import org.eclipse.m2e.core.project.configurator.AbstractProjectConfigurator;
 import org.eclipse.m2e.core.project.configurator.ILifecycleMapping;
-import org.eclipse.m2e.jdt.internal.JarLifecycleMapping;
-import org.eclipse.m2e.jdt.internal.JavaProjectConfigurator;
 import org.eclipse.m2e.tests.common.AbstractLifecycleMappingTest;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
+import org.eclipse.m2e.tests.configurators.TestLifecycleMapping;
 
 
-@SuppressWarnings("restriction")
 public class PluginExecutionMetadataPrioritiesTest extends AbstractLifecycleMappingTest {
   public void testDefaultMetadataSource() throws Exception {
     LifecycleMappingMetadataSource defaultMetadata = loadLifecycleMappingMetadataSource("projects/lifecyclemapping/lifecycleMappingMetadata/PluginExecutionMetadataPrioritiesTest/defaultMetadata.xml");
@@ -39,23 +27,23 @@ public class PluginExecutionMetadataPrioritiesTest extends AbstractLifecycleMapp
     IProject project = facade.getProject();
     List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
     assertNotNull(errorMarkers);
-    assertEquals(WorkspaceHelpers.toString(errorMarkers), 3, errorMarkers.size());
+    assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
 
-    // resources mojo execution not covered
-    // testResources mojo execution not covered
-    String expectedErrorMessage = "Project configurator \"no such project configurator for maven-resources-plugin\" is not available. To enable full functionality, install the project configurator and run Maven->Update Project Configuration.";
+    String expectedErrorMessage = "Mojo execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 {execution: default-test-goal-1} (maven lifecycle phase: process-resources)";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
-        1 /*lineNumber*/, errorMarkers.get(2));
+        1 /*lineNumber*/, errorMarkers.get(0));
+
+    expectedErrorMessage = "Project configurator \"missing default project configurator id for test-lifecyclemapping-plugin:test-goal-1\" is not available. To enable full functionality, install the project configurator and run Maven->Update Project Configuration.";
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+        1 /*lineNumber*/, errorMarkers.get(1));
   }
 
   /**
-   * This test verifies that pluginExecution mapping metadtata contributed via eclipse extension
-   * point takes preference over default metadata. 
-   * 
-   * The test relies on specific implementation of m2e.jdt bundle 
+   * This test verifies that pluginExecution mapping metadata contributed via eclipse extension point takes preference
+   * over default metadata.
    */
   public void testEclipseExtension() throws Exception {
-    LifecycleMappingMetadataSource defaultMetadata = loadLifecycleMappingMetadataSource("projects/lifecyclemapping/lifecycleMappingMetadata/PluginExecutionMetadataPrioritiesTest/testEclipseExtension/defaultMetadata.xml");
+    LifecycleMappingMetadataSource defaultMetadata = loadLifecycleMappingMetadataSource("projects/lifecyclemapping/lifecycleMappingMetadata/PluginExecutionMetadataPrioritiesTest/defaultMetadata.xml");
     LifecycleMappingFactory.setDefaultLifecycleMappingMetadataSource(defaultMetadata);
 
     IMavenProjectFacade facade = importMavenProject(
@@ -67,9 +55,10 @@ public class PluginExecutionMetadataPrioritiesTest extends AbstractLifecycleMapp
 
     ILifecycleMapping lifecycleMapping = facade.getLifecycleMapping(monitor);
     assertNotNull(lifecycleMapping);
-    assertTrue(lifecycleMapping.getClass().getCanonicalName(), lifecycleMapping instanceof JarLifecycleMapping);
+    assertTrue(lifecycleMapping.getClass().getCanonicalName(), lifecycleMapping instanceof TestLifecycleMapping);
   }
 
+  // Referenced metadata has priority over eclipse extensions
   public void testReferencedFromPom() throws Exception {
     LifecycleMappingMetadataSource defaultMetadata = loadLifecycleMappingMetadataSource("projects/lifecyclemapping/lifecycleMappingMetadata/PluginExecutionMetadataPrioritiesTest/defaultMetadata.xml");
     LifecycleMappingFactory.setDefaultLifecycleMappingMetadataSource(defaultMetadata);
@@ -79,18 +68,20 @@ public class PluginExecutionMetadataPrioritiesTest extends AbstractLifecycleMapp
         "testReferencedFromPom/pom.xml");
     assertNotNull("Expected not null MavenProjectFacade", facade);
     IProject project = facade.getProject();
-    WorkspaceHelpers.assertNoErrors(project);
+    List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
+    assertNotNull(errorMarkers);
+    assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
 
-    ILifecycleMapping lifecycleMapping = facade.getLifecycleMapping(monitor);
-    assertNotNull(lifecycleMapping);
-    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(monitor);
-    assertEquals(configurators.toString(), 1, configurators.size());
-    AbstractProjectConfigurator configurator = configurators.get(0);
-    assertNotNull(configurator);
-    assertTrue(configurator.getClass().getCanonicalName(), configurator instanceof JavaProjectConfigurator);
-    // this _implies_ that resources-plugin has been ignoted as per metadata source referenced from the pom
+    String expectedErrorMessage = "Mojo execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-for-eclipse-extension2 {execution: default-test-goal-for-eclipse-extension2} (maven lifecycle phase: compile)";
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+        1 /*lineNumber*/, errorMarkers.get(0));
+
+    expectedErrorMessage = "Project configurator \"no such project configurator id for test-lifecyclemapping-plugin:test-goal-for-eclipse-extension2 - referenced from pom\" is not available. To enable full functionality, install the project configurator and run Maven->Update Project Configuration.";
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+        1 /*lineNumber*/, errorMarkers.get(1));
   }
 
+  // Embedded metadata has priority over referenced metadata
   public void testEmbeddedInPom() throws Exception {
     LifecycleMappingMetadataSource defaultMetadata = loadLifecycleMappingMetadataSource("projects/lifecyclemapping/lifecycleMappingMetadata/PluginExecutionMetadataPrioritiesTest/defaultMetadata.xml");
     LifecycleMappingFactory.setDefaultLifecycleMappingMetadataSource(defaultMetadata);
@@ -100,29 +91,16 @@ public class PluginExecutionMetadataPrioritiesTest extends AbstractLifecycleMapp
         "testEmbeddedInPom/pom.xml");
     assertNotNull("Expected not null MavenProjectFacade", facade);
     IProject project = facade.getProject();
-    WorkspaceHelpers.assertNoErrors(project);
+    List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
+    assertNotNull(errorMarkers);
+    assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
 
-    ILifecycleMapping lifecycleMapping = facade.getLifecycleMapping(monitor);
-    assertNotNull(lifecycleMapping);
-    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(monitor);
-    assertEquals(configurators.toString(), 1, configurators.size());
-    AbstractProjectConfigurator configurator = configurators.get(0);
-    assertNotNull(configurator);
-    assertTrue(configurator.getClass().getCanonicalName(), configurator instanceof JavaProjectConfigurator);
-    // this _implies_ that resources-plugin has been ignoted as per metadata source embedded the pom
-  }
+    String expectedErrorMessage = "Mojo execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-for-eclipse-extension2 {execution: default-test-goal-for-eclipse-extension2} (maven lifecycle phase: compile)";
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+        1 /*lineNumber*/, errorMarkers.get(0));
 
-  private LifecycleMappingMetadataSource loadLifecycleMappingMetadataSource(String metadataFilename)
-      throws IOException, XmlPullParserException {
-    File metadataFile = new File(metadataFilename);
-    assertTrue("File does not exist:" + metadataFile.getAbsolutePath(), metadataFile.exists());
-    InputStream in = new FileInputStream(metadataFile);
-    try {
-      LifecycleMappingMetadataSource lifecycleMappingMetadataSource = new LifecycleMappingMetadataSourceXpp3Reader()
-          .read(in);
-      return lifecycleMappingMetadataSource;
-    } finally {
-      IOUtil.close(in);
-    }
+    expectedErrorMessage = "Project configurator \"no such project configurator id for test-lifecyclemapping-plugin:test-goal-for-eclipse-extension2 - embedded from pom\" is not available. To enable full functionality, install the project configurator and run Maven->Update Project Configuration.";
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+        1 /*lineNumber*/, errorMarkers.get(1));
   }
 }

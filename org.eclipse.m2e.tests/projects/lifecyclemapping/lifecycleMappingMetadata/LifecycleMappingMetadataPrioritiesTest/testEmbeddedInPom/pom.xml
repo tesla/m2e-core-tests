@@ -4,9 +4,18 @@
   <groupId>LifecycleMappingMetadataPrioritiesTest</groupId>
   <artifactId>testEmbeddedInPom</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <packaging>jar</packaging>
+  <packaging>test-packaging-for-eclipse-extension</packaging>
 
   <build>
+    <plugins>
+      <plugin>
+        <groupId>org.eclipse.m2e.test.lifecyclemapping</groupId>
+        <artifactId>test-lifecyclemapping-plugin</artifactId>
+        <version>1.0.0</version>
+        <extensions>true</extensions>
+      </plugin>
+    </plugins>
+
     <pluginManagement>
       <plugins>
         <plugin>
@@ -17,8 +26,8 @@
             <lifecycleMappingMetadata>
               <lifecycleMappings>
                 <lifecycleMapping>
-                  <packagingType>jar</packagingType>
-                  <lifecycleMappingId>no such lifecycle mapping for jar - embedded in pom</lifecycleMappingId>
+                  <packagingType>test-packaging-for-eclipse-extension</packagingType>
+                  <lifecycleMappingId>no such lifecycle mapping for test-packaging-for-eclipse-extension - embedded in pom</lifecycleMappingId>
                 </lifecycleMapping>
               </lifecycleMappings>
             </lifecycleMappingMetadata>
@@ -28,7 +37,6 @@
           <groupId>org.eclipse.m2e</groupId>
           <artifactId>lifecycle-mapping-metadata-sources</artifactId>
           <version>0.9.9-SNAPSHOT</version>
-
           <configuration>
             <sources>
               <source>

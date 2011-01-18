@@ -1,25 +1,18 @@
 
 package org.eclipse.m2e.tests.lifecycle;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
-import org.codehaus.plexus.util.IOUtil;
-import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.internal.lifecycle.LifecycleMappingFactory;
 import org.eclipse.m2e.core.internal.lifecycle.model.LifecycleMappingMetadataSource;
-import org.eclipse.m2e.core.internal.lifecycle.model.io.xpp3.LifecycleMappingMetadataSourceXpp3Reader;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.configurator.ILifecycleMapping;
-import org.eclipse.m2e.jdt.internal.JarLifecycleMapping;
 import org.eclipse.m2e.tests.common.AbstractLifecycleMappingTest;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
+import org.eclipse.m2e.tests.configurators.TestLifecycleMapping;
 
 
 public class LifecycleMappingMetadataPrioritiesTest extends AbstractLifecycleMappingTest {
@@ -37,9 +30,13 @@ public class LifecycleMappingMetadataPrioritiesTest extends AbstractLifecycleMap
     assertNotNull(errorMarkers);
     assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
 
-    String expectedErrorMessage = "Lifecycle mapping \"no such lifecycle mapping for rar\" is not available. To enable full functionality, install the lifecycle mapping and run Maven->Update Project Configuration.";
+    String expectedErrorMessage = "Lifecycle mapping \"missing default lifecycle mapping id for test-packaging-empty\" is not available. To enable full functionality, install the lifecycle mapping and run Maven->Update Project Configuration.";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
         1 /*lineNumber*/, errorMarkers.get(0));
+
+    expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"test-packaging-empty\")";
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+        1 /*lineNumber*/, errorMarkers.get(1));
   }
 
   // Tests that a lifecycle mapping declared in an eclipse extension has priority over default lifecycle mapping metadata
@@ -56,7 +53,7 @@ public class LifecycleMappingMetadataPrioritiesTest extends AbstractLifecycleMap
 
     ILifecycleMapping lifecycleMapping = facade.getLifecycleMapping(monitor);
     assertNotNull(lifecycleMapping);
-    assertTrue(lifecycleMapping.getClass().getCanonicalName(), lifecycleMapping instanceof JarLifecycleMapping);
+    assertTrue(lifecycleMapping.getClass().getCanonicalName(), lifecycleMapping instanceof TestLifecycleMapping);
   }
 
   // Tests that a lifecycle mapping declared in a metadata source referenced from pom has priority over eclipse extension
@@ -73,9 +70,13 @@ public class LifecycleMappingMetadataPrioritiesTest extends AbstractLifecycleMap
     assertNotNull(errorMarkers);
     assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
 
-    String expectedErrorMessage = "Lifecycle mapping \"no such lifecycle mapping for jar - referenced from pom\" is not available. To enable full functionality, install the lifecycle mapping and run Maven->Update Project Configuration.";
+    String expectedErrorMessage = "Lifecycle mapping \"no such lifecycle mapping for test-packaging-for-eclipse-extension - referenced from pom\" is not available. To enable full functionality, install the lifecycle mapping and run Maven->Update Project Configuration.";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
         1 /*lineNumber*/, errorMarkers.get(0));
+
+    expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"test-packaging-for-eclipse-extension\")";
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+        1 /*lineNumber*/, errorMarkers.get(1));
   }
 
   // Tests that a lifecycle mapping embedded in pom has priority over lifecycle mapping declared in a metadata source referenced from pom
@@ -92,22 +93,12 @@ public class LifecycleMappingMetadataPrioritiesTest extends AbstractLifecycleMap
     assertNotNull(errorMarkers);
     assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
 
-    String expectedErrorMessage = "Lifecycle mapping \"no such lifecycle mapping for jar - embedded in pom\" is not available. To enable full functionality, install the lifecycle mapping and run Maven->Update Project Configuration.";
+    String expectedErrorMessage = "Lifecycle mapping \"no such lifecycle mapping for test-packaging-for-eclipse-extension - embedded in pom\" is not available. To enable full functionality, install the lifecycle mapping and run Maven->Update Project Configuration.";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
         1 /*lineNumber*/, errorMarkers.get(0));
-  }
 
-  private LifecycleMappingMetadataSource loadLifecycleMappingMetadataSource(String metadataFilename)
-      throws IOException, XmlPullParserException {
-    File metadataFile = new File(metadataFilename);
-    assertTrue("File does not exist:" + metadataFile.getAbsolutePath(), metadataFile.exists());
-    InputStream in = new FileInputStream(metadataFile);
-    try {
-      LifecycleMappingMetadataSource lifecycleMappingMetadataSource = new LifecycleMappingMetadataSourceXpp3Reader()
-          .read(in);
-      return lifecycleMappingMetadataSource;
-    } finally {
-      IOUtil.close(in);
-    }
+    expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"test-packaging-for-eclipse-extension\")";
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+        1 /*lineNumber*/, errorMarkers.get(1));
   }
 }

@@ -2,28 +2,14 @@
 <lifecycleMappingMetadata>
   <lifecycleMappings>
     <lifecycleMapping>
-      <lifecycleMappingId>no such lifecycle mapping for rar</lifecycleMappingId>
-      <packagingType>rar</packagingType>
+      <lifecycleMappingId>missing default lifecycle mapping id for test-packaging-empty</lifecycleMappingId>
+      <packagingType>test-packaging-empty</packagingType>
     </lifecycleMapping>
     <lifecycleMapping>
-      <lifecycleMappingId>no such lifecycle mapping for jar</lifecycleMappingId>
-      <packagingType>jar</packagingType>
+      <!-- test-packaging-for-eclipse-extension packaging type is mapped by an eclipse extension.
+      Since extensions have priority over defaults, the mapping declared here should never be used. -->
+      <lifecycleMappingId>missing default lifecycle mapping id for test-packaging-for-eclipse-extension</lifecycleMappingId>
+      <packagingType>test-packaging-for-eclipse-extension</packagingType>
     </lifecycleMapping>
   </lifecycleMappings>
-  <pluginExecutions>
-    <pluginExecution>
-      <pluginExecutionFilter>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-resources-plugin</artifactId>
-        <goals>
-          <goal>resources</goal>
-          <goal>testResources</goal>
-        </goals>
-        <versionRange>[2.4,)</versionRange>
-      </pluginExecutionFilter>
-      <action>
-        <ignore/>
-      </action>
-    </pluginExecution>
-  </pluginExecutions>
 </lifecycleMappingMetadata>

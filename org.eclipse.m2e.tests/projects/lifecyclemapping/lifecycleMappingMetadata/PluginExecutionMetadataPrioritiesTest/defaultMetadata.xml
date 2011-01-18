@@ -1,34 +1,71 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <lifecycleMappingMetadata>
+  <lifecycleMappings>
+    <lifecycleMapping>
+      <lifecycleMappingId>TEST</lifecycleMappingId>
+      <packagingType>test-packaging-a</packagingType>
+    </lifecycleMapping>
+  </lifecycleMappings>
   <pluginExecutions>
     <pluginExecution>
       <pluginExecutionFilter>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-deploy-plugin</artifactId>
-        <versionRange>[2.5,)</versionRange>
+        <groupId>org.eclipse.m2e.test.lifecyclemapping</groupId>
+        <artifactId>test-lifecyclemapping-plugin</artifactId>
+        <versionRange>[1.0.0,)</versionRange>
         <goals>
-          <goal>deploy-file</goal>
+          <goal>test-goal-1</goal>
         </goals>
       </pluginExecutionFilter>
       <action>
         <configurator>
-          <id>no such project configurator for maven-deploy-plugin</id>
+          <id>missing default project configurator id for test-lifecyclemapping-plugin:test-goal-1</id>
         </configurator>
       </action>
     </pluginExecution>
     <pluginExecution>
       <pluginExecutionFilter>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-resources-plugin</artifactId>
-        <versionRange>[2.4,)</versionRange>
+        <groupId>org.eclipse.m2e.test.lifecyclemapping</groupId>
+        <artifactId>test-lifecyclemapping-plugin</artifactId>
+        <versionRange>[1.0.0,)</versionRange>
         <goals>
-          <goal>resources</goal>
-          <goal>testResources</goal>
+          <goal>test-goal-2</goal>
+        </goals>
+      </pluginExecutionFilter>
+      <action>
+        <ignore />
+      </action>
+    </pluginExecution>
+    <pluginExecution>
+      <!-- This plugin execution is covered in the eclipse extension.
+      Since eclipse extensions have priority over the defaults, this plugin execution should never be used. -->
+      <pluginExecutionFilter>
+        <groupId>org.eclipse.m2e.test.lifecyclemapping</groupId>
+        <artifactId>test-lifecyclemapping-plugin</artifactId>
+        <versionRange>[1.0.0,)</versionRange>
+        <goals>
+          <goal>test-goal-for-eclipse-extension1</goal>
         </goals>
       </pluginExecutionFilter>
       <action>
         <configurator>
-          <id>no such project configurator for maven-resources-plugin</id>
+          <id>missing default project configurator id for test-lifecyclemapping-plugin:test-goal-for-eclipse-extension1</id>
+        </configurator>
+      </action>
+    </pluginExecution>
+    <pluginExecution>
+      <!-- This plugin execution is covered in the eclipse extension.
+      Since eclipse extensions have priority over the defaults, this plugin execution should never be used. -->
+      <pluginExecutionFilter>
+        <groupId>org.eclipse.m2e.test.lifecyclemapping</groupId>
+        <artifactId>test-lifecyclemapping-plugin</artifactId>
+        <versionRange>[1.0.0,)</versionRange>
+        <goals>
+          <goal>test-goal-for-eclipse-extension2</goal>
+        </goals>
+      </pluginExecutionFilter>
+      <action>
+        <configurator>
+          <id>missing default project configurator id for test-lifecyclemapping-plugin:test-goal-for-eclipse-extension2</id>
         </configurator>
       </action>
     </pluginExecution>
