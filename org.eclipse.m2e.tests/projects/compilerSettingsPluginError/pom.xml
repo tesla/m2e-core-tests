@@ -11,57 +11,6 @@
 
   <build>
     <defaultGoal>package</defaultGoal>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.eclipse.m2e</groupId>
-          <artifactId>lifecycle-mapping</artifactId>
-          <version>0.9.9-SNAPSHOT</version>
-          <configuration>
-            <lifecycleMappingMetadata>
-              <lifecycleMappings>
-                <lifecycleMapping>
-                  <packagingType>jar</packagingType>
-                  <lifecycleMappingId>custom</lifecycleMappingId>
-                  <pluginExecutions>
-                    <pluginExecution>
-                      <pluginExecutionFilter>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-compiler-plugin</artifactId>
-                        <versionRange>[2.0,)</versionRange>
-                        <goals>
-                          <goal>compile</goal>
-                          <goal>testCompile</goal>
-                        </goals>
-                      </pluginExecutionFilter>
-                      <action>
-                        <configurator>
-                          <id>org.eclipse.m2e.jdt.javaConfigurator</id>
-                        </configurator>
-                      </action>
-                    </pluginExecution>
-                    <pluginExecution>
-                      <pluginExecutionFilter>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-resources-plugin</artifactId>
-                        <versionRange>[2.4,)</versionRange>
-                        <goals>
-                          <goal>resources</goal>
-                          <goal>testResources</goal>
-                        </goals>
-                      </pluginExecutionFilter>
-                      <action>
-                        <execute />
-                      </action>
-                    </pluginExecution>
-                  </pluginExecutions>
-                </lifecycleMapping>
-              </lifecycleMappings>
-            </lifecycleMappingMetadata>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
     
     <plugins>
       <plugin>

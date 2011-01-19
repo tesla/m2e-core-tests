@@ -32,7 +32,6 @@ import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.configurator.AbstractBuildParticipant;
 import org.eclipse.m2e.core.project.configurator.AbstractLifecycleMapping;
 import org.eclipse.m2e.core.project.configurator.AbstractProjectConfigurator;
-import org.eclipse.m2e.core.project.configurator.CustomLifecycleMapping;
 import org.eclipse.m2e.core.project.configurator.ILifecycleMapping;
 import org.eclipse.m2e.core.project.configurator.MojoExecutionBuildParticipant;
 import org.eclipse.m2e.core.project.configurator.MojoExecutionKey;
@@ -40,6 +39,7 @@ import org.eclipse.m2e.jdt.internal.JarLifecycleMapping;
 import org.eclipse.m2e.jdt.internal.JavaProjectConfigurator;
 import org.eclipse.m2e.tests.common.AbstractLifecycleMappingTest;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
+import org.eclipse.m2e.tests.configurators.TestLifecycleMapping;
 import org.eclipse.m2e.tests.configurators.TestProjectConfigurator;
 
 
@@ -319,56 +319,34 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     }
   }
 
-  public void testCustomizableMapping() throws Exception {
-    IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping", "customizable/pom.xml");
+  public void testNotCoveredMojoExecutions() throws Exception {
+    IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping", "notCoveredMojoExecutions/pom.xml");
     assertNotNull("Expected not null MavenProjectFacade", facade);
     IProject project = facade.getProject();
-    WorkspaceHelpers.assertNoErrors(project);
+    assertNotNull("Expected not null project", project);
 
     ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade, monitor);
-
-    assertTrue(lifecycleMapping instanceof CustomLifecycleMapping);
-
-    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(monitor);
-    assertEquals(configurators.toString(), 1, configurators.size());
-    assertTrue(configurators.get(0).toString(), configurators.get(0) instanceof JavaProjectConfigurator);
-
-    List<MojoExecution> notCoveredMojoExecutions = lifecycleMapping.getNotCoveredMojoExecutions(monitor);
-    assertEquals(notCoveredMojoExecutions.toString(), 0, lifecycleMapping.getNotCoveredMojoExecutions(monitor).size());
-  }
-
-  public void testCustomizableMappingNotComplete() throws Exception {
-    IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping", "customizableNotComplete/pom.xml");
-    assertNotNull("Expected not null MavenProjectFacade", facade);
-    IProject project = facade.getProject();
-
-    List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
-    assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
-    String expectedErrorMessage = "Mojo execution not covered by lifecycle configuration: org.apache.maven.plugins:maven-resources-plugin:2.4.1:resources {execution: default-resources} (maven lifecycle phase: process-resources)";
-    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
-        1 /*lineNumber*/, errorMarkers.get(0));
-
-    ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade, monitor);
-    assertTrue(lifecycleMapping instanceof CustomLifecycleMapping);
-
-    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(monitor);
-    assertEquals(configurators.toString(), 1, configurators.size());
-    assertTrue(configurators.get(0) instanceof JavaProjectConfigurator);
-
+    assertTrue("Unexpected lifecycle mapping type:" + lifecycleMapping.getClass().getName(),
+        lifecycleMapping instanceof TestLifecycleMapping);
+    assertNotNull("Expected not null lifecycle mapping", lifecycleMapping);
     List<MojoExecution> notCoveredMojoExecutions = lifecycleMapping.getNotCoveredMojoExecutions(monitor);
     assertEquals(notCoveredMojoExecutions.toString(), 2, notCoveredMojoExecutions.size());
-    assertEquals("org.apache.maven.plugins:maven-resources-plugin:2.4.1:resources {execution: default-resources}",
+    assertEquals(
+        "org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 {execution: default-test-goal-1}",
         notCoveredMojoExecutions.get(0).toString());
     assertEquals(
-        "org.apache.maven.plugins:maven-resources-plugin:2.4.1:testResources {execution: default-testResources}",
+        "org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-2 {execution: default-test-goal-2}",
         notCoveredMojoExecutions.get(1).toString());
 
-    project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
-    waitForJobsToComplete();
-
-    errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
+    // Also verify that we get the expected markers
+    List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
+    assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
+    String expectedErrorMessage = "Mojo execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 {execution: default-test-goal-1} (maven lifecycle phase: process-resources)";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
         1 /*lineNumber*/, errorMarkers.get(0));
+    expectedErrorMessage = "Mojo execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-2 {execution: default-test-goal-2} (maven lifecycle phase: compile)";
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+        1 /*lineNumber*/, errorMarkers.get(1));
   }
 
   public void testMissingMapping() throws Exception {

@@ -35,7 +35,7 @@
               <lifecycleMappings>
                 <lifecycleMapping>
                   <packagingType>test-packaging-empty</packagingType>
-                  <lifecycleMappingId>custom</lifecycleMappingId>
+                  <lifecycleMappingId>TEST</lifecycleMappingId>
                   <pluginExecutions>
                     <pluginExecution>
                       <pluginExecutionFilter>
