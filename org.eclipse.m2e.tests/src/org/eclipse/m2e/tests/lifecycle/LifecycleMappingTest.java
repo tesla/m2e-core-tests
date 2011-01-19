@@ -34,13 +34,13 @@ import org.eclipse.m2e.core.project.configurator.AbstractLifecycleMapping;
 import org.eclipse.m2e.core.project.configurator.AbstractProjectConfigurator;
 import org.eclipse.m2e.core.project.configurator.CustomLifecycleMapping;
 import org.eclipse.m2e.core.project.configurator.ILifecycleMapping;
-import org.eclipse.m2e.core.project.configurator.MavenResourcesProjectConfigurator;
 import org.eclipse.m2e.core.project.configurator.MojoExecutionBuildParticipant;
 import org.eclipse.m2e.core.project.configurator.MojoExecutionKey;
 import org.eclipse.m2e.jdt.internal.JarLifecycleMapping;
 import org.eclipse.m2e.jdt.internal.JavaProjectConfigurator;
 import org.eclipse.m2e.tests.common.AbstractLifecycleMappingTest;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
+import org.eclipse.m2e.tests.configurators.TestProjectConfigurator;
 
 
 public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
@@ -65,10 +65,14 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
 
     ILifecycleMapping lifecycleMapping = facade.getLifecycleMapping(monitor);
     assertNotNull(lifecycleMapping);
+
     List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(monitor);
-    assertEquals(configurators.toString(), 2, configurators.size());
-    assertTrue(configurators.get(0) instanceof MavenResourcesProjectConfigurator);
-    assertTrue(configurators.get(1) instanceof JavaProjectConfigurator);
+    assertEquals(configurators.toString(), 0, configurators.size());
+
+    Map<MojoExecutionKey, List<AbstractBuildParticipant>> buildParticipants = lifecycleMapping
+        .getBuildParticipants(monitor);
+    assertEquals(buildParticipants.keySet().toString(), 1, buildParticipants.size()); // only one mojo execution
+    assertEquals(0, buildParticipants.values().iterator().next().size()); // no build participants
   }
 
   public void testMojoExecutionExecute() throws Exception {
@@ -80,10 +84,15 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
 
     ILifecycleMapping lifecycleMapping = facade.getLifecycleMapping(monitor);
     assertNotNull(lifecycleMapping);
+
     List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(monitor);
-    assertEquals(configurators.toString(), 2, configurators.size());
-    assertTrue(configurators.get(0) instanceof MavenResourcesProjectConfigurator);
-    assertTrue(configurators.get(1) instanceof JavaProjectConfigurator);
+    assertEquals(configurators.toString(), 0, configurators.size());
+
+    Map<MojoExecutionKey, List<AbstractBuildParticipant>> buildParticipants = lifecycleMapping
+        .getBuildParticipants(monitor);
+    assertEquals(buildParticipants.keySet().toString(), 1, buildParticipants.size()); // only one mojo execution
+    assertEquals(1, buildParticipants.values().iterator().next().size()); // one 
+    assertTrue(buildParticipants.values().iterator().next().get(0) instanceof MojoExecutionBuildParticipant);
   }
 
   public void testMojoExecutionConfigurator() throws Exception {
@@ -95,11 +104,10 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
 
     ILifecycleMapping lifecycleMapping = facade.getLifecycleMapping(monitor);
     assertNotNull(lifecycleMapping);
+
     List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(monitor);
-    assertEquals(configurators.toString(), 2, configurators.size());
-    AbstractProjectConfigurator configurator = configurators.get(0);
-    assertNotNull(configurator);
-    assertTrue(configurator.getClass().getCanonicalName(), configurator instanceof MavenResourcesProjectConfigurator);
+    assertEquals(configurators.toString(), 1, configurators.size());
+    assertTrue(configurators.get(0) instanceof TestProjectConfigurator);
   }
 
   public void testMissingLifecycleMappingMetadata() throws Exception {
@@ -286,12 +294,29 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertTrue(lifecycleMapping instanceof JarLifecycleMapping);
 
     List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(monitor);
-    assertEquals(configurators.toString(), 2, configurators.size());
-    assertTrue(configurators.get(0) instanceof MavenResourcesProjectConfigurator);
-    assertTrue(configurators.get(1) instanceof JavaProjectConfigurator);
+    assertEquals(configurators.toString(), 1, configurators.size());
+    assertTrue(configurators.get(0) instanceof JavaProjectConfigurator);
 
     List<MojoExecution> notCoveredMojoExecutions = lifecycleMapping.getNotCoveredMojoExecutions(monitor);
     assertEquals(notCoveredMojoExecutions.toString(), 0, lifecycleMapping.getNotCoveredMojoExecutions(monitor).size());
+
+    Map<MojoExecutionKey, List<AbstractBuildParticipant>> buildParticipants = lifecycleMapping
+        .getBuildParticipants(monitor);
+    assertEquals(8, buildParticipants.size());
+
+    assertBuildParticipantType(buildParticipants, "maven-resources-plugin", MojoExecutionBuildParticipant.class);
+    // TODO assert all other mojo executions
+  }
+
+  private void assertBuildParticipantType(Map<MojoExecutionKey, List<AbstractBuildParticipant>> buildParticipants,
+      String artifactId, Class<MojoExecutionBuildParticipant> participantType) {
+    for(Map.Entry<MojoExecutionKey, List<AbstractBuildParticipant>> entry : buildParticipants.entrySet()) {
+      if(artifactId.equals(entry.getKey().getMojoExecution().getArtifactId())) {
+        for(AbstractBuildParticipant participant : entry.getValue()) {
+          assertTrue(participantType.equals(participant.getClass()));
+        }
+      }
+    }
   }
 
   public void testCustomizableMapping() throws Exception {

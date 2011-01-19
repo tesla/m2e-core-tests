@@ -8,7 +8,9 @@
 
 package org.eclipse.m2e.editor.pom;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 
@@ -17,7 +19,6 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.bindings.keys.KeyStroke;
-import org.eclipse.m2e.editor.pom.MavenPomEditor;
 import org.eclipse.m2e.integration.tests.common.ContextMenuHelper;
 import org.eclipse.m2e.integration.tests.common.SwtbotUtil;
 import org.eclipse.swt.SWT;

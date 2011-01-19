@@ -9,6 +9,7 @@
 package org.eclipse.m2e.tests.ui.dialogs;
 
 import java.util.List;
+
 import junit.framework.Assert;
 
 import org.apache.maven.project.MavenProject;
