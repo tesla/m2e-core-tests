@@ -450,4 +450,27 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
         lifecycleMapping.getProblems().get(0).getMessage());
   }
 
+  public void testSecondaryConfiguratorsCustomizable() throws Exception {
+    IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/secondaryConfigurators/customizable",
+        "pom.xml");
+    assertNoErrors(facade.getProject());
+
+    AbstractLifecycleMapping lifecycleMapping = (AbstractLifecycleMapping) projectConfigurationManager
+        .getLifecycleMapping(facade, monitor);
+
+    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(monitor);
+    assertEquals(3, configurators.size());
+  }
+
+  public void testSecondaryConfiguratorsCustom() throws Exception {
+    IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/secondaryConfigurators/custom",
+        "pom.xml");
+    assertNoErrors(facade.getProject());
+
+    AbstractLifecycleMapping lifecycleMapping = (AbstractLifecycleMapping) projectConfigurationManager
+        .getLifecycleMapping(facade, monitor);
+
+    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(monitor);
+    assertEquals(3, configurators.size());
+  }
 }

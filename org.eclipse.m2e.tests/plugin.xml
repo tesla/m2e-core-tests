@@ -22,10 +22,10 @@
    <extension point="org.eclipse.m2e.core.projectConfigurators">
       <configurator id="org.eclipse.m2e.configurator.test"
             class="org.eclipse.m2e.tests.configurators.TestProjectConfigurator"
-            name="TEST" priority="1000"/>
+            name="TEST"/>
       <configurator id="org.eclipse.m2e.configurator.incompatibleApi"
             class="org.eclipse.m2e.tests.configurators.IncompatibleProjectConfigurator"
-            name="AJDT-0.9.8" priority="1002"/>
+            name="AJDT-0.9.8"/>
       <configurator
             class="org.eclipse.m2e.tests.configurators.MNGECLIPSE2313MarkAllRawClasspathEntriesConfigurator"
             id="MNGECLIPSE-2313_markAllRawClasspathEntries">
@@ -45,6 +45,18 @@
       <configurator
             class="org.eclipse.m2e.tests.AddMarkersProjectConfiguratorBar"
             id="org.eclipse.m2e.tests.AddMarkersProjectConfiguratorBar">
+      </configurator>
+      <configurator
+            class="org.eclipse.m2e.tests.configurators.TestProjectConfigurator"
+            id="org.eclipse.m2e.configurator.testsecondary"
+            name="TEST_SECONDARY"
+            secondaryTo="org.eclipse.m2e.configurator.test">
+      </configurator>
+      <configurator
+            class="org.eclipse.m2e.tests.configurators.TestProjectConfigurator"
+            id="org.eclipse.m2e.configurator.testsecondary2"
+            name="TEST_SECONDARY2"
+            secondaryTo="org.eclipse.m2e.configurator.test">
       </configurator>
    </extension>
    
