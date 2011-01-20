@@ -58,14 +58,16 @@ public class AddMarkersProjectConfiguratorFoo extends AbstractProjectConfigurato
           return null;
         }
 
-        buildContext.removeWarnings(file);
+        buildContext.removeMessages(file);
+
         Exception warning = new Exception(WARNING_MESSAGE + filename + " " + System.currentTimeMillis()
             + System.nanoTime());
-        buildContext.addWarning(file, WARNING_LINE_NUMBER, 1 /*column*/, null /*message*/, warning);
+        buildContext.addMessage(file, WARNING_LINE_NUMBER, 1 /*column*/, null /*message*/,
+            BuildContext.SEVERITY_WARNING, warning);
 
-        buildContext.removeErrors(file);
         Exception error = new Exception(ERROR_MESSAGE + filename + " " + System.currentTimeMillis() + System.nanoTime());
-        buildContext.addError(file, ERROR_LINE_NUMBER, 1 /*column*/, null /*message*/, error);
+        buildContext.addMessage(file, ERROR_LINE_NUMBER, 1 /*column*/, null /*message*/, BuildContext.SEVERITY_ERROR,
+            error);
 
         return error;
       }
