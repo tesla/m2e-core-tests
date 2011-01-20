@@ -183,17 +183,17 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     goals.add("compile");
     goals.add("testCompile");
     assertPluginExecutionMetadata("org.apache.maven.plugins", "maven-compiler-plugin", "[2.0,)", goals,
-        PluginExecutionAction.CONFIGURATOR, "org.eclipse.m2e.jdt.javaConfigurator", pluginExecutions.get(0));
+        PluginExecutionAction.configurator, "org.eclipse.m2e.jdt.javaConfigurator", pluginExecutions.get(0));
 
     goals = new LinkedHashSet<String>();
     goals.add("jar");
     assertPluginExecutionMetadata("org.apache.maven.plugins", "maven-jar-plugin", "[2.0,)", goals,
-        PluginExecutionAction.IGNORE, null, pluginExecutions.get(1));
+        PluginExecutionAction.ignore, null, pluginExecutions.get(1));
 
     goals = new LinkedHashSet<String>();
     goals.add("resources");
     assertPluginExecutionMetadata("org.apache.maven.plugins", "maven-resources-plugin", "[2.0,)", goals,
-        PluginExecutionAction.EXECUTE, null, pluginExecutions.get(2));
+        PluginExecutionAction.execute, null, pluginExecutions.get(2));
   }
 
   public void testGetLifecycleMappingMetadataOverride() throws Exception {
@@ -222,12 +222,12 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     goals.add("compile");
     goals.add("testCompile");
     assertPluginExecutionMetadata("org.apache.maven.plugins", "maven-compiler-plugin", "[3.0,)", goals,
-        PluginExecutionAction.CONFIGURATOR, "org.eclipse.m2e.jdt.javaConfigurator", pluginExecutions.get(0));
+        PluginExecutionAction.configurator, "org.eclipse.m2e.jdt.javaConfigurator", pluginExecutions.get(0));
 
     goals = new LinkedHashSet<String>();
     goals.add("jar");
     assertPluginExecutionMetadata("org.apache.maven.plugins", "maven-jar-plugin", "[3.0,)", goals,
-        PluginExecutionAction.IGNORE, null, pluginExecutions.get(1));
+        PluginExecutionAction.ignore, null, pluginExecutions.get(1));
   }
 
   public void testProfilesAndProperties() throws Exception {
