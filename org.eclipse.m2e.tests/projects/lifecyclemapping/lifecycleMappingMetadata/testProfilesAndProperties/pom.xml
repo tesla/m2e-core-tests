@@ -7,7 +7,7 @@
   <version>0.0.1-SNAPSHOT</version>
 
   <properties>
-    <metadata-format.version>0.9.9-SNAPSHOT</metadata-format.version>
+    <metadata-format.version>1.0.0</metadata-format.version>
     <metadata.version2>0.0.2</metadata.version2>
   </properties>
 

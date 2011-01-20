@@ -476,4 +476,34 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(monitor);
     assertEquals(3, configurators.size());
   }
+
+  public void testCompatibleVersion() throws Exception {
+    IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/lifecycleMappingMetadata",
+        "testCompatibleVersion/pom.xml");
+    assertNotNull("Expected not null MavenProjectFacade", facade);
+    IProject project = facade.getProject();
+    WorkspaceHelpers.assertNoErrors(project);
+
+    ILifecycleMapping lifecycleMapping = facade.getLifecycleMapping(monitor);
+    assertNotNull(lifecycleMapping);
+    assertTrue(lifecycleMapping.getClass().getCanonicalName(), lifecycleMapping instanceof JarLifecycleMapping);
+  }
+
+  public void testIncompatibleVersion() throws Exception {
+    IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/lifecycleMappingMetadata",
+        "testIncompatibleVersion/pom.xml");
+    assertNotNull("Expected not null MavenProjectFacade", facade);
+    IProject project = facade.getProject();
+    List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
+    assertNotNull(errorMarkers);
+    assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
+
+    String expectedErrorMessage = "Incompatible lifecycle mapping plugin version 1000.0.0";
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+        1 /*lineNumber*/, errorMarkers.get(0));
+
+    expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"jar\")";
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+        1 /*lineNumber*/, errorMarkers.get(1));
+  }
 }
