@@ -42,13 +42,6 @@
                 </pluginExecution>
               </pluginExecutions>
             </lifecycleMappingMetadata>
-          </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.eclipse.m2e</groupId>
-          <artifactId>lifecycle-mapping-metadata-sources</artifactId>
-          <version>0.9.9-SNAPSHOT</version>
-          <configuration>
             <sources>
               <source>
                 <groupId>testLifecycleMappingMetadata</groupId>

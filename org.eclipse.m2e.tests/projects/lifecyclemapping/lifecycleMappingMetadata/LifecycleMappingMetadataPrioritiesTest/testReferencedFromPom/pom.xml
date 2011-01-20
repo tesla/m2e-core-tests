@@ -20,7 +20,7 @@
       <plugins>
         <plugin>
           <groupId>org.eclipse.m2e</groupId>
-          <artifactId>lifecycle-mapping-metadata-sources</artifactId>
+          <artifactId>lifecycle-mapping</artifactId>
           <version>0.9.9-SNAPSHOT</version>
           <configuration>
             <sources>

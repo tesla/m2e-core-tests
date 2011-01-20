@@ -1,37 +1,29 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>lifecycleMappingMetadataTests</groupId>
-	<artifactId>testGetLifecycleMappingMetadata</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>lifecycleMappingMetadataTests</groupId>
+  <artifactId>testGetLifecycleMappingMetadata</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
 
-	<build>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<!-- Well-known groupId and artifactId (used to find lifecycle mapping 
-						metadata sources. -->
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping-metadata-sources</artifactId>
-					<version>0.9.9-SNAPSHOT</version>
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>0.9.9-SNAPSHOT</version>
 
-					<configuration>
-						<!-- The order is important, as one source may override 
-							another. By default, the sources declared here override any sources declared 
-							in parent poms. To have the sources declared here appended to the sources 
-							declared in pom files, add combine.children="append" as xml attribute to 
-							the "sources" element: -->
-						<!-- <sources combine.children="append"> -->
-						<sources>
-							<source>
-								<groupId>testLifecycleMappingMetadata</groupId>
-								<artifactId>testLifecycleMappingMetadata1</artifactId>
-								<version>0.0.1</version>
-							</source>
-						</sources>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
-	</build>
+          <configuration>
+            <sources>
+              <source>
+                <groupId>testLifecycleMappingMetadata</groupId>
+                <artifactId>testLifecycleMappingMetadata1</artifactId>
+                <version>0.0.1</version>
+              </source>
+            </sources>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
 </project>

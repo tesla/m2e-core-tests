@@ -15,10 +15,8 @@
     <pluginManagement>
       <plugins>
         <plugin>
-          <!-- Well-known groupId and artifactId (used to find lifecycle mapping 
-               metadata sources. -->
           <groupId>org.eclipse.m2e</groupId>
-          <artifactId>lifecycle-mapping-metadata-sources</artifactId>
+          <artifactId>lifecycle-mapping</artifactId>
           <version>${metadata-format.version}</version>
 
           <configuration>
@@ -45,10 +43,8 @@
         <pluginManagement>
           <plugins>
             <plugin>
-            <!-- Well-known groupId and artifactId (used to find lifecycle mapping 
-                 metadata sources. -->
               <groupId>org.eclipse.m2e</groupId>
-              <artifactId>lifecycle-mapping-metadata-sources</artifactId>
+              <artifactId>lifecycle-mapping</artifactId>
               <version>${metadata-format.version}</version>
 
               <configuration>
