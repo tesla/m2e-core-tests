@@ -44,6 +44,7 @@ import org.eclipse.m2e.tests.common.FileHelpers;
 import org.eclipse.m2e.tests.common.HttpServer;
 
 
+@SuppressWarnings("restriction")
 public class MavenImplTest extends AbstractMavenProjectTestCase {
 
   private IProgressMonitor monitor = new NullProgressMonitor();
@@ -55,7 +56,6 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
   public void testGetMojoParameterValue() throws Exception {
     MavenExecutionRequest request = maven.createExecutionRequest(monitor);
     request.setPom(new File("projects/mojoparametervalue/pom.xml"));
-    request.setGoals(Arrays.asList("compile"));
 
     MavenExecutionResult result = maven.readProject(request, monitor);
     assertFalse(result.hasExceptions());
@@ -63,7 +63,8 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
 
     MavenSession session = maven.createSession(request, project);
 
-    MavenExecutionPlan executionPlan = maven.calculateExecutionPlan(request, project, monitor);
+    MavenExecutionPlan executionPlan = maven.calculateExecutionPlan(session, project, Arrays.asList("compile"), true,
+        monitor);
 
     MojoExecution execution = getExecution(executionPlan, "maven-compiler-plugin", "compile");
 
@@ -320,8 +321,9 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
       assertNotNull(result.getProject().getArtifacts());
       assertEquals(result.getProject().getArtifacts().toString(), 1, result.getProject().getArtifacts().size());
 
-      request.setGoals(Arrays.asList("verify"));
-      MavenExecutionPlan plan = maven.calculateExecutionPlan(request, result.getProject(), monitor);
+      MavenSession session = maven.createSession(request, result.getProject());
+      MavenExecutionPlan plan = maven.calculateExecutionPlan(session, result.getProject(), Arrays.asList("verify"),
+          true, monitor);
       assertEquals(plan.getMojoExecutions().toString(), 2, plan.getMojoExecutions().size());
     } finally {
       configuration.setUserSettingsFile(origSettings);

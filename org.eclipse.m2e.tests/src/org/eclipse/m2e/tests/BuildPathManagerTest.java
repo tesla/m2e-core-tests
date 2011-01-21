@@ -67,6 +67,7 @@ import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 /**
  * @author Eugene Kuleshov
  */
+@SuppressWarnings("restriction")
 public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
 
   public void testEnableMavenNature() throws Exception {

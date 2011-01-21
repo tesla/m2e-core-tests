@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.maven.execution.MavenExecutionRequest;
-import org.apache.maven.plugin.MojoExecution;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
@@ -297,7 +296,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertEquals(configurators.toString(), 1, configurators.size());
     assertTrue(configurators.get(0) instanceof JavaProjectConfigurator);
 
-    List<MojoExecution> notCoveredMojoExecutions = lifecycleMapping.getNotCoveredMojoExecutions(monitor);
+    List<MojoExecutionKey> notCoveredMojoExecutions = lifecycleMapping.getNotCoveredMojoExecutions(monitor);
     assertEquals(notCoveredMojoExecutions.toString(), 0, lifecycleMapping.getNotCoveredMojoExecutions(monitor).size());
 
     Map<MojoExecutionKey, List<AbstractBuildParticipant>> buildParticipants = lifecycleMapping
@@ -311,7 +310,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
   private void assertBuildParticipantType(Map<MojoExecutionKey, List<AbstractBuildParticipant>> buildParticipants,
       String artifactId, Class<MojoExecutionBuildParticipant> participantType) {
     for(Map.Entry<MojoExecutionKey, List<AbstractBuildParticipant>> entry : buildParticipants.entrySet()) {
-      if(artifactId.equals(entry.getKey().getMojoExecution().getArtifactId())) {
+      if(artifactId.equals(entry.getKey().getArtifactId())) {
         for(AbstractBuildParticipant participant : entry.getValue()) {
           assertTrue(participantType.equals(participant.getClass()));
         }
@@ -329,7 +328,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertTrue("Unexpected lifecycle mapping type:" + lifecycleMapping.getClass().getName(),
         lifecycleMapping instanceof TestLifecycleMapping);
     assertNotNull("Expected not null lifecycle mapping", lifecycleMapping);
-    List<MojoExecution> notCoveredMojoExecutions = lifecycleMapping.getNotCoveredMojoExecutions(monitor);
+    List<MojoExecutionKey> notCoveredMojoExecutions = lifecycleMapping.getNotCoveredMojoExecutions(monitor);
     assertEquals(notCoveredMojoExecutions.toString(), 2, notCoveredMojoExecutions.size());
     assertEquals(
         "org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 {execution: default-test-goal-1}",
@@ -408,8 +407,8 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
         .getBuildParticipants(monitor);
     assertEquals(1, buildParticipants.size());
     MojoExecutionKey executionKey = buildParticipants.keySet().iterator().next();
-    assertEquals("package", executionKey.getMojoExecution().getLifecyclePhase());
-    assertEquals("test-lifecyclemapping-plugin", executionKey.getMojoExecution().getArtifactId());
+    assertEquals("package", executionKey.getLifecyclePhase());
+    assertEquals("test-lifecyclemapping-plugin", executionKey.getArtifactId());
     assertEquals(1, buildParticipants.get(executionKey).size());
     assertTrue(buildParticipants.get(executionKey).get(0) instanceof MojoExecutionBuildParticipant);
   }
