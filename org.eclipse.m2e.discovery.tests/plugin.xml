@@ -21,8 +21,59 @@
             categoryId="com.sonatype.m2e.discovery-directories.lifecycles"
             description="%connectorDescriptor.description.tycho"
             groupId="lifecycles"
-            id="com.sonatype.m2e.discovery-directories.lifecycles.tycho_feature"
+            id="com.sonatype.m2e.lifecycle.one"
             kind="lifecycles"
+            license="%connectorDescriptor.license.tycho"
+            name="%connectorDescriptor.name.tycho"
+            provider="%connectorDescriptor.provider.tycho"
+            siteUrl="http://repository.sonatype.org/content/sites/forge-sites/m2eclipse-tycho/0.5.0/N/0.5.0.201101121400/">
+        <iu id="org.sonatype.tycho.m2e.feature.feature.group">
+        </iu>
+         <overview
+               summary="%connectorDescriptor.overview.summary.tycho"
+               url="http://eclipse.org/tycho/">
+         </overview>
+      </connectorDescriptor>
+      <connectorDescriptor
+            categoryId="com.sonatype.m2e.discovery-directories.lifecycles"
+            description="%connectorDescriptor.description.tycho"
+            groupId="lifecycles"
+            id="com.sonatype.m2e.lifecycle.two"
+            kind="lifecycles, configurator:a.configurator-id"
+            license="%connectorDescriptor.license.tycho"
+            name="%connectorDescriptor.name.tycho"
+            provider="%connectorDescriptor.provider.tycho"
+            siteUrl="http://repository.sonatype.org/content/sites/forge-sites/m2eclipse-tycho/0.5.0/N/0.5.0.201101121400/">
+        <iu id="org.sonatype.tycho.m2e.feature.feature.group">
+        </iu>
+         <overview
+               summary="%connectorDescriptor.overview.summary.tycho"
+               url="http://eclipse.org/tycho/">
+         </overview>
+      </connectorDescriptor>
+      <connectorDescriptor
+            categoryId="com.sonatype.m2e.discovery-directories.lifecycles"
+            description="%connectorDescriptor.description.tycho"
+            groupId="lifecycles"
+            id="com.sonatype.m2e.lifecycle.three"
+            kind="lifecycles, configurator:a.configurator-id3, lifecycle:none"
+            license="%connectorDescriptor.license.tycho"
+            name="%connectorDescriptor.name.tycho"
+            provider="%connectorDescriptor.provider.tycho"
+            siteUrl="http://repository.sonatype.org/content/sites/forge-sites/m2eclipse-tycho/0.5.0/N/0.5.0.201101121400/">
+        <iu id="org.sonatype.tycho.m2e.feature.feature.group">
+        </iu>
+         <overview
+               summary="%connectorDescriptor.overview.summary.tycho"
+               url="http://eclipse.org/tycho/">
+         </overview>
+      </connectorDescriptor>
+      <connectorDescriptor
+            categoryId="com.sonatype.m2e.discovery-directories.lifecycles"
+            description="%connectorDescriptor.description.tycho"
+            groupId="lifecycles"
+            id="com.sonatype.m2e.lifecycle.four"
+            kind="lifecycles, lifecycle:unknown-or-missing"
             license="%connectorDescriptor.license.tycho"
             name="%connectorDescriptor.name.tycho"
             provider="%connectorDescriptor.provider.tycho"
