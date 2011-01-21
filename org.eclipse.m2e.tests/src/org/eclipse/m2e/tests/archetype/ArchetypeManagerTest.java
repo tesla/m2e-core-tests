@@ -11,7 +11,9 @@
 
 package org.eclipse.m2e.tests.archetype;
 
+import java.io.File;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -25,6 +27,9 @@ import org.eclipse.m2e.core.archetype.ArchetypeCatalogFactory.LocalCatalogFactor
 import org.eclipse.m2e.core.archetype.ArchetypeCatalogFactory.NexusIndexerCatalogFactory;
 import org.eclipse.m2e.core.archetype.ArchetypeCatalogFactory.RemoteCatalogFactory;
 import org.eclipse.m2e.core.archetype.ArchetypeManager;
+import org.eclipse.m2e.core.internal.index.IndexedArtifactGroup;
+import org.eclipse.m2e.tests.common.FileHelpers;
+import org.eclipse.m2e.tests.common.HttpServer;
 
 
 /**
@@ -126,4 +131,16 @@ public class ArchetypeManagerTest extends TestCase {
     assertNull(archetypeManager.getArchetypeCatalogFactory(catalogFactory.getId()));
   }
 
+  public void testAddRemoteCatalog() throws Exception {
+    HttpServer httpServer = new HttpServer();
+    httpServer.addResources("/", "");
+    httpServer.start();
+    try {
+      final RemoteCatalogFactory factory = new RemoteCatalogFactory(httpServer.getHttpUrl() + "/archetype-catalog.xml", null, true);
+      ArchetypeCatalog catalog = factory.getArchetypeCatalog();
+      assertEquals(1, catalog.getArchetypes().size());
+    } finally {
+      httpServer.stop();
+    }
+  }
 }
