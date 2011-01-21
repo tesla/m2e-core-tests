@@ -1,3 +1,6 @@
 /target
 /wintest
 /screenshots
+/.project
+/.classpath
+/.settings

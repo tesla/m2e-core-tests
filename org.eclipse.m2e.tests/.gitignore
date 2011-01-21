@@ -1,3 +1,6 @@
 /target
 /workspaceState.ser
 /bin
+/.settings
+/.project
+/.classpath
