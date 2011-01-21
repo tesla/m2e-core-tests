@@ -142,14 +142,14 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     }
   }
 
-  //TODO Re-enable? Does it make sense?
-  public void ttestExtractionOfCompilerSettingsDespiteErrorsInExecutionPlan() throws Exception {
+  public void testExtractionOfCompilerSettingsDespiteErrorsInExecutionPlan() throws Exception {
     IProject[] projects = importProjects("projects/compilerSettingsPluginError", new String[] {"pom.xml"},
         new ResolverConfiguration());
     assertNotNull(projects);
     assertEquals(1, projects.length);
     IProject project = projects[0];
     assertNotNull(project);
+    assertNoErrors(project);
 
     IJavaProject javaProject = JavaCore.create(project);
     assertEquals("1.6", javaProject.getOption(JavaCore.COMPILER_SOURCE, true));
