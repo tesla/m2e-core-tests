@@ -459,4 +459,29 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
         2 /*lineNumber of <project> for cases without local <packaging> section.*/, errorMarkers.get(1));
   }
+
+  public void testPackagingTypeMismatch() throws Exception {
+    IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping",
+        "testPackagingTypeMismatch/pom/pom.xml");
+    assertNotNull("Expected not null MavenProjectFacade", facade);
+    IProject project = facade.getProject();
+    assertNotNull("Expected not null project", project);
+    WorkspaceHelpers.assertNoErrors(project);
+
+    facade = importMavenProject("projects/lifecyclemapping", "testPackagingTypeMismatch/other/pom.xml");
+    assertNotNull("Expected not null MavenProjectFacade", facade);
+    project = facade.getProject();
+    assertNotNull("Expected not null project", project);
+    List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
+    assertNotNull(errorMarkers);
+    assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
+
+    String expectedErrorMessage = "Packaging type test-packaging-a configured in embedded lifecycle mapping configuration does not match the packaging type test-packaging-empty of the current project.";
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+        1 /*lineNumber*/, errorMarkers.get(0));
+
+    expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"test-packaging-empty\")";
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+        7 /*lineNumber*/, errorMarkers.get(1));
+  }
 }
