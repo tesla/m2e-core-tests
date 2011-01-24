@@ -39,7 +39,6 @@ import org.eclipse.m2e.jdt.internal.JavaProjectConfigurator;
 import org.eclipse.m2e.tests.common.AbstractLifecycleMappingTest;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 import org.eclipse.m2e.tests.configurators.TestLifecycleMapping;
-import org.eclipse.m2e.tests.configurators.TestProjectConfigurator;
 
 
 public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
@@ -53,60 +52,6 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     ILifecycleMapping lifecycleMapping = facade.getLifecycleMapping(monitor);
     assertNotNull(lifecycleMapping);
     assertTrue(lifecycleMapping.getClass().getCanonicalName(), lifecycleMapping instanceof JarLifecycleMapping);
-  }
-
-  public void testMojoExecutionIgnore() throws Exception {
-    IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/lifecycleMappingMetadata",
-        "testMojoExecutionIgnore/pom.xml");
-    assertNotNull("Expected not null MavenProjectFacade", facade);
-    IProject project = facade.getProject();
-    WorkspaceHelpers.assertNoErrors(project);
-
-    ILifecycleMapping lifecycleMapping = facade.getLifecycleMapping(monitor);
-    assertNotNull(lifecycleMapping);
-
-    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(monitor);
-    assertEquals(configurators.toString(), 0, configurators.size());
-
-    Map<MojoExecutionKey, List<AbstractBuildParticipant>> buildParticipants = lifecycleMapping
-        .getBuildParticipants(monitor);
-    assertEquals(buildParticipants.keySet().toString(), 1, buildParticipants.size()); // only one mojo execution
-    assertEquals(0, buildParticipants.values().iterator().next().size()); // no build participants
-  }
-
-  public void testMojoExecutionExecute() throws Exception {
-    IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/lifecycleMappingMetadata",
-        "testMojoExecutionExecute/pom.xml");
-    assertNotNull("Expected not null MavenProjectFacade", facade);
-    IProject project = facade.getProject();
-    WorkspaceHelpers.assertNoErrors(project);
-
-    ILifecycleMapping lifecycleMapping = facade.getLifecycleMapping(monitor);
-    assertNotNull(lifecycleMapping);
-
-    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(monitor);
-    assertEquals(configurators.toString(), 0, configurators.size());
-
-    Map<MojoExecutionKey, List<AbstractBuildParticipant>> buildParticipants = lifecycleMapping
-        .getBuildParticipants(monitor);
-    assertEquals(buildParticipants.keySet().toString(), 1, buildParticipants.size()); // only one mojo execution
-    assertEquals(1, buildParticipants.values().iterator().next().size()); // one 
-    assertTrue(buildParticipants.values().iterator().next().get(0) instanceof MojoExecutionBuildParticipant);
-  }
-
-  public void testMojoExecutionConfigurator() throws Exception {
-    IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/lifecycleMappingMetadata",
-        "testMojoExecutionConfigurator/pom.xml");
-    assertNotNull("Expected not null MavenProjectFacade", facade);
-    IProject project = facade.getProject();
-    WorkspaceHelpers.assertNoErrors(project);
-
-    ILifecycleMapping lifecycleMapping = facade.getLifecycleMapping(monitor);
-    assertNotNull(lifecycleMapping);
-
-    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(monitor);
-    assertEquals(configurators.toString(), 1, configurators.size());
-    assertTrue(configurators.get(0) instanceof TestProjectConfigurator);
   }
 
   public void testMissingLifecycleMappingMetadata() throws Exception {
