@@ -43,10 +43,10 @@ public class MavenDiscoveryMarkerResolutionGeneratorTest extends AbstractLifecyc
     assertEquals("Error markers", 2, errorMarkers.size());
 
     WorkspaceHelpers
-        .assertConfiguratorErrorMarkerAttributes(errorMarkers.get(1),
+        .assertConfiguratorErrorMarkerAttributes(errorMarkers.get(0),
             "no such project configurator id for test-lifecyclemapping-plugin:test-goal-for-eclipse-extension2 - embedded from pom");
-    assertTrue("Resolve configurator marker", generator.hasResolutions(errorMarkers.get(1)));
-    IMarkerResolution[] resolutions = generator.getResolutions(errorMarkers.get(1));
+    assertTrue("Resolve configurator marker", generator.hasResolutions(errorMarkers.get(0)));
+    IMarkerResolution[] resolutions = generator.getResolutions(errorMarkers.get(0));
     assertEquals(1, resolutions.length);
 
   }
@@ -76,8 +76,8 @@ public class MavenDiscoveryMarkerResolutionGeneratorTest extends AbstractLifecyc
     List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
     assertEquals("Error markers", 2, errorMarkers.size());
 
-    WorkspaceHelpers.assertLifecycleIdErrorMarkerAttributes(errorMarkers.get(1), "unknown-or-missing");
-    assertTrue("Resolve packaging marker", generator.hasResolutions(errorMarkers.get(1)));
+    WorkspaceHelpers.assertLifecycleIdErrorMarkerAttributes(errorMarkers.get(0), "unknown-or-missing");
+    assertTrue("Resolve packaging marker", generator.hasResolutions(errorMarkers.get(0)));
   }
 
   @Test
