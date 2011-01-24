@@ -45,21 +45,21 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     project = facade.getProject();
     expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"war\")";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
-        1 /*lineNumber*/, project);
+        7 /*lineNumber of <packaging> element*/, project);
     WorkspaceHelpers.assertLifecyclePackagingErrorMarkerAttributes(project, "war");
 
     // Building the project should not remove the marker
     project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
     waitForJobsToComplete();
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
-        1 /*lineNumber*/, project);
+    	7 /*lineNumber of <packaging> element*/, project);
 
     // Fix the current configuration problem, introduce a new one
     copyContent(project, "pom_badConfiguration1.xml", "pom.xml");
     waitForJobsToComplete();
     expectedErrorMessage = "Mojo execution not covered by lifecycle configuration: org.codehaus.modello:modello-maven-plugin:1.1:java {execution: standard} (maven lifecycle phase: generate-sources)";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
-        1 /*lineNumber*/, project);
+        24 /*lineNumber of <goal>standard</goal>*/, project);
 
     // Fix the current configuration problem, introduce a dependency problem
     copyContent(project, "pom_badDependency.xml", "pom.xml");
