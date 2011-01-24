@@ -41,7 +41,6 @@
         <module>../org.eclipse.m2e.integration.tests</module>
         <module>../org.eclipse.m2e.editor.tests</module>
         <module>../org.eclipse.m2e.editor.xml.tests</module>
-        <module>../org.eclipse.m2e.discovery.tests</module>
       </modules>
     </profile>
   </profiles>

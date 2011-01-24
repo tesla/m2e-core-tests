@@ -32,7 +32,10 @@ public class MavenDiscoveryMarkerResolutionGeneratorTest extends AbstractLifecyc
 
   @Test
   public void testCanResolveConfiguratorMarker() throws Exception {
-    IMavenProjectFacade facade = importMavenProject("projects", "configurator/pom.xml");
+    LifecycleMappingMetadataSource defaultMetadata = loadLifecycleMappingMetadataSource("projects/discovery/defaultMetadata.xml");
+    LifecycleMappingFactory.setDefaultLifecycleMappingMetadataSource(defaultMetadata);
+
+    IMavenProjectFacade facade = importMavenProject("projects/discovery", "configurator/pom.xml");
     assertNotNull("Expected not null MavenProjectFacade", facade);
     IProject project = facade.getProject();
 
@@ -40,17 +43,17 @@ public class MavenDiscoveryMarkerResolutionGeneratorTest extends AbstractLifecyc
     assertEquals("Error markers", 2, errorMarkers.size());
 
     WorkspaceHelpers
-        .assertConfiguratorErrorMarkerAttributes(errorMarkers.get(0),
+        .assertConfiguratorErrorMarkerAttributes(errorMarkers.get(1),
             "no such project configurator id for test-lifecyclemapping-plugin:test-goal-for-eclipse-extension2 - embedded from pom");
-    assertTrue("Resolve configurator marker", generator.hasResolutions(errorMarkers.get(0)));
-    IMarkerResolution[] resolutions = generator.getResolutions(errorMarkers.get(0));
+    assertTrue("Resolve configurator marker", generator.hasResolutions(errorMarkers.get(1)));
+    IMarkerResolution[] resolutions = generator.getResolutions(errorMarkers.get(1));
     assertEquals(1, resolutions.length);
 
   }
 
   @Test
   public void testCanResolvePackagingMarker() throws Exception {
-    IMavenProjectFacade facade = importMavenProject("projects", "unknownPackaging/pom.xml");
+    IMavenProjectFacade facade = importMavenProject("projects/discovery", "unknownPackaging/pom.xml");
     assertNotNull("Expected not null MavenProjectFacade", facade);
     IProject project = facade.getProject();
 
@@ -63,23 +66,23 @@ public class MavenDiscoveryMarkerResolutionGeneratorTest extends AbstractLifecyc
 
   @Test
   public void testCanResolveLifecycleIdMarker() throws Exception {
-    LifecycleMappingMetadataSource defaultMetadata = loadLifecycleMappingMetadataSource("projects/defaultMetadata.xml");
+    LifecycleMappingMetadataSource defaultMetadata = loadLifecycleMappingMetadataSource("projects/discovery/defaultMetadata.xml");
     LifecycleMappingFactory.setDefaultLifecycleMappingMetadataSource(defaultMetadata);
 
-    IMavenProjectFacade facade = importMavenProject("projects", "lifecycleId/pom.xml");
+    IMavenProjectFacade facade = importMavenProject("projects/discovery", "lifecycleId/pom.xml");
     assertNotNull("Expected not null MavenProjectFacade", facade);
     IProject project = facade.getProject();
 
     List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
     assertEquals("Error markers", 2, errorMarkers.size());
 
-    WorkspaceHelpers.assertLifecycleIdErrorMarkerAttributes(errorMarkers.get(0), "unknown-or-missing");
-    assertTrue("Resolve packaging marker", generator.hasResolutions(errorMarkers.get(0)));
+    WorkspaceHelpers.assertLifecycleIdErrorMarkerAttributes(errorMarkers.get(1), "unknown-or-missing");
+    assertTrue("Resolve packaging marker", generator.hasResolutions(errorMarkers.get(1)));
   }
 
   @Test
   public void testCanResolveMojoExecutionMarker() throws Exception {
-    IMavenProjectFacade facade = importMavenProject("projects", "mojoExecutions/pom.xml");
+    IMavenProjectFacade facade = importMavenProject("projects/discovery", "mojoExecutions/pom.xml");
     assertNotNull("Expected not null MavenProjectFacade", facade);
     IProject project = facade.getProject();
 
@@ -96,7 +99,7 @@ public class MavenDiscoveryMarkerResolutionGeneratorTest extends AbstractLifecyc
   @Test
   public void testResolveMultipleMarkers() throws Exception {
     ResolverConfiguration configuration = new ResolverConfiguration();
-    IProject[] projects = importProjects("projects", new String[] {"configurator/pom.xml", "unknownPackaging/pom.xml",
+    IProject[] projects = importProjects("projects/discovery", new String[] {"configurator/pom.xml", "unknownPackaging/pom.xml",
         "lifecycleId/pom.xml", "mojoExecutions/pom.xml"}, configuration);
     waitForJobsToComplete();
 

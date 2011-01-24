@@ -20,7 +20,10 @@ Require-Bundle: org.eclipse.core.runtime,
  org.junit,
  org.eclipse.m2e.launching,
  org.eclipse.m2e.maven.indexer,
- org.eclipse.m2e.tests.common
+ org.eclipse.m2e.tests.common,
+ org.eclipse.equinox.p2.discovery,
+ org.eclipse.equinox.p2.discovery.compatibility,
+ org.eclipse.equinox.p2.ui.discovery
 Eclipse-LazyStart: true
 Bundle-RequiredExecutionEnvironment: J2SE-1.5,
  JavaSE-1.6
@@ -34,3 +37,8 @@ Export-Package: org.eclipse.m2e.tests.configurators,
  org.eclipse.m2e.tests.scm,
  org.eclipse.m2e.tests,
  org.eclipse.m2e.tests.archetype
+Import-Package: org.eclipse.m2e.internal.discovery,
+ org.eclipse.m2e.internal.discovery.markers,
+ org.eclipse.m2e.internal.discovery.wizards,
+ org.eclipse.ui,
+ org.eclipse.ui.views.markers
