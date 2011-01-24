@@ -38,7 +38,7 @@ public class LifecycleMappingMetadataPrioritiesTest extends AbstractLifecycleMap
 
     expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"test-packaging-empty\")";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
-        1 /*lineNumber*/, errorMarkers.get(1));
+        7 /*lineNumber of <packaging> element*/, errorMarkers.get(1));
     WorkspaceHelpers.assertLifecyclePackagingErrorMarkerAttributes(errorMarkers.get(1), "test-packaging-empty");
   }
 
@@ -81,7 +81,7 @@ public class LifecycleMappingMetadataPrioritiesTest extends AbstractLifecycleMap
 
     expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"test-packaging-for-eclipse-extension\")";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
-        1 /*lineNumber*/, errorMarkers.get(1));
+        7 /*lineNumber of <packaging> element*/, errorMarkers.get(1));
     WorkspaceHelpers.assertLifecyclePackagingErrorMarkerAttributes(errorMarkers.get(1),
         "test-packaging-for-eclipse-extension");
   }
@@ -108,7 +108,7 @@ public class LifecycleMappingMetadataPrioritiesTest extends AbstractLifecycleMap
 
     expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"test-packaging-for-eclipse-extension\")";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
-        1 /*lineNumber*/, errorMarkers.get(1));
+        7 /*lineNumber of <packaging> element*/, errorMarkers.get(1));
     WorkspaceHelpers.assertLifecyclePackagingErrorMarkerAttributes(errorMarkers.get(1),
         "test-packaging-for-eclipse-extension");
   }
@@ -136,7 +136,7 @@ public class LifecycleMappingMetadataPrioritiesTest extends AbstractLifecycleMap
         "no such lifecycle mapping for test-packaging-a - parent");
     expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"test-packaging-a\")";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
-        1 /*lineNumber*/, errorMarkers.get(1));
+        12 /*lineNumber of <packaging> element*/, errorMarkers.get(1));
     WorkspaceHelpers.assertLifecyclePackagingErrorMarkerAttributes(errorMarkers.get(1), "test-packaging-a");
 
     facade = importMavenProject(
@@ -154,7 +154,7 @@ public class LifecycleMappingMetadataPrioritiesTest extends AbstractLifecycleMap
         "no such lifecycle mapping for test-packaging-a - override");
     expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"test-packaging-a\")";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
-        1 /*lineNumber*/, errorMarkers.get(1));
+        12 /*lineNumber of <packaging> element*/, errorMarkers.get(1));
     WorkspaceHelpers.assertLifecyclePackagingErrorMarkerAttributes(errorMarkers.get(1), "test-packaging-a");
   }
 }
