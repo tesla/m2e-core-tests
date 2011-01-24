@@ -343,11 +343,11 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
     String expectedErrorMessage = "Mojo execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 {execution: default-test-goal-1} (maven lifecycle phase: process-resources)";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
-        1 /*lineNumber*/, errorMarkers.get(0));
+        13 /*lineNumber <artifactId> of plugin def*/, errorMarkers.get(0));
     WorkspaceHelpers.assertErrorMarkerAttributes(errorMarkers.get(0), notCoveredMojoExecutions.get(0));
     expectedErrorMessage = "Mojo execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-2 {execution: default-test-goal-2} (maven lifecycle phase: compile)";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
-        1 /*lineNumber*/, errorMarkers.get(1));
+    	13 /*lineNumber <artifactId> of plugin def*/, errorMarkers.get(1));
     WorkspaceHelpers.assertErrorMarkerAttributes(errorMarkers.get(1), notCoveredMojoExecutions.get(1));
   }
 
@@ -389,7 +389,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     IProject project = facade.getProject();
     String expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"rar\")";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
-        1 /*lineNumber*/, project);
+        7 /*lineNumber for <packaging>*/, project);
     WorkspaceHelpers.assertLifecyclePackagingErrorMarkerAttributes(project, "rar");
 
     ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade, monitor);
@@ -401,7 +401,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertNotNull(errorMarkers);
     assertEquals(WorkspaceHelpers.toString(errorMarkers), 1, errorMarkers.size());
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
-        1 /*lineNumber*/, project);
+        7 /*lineNumber for <packaging>*/, project);
     WorkspaceHelpers.assertLifecyclePackagingErrorMarkerAttributes(project, "rar");
   }
 
