@@ -512,6 +512,6 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
 
     expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"jar\")";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
-        1 /*lineNumber*/, errorMarkers.get(1));
+        2 /*lineNumber of <project> for cases without local <packaging> section.*/, errorMarkers.get(1));
   }
 }
