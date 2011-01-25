@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.internal.lifecycle.LifecycleMappingFactory;
 import org.eclipse.m2e.core.internal.lifecycle.model.LifecycleMappingMetadataSource;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
@@ -42,13 +43,15 @@ public class MavenDiscoveryMarkerResolutionGeneratorTest extends AbstractLifecyc
     List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
     assertEquals("Error markers", 2, errorMarkers.size());
 
+    String expectedErrorMessage = "Project configurator \"no such project configurator id for test-lifecyclemapping-plugin:test-goal-for-eclipse-extension2 - embedded from pom\" is not available. To enable full functionality, install the project configurator and run Maven->Update Project Configuration.";
+    IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+        1 /*lineNumber*/, project);
     WorkspaceHelpers
-        .assertConfiguratorErrorMarkerAttributes(errorMarkers.get(0),
+        .assertConfiguratorErrorMarkerAttributes(marker,
             "no such project configurator id for test-lifecyclemapping-plugin:test-goal-for-eclipse-extension2 - embedded from pom");
-    assertTrue("Resolve configurator marker", generator.hasResolutions(errorMarkers.get(0)));
-    IMarkerResolution[] resolutions = generator.getResolutions(errorMarkers.get(0));
+    assertTrue("Resolve configurator marker", generator.hasResolutions(marker));
+    IMarkerResolution[] resolutions = generator.getResolutions(marker);
     assertEquals(1, resolutions.length);
-
   }
 
   @Test
@@ -76,8 +79,11 @@ public class MavenDiscoveryMarkerResolutionGeneratorTest extends AbstractLifecyc
     List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
     assertEquals("Error markers", 2, errorMarkers.size());
 
-    WorkspaceHelpers.assertLifecycleIdErrorMarkerAttributes(errorMarkers.get(0), "unknown-or-missing");
-    assertTrue("Resolve packaging marker", generator.hasResolutions(errorMarkers.get(0)));
+    String expectedErrorMessage = "Lifecycle mapping \"unknown-or-missing\" is not available. To enable full functionality, install the lifecycle mapping and run Maven->Update Project Configuration.";
+    IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+        null /*lineNumber*/, project);
+    WorkspaceHelpers.assertLifecycleIdErrorMarkerAttributes(marker, "unknown-or-missing");
+    assertTrue("Resolve packaging marker", generator.hasResolutions(marker));
   }
 
   @Test
@@ -92,8 +98,11 @@ public class MavenDiscoveryMarkerResolutionGeneratorTest extends AbstractLifecyc
     ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade, monitor);
     List<MojoExecutionKey> notCoveredMojoExecutions = lifecycleMapping.getNotCoveredMojoExecutions(monitor);
 
-    WorkspaceHelpers.assertErrorMarkerAttributes(errorMarkers.get(0), notCoveredMojoExecutions.get(0));
-    assertTrue("Resolve MojoExecution marker", generator.hasResolutions(errorMarkers.get(0)));
+    String expectedErrorMessage = "Mojo execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 {execution: default-test-goal-1} (maven lifecycle phase: process-resources)";
+    IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+        null /*lineNumber*/, project);
+    WorkspaceHelpers.assertErrorMarkerAttributes(marker, notCoveredMojoExecutions.get(0));
+    assertTrue("Resolve MojoExecution marker", generator.hasResolutions(marker));
   }
 
   @Test
