@@ -58,7 +58,7 @@ public class PluginExecutionActionsTest extends AbstractLifecycleMappingTest {
     assertEquals(0, buildParticipants.values().iterator().next().size()); // no build participants
 
     WorkspaceHelpers.assertWarningMarker(IMavenConstants.MARKER_CONFIGURATION_ID,
-        "Ignore plugin execution test message", 1 /*lineNumber*/, project, "pom.xml");
+        "Ignore plugin execution test message", 1 /*lineNumber*/, "pom.xml", project);
   }
 
   public void testMojoExecutionExecute() throws Exception {
@@ -104,7 +104,7 @@ public class PluginExecutionActionsTest extends AbstractLifecycleMappingTest {
     assertTrue(buildParticipants.values().iterator().next().get(0) instanceof MojoExecutionBuildParticipant);
 
     WorkspaceHelpers.assertWarningMarker(IMavenConstants.MARKER_CONFIGURATION_ID,
-        "Execute plugin execution test message", 1 /*lineNumber*/, project, "pom.xml");
+        "Execute plugin execution test message", 1 /*lineNumber*/, "pom.xml", project);
   }
 
   public void testMojoExecutionConfigurator() throws Exception {
@@ -145,7 +145,7 @@ public class PluginExecutionActionsTest extends AbstractLifecycleMappingTest {
 
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID,
             "Mojo execution marked as error in lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 {execution: standard} (maven lifecycle phase: compile)",
-            1 /*lineNumber*/, project, "pom.xml");
+            1 /*lineNumber*/, "pom.xml", project);
   }
 
   public void testMojoExecutionErrorWithMessage() throws Exception {
@@ -168,6 +168,6 @@ public class PluginExecutionActionsTest extends AbstractLifecycleMappingTest {
     assertEquals(0, buildParticipants.values().iterator().next().size());
 
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, "Error plugin execution test message",
-        1 /*lineNumber*/, project, "pom.xml");
+        1 /*lineNumber*/, "pom.xml", project);
   }
 }
