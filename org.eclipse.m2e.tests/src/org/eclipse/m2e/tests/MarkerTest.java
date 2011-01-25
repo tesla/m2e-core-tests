@@ -72,7 +72,7 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     // (maven) Missing artifact missing:missing:jar:0.0.0:compile
     assertEquals(WorkspaceHelpers.toString(markers), 2, markers.size());
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_DEPENDENCY_ID, expectedErrorMessage, 1 /*lineNumber*/,
-        markers.get(1));
+        project);
 
     // Building the project should not remove the marker
     project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
@@ -83,7 +83,7 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     // (maven) Missing artifact missing:missing:jar:0.0.0:compile
     assertEquals(WorkspaceHelpers.toString(markers), 3, markers.size());
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_DEPENDENCY_ID, expectedErrorMessage, 1 /*lineNumber*/,
-        markers.get(2));
+        project);
 
     // Fix the current dependency problem
     copyContent(project, "pom_good.xml", "pom.xml");

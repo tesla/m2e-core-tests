@@ -240,7 +240,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
         .assertErrorMarker(
             IMavenConstants.MARKER_POM_LOADING_ID,
             "Project build error: Non-resolvable parent POM: Failure to find t001:t001-p3:pom:0.0.1-SNAPSHOT in file:repositories/remoterepo was cached in the local repository, resolution will not be reattempted until the update interval of central has elapsed or updates are forced and 'parent.relativePath' points at wrong local POM",
-            1 /*lineNumber*/, markers[0]);
+            1 /*lineNumber*/, p2);
 
     IProject p3 = createExisting("t001-p3");
     waitForJobsToComplete();
@@ -597,7 +597,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     // (maven) Missing artifact missing:missing:jar:0.0.0:compile
     assertEquals(WorkspaceHelpers.toString(markers), 2, markers.size());
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_DEPENDENCY_ID, expectedErrorMessage, 1 /*lineNumber*/,
-        markers.get(1));
+        project);
 
     workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
     waitForJobsToComplete();
@@ -608,7 +608,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     // (maven) Missing artifact missing:missing:jar:0.0.0:compile
     assertEquals(WorkspaceHelpers.toString(markers), 3, markers.size());
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_DEPENDENCY_ID, expectedErrorMessage, 1 /*lineNumber*/,
-        markers.get(2));
+        project);
   }
 
   public void test015_refreshOffline() throws Exception {
