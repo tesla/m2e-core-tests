@@ -43,10 +43,10 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     facade = MavenPlugin.getDefault().getMavenProjectManagerImpl().getProject(project);
     assertNotNull("Expected not null MavenProjectFacade", facade);
     project = facade.getProject();
-    expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"war\")";
+    expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"test-packaging-empty\")";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
         7 /*lineNumber of <packaging> element*/, project);
-    WorkspaceHelpers.assertLifecyclePackagingErrorMarkerAttributes(project, "war");
+    WorkspaceHelpers.assertLifecyclePackagingErrorMarkerAttributes(project, "test-packaging-empty");
 
     // Building the project should not remove the marker
     project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
