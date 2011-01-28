@@ -279,20 +279,20 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     List<MojoExecutionKey> notCoveredMojoExecutions = lifecycleMapping.getNotCoveredMojoExecutions(monitor);
     assertEquals(notCoveredMojoExecutions.toString(), 2, notCoveredMojoExecutions.size());
     assertEquals(
-        "org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 {execution: default-test-goal-1}",
+        "org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 (execution: default-test-goal-1, phase: process-resources)",
         notCoveredMojoExecutions.get(0).toString());
     assertEquals(
-        "org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-2 {execution: default-test-goal-2}",
+        "org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-2 (execution: default-test-goal-2, phase: compile)",
         notCoveredMojoExecutions.get(1).toString());
 
     // Also verify that we get the expected markers
     List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
     assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
-    String expectedErrorMessage = "Mojo execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 {execution: default-test-goal-1} (maven lifecycle phase: process-resources)";
+    String expectedErrorMessage = "Plugin execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 (execution: default-test-goal-1, phase: process-resources)";
     IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
         13 /*lineNumber <artifactId> of plugin def*/, project);
     WorkspaceHelpers.assertErrorMarkerAttributes(marker, notCoveredMojoExecutions.get(0));
-    expectedErrorMessage = "Mojo execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-2 {execution: default-test-goal-2} (maven lifecycle phase: compile)";
+    expectedErrorMessage = "Plugin execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-2 (execution: default-test-goal-2, phase: compile)";
     marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
         13 /*lineNumber <artifactId> of plugin def*/, project);
     WorkspaceHelpers.assertErrorMarkerAttributes(marker, notCoveredMojoExecutions.get(1));
@@ -391,7 +391,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
 
     assertEquals(2, lifecycleMapping.getProblems().size());
     assertEquals(
-        "Conflicting lifecycle mapping (plugin execution \"org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 {execution: default-test-goal-1}\"). To enable full functionality, remove the conflicting mapping and run Maven->Update Project Configuration.",
+        "Conflicting lifecycle mapping (plugin execution \"org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 (execution: default-test-goal-1, phase: process-resources)\"). To enable full functionality, remove the conflicting mapping and run Maven->Update Project Configuration.",
         lifecycleMapping.getProblems().get(0).getMessage());
   }
 
@@ -404,7 +404,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
 
     assertEquals(1, lifecycleMapping.getProblems().size());
     assertEquals(
-        "Conflicting lifecycle mapping (plugin execution \"org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 {execution: default-test-goal-1}\"). To enable full functionality, remove the conflicting mapping and run Maven->Update Project Configuration.",
+        "Conflicting lifecycle mapping (plugin execution \"org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 (execution: default-test-goal-1, phase: process-resources)\"). To enable full functionality, remove the conflicting mapping and run Maven->Update Project Configuration.",
         lifecycleMapping.getProblems().get(0).getMessage());
   }
 

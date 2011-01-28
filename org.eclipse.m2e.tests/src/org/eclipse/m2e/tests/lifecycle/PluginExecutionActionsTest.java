@@ -144,7 +144,7 @@ public class PluginExecutionActionsTest extends AbstractLifecycleMappingTest {
     assertEquals(0, buildParticipants.values().iterator().next().size());
 
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID,
-            "Mojo execution marked as error in lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 {execution: standard} (maven lifecycle phase: compile)",
+            "Plugin execution marked as error in lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 (execution: standard, phase: compile)",
             1 /*lineNumber*/, "pom.xml", project);
   }
 

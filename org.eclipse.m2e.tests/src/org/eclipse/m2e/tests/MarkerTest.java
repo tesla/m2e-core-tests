@@ -57,7 +57,7 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     // Fix the current configuration problem, introduce a new one
     copyContent(project, "pom_badConfiguration1.xml", "pom.xml");
     waitForJobsToComplete();
-    expectedErrorMessage = "Mojo execution not covered by lifecycle configuration: org.codehaus.modello:modello-maven-plugin:1.1:java {execution: standard} (maven lifecycle phase: generate-sources)";
+    expectedErrorMessage = "Plugin execution not covered by lifecycle configuration: org.codehaus.modello:modello-maven-plugin:1.1:java (execution: standard, phase: generate-sources)";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
         24 /*lineNumber of <goal>standard</goal>*/, project);
 
