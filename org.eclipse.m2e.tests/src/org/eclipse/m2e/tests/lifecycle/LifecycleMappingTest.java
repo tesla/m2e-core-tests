@@ -38,7 +38,9 @@ import org.eclipse.m2e.jdt.internal.JarLifecycleMapping;
 import org.eclipse.m2e.jdt.internal.JavaProjectConfigurator;
 import org.eclipse.m2e.tests.common.AbstractLifecycleMappingTest;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
+import org.eclipse.m2e.tests.configurators.TestBuildParticipant;
 import org.eclipse.m2e.tests.configurators.TestLifecycleMapping;
+import org.eclipse.m2e.tests.configurators.TestProjectConfigurator;
 
 
 public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
@@ -483,5 +485,33 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"test-packaging-empty\")";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
         7 /*lineNumber*/, project);
+  }
+
+  public void testSameConfiguratorUsedTwice() throws Exception {
+    IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/lifecycleMappingMetadata",
+        "testSameConfiguratorUsedTwice/pom.xml");
+    assertNotNull("Expected not null MavenProjectFacade", facade);
+    IProject project = facade.getProject();
+    WorkspaceHelpers.assertNoErrors(project);
+    WorkspaceHelpers.assertNoWarnings(project);
+
+    ILifecycleMapping lifecycleMapping = facade.getLifecycleMapping(monitor);
+    assertNotNull(lifecycleMapping);
+
+    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(monitor);
+    assertEquals(configurators.toString(), 1, configurators.size());
+    assertTrue(configurators.get(0) instanceof TestProjectConfigurator);
+
+    Map<MojoExecutionKey, List<AbstractBuildParticipant>> buildParticipants = lifecycleMapping
+        .getBuildParticipants(monitor);
+    assertEquals(buildParticipants.toString(), 2, buildParticipants.size());
+    for(MojoExecutionKey mojoExecutionKey : buildParticipants.keySet()) {
+      List<AbstractBuildParticipant> buildParticipantList = buildParticipants.get(mojoExecutionKey);
+      assertNotNull(mojoExecutionKey.toString(), buildParticipantList);
+      assertEquals(mojoExecutionKey.toString(), 1, buildParticipantList.size());
+      AbstractBuildParticipant buildParticipant = buildParticipantList.get(0);
+      assertTrue(mojoExecutionKey.toString(), buildParticipant instanceof TestBuildParticipant);
+      assertEquals(mojoExecutionKey, ((TestBuildParticipant) buildParticipant).mojoExecutionKey);
+    }
   }
 }
