@@ -9,6 +9,8 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.m2e.core.internal.lifecycle.model.PluginExecutionMetadata;
+import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.configurator.AbstractBuildParticipant;
 import org.eclipse.m2e.core.project.configurator.AbstractProjectConfigurator;
 import org.eclipse.m2e.core.project.configurator.MojoExecutionKey;
@@ -33,7 +35,8 @@ public class AddMarkersProjectConfigurator extends AbstractProjectConfigurator {
   }
 
   @Override
-  public AbstractBuildParticipant getBuildParticipant(final MojoExecution mojoExecution) {
+  public AbstractBuildParticipant getBuildParticipant(IMavenProjectFacade projectFacade, final MojoExecution mojoExecution,
+                                                      PluginExecutionMetadata executionMetadata) {
     return new AbstractBuildParticipant() {
       public Set<IProject> build(int kind, IProgressMonitor monitor) throws Exception {
         String mojoExecutionKey = new MojoExecutionKey(mojoExecution).getKeyString();

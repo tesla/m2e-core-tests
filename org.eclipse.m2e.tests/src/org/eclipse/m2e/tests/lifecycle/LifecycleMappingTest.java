@@ -23,12 +23,16 @@ import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.internal.lifecycle.InvalidLifecycleMapping;
 import org.eclipse.m2e.core.internal.lifecycle.LifecycleMappingFactory;
+import org.eclipse.m2e.core.internal.lifecycle.LifecycleMappingResult;
 import org.eclipse.m2e.core.internal.lifecycle.model.LifecycleMappingMetadata;
 import org.eclipse.m2e.core.internal.lifecycle.model.LifecycleMappingMetadataSource;
 import org.eclipse.m2e.core.internal.lifecycle.model.PluginExecutionAction;
 import org.eclipse.m2e.core.internal.lifecycle.model.PluginExecutionMetadata;
+import org.eclipse.m2e.core.internal.markers.MavenProblemInfo;
+import org.eclipse.m2e.core.internal.project.registry.MavenProjectFacade;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.configurator.AbstractBuildParticipant;
+import org.eclipse.m2e.core.project.configurator.AbstractCustomizableLifecycleMapping;
 import org.eclipse.m2e.core.project.configurator.AbstractLifecycleMapping;
 import org.eclipse.m2e.core.project.configurator.AbstractProjectConfigurator;
 import org.eclipse.m2e.core.project.configurator.ILifecycleMapping;
@@ -43,6 +47,7 @@ import org.eclipse.m2e.tests.configurators.TestLifecycleMapping;
 import org.eclipse.m2e.tests.configurators.TestProjectConfigurator;
 
 
+@SuppressWarnings("restriction")
 public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
   public void testLifecycleMappingSpecifiedInMetadata() throws Exception {
     IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/lifecycleMappingMetadata",
@@ -51,7 +56,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     IProject project = facade.getProject();
     WorkspaceHelpers.assertNoErrors(project);
 
-    ILifecycleMapping lifecycleMapping = facade.getLifecycleMapping(monitor);
+    ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade);
     assertNotNull(lifecycleMapping);
     assertTrue(lifecycleMapping.getClass().getCanonicalName(), lifecycleMapping instanceof JarLifecycleMapping);
   }
@@ -68,15 +73,15 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
 
     String expectedErrorMessage = "Could not resolve artifact testLifecycleMappingMetadata:missing:xml:lifecycle-mapping-metadata:0.0.1";
-    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
         1 /*lineNumber*/, project);
 
     expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"jar\")";
-    IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
-        1 /*lineNumber*/, project);
+    IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID,
+        expectedErrorMessage, 1 /*lineNumber*/, project);
     WorkspaceHelpers.assertLifecyclePackagingErrorMarkerAttributes(marker, "jar");
 
-    ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade, monitor);
+    ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade);
     assertTrue(lifecycleMapping instanceof InvalidLifecycleMapping);
   }
 
@@ -236,19 +241,20 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     IProject project = facade.getProject();
     WorkspaceHelpers.assertNoErrors(project);
 
-    ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade, monitor);
+    AbstractCustomizableLifecycleMapping lifecycleMapping = (AbstractCustomizableLifecycleMapping) projectConfigurationManager
+        .getLifecycleMapping(facade);
 
     assertTrue(lifecycleMapping instanceof JarLifecycleMapping);
 
-    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(monitor);
+    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
     assertEquals(configurators.toString(), 1, configurators.size());
     assertTrue(configurators.get(0) instanceof JavaProjectConfigurator);
 
-    List<MojoExecutionKey> notCoveredMojoExecutions = lifecycleMapping.getNotCoveredMojoExecutions(monitor);
-    assertEquals(notCoveredMojoExecutions.toString(), 0, lifecycleMapping.getNotCoveredMojoExecutions(monitor).size());
+    List<MojoExecutionKey> notCoveredMojoExecutions = getNotCoveredMojoExecutions(facade);
+    assertEquals(notCoveredMojoExecutions.toString(), 0, notCoveredMojoExecutions.size());
 
-    Map<MojoExecutionKey, List<AbstractBuildParticipant>> buildParticipants = lifecycleMapping
-        .getBuildParticipants(monitor);
+    Map<MojoExecutionKey, List<AbstractBuildParticipant>> buildParticipants = lifecycleMapping.getBuildParticipants(
+        facade, monitor);
     assertEquals(8, buildParticipants.size());
 
     assertBuildParticipantType(buildParticipants, "maven-resources-plugin", MojoExecutionBuildParticipant.class);
@@ -272,11 +278,13 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     IProject project = facade.getProject();
     assertNotNull("Expected not null project", project);
 
-    ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade, monitor);
+    AbstractCustomizableLifecycleMapping lifecycleMapping = (AbstractCustomizableLifecycleMapping) projectConfigurationManager
+        .getLifecycleMapping(facade);
+
     assertTrue("Unexpected lifecycle mapping type:" + lifecycleMapping.getClass().getName(),
         lifecycleMapping instanceof TestLifecycleMapping);
     assertNotNull("Expected not null lifecycle mapping", lifecycleMapping);
-    List<MojoExecutionKey> notCoveredMojoExecutions = lifecycleMapping.getNotCoveredMojoExecutions(monitor);
+    List<MojoExecutionKey> notCoveredMojoExecutions = getNotCoveredMojoExecutions(facade);
     assertEquals(notCoveredMojoExecutions.toString(), 2, notCoveredMojoExecutions.size());
     assertEquals(
         "org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 (execution: default-test-goal-1, phase: process-resources)",
@@ -289,11 +297,11 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
     assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
     String expectedErrorMessage = "Plugin execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 (execution: default-test-goal-1, phase: process-resources)";
-    IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
-        13 /*lineNumber <artifactId> of plugin def*/, project);
+    IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID,
+        expectedErrorMessage, 13 /*lineNumber <artifactId> of plugin def*/, project);
     WorkspaceHelpers.assertErrorMarkerAttributes(marker, notCoveredMojoExecutions.get(0));
     expectedErrorMessage = "Plugin execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-2 (execution: default-test-goal-2, phase: compile)";
-    marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+    marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
         13 /*lineNumber <artifactId> of plugin def*/, project);
     WorkspaceHelpers.assertErrorMarkerAttributes(marker, notCoveredMojoExecutions.get(1));
   }
@@ -305,15 +313,15 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
     assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
     String expectedErrorMessage = "Lifecycle mapping \"unknown-or-missing\" is not available. To enable full functionality, install the lifecycle mapping and run Maven->Update Project Configuration.";
-    IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
-        1 /*lineNumber*/, project);
+    IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID,
+        expectedErrorMessage, 1 /*lineNumber*/, project);
     WorkspaceHelpers.assertLifecycleIdErrorMarkerAttributes(marker, "unknown-or-missing");
     expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"jar\")";
-    marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+    marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
         1 /*lineNumber*/, project);
     WorkspaceHelpers.assertLifecyclePackagingErrorMarkerAttributes(marker, "jar");
 
-    ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade, monitor);
+    ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade);
     assertTrue(lifecycleMapping instanceof InvalidLifecycleMapping);
 
     project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
@@ -321,11 +329,11 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
     assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
     expectedErrorMessage = "Lifecycle mapping \"unknown-or-missing\" is not available. To enable full functionality, install the lifecycle mapping and run Maven->Update Project Configuration.";
-    marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+    marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
         1 /*lineNumber*/, project);
     WorkspaceHelpers.assertLifecycleIdErrorMarkerAttributes(marker, "unknown-or-missing");
     expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"jar\")";
-    marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+    marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
         1 /*lineNumber*/, project);
     WorkspaceHelpers.assertLifecyclePackagingErrorMarkerAttributes(marker, "jar");
   }
@@ -335,11 +343,11 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertNotNull("Expected not null MavenProjectFacade", facade);
     IProject project = facade.getProject();
     String expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"rar\")";
-    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
         7 /*lineNumber for <packaging>*/, project);
     WorkspaceHelpers.assertLifecyclePackagingErrorMarkerAttributes(project, "rar");
 
-    ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade, monitor);
+    ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade);
     assertTrue(lifecycleMapping instanceof InvalidLifecycleMapping);
 
     project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
@@ -347,7 +355,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
     assertNotNull(errorMarkers);
     assertEquals(WorkspaceHelpers.toString(errorMarkers), 1, errorMarkers.size());
-    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
         7 /*lineNumber for <packaging>*/, project);
     WorkspaceHelpers.assertLifecyclePackagingErrorMarkerAttributes(project, "rar");
   }
@@ -357,10 +365,10 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
         "projects/lifecyclemapping/lifecycleMappingMetadata/testNotInterestingPhaseConfigurator", "pom.xml");
     assertNotNull("Expected not null MavenProjectFacade", facade);
 
-    ILifecycleMapping lifecycleMapping = facade.getLifecycleMapping(monitor);
+    ILifecycleMapping lifecycleMapping = mavenProjectManager.getLifecycleMapping(facade);
 
-    Map<MojoExecutionKey, List<AbstractBuildParticipant>> buildParticipants = lifecycleMapping
-        .getBuildParticipants(monitor);
+    Map<MojoExecutionKey, List<AbstractBuildParticipant>> buildParticipants = lifecycleMapping.getBuildParticipants(
+        facade, monitor);
     assertEquals(1, buildParticipants.size());
     MojoExecutionKey executionKey = buildParticipants.keySet().iterator().next();
     assertEquals("package", executionKey.getLifecyclePhase());
@@ -370,42 +378,50 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
   }
 
   public void testDuplicatePackagingTypeMetadata() throws Exception {
-    IMavenProjectFacade facade = importMavenProject(
-        "projects/lifecyclemapping/lifecycleMappingMetadata/DuplicateMetadata/testDuplicatePackagingType", "pom.xml");
+    MavenProjectFacade facade = newMavenProjectFacade("projects/lifecyclemapping/lifecycleMappingMetadata/DuplicateMetadata/testDuplicatePackagingType/pom.xml");
 
-    InvalidLifecycleMapping lifecycleMapping = (InvalidLifecycleMapping) projectConfigurationManager
-        .getLifecycleMapping(facade, monitor);
+    LifecycleMappingResult mappingResult = LifecycleMappingFactory.calculateLifecycleMapping(plugin.getMaven()
+        .createExecutionRequest(monitor), facade, monitor);
 
-    assertEquals(2, lifecycleMapping.getProblems().size());
+    List<MavenProblemInfo> problems = mappingResult.getProblems();
+
+    assertEquals(2, problems.size());
     assertEquals(
         "Conflicting lifecycle mapping metadata (project packaging type=\"test-packaging-a\"). To enable full functionality, remove the conflicting mapping and run Maven->Update Project Configuration.",
-        lifecycleMapping.getProblems().get(0).getMessage());
+        problems.get(0).getMessage());
   }
 
   public void testDuplicatePluginExecution1() throws Exception {
-    IMavenProjectFacade facade = importMavenProject(
-        "projects/lifecyclemapping/lifecycleMappingMetadata/DuplicateMetadata/testDuplicatePluginExecution1", "pom.xml");
+    MavenProjectFacade facade = newMavenProjectFacade("projects/lifecyclemapping/lifecycleMappingMetadata/DuplicateMetadata/testDuplicatePluginExecution1/pom.xml");
 
-    AbstractLifecycleMapping lifecycleMapping = (AbstractLifecycleMapping) projectConfigurationManager
-        .getLifecycleMapping(facade, monitor);
+    LifecycleMappingResult mappingResult = LifecycleMappingFactory.calculateLifecycleMapping(plugin.getMaven()
+        .createExecutionRequest(monitor), facade, monitor);
 
-    assertEquals(2, lifecycleMapping.getProblems().size());
+    List<MavenProblemInfo> problems = mappingResult.getProblems();
+
+    assertEquals(4, problems.size());
     assertEquals(
         "Conflicting lifecycle mapping (plugin execution \"org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 (execution: default-test-goal-1, phase: process-resources)\"). To enable full functionality, remove the conflicting mapping and run Maven->Update Project Configuration.",
-        lifecycleMapping.getProblems().get(0).getMessage());
+        problems.get(0).getMessage());
+    // [1] Conflicting lifecycle mapping (plugin execution "org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-2 (execution: default-test-goal-2, phase: compile)"). To enable full functionality, remove the conflicting mapping and run Maven->Update Project Configuration.
+    // [2] Plugin execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 (execution: default-test-goal-1, phase: process-resources)
+    // [3] Plugin execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-2 (execution: default-test-goal-2, phase: compile)
   }
 
   public void testDuplicatePluginExecution2() throws Exception {
-    IMavenProjectFacade facade = importMavenProject(
-        "projects/lifecyclemapping/lifecycleMappingMetadata/DuplicateMetadata/testDuplicatePluginExecution2", "pom.xml");
+    MavenProjectFacade facade = newMavenProjectFacade("projects/lifecyclemapping/lifecycleMappingMetadata/DuplicateMetadata/testDuplicatePluginExecution2/pom.xml");
 
-    AbstractLifecycleMapping lifecycleMapping = (AbstractLifecycleMapping) projectConfigurationManager
-        .getLifecycleMapping(facade, monitor);
+    LifecycleMappingResult mappingResult = LifecycleMappingFactory.calculateLifecycleMapping(plugin.getMaven()
+        .createExecutionRequest(monitor), facade, monitor);
 
-    assertEquals(1, lifecycleMapping.getProblems().size());
+    List<MavenProblemInfo> problems = mappingResult.getProblems();
+
+    assertEquals(3, problems.size());
     assertEquals(
         "Conflicting lifecycle mapping (plugin execution \"org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 (execution: default-test-goal-1, phase: process-resources)\"). To enable full functionality, remove the conflicting mapping and run Maven->Update Project Configuration.",
-        lifecycleMapping.getProblems().get(0).getMessage());
+        problems.get(0).getMessage());
+    // [1] Plugin execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 (execution: default-test-goal-1, phase: process-resources)
+    // [2] Plugin execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-2 (execution: default-test-goal-2, phase: compile)
   }
 
   public void testSecondaryConfiguratorsCustomizable() throws Exception {
@@ -414,9 +430,9 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertNoErrors(facade.getProject());
 
     AbstractLifecycleMapping lifecycleMapping = (AbstractLifecycleMapping) projectConfigurationManager
-        .getLifecycleMapping(facade, monitor);
+        .getLifecycleMapping(facade);
 
-    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(monitor);
+    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
     assertEquals(3, configurators.size());
   }
 
@@ -426,9 +442,9 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertNoErrors(facade.getProject());
 
     AbstractLifecycleMapping lifecycleMapping = (AbstractLifecycleMapping) projectConfigurationManager
-        .getLifecycleMapping(facade, monitor);
+        .getLifecycleMapping(facade);
 
-    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(monitor);
+    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
     assertEquals(3, configurators.size());
   }
 
@@ -439,7 +455,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     IProject project = facade.getProject();
     WorkspaceHelpers.assertNoErrors(project);
 
-    ILifecycleMapping lifecycleMapping = facade.getLifecycleMapping(monitor);
+    ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade);
     assertNotNull(lifecycleMapping);
     assertTrue(lifecycleMapping.getClass().getCanonicalName(), lifecycleMapping instanceof JarLifecycleMapping);
   }
@@ -454,11 +470,11 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
 
     String expectedErrorMessage = "Incompatible lifecycle mapping plugin version 1000.0.0";
-    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
         1 /*lineNumber*/, project);
 
     expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"jar\")";
-    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
         2 /*lineNumber of <project> for cases without local <packaging> section.*/, project);
   }
 
@@ -479,11 +495,11 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
 
     String expectedErrorMessage = "Packaging type test-packaging-a configured in embedded lifecycle mapping configuration does not match the packaging type test-packaging-empty of the current project.";
-    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
         1 /*lineNumber*/, project);
 
     expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"test-packaging-empty\")";
-    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
         7 /*lineNumber*/, project);
   }
 
@@ -495,15 +511,15 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     WorkspaceHelpers.assertNoErrors(project);
     WorkspaceHelpers.assertNoWarnings(project);
 
-    ILifecycleMapping lifecycleMapping = facade.getLifecycleMapping(monitor);
+    ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade);
     assertNotNull(lifecycleMapping);
 
-    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(monitor);
+    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
     assertEquals(configurators.toString(), 1, configurators.size());
     assertTrue(configurators.get(0) instanceof TestProjectConfigurator);
 
-    Map<MojoExecutionKey, List<AbstractBuildParticipant>> buildParticipants = lifecycleMapping
-        .getBuildParticipants(monitor);
+    Map<MojoExecutionKey, List<AbstractBuildParticipant>> buildParticipants = lifecycleMapping.getBuildParticipants(
+        facade, monitor);
     assertEquals(buildParticipants.toString(), 2, buildParticipants.size());
     for(MojoExecutionKey mojoExecutionKey : buildParticipants.keySet()) {
       List<AbstractBuildParticipant> buildParticipantList = buildParticipants.get(mojoExecutionKey);
@@ -513,5 +529,18 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
       assertTrue(mojoExecutionKey.toString(), buildParticipant instanceof TestBuildParticipant);
       assertEquals(mojoExecutionKey, ((TestBuildParticipant) buildParticipant).mojoExecutionKey);
     }
+  }
+
+  public void testNonresolvableExecutionPlan() throws Exception {
+    IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping",
+        "testNonresolvableExecutionPlan/pom.xml");
+
+    assertNotNull("Expected not null MavenProjectFacade", facade);
+
+    ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade);
+    assertTrue(lifecycleMapping instanceof JarLifecycleMapping);
+
+    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
+    assertEquals(configurators.toString(), 0, configurators.size());
   }
 }

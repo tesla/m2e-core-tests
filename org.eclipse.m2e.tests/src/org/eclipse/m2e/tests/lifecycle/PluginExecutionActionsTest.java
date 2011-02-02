@@ -26,14 +26,14 @@ public class PluginExecutionActionsTest extends AbstractLifecycleMappingTest {
     WorkspaceHelpers.assertNoErrors(project);
     WorkspaceHelpers.assertNoWarnings(project);
 
-    ILifecycleMapping lifecycleMapping = facade.getLifecycleMapping(monitor);
+    ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade);
     assertNotNull(lifecycleMapping);
 
-    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(monitor);
+    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
     assertEquals(configurators.toString(), 0, configurators.size());
 
     Map<MojoExecutionKey, List<AbstractBuildParticipant>> buildParticipants = lifecycleMapping
-        .getBuildParticipants(monitor);
+        .getBuildParticipants(facade, monitor);
     assertEquals(buildParticipants.keySet().toString(), 1, buildParticipants.size()); // only one mojo execution
     assertEquals(0, buildParticipants.values().iterator().next().size()); // no build participants
   }
@@ -46,18 +46,18 @@ public class PluginExecutionActionsTest extends AbstractLifecycleMappingTest {
     IProject project = facade.getProject();
     WorkspaceHelpers.assertNoErrors(project);
 
-    ILifecycleMapping lifecycleMapping = facade.getLifecycleMapping(monitor);
+    ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade);
     assertNotNull(lifecycleMapping);
 
-    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(monitor);
+    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
     assertEquals(configurators.toString(), 0, configurators.size());
 
     Map<MojoExecutionKey, List<AbstractBuildParticipant>> buildParticipants = lifecycleMapping
-        .getBuildParticipants(monitor);
+        .getBuildParticipants(facade, monitor);
     assertEquals(buildParticipants.keySet().toString(), 1, buildParticipants.size()); // only one mojo execution
     assertEquals(0, buildParticipants.values().iterator().next().size()); // no build participants
 
-    WorkspaceHelpers.assertWarningMarker(IMavenConstants.MARKER_CONFIGURATION_ID,
+    WorkspaceHelpers.assertWarningMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID,
         "Ignore plugin execution test message", 1 /*lineNumber*/, "pom.xml", project);
   }
 
@@ -70,14 +70,14 @@ public class PluginExecutionActionsTest extends AbstractLifecycleMappingTest {
     WorkspaceHelpers.assertNoErrors(project);
     WorkspaceHelpers.assertNoWarnings(project);
 
-    ILifecycleMapping lifecycleMapping = facade.getLifecycleMapping(monitor);
+    ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade);
     assertNotNull(lifecycleMapping);
 
-    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(monitor);
+    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
     assertEquals(configurators.toString(), 0, configurators.size());
 
     Map<MojoExecutionKey, List<AbstractBuildParticipant>> buildParticipants = lifecycleMapping
-        .getBuildParticipants(monitor);
+        .getBuildParticipants(facade, monitor);
     assertEquals(buildParticipants.keySet().toString(), 1, buildParticipants.size()); // only one mojo execution
     assertEquals(1, buildParticipants.values().iterator().next().size()); // one 
     assertTrue(buildParticipants.values().iterator().next().get(0) instanceof MojoExecutionBuildParticipant);
@@ -91,19 +91,19 @@ public class PluginExecutionActionsTest extends AbstractLifecycleMappingTest {
     IProject project = facade.getProject();
     WorkspaceHelpers.assertNoErrors(project);
 
-    ILifecycleMapping lifecycleMapping = facade.getLifecycleMapping(monitor);
+    ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade);
     assertNotNull(lifecycleMapping);
 
-    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(monitor);
+    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
     assertEquals(configurators.toString(), 0, configurators.size());
 
     Map<MojoExecutionKey, List<AbstractBuildParticipant>> buildParticipants = lifecycleMapping
-        .getBuildParticipants(monitor);
+        .getBuildParticipants(facade, monitor);
     assertEquals(buildParticipants.keySet().toString(), 1, buildParticipants.size()); // only one mojo execution
     assertEquals(1, buildParticipants.values().iterator().next().size()); // one 
     assertTrue(buildParticipants.values().iterator().next().get(0) instanceof MojoExecutionBuildParticipant);
 
-    WorkspaceHelpers.assertWarningMarker(IMavenConstants.MARKER_CONFIGURATION_ID,
+    WorkspaceHelpers.assertWarningMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID,
         "Execute plugin execution test message", 1 /*lineNumber*/, "pom.xml", project);
   }
 
@@ -116,10 +116,10 @@ public class PluginExecutionActionsTest extends AbstractLifecycleMappingTest {
     WorkspaceHelpers.assertNoErrors(project);
     WorkspaceHelpers.assertNoWarnings(project);
 
-    ILifecycleMapping lifecycleMapping = facade.getLifecycleMapping(monitor);
+    ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade);
     assertNotNull(lifecycleMapping);
 
-    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(monitor);
+    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
     assertEquals(configurators.toString(), 1, configurators.size());
     assertTrue(configurators.get(0) instanceof TestProjectConfigurator);
   }
@@ -132,18 +132,18 @@ public class PluginExecutionActionsTest extends AbstractLifecycleMappingTest {
     IProject project = facade.getProject();
     WorkspaceHelpers.assertNoWarnings(project);
 
-    ILifecycleMapping lifecycleMapping = facade.getLifecycleMapping(monitor);
+    ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade);
     assertNotNull(lifecycleMapping);
 
-    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(monitor);
+    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
     assertEquals(configurators.toString(), 0, configurators.size());
 
     Map<MojoExecutionKey, List<AbstractBuildParticipant>> buildParticipants = lifecycleMapping
-        .getBuildParticipants(monitor);
+        .getBuildParticipants(facade, monitor);
     assertEquals(buildParticipants.keySet().toString(), 1, buildParticipants.size()); // only one mojo execution
     assertEquals(0, buildParticipants.values().iterator().next().size());
 
-    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID,
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID,
             "Plugin execution marked as error in lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 (execution: standard, phase: compile)",
             1 /*lineNumber*/, "pom.xml", project);
   }
@@ -156,18 +156,18 @@ public class PluginExecutionActionsTest extends AbstractLifecycleMappingTest {
     IProject project = facade.getProject();
     WorkspaceHelpers.assertNoWarnings(project);
 
-    ILifecycleMapping lifecycleMapping = facade.getLifecycleMapping(monitor);
+    ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade);
     assertNotNull(lifecycleMapping);
 
-    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(monitor);
+    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
     assertEquals(configurators.toString(), 0, configurators.size());
 
     Map<MojoExecutionKey, List<AbstractBuildParticipant>> buildParticipants = lifecycleMapping
-        .getBuildParticipants(monitor);
+        .getBuildParticipants(facade, monitor);
     assertEquals(buildParticipants.keySet().toString(), 1, buildParticipants.size()); // only one mojo execution
     assertEquals(0, buildParticipants.values().iterator().next().size());
 
-    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, "Error plugin execution test message",
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, "Error plugin execution test message",
         1 /*lineNumber*/, "pom.xml", project);
   }
 }

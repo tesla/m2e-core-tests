@@ -31,13 +31,13 @@ public class LifecycleMappingMetadataPrioritiesTest extends AbstractLifecycleMap
     assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
 
     String expectedErrorMessage = "Lifecycle mapping \"missing default lifecycle mapping id for test-packaging-empty\" is not available. To enable full functionality, install the lifecycle mapping and run Maven->Update Project Configuration.";
-    IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+    IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
         1 /*lineNumber*/, project);
     WorkspaceHelpers.assertLifecycleIdErrorMarkerAttributes(marker,
         "missing default lifecycle mapping id for test-packaging-empty");
 
     expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"test-packaging-empty\")";
-    marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+    marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
         7 /*lineNumber of <packaging> element*/, project);
     WorkspaceHelpers.assertLifecyclePackagingErrorMarkerAttributes(marker, "test-packaging-empty");
   }
@@ -54,7 +54,7 @@ public class LifecycleMappingMetadataPrioritiesTest extends AbstractLifecycleMap
     IProject project = facade.getProject();
     WorkspaceHelpers.assertNoErrors(project);
 
-    ILifecycleMapping lifecycleMapping = facade.getLifecycleMapping(monitor);
+    ILifecycleMapping lifecycleMapping = mavenProjectManager.getLifecycleMapping(facade);
     assertNotNull(lifecycleMapping);
     assertTrue(lifecycleMapping.getClass().getCanonicalName(), lifecycleMapping instanceof TestLifecycleMapping);
   }
@@ -74,13 +74,13 @@ public class LifecycleMappingMetadataPrioritiesTest extends AbstractLifecycleMap
     assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
 
     String expectedErrorMessage = "Lifecycle mapping \"no such lifecycle mapping for test-packaging-for-eclipse-extension - referenced from pom\" is not available. To enable full functionality, install the lifecycle mapping and run Maven->Update Project Configuration.";
-    IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+    IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
         1 /*lineNumber*/, project);
     WorkspaceHelpers.assertLifecycleIdErrorMarkerAttributes(marker,
         "no such lifecycle mapping for test-packaging-for-eclipse-extension - referenced from pom");
 
     expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"test-packaging-for-eclipse-extension\")";
-    marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+    marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
         7 /*lineNumber of <packaging> element*/, project);
     WorkspaceHelpers.assertLifecyclePackagingErrorMarkerAttributes(marker, "test-packaging-for-eclipse-extension");
   }
@@ -100,13 +100,13 @@ public class LifecycleMappingMetadataPrioritiesTest extends AbstractLifecycleMap
     assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
 
     String expectedErrorMessage = "Lifecycle mapping \"no such lifecycle mapping for test-packaging-for-eclipse-extension - embedded in pom\" is not available. To enable full functionality, install the lifecycle mapping and run Maven->Update Project Configuration.";
-    IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+    IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
         1 /*lineNumber*/, project);
     WorkspaceHelpers.assertLifecycleIdErrorMarkerAttributes(marker,
         "no such lifecycle mapping for test-packaging-for-eclipse-extension - embedded in pom");
 
     expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"test-packaging-for-eclipse-extension\")";
-    marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+    marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
         7 /*lineNumber of <packaging> element*/, project);
     WorkspaceHelpers.assertLifecyclePackagingErrorMarkerAttributes(marker, "test-packaging-for-eclipse-extension");
   }
@@ -128,12 +128,12 @@ public class LifecycleMappingMetadataPrioritiesTest extends AbstractLifecycleMap
     assertNotNull(errorMarkers);
     assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
     String expectedErrorMessage = "Lifecycle mapping \"no such lifecycle mapping for test-packaging-a - parent\" is not available. To enable full functionality, install the lifecycle mapping and run Maven->Update Project Configuration.";
-    IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+    IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
         1 /*lineNumber*/, project);
     WorkspaceHelpers.assertLifecycleIdErrorMarkerAttributes(marker,
         "no such lifecycle mapping for test-packaging-a - parent");
     expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"test-packaging-a\")";
-    marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+    marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
         12 /*lineNumber of <packaging> element*/, project);
     WorkspaceHelpers.assertLifecyclePackagingErrorMarkerAttributes(marker, "test-packaging-a");
 
@@ -146,12 +146,12 @@ public class LifecycleMappingMetadataPrioritiesTest extends AbstractLifecycleMap
     assertNotNull(errorMarkers);
     assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
     expectedErrorMessage = "Lifecycle mapping \"no such lifecycle mapping for test-packaging-a - override\" is not available. To enable full functionality, install the lifecycle mapping and run Maven->Update Project Configuration.";
-    marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+    marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
         1 /*lineNumber*/, project);
     WorkspaceHelpers.assertLifecycleIdErrorMarkerAttributes(marker,
         "no such lifecycle mapping for test-packaging-a - override");
     expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"test-packaging-a\")";
-    marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+    marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
         12 /*lineNumber of <packaging> element*/, project);
     WorkspaceHelpers.assertLifecyclePackagingErrorMarkerAttributes(marker, "test-packaging-a");
   }

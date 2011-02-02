@@ -19,7 +19,6 @@ import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
-import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
@@ -44,28 +43,28 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     assertNotNull("Expected not null MavenProjectFacade", facade);
     project = facade.getProject();
     expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"test-packaging-empty\")";
-    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
         7 /*lineNumber of <packaging> element*/, project);
     WorkspaceHelpers.assertLifecyclePackagingErrorMarkerAttributes(project, "test-packaging-empty");
 
     // Building the project should not remove the marker
     project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
     waitForJobsToComplete();
-    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
         7 /*lineNumber of <packaging> element*/, project);
 
     // Fix the current configuration problem, introduce a new one
     copyContent(project, "pom_badConfiguration1.xml", "pom.xml");
+    plugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
     waitForJobsToComplete();
     expectedErrorMessage = "Plugin execution not covered by lifecycle configuration: org.codehaus.modello:modello-maven-plugin:1.1:java (execution: standard, phase: generate-sources)";
-    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_CONFIGURATION_ID, expectedErrorMessage,
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
         24 /*lineNumber of <goal>standard</goal>*/, project);
 
     // Fix the current configuration problem, introduce a dependency problem
     copyContent(project, "pom_badDependency.xml", "pom.xml");
     waitForJobsToComplete();
-    MavenPlugin.getDefault().getProjectConfigurationManager()
-        .updateProjectConfiguration(project, new ResolverConfiguration(), monitor);
+    MavenPlugin.getDefault().getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
     expectedErrorMessage = "Missing artifact missing:missing:jar:0.0.0:compile";
     List<IMarker> markers = WorkspaceHelpers.findErrorMarkers(project);
     // (jdt) The container 'Maven Dependencies' references non existing library ...missing/missing/0.0.0/missing-0.0.0.jar'
@@ -107,10 +106,11 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
 
     // Add a maven build marker based on build participant exception
     copyContent(project, "pom_buildException.xml", "pom.xml");
+    MavenPlugin.getDefault().getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
     waitForJobsToComplete();
     WorkspaceHelpers.assertNoErrors(project);
     MavenPlugin.getDefault().getProjectConfigurationManager()
-        .updateProjectConfiguration(project, new ResolverConfiguration(), monitor);
+        .updateProjectConfiguration(project, monitor);
     project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
     waitForJobsToComplete();
     expectedErrorMessage = "Exception: " + ThrowBuildExceptionProjectConfigurator.ERROR_MESSAGE;

@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Properties;
 
 import org.apache.maven.archetype.catalog.Archetype;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -32,6 +33,8 @@ import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.m2e.core.MavenPlugin;
+import org.eclipse.m2e.core.core.IMavenConstants;
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.internal.project.registry.ProjectRegistryRefreshJob;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.IProjectConfigurationManager;
@@ -40,6 +43,7 @@ import org.eclipse.m2e.core.project.ProjectImportConfiguration;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.m2e.tests.common.FilexWagon;
+import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
 
 @SuppressWarnings("restriction")
@@ -156,4 +160,22 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     assertEquals("1.5", javaProject.getOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, true));
   }
 
+  public void testStaleProjectConfigurationMarker() throws Exception {
+    IProject project = importProject("projects/staleconfiguration/pom.xml");
+    assertNoErrors(project);
+
+    final IMavenProjectFacade projectFacade = plugin.getMavenProjectManager().create(project, monitor);
+
+    copyContent(project, new File("projects/staleconfiguration/pom-changed.xml"), "pom.xml");
+    WorkspaceHelpers.assertMarker(IMavenConstants.MARKER_CONFIGURATION_ID, IMarker.SEVERITY_ERROR,
+        Messages.ProjectConfigurationUpdateRequired, null, null, project);
+
+    workspace.run(new IWorkspaceRunnable() {
+      public void run(IProgressMonitor monitor) throws CoreException {
+        plugin.getProjectConfigurationManager().updateProjectConfiguration(projectFacade.getProject(),
+            monitor);
+      }
+    }, monitor);
+    assertNoErrors(project);
+  }
 }

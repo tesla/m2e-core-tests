@@ -42,7 +42,7 @@ public class ResourceChangeListenerTest extends AbstractMavenProjectTestCase {
     IProjectConfigurationManager configurationManager = MavenPlugin.getDefault().getProjectConfigurationManager();
     ResolverConfiguration configuration = new ResolverConfiguration();
     configurationManager.enableMavenNature(project, configuration, monitor);
-    configurationManager.updateProjectConfiguration(project, configuration, monitor);
+    configurationManager.updateProjectConfiguration(project, monitor);
     
     waitForJobsToComplete();
   }
