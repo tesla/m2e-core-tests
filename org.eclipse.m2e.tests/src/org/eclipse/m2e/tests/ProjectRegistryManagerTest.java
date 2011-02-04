@@ -583,6 +583,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
         1 /*lineNumber*/, project);
 
     copyContent(project, "pom_good.xml", "pom.xml");
+    plugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
     WorkspaceHelpers.assertNoErrors(project);
     assertNotNull(manager.create(project, monitor));
   }

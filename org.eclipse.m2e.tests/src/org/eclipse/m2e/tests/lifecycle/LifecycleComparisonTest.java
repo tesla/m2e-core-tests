@@ -1,9 +1,13 @@
 
 package org.eclipse.m2e.tests.lifecycle;
 
+import java.io.IOException;
+
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.m2e.core.internal.lifecycle.LifecycleMappingFactory;
 import org.eclipse.m2e.core.internal.lifecycle.LifecycleMappingResult;
+import org.eclipse.m2e.core.internal.project.LifecycleMappingConfiguration;
 import org.eclipse.m2e.core.internal.project.registry.MavenProjectFacade;
 import org.eclipse.m2e.tests.common.AbstractLifecycleMappingTest;
 
@@ -11,29 +15,40 @@ import org.eclipse.m2e.tests.common.AbstractLifecycleMappingTest;
 @SuppressWarnings("restriction")
 public class LifecycleComparisonTest extends AbstractLifecycleMappingTest {
 
-  public void testSameProject() throws CoreException {
-    MavenProjectFacade facadeA = newMavenProjectFacade("pom.xml");
-    MavenProjectFacade facadeB = newMavenProjectFacade("pom.xml");
-
-    assertFalse(LifecycleMappingFactory.isLifecycleMappingChanged(facadeA, facadeB, monitor));
+  @Override
+  protected void setUp() throws Exception {
+    super.setUp();
   }
 
-  public void testPluginVersionChange() throws CoreException {
-    MavenProjectFacade facadeA = newMavenProjectFacade("pom.xml");
-    MavenProjectFacade facadeB = newMavenProjectFacade("pom-plugin-version-change.xml");
+  public void testSameProject() throws Exception {
+    IProject project = createExisting("LifecycleComparisonTest", "projects/lifecyclemapping/lifecyclecomparison");
+    LifecycleMappingConfiguration facadeA = LifecycleMappingConfiguration.newLifecycleMappingConfiguration(
+        newMavenProjectFacade(project, "pom.xml"), monitor);
+    MavenProjectFacade facadeB = newMavenProjectFacade(project, "pom.xml");
 
-    assertTrue(LifecycleMappingFactory.isLifecycleMappingChanged(facadeA, facadeB, monitor));
+    assertFalse(LifecycleMappingFactory.isLifecycleMappingChanged(facadeB, facadeA, monitor));
   }
 
-  public void testPluginConfigurationChange() throws CoreException {
-    MavenProjectFacade facadeA = newMavenProjectFacade("pom.xml");
-    MavenProjectFacade facadeB = newMavenProjectFacade("pom-plugin-configuration-change.xml");
+  public void testPluginVersionChange() throws Exception {
+    IProject project = createExisting("LifecycleComparisonTest", "projects/lifecyclemapping/lifecyclecomparison");
+    LifecycleMappingConfiguration facadeA = LifecycleMappingConfiguration.newLifecycleMappingConfiguration(
+        newMavenProjectFacade(project, "pom.xml"), monitor);
+    MavenProjectFacade facadeB = newMavenProjectFacade(project, "pom-plugin-version-change.xml");
 
-    assertTrue(LifecycleMappingFactory.isLifecycleMappingChanged(facadeA, facadeB, monitor));
+    assertTrue(LifecycleMappingFactory.isLifecycleMappingChanged(facadeB, facadeA, monitor));
   }
 
-  protected MavenProjectFacade newMavenProjectFacade(String path) throws CoreException {
-    MavenProjectFacade facade = super.newMavenProjectFacade("projects/lifecyclemapping/lifecyclecomparison/" + path);
+  public void testPluginConfigurationChange() throws Exception {
+    IProject project = createExisting("LifecycleComparisonTest", "projects/lifecyclemapping/lifecyclecomparison");
+    LifecycleMappingConfiguration facadeA = LifecycleMappingConfiguration.newLifecycleMappingConfiguration(
+        newMavenProjectFacade(project, "pom.xml"), monitor);
+    MavenProjectFacade facadeB = newMavenProjectFacade(project, "pom-plugin-configuration-change.xml");
+
+    assertTrue(LifecycleMappingFactory.isLifecycleMappingChanged(facadeB, facadeA, monitor));
+  }
+
+  protected MavenProjectFacade newMavenProjectFacade(IProject project, String path) throws CoreException, IOException {
+    MavenProjectFacade facade = super.newMavenProjectFacade(project.getFile(path));
     LifecycleMappingResult mappingResult = LifecycleMappingFactory.calculateLifecycleMapping(plugin.getMaven()
         .createExecutionRequest(monitor), facade, monitor);
     assertFalse(mappingResult.getProblems().toString(), mappingResult.hasProblems());

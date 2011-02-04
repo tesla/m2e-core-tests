@@ -4,7 +4,7 @@
   <groupId>lifecyclecomparison</groupId>
   <artifactId>simple</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <packaging>test-packaging-a</packaging>
+  <packaging>test-packaging-empty</packaging>
 
   <build>
     <plugins>
@@ -13,9 +13,19 @@
         <artifactId>test-lifecyclemapping-plugin</artifactId>
         <version>1.0.0</version>
         <extensions>true</extensions>
-        <configuration>
-          <foo>bar</foo>
-        </configuration>
+
+        <executions>
+          <execution>
+            <id>execution-1</id>
+            <goals>
+              <goal>test-goal-with-parameters</goal>
+            </goals>
+            <phase>compile</phase>
+            <configuration>
+              <parameter1>value</parameter1>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
 
@@ -30,7 +40,7 @@
             <lifecycleMappingMetadata>
               <lifecycleMappings>
                 <lifecycleMapping>
-                  <packagingType>test-packaging-a</packagingType>
+                  <packagingType>test-packaging-empty</packagingType>
                   <lifecycleMappingId>TEST</lifecycleMappingId>
                 </lifecycleMapping>
               </lifecycleMappings>
@@ -41,8 +51,7 @@
                     <artifactId>test-lifecyclemapping-plugin</artifactId>
                     <versionRange>[1.0.0,)</versionRange>
                     <goals>
-                      <goal>test-goal-1</goal>
-                      <goal>test-goal-2</goal>
+                      <goal>test-goal-with-parameters</goal>
                     </goals>
                   </pluginExecutionFilter>
                   <action>

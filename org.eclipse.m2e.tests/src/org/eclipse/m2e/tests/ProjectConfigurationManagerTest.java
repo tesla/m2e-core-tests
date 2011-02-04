@@ -13,6 +13,8 @@ package org.eclipse.m2e.tests;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -178,4 +180,32 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     }, monitor);
     assertNoErrors(project);
   }
+
+  public void testStaleProjectConfigurationMarkerAfterWorkspaceRestart() throws Exception {
+    IProject project = importProject("projects/staleconfiguration/pom.xml");
+    assertNoErrors(project);
+
+    final IMavenProjectFacade projectFacade = plugin.getMavenProjectManager().create(project, monitor);
+
+    // pretend it was deserialized from workspace state
+    for(Field field : projectFacade.getClass().getDeclaredFields()) {
+      if(Modifier.isTransient(field.getModifiers())) {
+        field.setAccessible(true);
+        field.set(projectFacade, null);
+      }
+    }
+
+    copyContent(project, new File("projects/staleconfiguration/pom-changed.xml"), "pom.xml");
+    WorkspaceHelpers.assertMarker(IMavenConstants.MARKER_CONFIGURATION_ID, IMarker.SEVERITY_ERROR,
+        Messages.ProjectConfigurationUpdateRequired, null, null, project);
+
+    workspace.run(new IWorkspaceRunnable() {
+      public void run(IProgressMonitor monitor) throws CoreException {
+        plugin.getProjectConfigurationManager().updateProjectConfiguration(projectFacade.getProject(),
+            monitor);
+      }
+    }, monitor);
+    assertNoErrors(project);
+  }
+
 }

@@ -11,6 +11,8 @@
 
 package org.eclipse.m2e.tests.lifecycle;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +22,7 @@ import org.apache.maven.execution.MavenExecutionRequest;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.internal.lifecycle.InvalidLifecycleMapping;
 import org.eclipse.m2e.core.internal.lifecycle.LifecycleMappingFactory;
@@ -378,7 +381,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
   }
 
   public void testDuplicatePackagingTypeMetadata() throws Exception {
-    MavenProjectFacade facade = newMavenProjectFacade("projects/lifecyclemapping/lifecycleMappingMetadata/DuplicateMetadata/testDuplicatePackagingType/pom.xml");
+    MavenProjectFacade facade = newMavenProjectFacade("projects/lifecyclemapping/lifecycleMappingMetadata/DuplicateMetadata/testDuplicatePackagingType", "pom.xml");
 
     LifecycleMappingResult mappingResult = LifecycleMappingFactory.calculateLifecycleMapping(plugin.getMaven()
         .createExecutionRequest(monitor), facade, monitor);
@@ -392,7 +395,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
   }
 
   public void testDuplicatePluginExecution1() throws Exception {
-    MavenProjectFacade facade = newMavenProjectFacade("projects/lifecyclemapping/lifecycleMappingMetadata/DuplicateMetadata/testDuplicatePluginExecution1/pom.xml");
+    MavenProjectFacade facade = newMavenProjectFacade("projects/lifecyclemapping/lifecycleMappingMetadata/DuplicateMetadata/testDuplicatePluginExecution1", "pom.xml");
 
     LifecycleMappingResult mappingResult = LifecycleMappingFactory.calculateLifecycleMapping(plugin.getMaven()
         .createExecutionRequest(monitor), facade, monitor);
@@ -409,7 +412,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
   }
 
   public void testDuplicatePluginExecution2() throws Exception {
-    MavenProjectFacade facade = newMavenProjectFacade("projects/lifecyclemapping/lifecycleMappingMetadata/DuplicateMetadata/testDuplicatePluginExecution2/pom.xml");
+    MavenProjectFacade facade = newMavenProjectFacade("projects/lifecyclemapping/lifecycleMappingMetadata/DuplicateMetadata/testDuplicatePluginExecution2", "pom.xml");
 
     LifecycleMappingResult mappingResult = LifecycleMappingFactory.calculateLifecycleMapping(plugin.getMaven()
         .createExecutionRequest(monitor), facade, monitor);
@@ -422,6 +425,12 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
         problems.get(0).getMessage());
     // [1] Plugin execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 (execution: default-test-goal-1, phase: process-resources)
     // [2] Plugin execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-2 (execution: default-test-goal-2, phase: compile)
+  }
+
+  private MavenProjectFacade newMavenProjectFacade(String dirName, String fileName) throws IOException, CoreException {
+    File dir = new File(dirName);
+    IProject project = createExisting(dir.getName(), dirName);
+    return newMavenProjectFacade(project.getFile(fileName));
   }
 
   public void testSecondaryConfiguratorsCustomizable() throws Exception {
