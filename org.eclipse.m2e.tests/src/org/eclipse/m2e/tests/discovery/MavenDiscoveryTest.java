@@ -9,7 +9,7 @@
  *      Sonatype, Inc. - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.m2e.discovery.tests;
+package org.eclipse.m2e.tests.discovery;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;

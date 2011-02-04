@@ -1,4 +1,4 @@
-package org.eclipse.m2e.discovery.tests;
+package org.eclipse.m2e.tests.discovery;
 
 import java.util.ArrayList;
 import java.util.Arrays;
