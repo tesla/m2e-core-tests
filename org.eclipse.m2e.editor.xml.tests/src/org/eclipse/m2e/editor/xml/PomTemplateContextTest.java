@@ -60,7 +60,7 @@ public class PomTemplateContextTest extends AbstractMavenProjectTestCase {
     assertNotNull(context);
     assertSame(PomTemplateContext.PHASE, context);
 
-    Template[] templates = context.getTemplates(null, phase, "");
+    Template[] templates = context.getTemplates(null, null, phase, "");
     assertNotNull(templates);
     assertEquals(29, templates.length);
     assertContextTypeId(PREFIX + "phase", templates);
@@ -75,7 +75,7 @@ public class PomTemplateContextTest extends AbstractMavenProjectTestCase {
     assertNotNull(context);
     assertSame(PomTemplateContext.SCOPE, context);
 
-    Template[] templates = context.getTemplates(null, scope, "");
+    Template[] templates = context.getTemplates(null, null, scope, "");
     assertNotNull(templates);
     assertEquals(6, templates.length);
     assertContextTypeId(PREFIX + "scope", templates);
@@ -90,9 +90,9 @@ public class PomTemplateContextTest extends AbstractMavenProjectTestCase {
     assertNotNull(context);
     assertSame(PomTemplateContext.PACKAGING, context);
 
-    Template[] templates = context.getTemplates(null, packaging, "");
+    Template[] templates = context.getTemplates(null, null, packaging, "");
     assertNotNull(templates);
-    assertEquals(10, templates.length);
+    assertEquals(7, templates.length);
     assertContextTypeId(PREFIX + "packaging", templates);
   }
 
@@ -110,12 +110,12 @@ public class PomTemplateContextTest extends AbstractMavenProjectTestCase {
     assertNotNull(context);
     assertSame(PomTemplateContext.CONFIGURATION, context);
 
-    Template[] templates = context.getTemplates(null, pluginConfiguration, "");
+    Template[] templates = context.getTemplates(null, null, pluginConfiguration, "");
     assertNotNull(templates);
     assertEquals(10, templates.length);
     assertContextTypeId(PREFIX + "configuration", templates);
 
-    templates = context.getTemplates(null, execConfiguration, "");
+    templates = context.getTemplates(null, null, execConfiguration, "");
     assertNotNull(templates);
     assertEquals(10, templates.length);
     assertContextTypeId(PREFIX + "configuration", templates);
@@ -133,7 +133,7 @@ public class PomTemplateContextTest extends AbstractMavenProjectTestCase {
     assertNotNull(context);
     assertSame(PomTemplateContext.GOAL, context);
 
-    Template[] templates = context.getTemplates(null, goal, "");
+    Template[] templates = context.getTemplates(null, null, goal, "");
     assertNotNull(templates);
     assertEquals(2, templates.length);
     assertContextTypeId(PREFIX + "goal", templates);
@@ -157,7 +157,7 @@ public class PomTemplateContextTest extends AbstractMavenProjectTestCase {
       assertNotNull(context);
       assertSame(PomTemplateContext.ARTIFACT_ID, context);
 
-      Template[] templates = context.getTemplates(null, artifactIdElement, "");
+      Template[] templates = context.getTemplates(null, null, artifactIdElement, "");
       assertNotNull(templates);
       assertEquals(1, templates.length);
       assertContextTypeId(PREFIX + "artifactId", templates);
@@ -186,7 +186,7 @@ public class PomTemplateContextTest extends AbstractMavenProjectTestCase {
       assertNotNull(context);
       assertSame(PomTemplateContext.ARTIFACT_ID, context);
 
-      Template[] templates = context.getTemplates(null, artifactIdElement, "");
+      Template[] templates = context.getTemplates(null, null, artifactIdElement, "");
       assertNotNull(templates);
       assertEquals(1, templates.length);
       assertContextTypeId(PREFIX + "artifactId", templates);
@@ -216,7 +216,7 @@ public class PomTemplateContextTest extends AbstractMavenProjectTestCase {
       assertNotNull(context);
       assertSame(PomTemplateContext.VERSION, context);
 
-      Template[] templates = context.getTemplates(null, versionElement, "");
+      Template[] templates = context.getTemplates(null, null, versionElement, "");
       assertNotNull(templates);
       assertEquals(1, templates.length);
       assertContextTypeId(PREFIX + "version", templates);
@@ -246,7 +246,7 @@ public class PomTemplateContextTest extends AbstractMavenProjectTestCase {
       assertNotNull(context);
       assertSame(PomTemplateContext.VERSION, context);
 
-      Template[] templates = context.getTemplates(null, versionElement, "");
+      Template[] templates = context.getTemplates(null, null, versionElement, "");
       assertNotNull(templates);
       assertEquals(1, templates.length);
       assertContextTypeId(PREFIX + "version", templates);
