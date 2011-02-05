@@ -1,14 +1,6 @@
 <settings>
   <localRepository>target/localrepo</localRepository>
 
-  <mirrors>
-    <mirror>
-      <id>test</id>
-      <mirrorOf>*</mirrorOf>
-      <url>filex://localhost/remoterepo</url>
-    </mirror>
-  </mirrors>
-
   <profiles>
     <profile>
       <id>test</id>
@@ -23,7 +15,7 @@
         <pluginRepositories>
           <pluginRepository>
             <id>central</id>
-            <url>filex://localhost/remoterepo</url>
+            <url>file:repositories/remoterepo</url>
             <snapshots><enabled>true</enabled></snapshots>
             <releases><enabled>true</enabled></releases>
           </pluginRepository>
