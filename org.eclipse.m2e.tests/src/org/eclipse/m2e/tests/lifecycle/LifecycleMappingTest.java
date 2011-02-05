@@ -13,6 +13,7 @@ package org.eclipse.m2e.tests.lifecycle;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,7 @@ import org.eclipse.m2e.core.internal.lifecycle.model.PluginExecutionAction;
 import org.eclipse.m2e.core.internal.lifecycle.model.PluginExecutionMetadata;
 import org.eclipse.m2e.core.internal.markers.MavenProblemInfo;
 import org.eclipse.m2e.core.internal.project.registry.MavenProjectFacade;
+import org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.configurator.AbstractBuildParticipant;
 import org.eclipse.m2e.core.project.configurator.AbstractCustomizableLifecycleMapping;
@@ -48,6 +50,7 @@ import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 import org.eclipse.m2e.tests.configurators.TestBuildParticipant;
 import org.eclipse.m2e.tests.configurators.TestLifecycleMapping;
 import org.eclipse.m2e.tests.configurators.TestProjectConfigurator;
+import org.eclipse.m2e.tests.configurators.TestProjectConfigurator2;
 
 
 @SuppressWarnings("restriction")
@@ -381,7 +384,8 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
   }
 
   public void testDuplicatePackagingTypeMetadata() throws Exception {
-    MavenProjectFacade facade = newMavenProjectFacade("projects/lifecyclemapping/lifecycleMappingMetadata/DuplicateMetadata/testDuplicatePackagingType", "pom.xml");
+    MavenProjectFacade facade = newMavenProjectFacade(
+        "projects/lifecyclemapping/lifecycleMappingMetadata/DuplicateMetadata/testDuplicatePackagingType", "pom.xml");
 
     LifecycleMappingResult mappingResult = LifecycleMappingFactory.calculateLifecycleMapping(plugin.getMaven()
         .createExecutionRequest(monitor), facade, monitor);
@@ -395,7 +399,8 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
   }
 
   public void testDuplicatePluginExecution1() throws Exception {
-    MavenProjectFacade facade = newMavenProjectFacade("projects/lifecyclemapping/lifecycleMappingMetadata/DuplicateMetadata/testDuplicatePluginExecution1", "pom.xml");
+    MavenProjectFacade facade = newMavenProjectFacade(
+        "projects/lifecyclemapping/lifecycleMappingMetadata/DuplicateMetadata/testDuplicatePluginExecution1", "pom.xml");
 
     LifecycleMappingResult mappingResult = LifecycleMappingFactory.calculateLifecycleMapping(plugin.getMaven()
         .createExecutionRequest(monitor), facade, monitor);
@@ -412,7 +417,8 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
   }
 
   public void testDuplicatePluginExecution2() throws Exception {
-    MavenProjectFacade facade = newMavenProjectFacade("projects/lifecyclemapping/lifecycleMappingMetadata/DuplicateMetadata/testDuplicatePluginExecution2", "pom.xml");
+    MavenProjectFacade facade = newMavenProjectFacade(
+        "projects/lifecyclemapping/lifecycleMappingMetadata/DuplicateMetadata/testDuplicatePluginExecution2", "pom.xml");
 
     LifecycleMappingResult mappingResult = LifecycleMappingFactory.calculateLifecycleMapping(plugin.getMaven()
         .createExecutionRequest(monitor), facade, monitor);
@@ -551,5 +557,36 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
 
     List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
     assertEquals(configurators.toString(), 0, configurators.size());
+  }
+
+  public void testNondeafaultLifecycles() throws Exception {
+    MavenProjectFacade facade = (MavenProjectFacade) importMavenProject(
+        "projects/lifecyclemapping/lifecycleMappingMetadata/PluginExecutionActionsTest/testNondefaultLifecycles",
+        "pom.xml");
+    assertNotNull("Expected not null MavenProjectFacade", facade);
+
+    List<Map.Entry<MojoExecutionKey, List<PluginExecutionMetadata>>> executionMapping = new ArrayList<Map.Entry<MojoExecutionKey, List<PluginExecutionMetadata>>>(
+        facade.getMojoExecutionMapping().entrySet());
+    assertEquals(4, executionMapping.size());
+    assertEquals(0, executionMapping.get(0).getValue().size()); // maven-clean-plugin
+    assertEquals(1, executionMapping.get(1).getValue().size()); // test-lifecyclemapping-plugin:test-goal-1
+    assertEquals(0, executionMapping.get(2).getValue().size()); // maven-site-plugin
+    assertEquals(1, executionMapping.get(3).getValue().size()); // test-lifecyclemapping-plugin:test-goal-2
+    
+    ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade);
+    assertNotNull("Expected not null lifecycle mapping", lifecycleMapping);
+
+    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
+    assertEquals(2, configurators.size());
+    assertTrue(configurators.get(0) instanceof TestProjectConfigurator);
+    assertTrue(configurators.get(1) instanceof TestProjectConfigurator2);
+
+    // assert non-default lifecycle mojos are not included in execution plan
+    assertEquals(2, facade.getExecutionPlan(ProjectRegistryManager.LIFECYCLE_CLEAN, null).size());
+    assertEquals(0, facade.getExecutionPlan(ProjectRegistryManager.LIFECYCLE_DEFAULT, null).size());
+    assertEquals(2, facade.getExecutionPlan(ProjectRegistryManager.LIFECYCLE_SITE, null).size());
+
+    // assert configurators activated by non-default lifecycle mojos are not considered during the build
+    assertEquals(0, lifecycleMapping.getBuildParticipants(facade, monitor).size());
   }
 }
