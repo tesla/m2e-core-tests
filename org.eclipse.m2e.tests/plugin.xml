@@ -23,6 +23,9 @@
       <configurator id="org.eclipse.m2e.configurator.test"
             class="org.eclipse.m2e.tests.configurators.TestProjectConfigurator"
             name="TEST"/>
+      <configurator id="org.eclipse.m2e.configurator.test2"
+            class="org.eclipse.m2e.tests.configurators.TestProjectConfigurator2"
+            name="TEST2"/>
       <configurator id="org.eclipse.m2e.configurator.incompatibleApi"
             class="org.eclipse.m2e.tests.configurators.IncompatibleProjectConfigurator"
             name="AJDT-0.9.8"/>
