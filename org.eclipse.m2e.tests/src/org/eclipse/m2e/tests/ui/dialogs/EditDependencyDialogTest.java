@@ -55,7 +55,7 @@ public class EditDependencyDialogTest extends AbstractMavenProjectTestCase {
 
   protected class TestDialog extends EditDependencyDialog {
     public TestDialog(Shell parent, boolean dependencyManagement, EditingDomain editingDomain, IProject project) {
-      super(parent, dependencyManagement, editingDomain, project);
+      super(parent, dependencyManagement, editingDomain, project, null);
     }
 
     protected void assertValues() {
