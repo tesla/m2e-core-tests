@@ -50,6 +50,7 @@ import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.index.IMutableIndex;
 import org.eclipse.m2e.core.internal.index.NexusIndex;
 import org.eclipse.m2e.core.internal.index.NexusIndexManager;
+import org.eclipse.m2e.core.internal.preferences.MavenConfigurationImpl;
 import org.eclipse.m2e.core.internal.preferences.MavenPreferenceConstants;
 import org.eclipse.m2e.core.internal.repository.RepositoryRegistry;
 import org.eclipse.m2e.core.project.IProjectConfigurationManager;
@@ -619,10 +620,9 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertEquals("downloadsources-t007-0.0.1-tests.jar", cp[0].getPath().lastSegment());
     assertNull(cp[0].getSourceAttachmentPath());
 
-    IPreferenceStore preferenceStore = plugin.getPreferenceStore();
-    boolean oldDownloadSources = preferenceStore.getBoolean(MavenPreferenceConstants.P_DOWNLOAD_SOURCES);
+    boolean oldDownloadSources = mavenConfiguration.isDownloadSources();
     try {
-      preferenceStore.setValue(MavenPreferenceConstants.P_DOWNLOAD_SOURCES, true);
+      ((MavenConfigurationImpl) mavenConfiguration).setDownloadSources(true);
       MavenUpdateRequest request = new MavenUpdateRequest(project, false/*offline*/, false/*updateSnapshots*/);
       plugin.getMavenProjectManager().refresh(request );
       waitForJobsToComplete();
@@ -633,7 +633,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
       assertEquals("downloadsources-t007-0.0.1-tests.jar", cp[0].getPath().lastSegment());
       assertNull(cp[0].getSourceAttachmentPath());
     } finally {
-      preferenceStore.setValue(MavenPreferenceConstants.P_DOWNLOAD_SOURCES, oldDownloadSources);
+      ((MavenConfigurationImpl) mavenConfiguration).setDownloadSources(oldDownloadSources);
     }
   }
 

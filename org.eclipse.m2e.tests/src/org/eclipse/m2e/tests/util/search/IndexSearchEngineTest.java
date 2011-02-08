@@ -12,8 +12,8 @@ import org.eclipse.m2e.core.index.IIndex;
 import org.eclipse.m2e.core.index.IndexedArtifact;
 import org.eclipse.m2e.core.index.IndexedArtifactFile;
 import org.eclipse.m2e.core.index.SearchExpression;
-import org.eclipse.m2e.core.util.search.IndexSearchEngine;
-import org.eclipse.m2e.core.util.search.Packaging;
+import org.eclipse.m2e.core.ui.internal.search.util.IndexSearchEngine;
+import org.eclipse.m2e.core.ui.internal.search.util.Packaging;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 
 public class IndexSearchEngineTest extends AbstractMavenProjectTestCase {

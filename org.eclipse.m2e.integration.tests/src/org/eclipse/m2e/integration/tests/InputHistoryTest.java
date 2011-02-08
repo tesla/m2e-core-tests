@@ -11,7 +11,7 @@ package org.eclipse.m2e.integration.tests;
 import junit.framework.TestCase;
 
 import org.eclipse.jface.dialogs.TitleAreaDialog;
-import org.eclipse.m2e.core.ui.dialogs.InputHistory;
+import org.eclipse.m2e.core.ui.internal.dialogs.InputHistory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.layout.GridLayout;

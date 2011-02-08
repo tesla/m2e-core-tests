@@ -24,7 +24,9 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.equinox.p2.discovery,
  org.eclipse.equinox.p2.discovery.compatibility,
  org.eclipse.equinox.p2.ui.discovery,
- org.eclipse.equinox.ds
+ org.eclipse.equinox.ds,
+ org.eclipse.m2e.core.ui,
+ org.eclipse.m2e.scm
 Eclipse-LazyStart: true
 Bundle-RequiredExecutionEnvironment: J2SE-1.5,
  JavaSE-1.6

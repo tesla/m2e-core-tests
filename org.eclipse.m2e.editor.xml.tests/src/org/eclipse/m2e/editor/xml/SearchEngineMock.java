@@ -5,9 +5,9 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.eclipse.m2e.core.util.search.ArtifactInfo;
-import org.eclipse.m2e.core.util.search.Packaging;
-import org.eclipse.m2e.core.util.search.SearchEngine;
+import org.eclipse.m2e.core.ui.internal.search.util.ArtifactInfo;
+import org.eclipse.m2e.core.ui.internal.search.util.Packaging;
+import org.eclipse.m2e.core.ui.internal.search.util.SearchEngine;
 
 class SearchEngineMock implements SearchEngine {
   private Set<ArtifactInfo> artifacts = new LinkedHashSet<ArtifactInfo>();

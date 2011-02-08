@@ -3,7 +3,7 @@ package org.eclipse.m2e.tests.ui.dialogs;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.emf.edit.domain.EditingDomain;
-import org.eclipse.m2e.core.ui.dialogs.EditDependencyDialog;
+import org.eclipse.m2e.core.ui.internal.dialogs.EditDependencyDialog;
 import org.eclipse.m2e.model.edit.pom.Dependency;
 import org.eclipse.m2e.model.edit.pom.PomFactory;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;

@@ -13,7 +13,7 @@ package org.eclipse.m2e.tests;
 
 import junit.framework.TestCase;
 
-import org.eclipse.m2e.core.wizards.MavenProjectWizardArchetypeParametersPage;
+import org.eclipse.m2e.core.ui.internal.wizards.MavenProjectWizardArchetypeParametersPage;
 
 /**
  * @author @author Eugene Kuleshov

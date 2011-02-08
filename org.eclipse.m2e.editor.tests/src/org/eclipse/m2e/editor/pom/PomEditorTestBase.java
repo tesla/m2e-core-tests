@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.Writer;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.maven.model.Model;
@@ -30,15 +31,14 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.project.IProjectConfigurationManager;
 import org.eclipse.m2e.core.project.ProjectImportConfiguration;
+import org.eclipse.m2e.core.ui.internal.wizards.AbstactCreateMavenProjectJob;
 import org.eclipse.m2e.integration.tests.common.UIIntegrationTestCase;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotEditor;
@@ -133,11 +133,12 @@ public abstract class PomEditorTestBase extends UIIntegrationTestCase {
 
     final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(PROJECT_NAME);
 
-    WorkspaceJob job = new WorkspaceJob("creating test project") {
-      public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
+    WorkspaceJob job = new AbstactCreateMavenProjectJob("creating test project", null) {
+      @Override
+      protected List<IProject> doCreateMavenProjects(IProgressMonitor monitor) throws CoreException {
         configurationManager.createSimpleProject(project, null, model, new String[0], new ProjectImportConfiguration(),
             new NullProgressMonitor());
-        return Status.OK_STATUS;
+        return Arrays.asList(project);
       }
     };
 

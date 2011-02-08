@@ -39,7 +39,7 @@ public class ImportSortOrderTestCase extends AbstractMavenProjectTestCase {
 
     List<IMavenProjectFacade> facades =  new ArrayList<IMavenProjectFacade>();
     
-    ProjectRegistryManager manager = new ProjectRegistryManager((MavenImpl) plugin.getMaven(), plugin.getConsole(), null, false,
+    ProjectRegistryManager manager = new ProjectRegistryManager((MavenImpl) plugin.getMaven(), null, false,
         plugin.getMavenMarkerManager());
     
     List<IProject> projects = new ArrayList<IProject>();
