@@ -14,6 +14,7 @@ package org.eclipse.m2e.tests.internal.embedder;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import junit.framework.TestCase;
 
@@ -59,6 +60,16 @@ public class EclipseClassRealmManagerDelegateTest extends TestCase {
       public RealmType getType() {
         return RealmType.Plugin;
       }
+
+	public Map<String, ClassLoader> getForeignImports() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public List<String> getParentImports() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
     };
 
