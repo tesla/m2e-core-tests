@@ -21,7 +21,7 @@ import org.eclipse.m2e.core.project.ResolverConfiguration;
 /**
  * Hello fellow tester:
  * everytime this test finds a regression add an 'x' here:
- * everytime you do mindless test update add an 'y' here: yyy
+ * everytime you do mindless test update add an 'y' here: yyyy
  * @author mkleint
  *
  */
@@ -51,8 +51,11 @@ public class HoverTest extends AbstractPOMEditorTestCase {
     
     PomTextHover hover = new PomTextHover(null, null, 0);
     IRegion region = hover.getHoverRegion(sourceViewer, offset + 5); //+5 as a way to point to the middle..
-    String s = hover.getHoverInfo(sourceViewer, region);
-    assertTrue(s.contains("theValue"));
-    assertTrue(s.contains("org.eclipse.m2e:hyperlinkParent"));
+    assertNotNull(region);
+    
+    //with compound region and custom hover component this makes no longer sense.
+//    String s = hover.getHoverInfo(sourceViewer, region);
+//    assertTrue(s.contains("theValue"));
+//    assertTrue(s.contains("org.eclipse.m2e:hyperlinkParent"));
   }
 }
