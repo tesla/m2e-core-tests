@@ -123,8 +123,11 @@ public class MavenDiscoveryMarkerResolutionGeneratorTest extends AbstractLifecyc
 
     IMarker[] resolvable = ((WorkbenchMarkerResolution) m).findOtherMarkers(errorMarkers
         .toArray(new IMarker[errorMarkers.size()]));
-    // One fewer marker than the total otherwise the marker used to generate the resolution will be shown twice
-    assertEquals(6, resolvable.length);
+    //Two fewer marker than the total otherwise the marker used to generate the resolution will be shown twice
+    //we have a MavenDiscoveryMarkerResolution instance per resource because of 335299, 335490
+    //that means we cannot pinpoint exactly the ONE marker that is associated with teh findOtherMarkers() call,
+    //so we exclude all associated with the file. thus 6->5 in the assert
+    assertEquals(5, resolvable.length);
     assertFalse(Arrays.asList(resolvable).contains(errorMarkers.get(0)));
   }
 }
