@@ -17,7 +17,7 @@ import java.io.InputStream;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.m2e.scm.MavenProjectScmInfo;
-import org.eclipse.m2e.scm.ScmHandler;
+import org.eclipse.m2e.scm.spi.ScmHandler;
 
 
 /**

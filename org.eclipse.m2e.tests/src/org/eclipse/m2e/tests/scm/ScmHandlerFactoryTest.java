@@ -14,8 +14,8 @@ package org.eclipse.m2e.tests.scm;
 import junit.framework.TestCase;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.m2e.scm.ScmHandler;
-import org.eclipse.m2e.scm.ScmHandlerFactory;
+import org.eclipse.m2e.scm.internal.ScmHandlerFactory;
+import org.eclipse.m2e.scm.spi.ScmHandler;
 
 /**
  * @author Eugene Kuleshov
