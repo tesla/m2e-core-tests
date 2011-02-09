@@ -20,7 +20,7 @@ import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 /**
  * Hello fellow tester:
  * everytime this test finds a regression add an 'x' here:
- * everytime you do mindless test update add an 'y' here:
+ * everytime you do mindless test update add an 'y' here: y
  * @author mkleint
  *
  */

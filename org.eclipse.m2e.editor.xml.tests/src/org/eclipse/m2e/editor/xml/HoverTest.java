@@ -21,7 +21,7 @@ import org.eclipse.m2e.core.project.ResolverConfiguration;
 /**
  * Hello fellow tester:
  * everytime this test finds a regression add an 'x' here:
- * everytime you do mindless test update add an 'y' here: yy
+ * everytime you do mindless test update add an 'y' here: yyy
  * @author mkleint
  *
  */
