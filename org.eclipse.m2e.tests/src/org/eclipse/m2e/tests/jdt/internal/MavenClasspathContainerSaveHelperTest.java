@@ -23,7 +23,7 @@ import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.m2e.jdt.BuildPathManager;
+import org.eclipse.m2e.jdt.internal.BuildPathManager;
 import org.eclipse.m2e.jdt.internal.MavenClasspathContainer;
 import org.eclipse.m2e.jdt.internal.MavenClasspathContainerSaveHelper;
 

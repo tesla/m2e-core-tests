@@ -18,7 +18,7 @@ import org.eclipse.m2e.core.embedder.IMavenConfiguration;
 import org.eclipse.m2e.core.index.IndexManager;
 import org.eclipse.m2e.integration.tests.common.ContextMenuHelper;
 import org.eclipse.m2e.integration.tests.common.matchers.ContainsMnemonic;
-import org.eclipse.m2e.jdt.BuildPathManager;
+import org.eclipse.m2e.jdt.internal.BuildPathManager;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotEditor;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;

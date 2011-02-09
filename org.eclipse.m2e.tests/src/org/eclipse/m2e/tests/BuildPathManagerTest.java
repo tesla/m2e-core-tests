@@ -59,8 +59,8 @@ import org.eclipse.m2e.core.project.ProjectImportConfiguration;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.core.repository.IRepository;
 import org.eclipse.m2e.core.repository.IRepositoryRegistry;
-import org.eclipse.m2e.jdt.BuildPathManager;
 import org.eclipse.m2e.jdt.MavenJdtPlugin;
+import org.eclipse.m2e.jdt.internal.BuildPathManager;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
@@ -638,7 +638,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
   }
 
   private BuildPathManager getBuildPathManager() {
-    return MavenJdtPlugin.getDefault().getBuildpathManager();
+    return (BuildPathManager) MavenJdtPlugin.getDefault().getBuildpathManager();
   }
 
   public void testClassifiers() throws Exception {

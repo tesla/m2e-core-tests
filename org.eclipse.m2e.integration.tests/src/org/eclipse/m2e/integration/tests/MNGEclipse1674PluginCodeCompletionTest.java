@@ -13,7 +13,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.bindings.keys.KeyStroke;
-import org.eclipse.m2e.jdt.BuildPathManager;
+import org.eclipse.m2e.jdt.internal.BuildPathManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotEclipseEditor;
 import org.junit.Assert;
