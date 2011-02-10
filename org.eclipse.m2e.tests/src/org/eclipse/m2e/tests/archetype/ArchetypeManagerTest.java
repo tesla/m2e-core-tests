@@ -11,9 +11,7 @@
 
 package org.eclipse.m2e.tests.archetype;
 
-import java.io.File;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -27,8 +25,6 @@ import org.eclipse.m2e.core.archetype.ArchetypeCatalogFactory.LocalCatalogFactor
 import org.eclipse.m2e.core.archetype.ArchetypeCatalogFactory.NexusIndexerCatalogFactory;
 import org.eclipse.m2e.core.archetype.ArchetypeCatalogFactory.RemoteCatalogFactory;
 import org.eclipse.m2e.core.archetype.ArchetypeManager;
-import org.eclipse.m2e.core.internal.index.IndexedArtifactGroup;
-import org.eclipse.m2e.tests.common.FileHelpers;
 import org.eclipse.m2e.tests.common.HttpServer;
 
 
