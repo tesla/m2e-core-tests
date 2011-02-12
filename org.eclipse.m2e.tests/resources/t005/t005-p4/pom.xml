@@ -1,15 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><project>
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>t005</groupId>
+  <groupId>org.eclipse.m2e.test.registrymanager.t005</groupId>
   <artifactId>t005-p4</artifactId>
   <version>0.0.1-SNAPSHOT</version>
 
-  <distributionManagement>
-    <repository>
-      <id>internal.repo</id>
-      <name>MyCo Internal Repository</name>
-      <url>file:../../../remoterepo</url>
-    </repository>
-  </distributionManagement>
 </project>

@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>t006</groupId>
+    <groupId>org.eclipse.m2e.test.registrymanager.t006</groupId>
     <artifactId>t006-p2</artifactId>
     <version>0.0.1</version>
   </parent>

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?><project>
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>t021_dependencyVersionRange</groupId>
+  <groupId>org.eclipse.m2e.test.registrymanager.t021_dependencyVersionRange</groupId>
   <artifactId>t021-p1</artifactId>
   <version>0.0.1-SNAPSHOT</version>
 
   <dependencies>
     <dependency>
-	  <groupId>t021_dependencyVersionRange</groupId>
+	  <groupId>org.eclipse.m2e.test.registrymanager.t021_dependencyVersionRange</groupId>
 	  <artifactId>t021-p2</artifactId>
 	  <version>[0.0.1,0.0.2-SNAPSHOT]</version>
 	</dependency>

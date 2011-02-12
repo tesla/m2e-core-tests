@@ -2,11 +2,40 @@
   <mirrors>
     <mirror>
       <id>nexus</id>
-      <mirrorOf>external:*,!custom</mirrorOf>
-      <url>file:repositories/remoterepo</url>
+      <mirrorOf>external:*,!central</mirrorOf>
+      <url>file:repositories/testrepo</url>
     </mirror>
   </mirrors>
+
+
   <profiles>
+    <profile>
+      <id>localcentral</id>
+      <repositories>
+        <repository>
+          <id>central</id>
+          <url>file:repositories/remoterepo</url>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+        </repository>
+      </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>central</id>
+          <url>file:repositories/remoterepo</url>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+        </pluginRepository>
+      </pluginRepositories>
+    </profile>
     <profile>
       <id>development</id>
       <repositories>
@@ -35,7 +64,9 @@
       </pluginRepositories>
     </profile>
   </profiles>
+
   <activeProfiles>
+    <activeProfile>localcentral</activeProfile>
     <activeProfile>development</activeProfile>
   </activeProfiles>
 </settings>

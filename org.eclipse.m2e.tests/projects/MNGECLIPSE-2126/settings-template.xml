@@ -10,16 +10,9 @@
       <password>proxypass</password>
     </proxy>
   </proxies>
-  <mirrors>
-    <mirror>
-      <id>nexus</id>
-      <mirrorOf>*</mirrorOf>
-      <url>http://bad.host/repositories/remoterepo</url>
-    </mirror>
-  </mirrors>
   <servers>
     <server>
-      <id>nexus</id>
+      <id>testrepo</id>
       <username>testuser</username>
       <password>testpass</password>
     </server>
@@ -30,29 +23,17 @@
       <repositories>
         <repository>
           <id>central</id>
-          <url>http://bad.host/</url>
-          <releases>
-            <enabled>true</enabled>
-            <checksumPolicy>ignore</checksumPolicy>
-          </releases>
-          <snapshots>
-            <enabled>true</enabled>
-            <checksumPolicy>ignore</checksumPolicy>
-          </snapshots>
+          <url>file:repositories/remoterepo</url>
+          <snapshots><enabled>true</enabled></snapshots>
+          <releases><enabled>true</enabled></releases>
         </repository>
       </repositories>
       <pluginRepositories>
         <pluginRepository>
           <id>central</id>
-          <url>http://bad.host/</url>
-          <releases>
-            <enabled>true</enabled>
-            <checksumPolicy>ignore</checksumPolicy>
-          </releases>
-          <snapshots>
-            <enabled>true</enabled>
-            <checksumPolicy>ignore</checksumPolicy>
-          </snapshots>
+          <url>file:repositories/remoterepo</url>
+          <snapshots><enabled>true</enabled></snapshots>
+          <releases><enabled>true</enabled></releases>
         </pluginRepository>
       </pluginRepositories>
     </profile>

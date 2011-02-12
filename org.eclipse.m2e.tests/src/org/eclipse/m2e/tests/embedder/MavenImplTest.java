@@ -297,7 +297,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
 
     HttpServer httpServer = new HttpServer();
     httpServer.addResources("/", "");
-    httpServer.addSecuredRealm("/remoterepo/*", "auth");
+    httpServer.addSecuredRealm("/repositories/*", "auth");
     httpServer.addUser("testuser", "testpass", "auth");
     httpServer.setProxyAuth("proxyuser", "proxypass");
     httpServer.start();

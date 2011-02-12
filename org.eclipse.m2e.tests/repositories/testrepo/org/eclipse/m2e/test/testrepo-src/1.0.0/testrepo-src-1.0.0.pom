@@ -28,5 +28,6 @@
   <modules>
     <module>m2e-test-parent</module>
     <module>test-packaging-plugin</module>
+    <module>mngeclipse-2110</module>
   </modules>
 </project>
