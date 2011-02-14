@@ -578,19 +578,7 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestJunit4
     private Model targetModel;
 
     public TestDialog(Shell parent, Model model, LinkedList<MavenProject> hierarchy) {
-      super(parent, model, hierarchy, createEditingDomain());
-    }
-
-    protected static EditingDomain createEditingDomain() {
-      List<AdapterFactoryImpl> factories = new ArrayList<AdapterFactoryImpl>();
-      factories.add(new ResourceItemProviderAdapterFactory());
-      factories.add(new ReflectiveItemProviderAdapterFactory());
-      
-      ComposedAdapterFactory adapterFactory = new ComposedAdapterFactory(factories);
-      BasicCommandStack commandStack = new BasicCommandStack();
-      EditingDomain editingDomain = new AdapterFactoryEditingDomain(adapterFactory,
-          commandStack, new HashMap<Resource, Boolean>());
-      return editingDomain;
+      super(parent, model, hierarchy);
     }
 
     public void compute() {
