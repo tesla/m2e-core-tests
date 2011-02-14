@@ -10,7 +10,7 @@
           <lifecycle>
             <id>default</id>
             <phases>
-              <package>org.maven.ide.eclipse.its.mngeclipse-2126:ext:0.1:touch</package>
+              <package>org.eclipse.m2e.its.mngeclipse-2126:ext:0.1:touch</package>
             </phases>
           </lifecycle>
         </lifecycles>
