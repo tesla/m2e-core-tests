@@ -17,7 +17,6 @@ import java.io.StringWriter;
 
 import junit.framework.TestCase;
 
-import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.codehaus.plexus.util.IOUtil;
 import org.eclipse.core.resources.IFile;
@@ -63,88 +62,6 @@ public class MavenModelManagerTest extends TestCase {
     super.tearDown();
   }
   
-  public void testAddingNewDependency() throws Exception {
-    String pom = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + // 
-    "<project>\n" + //
-    "  <modelVersion>4.0.0</modelVersion>\n" + // 
-    "  <groupId>test-groupId</groupId>\n" + //
-    "  <artifactId>test-artifactId</artifactId>\n" + // 
-    "  <version>1.0-SNAPSHOT</version>\n" + //
-    "  <packaging>jar</packaging>\n" + //
-    "  <dependencies>\n" + //
-    "    <dependency>\n" + // 
-    "      <groupId>org.junit</groupId>\n" + // 
-    "      <artifactId>junit</artifactId>\n" + // 
-    "      <version>4.4</version>\n" + // 
-    "    </dependency>\n" + // 
-    "  </dependencies>\n" + //
-    "</project>";
-    
-    Dependency dependency = new Dependency();
-    dependency.setGroupId("org.springframework");
-    dependency.setArtifactId("spring");
-    dependency.setVersion("2.5");
-    
-    resource = MavenModelUtil.createResource(project, "testAddingNewDependency.xml", pom);
-    new MavenModelManager.DependencyAdder(dependency).update(resource.getModel());
-    
-    assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + // 
-        "<project>\n" + //
-        "  <modelVersion>4.0.0</modelVersion>\n" + // 
-        "  <groupId>test-groupId</groupId>\n" + //
-        "  <artifactId>test-artifactId</artifactId>\n" + // 
-        "  <version>1.0-SNAPSHOT</version>\n" + //
-        "  <packaging>jar</packaging>\n" + //
-        "  <dependencies>\n" + //
-        "    <dependency>\n" + // 
-        "      <groupId>org.junit</groupId>\n" + // 
-        "      <artifactId>junit</artifactId>\n" + // 
-        "      <version>4.4</version>\n" + // 
-        "    </dependency>\n" + // 
-        "    <dependency>\n" + // 
-        "      <groupId>org.springframework</groupId>\n" + // 
-        "      <artifactId>spring</artifactId>\n" + // 
-        "      <version>2.5</version>\n" + // 
-        "    </dependency>\n" + // 
-        "  </dependencies>\n" + //
-        "</project>", MavenModelUtil.toString(resource));
-  }
-  
-  public void testAddingDependencies() throws Exception {
-    String pom = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + // 
-    "<project>\n" + //
-    "  <modelVersion>4.0.0</modelVersion>\n" + // 
-    "  <groupId>test-groupId</groupId>\n" + //
-    "  <artifactId>test-artifactId</artifactId>\n" + // 
-    "  <version>1.0-SNAPSHOT</version>\n" + //
-    "  <packaging>jar</packaging>\n" + //
-    "</project>";
-    
-    Dependency dependency = new Dependency();
-    dependency.setGroupId("org.springframework");
-    dependency.setArtifactId("spring");
-    dependency.setVersion("2.5");
-    
-    resource = MavenModelUtil.createResource(project, "testAddingDependencies.xml", pom);
-    new MavenModelManager.DependencyAdder(dependency).update(resource.getModel());
-    
-    assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + // 
-        "<project>\n" + //
-        "  <modelVersion>4.0.0</modelVersion>\n" + // 
-        "  <groupId>test-groupId</groupId>\n" + //
-        "  <artifactId>test-artifactId</artifactId>\n" + // 
-        "  <version>1.0-SNAPSHOT</version>\n" + //
-        "  <packaging>jar</packaging>\n" + //
-        "  <dependencies>\n" + //
-        "    <dependency>\n" + // 
-        "      <groupId>org.springframework</groupId>\n" + // 
-        "      <artifactId>spring</artifactId>\n" + // 
-        "      <version>2.5</version>\n" + // 
-        "    </dependency>\n" + // 
-        "  </dependencies>\n" + //
-        "</project>", MavenModelUtil.toString(resource));
-    
-  }
   
   public void testCreateMavenModel() throws Exception {
 
