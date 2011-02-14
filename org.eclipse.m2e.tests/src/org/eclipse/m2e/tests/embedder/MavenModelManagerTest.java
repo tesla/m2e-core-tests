@@ -146,44 +146,6 @@ public class MavenModelManagerTest extends TestCase {
     
   }
   
-  public void testAddingNewPlugin() throws Exception {
-    String pom = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + // 
-    "<project>\n" + //
-    "  <modelVersion>4.0.0</modelVersion>\n" + // 
-    "  <groupId>test-groupId</groupId>\n" + //
-    "  <artifactId>test-artifactId</artifactId>\n" + // 
-    "  <version>1.0-SNAPSHOT</version>\n" + //
-    "  <packaging>jar</packaging>\n" + //
-    "</project>";
-    
-    Dependency dependency = new Dependency();
-    dependency.setGroupId("org.springframework");
-    dependency.setArtifactId("spring");
-    dependency.setVersion("2.5");
-    
-    resource = MavenModelUtil.createResource(project, "testAddingPlugin.xml", pom);
-    new MavenModelManager.PluginAdder("org.apache.maven.plugins", "maven-help-plugin", "2.0.2").update(resource.getModel());
-    
-    assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + // 
-        "<project>\n" + //
-        "  <modelVersion>4.0.0</modelVersion>\n" + // 
-        "  <groupId>test-groupId</groupId>\n" + //
-        "  <artifactId>test-artifactId</artifactId>\n" + // 
-        "  <version>1.0-SNAPSHOT</version>\n" + //
-        "  <packaging>jar</packaging>\n" + //
-        "  <build>\n" + //
-        "    <plugins>\n" + // 
-        "      <plugin>\n" + // 
-        "        <artifactId>maven-help-plugin</artifactId>\n" + // 
-        "        <version>2.0.2</version>\n" +  //
-        "        <configuration></configuration>\n" + // 
-        "      </plugin>\n" + // 
-        "    </plugins>\n" + // 
-        "  </build>\n" + //
-        "</project>", MavenModelUtil.toString(resource));
-  }
-  
-
   public void testCreateMavenModel() throws Exception {
 
     testCreateMavenModel("<project xmlns=\"http://maven.apache.org/POM/4.0.0\" " + //
