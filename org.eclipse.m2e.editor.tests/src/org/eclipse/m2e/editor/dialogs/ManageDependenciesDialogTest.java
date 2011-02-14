@@ -579,6 +579,7 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestJunit4
 
     public TestDialog(Shell parent, Model model, LinkedList<MavenProject> hierarchy) {
       super(parent, model, hierarchy);
+      isTest = true;
     }
 
     public void compute() {
