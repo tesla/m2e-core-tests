@@ -19,8 +19,12 @@ import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
+import org.eclipse.m2e.editor.xml.internal.lifecycle.LifecycleMappingProposal;
+import org.eclipse.m2e.internal.discovery.markers.DiscoveryWizardProposal;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
+import org.eclipse.ui.IMarkerResolution;
+import org.eclipse.ui.ide.IDE;
 
 
 public class MarkerTest extends AbstractMavenProjectTestCase {
@@ -109,8 +113,7 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     MavenPlugin.getDefault().getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
     waitForJobsToComplete();
     WorkspaceHelpers.assertNoErrors(project);
-    MavenPlugin.getDefault().getProjectConfigurationManager()
-        .updateProjectConfiguration(project, monitor);
+    MavenPlugin.getDefault().getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
     project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
     waitForJobsToComplete();
     expectedErrorMessage = "Exception: " + ThrowBuildExceptionProjectConfigurator.ERROR_MESSAGE;
@@ -392,4 +395,30 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
 //    MavenProjectManager mavenProjectManager = MavenPlugin.getDefault().getMavenProjectManager();
 //    return mavenProjectManager.create(project[0], monitor);
 //  }
+
+  public void testMarkerResolutions() throws Exception {
+    IProject project = importProject("projects/markers/testUncoveredPluginExecutionResolutions/pom.xml");
+    waitForJobsToComplete();
+
+    List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
+    assertEquals(1, errorMarkers.size());
+
+    IMarkerResolution[] resolutions = IDE.getMarkerHelpRegistry().getResolutions(errorMarkers.get(0));
+
+    assertEquals(2, resolutions.length);
+    assertNotNull(getResolution(resolutions, DiscoveryWizardProposal.class));
+    assertNotNull(getResolution(resolutions, LifecycleMappingProposal.class));
+  }
+
+  private IMarkerResolution getResolution(IMarkerResolution[] resolutions, Class<? extends IMarkerResolution> type) {
+    if(resolutions == null) {
+      return null;
+    }
+    for(IMarkerResolution resolution : resolutions) {
+      if(type.isAssignableFrom(resolution.getClass())) {
+        return resolution;
+      }
+    }
+    return null;
+  }
 }

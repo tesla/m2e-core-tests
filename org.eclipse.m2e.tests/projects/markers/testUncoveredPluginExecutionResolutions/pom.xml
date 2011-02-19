@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>markerTest</groupId>
+  <artifactId>testUncoveredPluginExecutionResolutions</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <packaging>test-packaging-empty</packaging>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.eclipse.m2e.test.lifecyclemapping</groupId>
+        <artifactId>test-lifecyclemapping-plugin</artifactId>
+        <version>1.0.0</version>
+        <extensions>true</extensions>
+        <executions>
+          <execution>
+            <id>notcovered</id>
+            <phase>compile</phase>
+            <goals>
+              <goal>test-goal-1</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+
+
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <lifecycleMappings>
+                <lifecycleMapping>
+                  <packagingType>test-packaging-empty</packagingType>
+                  <lifecycleMappingId>NULL</lifecycleMappingId>
+                </lifecycleMapping>
+              </lifecycleMappings>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
+  </build>
+</project>
