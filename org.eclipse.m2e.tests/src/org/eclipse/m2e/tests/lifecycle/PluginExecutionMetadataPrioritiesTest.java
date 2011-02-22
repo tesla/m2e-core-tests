@@ -9,7 +9,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.internal.lifecycle.LifecycleMappingFactory;
 import org.eclipse.m2e.core.internal.lifecycle.model.LifecycleMappingMetadataSource;
-import org.eclipse.m2e.core.internal.markers.MarkerLocation;
+import org.eclipse.m2e.core.internal.markers.SourceLocation;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.configurator.ILifecycleMapping;
 import org.eclipse.m2e.tests.common.AbstractLifecycleMappingTest;
@@ -135,13 +135,13 @@ public class PluginExecutionMetadataPrioritiesTest extends AbstractLifecycleMapp
     String expectedErrorMessage = "Plugin execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 (execution: default-test-goal-1, phase: process-resources)";
     IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID,
         expectedErrorMessage, null /*lineNumber*/, project);
-    MarkerLocation causeLocation = new MarkerLocation(parentFacade.getMavenProject().getFile().getAbsolutePath(), 12,
+    SourceLocation causeLocation = new SourceLocation(parentFacade.getMavenProject().getFile().getAbsolutePath(), 12,
         10, 17);
-    WorkspaceHelpers.assertMarkerLocation(new MarkerLocation(5, 3, 10, causeLocation), marker);
+    WorkspaceHelpers.assertMarkerLocation(new SourceLocation(5, 3, 10, causeLocation), marker);
     expectedErrorMessage = "Project configurator \"no such project configurator id for test-lifecyclemapping-plugin:test-goal-1 - parent\" is not available. To enable full functionality, install the project configurator and run Maven->Update Project Configuration.";
     marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
         null /*lineNumber*/, project);
-    WorkspaceHelpers.assertMarkerLocation(new MarkerLocation(5, 3, 10, causeLocation), marker);
+    WorkspaceHelpers.assertMarkerLocation(new SourceLocation(5, 3, 10, causeLocation), marker);
 
     facade = importMavenProject(
         "projects/lifecyclemapping/lifecycleMappingMetadata/PluginExecutionMetadataPrioritiesTest",
@@ -154,7 +154,7 @@ public class PluginExecutionMetadataPrioritiesTest extends AbstractLifecycleMapp
     expectedErrorMessage = "Plugin execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 (execution: default-test-goal-1, phase: process-resources)";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
         null /*lineNumber*/, project);
-    WorkspaceHelpers.assertMarkerLocation(new MarkerLocation(5, 3, 10), marker);
+    WorkspaceHelpers.assertMarkerLocation(new SourceLocation(5, 3, 10), marker);
     expectedErrorMessage = "Project configurator \"no such project configurator id for test-lifecyclemapping-plugin:test-goal-1 - override\" is not available. To enable full functionality, install the project configurator and run Maven->Update Project Configuration.";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
         null /*lineNumber*/, project);
