@@ -11,19 +11,28 @@
 
 package org.eclipse.m2e.tests.ui.editing;
 
-import org.eclipse.jface.text.IDocument;
-import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.*;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.ARTIFACT_ID;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.BUILD;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.DEPENDENCY;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.GROUP_ID;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.PLUGINS;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.PLUGIN_MANAGEMENT;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.childEquals;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.childMissingOrEqual;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.findChild;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.findChilds;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.removeIfNoChildElement;
+
+import java.util.List;
+
+import junit.framework.TestCase;
+
 import org.eclipse.wst.sse.core.StructuredModelManager;
-import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import junit.framework.TestCase;
-
-
-
-
+@SuppressWarnings("restriction")
 public class PomEditsTest extends TestCase {
 
 	private IDOMModel tempModel;
@@ -97,5 +106,62 @@ public class PomEditsTest extends TestCase {
 		
 		el = findChild(doc.getDocumentElement(), DEPENDENCY, childEquals(GROUP_ID, "AAA"), childMissingOrEqual(ARTIFACT_ID, "BBBB"));
 		assertNotNull(findChild(el, "tag3"));
+	}
+
+	public void testFindChild() {
+		tempModel.getStructuredDocument().setText(StructuredModelManager.getModelManager(), //
+				"<dependencies>" + //
+				"<dependency><groupId>AAA</groupId><artifactId>BBB</artifactId><tag1/></dependency>" + //
+				"<dependency><groupId>AAAB</groupId><artifactId>BBB</artifactId><tag2/></dependency>" + //
+				"<dependency><groupId>AAA</groupId><artifactId>BBBB</artifactId><tag3/></dependency>" + //
+				"<dependency><artifactId>BBB</artifactId><tag4/></dependency>" + "</dependencies>");
+		Element docElement = tempModel.getDocument().getDocumentElement();
+
+		assertNull("null parent should return null", findChild(null, "dependency"));
+		assertNull("missing child should return null", findChild(docElement, "missingElement"));
+
+		Element dep = findChild(docElement, "dependency");
+		assertNotNull("Expected node found", dep);
+		assertEquals("Node type", "dependency", dep.getLocalName());
+		// Should return first match
+		assertDependencyChild(null, "AAA", "BBB", "tag1", dep);
+	}
+
+	public void testFindChildren() {
+		tempModel.getStructuredDocument().setText(StructuredModelManager.getModelManager(), //
+				"<dependencies>" + //
+				"<dependency><groupId>AAA</groupId><artifactId>BBB</artifactId><tag1/></dependency>" + //
+				"<dependency><groupId>AAAB</groupId><artifactId>BBB</artifactId><tag2/></dependency>" + //
+				"<dependency><groupId>AAA</groupId><artifactId>BBBB</artifactId><tag3/></dependency>" + //
+				"<dependency><artifactId>BBB</artifactId><tag4/></dependency>" + "</dependencies>");
+		Element docElement = tempModel.getDocument().getDocumentElement();
+
+		assertTrue("null parent should return empty list", findChilds(null, "dependency").isEmpty());
+		assertTrue("missing child should return empty list", findChilds(docElement, "missingElement").isEmpty());
+
+		List<Element> dep = findChilds(docElement, "dependency");
+		assertEquals("Children found", 4, dep.size());
+		for (Element d : dep) {
+			assertEquals("Node type", "dependency", d.getLocalName());
+		}
+		// Should return first match
+		assertDependencyChild("Unexpected child", "AAA", "BBB", "tag1", dep.get(0));
+		assertDependencyChild("Unexpected child", "AAAB", "BBB", "tag2", dep.get(1));
+		assertDependencyChild("Unexpected child", "AAA", "BBBB", "tag3", dep.get(2));
+		assertDependencyChild("Unexpected child", null, "BBB", "tag4", dep.get(3));
+	}
+
+	private static void assertDependencyChild(String msg, String groupId, String artifactId, String tag, Element dep) {
+		if (groupId != null) {
+			assertEquals(msg + ":groupId", groupId, findChild(dep, "groupId").getTextContent());
+		} else {
+			assertNull(msg + ":groupId", findChild(dep, "groupId"));
+		}
+		if (artifactId != null) {
+			assertEquals(msg + ":artifactId", artifactId, findChild(dep, "artifactId").getTextContent());
+		} else {
+			assertNull(msg + ":artifactId", findChild(dep, "artifactId"));
+		}
+		assertNotNull(msg + ":tag", findChild(dep, tag));
 	}
 }
