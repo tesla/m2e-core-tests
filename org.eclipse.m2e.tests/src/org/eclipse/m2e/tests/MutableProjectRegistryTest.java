@@ -16,9 +16,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.maven.project.MavenProject;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+
+import org.apache.maven.project.MavenProject;
+
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.IMaven;
 import org.eclipse.m2e.core.internal.project.registry.Capability;
@@ -147,7 +149,7 @@ public class MutableProjectRegistryTest extends AbstractMavenProjectTestCase {
     assertTrue(events.isEmpty());
   }
 
-  public void testIllageStateMerge() throws Exception {
+  public void testIllegalStateMerge() throws Exception {
     ProjectRegistry state = new ProjectRegistry();
     MutableProjectRegistry delta = new MutableProjectRegistry(state);
 
@@ -159,7 +161,6 @@ public class MutableProjectRegistryTest extends AbstractMavenProjectTestCase {
     } catch (IllegalStateException expected) {
       //
     }
-
   }
 
   public void testDetectNoLongerExistingProjectsInWorkspaceState() throws Exception {
