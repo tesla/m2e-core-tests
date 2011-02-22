@@ -16,6 +16,7 @@ import java.util.List;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
+
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
@@ -63,7 +64,7 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     waitForJobsToComplete();
     expectedErrorMessage = "Plugin execution not covered by lifecycle configuration: org.codehaus.modello:modello-maven-plugin:1.1:java (execution: standard, phase: generate-sources)";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
-        24 /*lineNumber of <goal>standard</goal>*/, project);
+        10 /*lineNumber*/, project);
 
     // Fix the current configuration problem, introduce a dependency problem
     copyContent(project, "pom_badDependency.xml", "pom.xml");

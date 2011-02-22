@@ -4,8 +4,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.junit.Test;
+
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.ui.IMarkerResolution;
+import org.eclipse.ui.IMarkerResolutionGenerator2;
+import org.eclipse.ui.views.markers.WorkbenchMarkerResolution;
+
 import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.internal.lifecycle.LifecycleMappingFactory;
 import org.eclipse.m2e.core.internal.lifecycle.model.LifecycleMappingMetadataSource;
@@ -15,10 +21,6 @@ import org.eclipse.m2e.core.project.configurator.MojoExecutionKey;
 import org.eclipse.m2e.internal.discovery.markers.MavenDiscoveryMarkerResolutionGenerator;
 import org.eclipse.m2e.tests.common.AbstractLifecycleMappingTest;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
-import org.eclipse.ui.IMarkerResolution;
-import org.eclipse.ui.IMarkerResolutionGenerator2;
-import org.eclipse.ui.views.markers.WorkbenchMarkerResolution;
-import org.junit.Test;
 
 
 public class MavenDiscoveryMarkerResolutionGeneratorTest extends AbstractLifecycleMappingTest {
@@ -43,8 +45,8 @@ public class MavenDiscoveryMarkerResolutionGeneratorTest extends AbstractLifecyc
     assertEquals("Error markers", 2, errorMarkers.size());
 
     String expectedErrorMessage = "Project configurator \"no such project configurator id for test-lifecyclemapping-plugin:test-goal-for-eclipse-extension2 - embedded from pom\" is not available. To enable full functionality, install the project configurator and run Maven->Update Project Configuration.";
-    IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
-        1 /*lineNumber*/, project);
+    IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID,
+        expectedErrorMessage, null /*lineNumber*/, project);
     WorkspaceHelpers
         .assertConfiguratorErrorMarkerAttributes(marker,
             "no such project configurator id for test-lifecyclemapping-plugin:test-goal-for-eclipse-extension2 - embedded from pom");
@@ -76,7 +78,7 @@ public class MavenDiscoveryMarkerResolutionGeneratorTest extends AbstractLifecyc
     IProject project = facade.getProject();
 
     List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
-    assertEquals("Error markers", 2, errorMarkers.size());
+    assertEquals("Error markers", 1, errorMarkers.size());
 
     String expectedErrorMessage = "Lifecycle mapping \"unknown-or-missing\" is not available. To enable full functionality, install the lifecycle mapping and run Maven->Update Project Configuration.";
     IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
@@ -125,9 +127,9 @@ public class MavenDiscoveryMarkerResolutionGeneratorTest extends AbstractLifecyc
         .toArray(new IMarker[errorMarkers.size()]));
     //Two fewer marker than the total otherwise the marker used to generate the resolution will be shown twice
     //we have a MavenDiscoveryMarkerResolution instance per resource because of 335299, 335490
-    //that means we cannot pinpoint exactly the ONE marker that is associated with teh findOtherMarkers() call,
+    //that means we cannot pinpoint exactly the ONE marker that is associated with the findOtherMarkers() call,
     //so we exclude all associated with the file. thus 6->5 in the assert
-    assertEquals(5, resolvable.length);
+    assertEquals(4, resolvable.length);
     assertFalse(Arrays.asList(resolvable).contains(errorMarkers.get(0)));
   }
 }
