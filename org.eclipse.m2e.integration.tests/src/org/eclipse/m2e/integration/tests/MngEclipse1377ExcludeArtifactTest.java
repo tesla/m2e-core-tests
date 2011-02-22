@@ -66,7 +66,7 @@ public class MngEclipse1377ExcludeArtifactTest extends M2EUIIntegrationTestCase 
 
     assertMavenCPEntry(jp, JAR, true);
 
-    excludeArtifact(projectName, JAR);
+    excludeArtifact(projectName, JAR, GROUP_ID + ":" + ARTIFACT_ID + ":" + VERSION);
     waitForAllBuildsToComplete();
 
     assertMavenCPEntry(jp, JAR, false);
@@ -85,13 +85,13 @@ public class MngEclipse1377ExcludeArtifactTest extends M2EUIIntegrationTestCase 
     assertMavenCPEntry(jp, "hibernate-3.2.4.ga.jar", true);
     assertMavenCPEntry(jp, "ehcache-1.2.3.jar", true);
 
-    excludeArtifact(projectName, "ehcache-1.2.3.jar");
+    excludeArtifact(projectName, "ehcache-1.2.3.jar", null);
     waitForAllBuildsToComplete();
 
     assertMavenCPEntry(jp, "ehcache-1.2.3.jar", false);
     assertMavenCPEntry(jp, "hibernate-3.2.4.ga.jar", true);
 
-    excludeArtifact(projectName, "hibernate-3.2.4.ga.jar");
+    excludeArtifact(projectName, "hibernate-3.2.4.ga.jar", null);
     waitForAllBuildsToComplete();
 
     assertMavenCPEntry(jp, "hibernate-3.2.4.ga.jar", false);
