@@ -82,13 +82,14 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
 
     String expectedErrorMessage = "Could not resolve artifact testLifecycleMappingMetadata:missing:xml:lifecycle-mapping-metadata:0.0.1";
-    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
-        1 /*lineNumber*/, project);
-
-    expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"jar\")";
     IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID,
         expectedErrorMessage, null /*lineNumber*/, project);
-    WorkspaceHelpers.assertMarkerLocation(new MarkerLocation(7, 2, 13), marker);
+    WorkspaceHelpers.assertMarkerLocation(new MarkerLocation(17, 11, 25), marker);
+
+    expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"jar\")";
+    marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID,
+        expectedErrorMessage, null /*lineNumber*/, project);
+    WorkspaceHelpers.assertMarkerLocation(new MarkerLocation(7, 3, 13), marker);
     WorkspaceHelpers.assertLifecyclePackagingErrorMarkerAttributes(marker, "jar");
 
     ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade);
@@ -325,7 +326,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     String expectedErrorMessage = "Lifecycle mapping \"unknown-or-missing\" is not available. To enable full functionality, install the lifecycle mapping and run Maven->Update Project Configuration.";
     IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID,
         expectedErrorMessage, null /*lineNumber*/, project);
-    WorkspaceHelpers.assertMarkerLocation(new MarkerLocation(7, 2, 13), marker);
+    WorkspaceHelpers.assertMarkerLocation(new MarkerLocation(7, 3, 13), marker);
     WorkspaceHelpers.assertLifecycleIdErrorMarkerAttributes(marker, "unknown-or-missing");
 
     ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade);
@@ -482,8 +483,10 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
 
     String expectedErrorMessage = "Incompatible lifecycle mapping plugin version 1000.0.0";
-    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
-        1 /*lineNumber*/, project);
+    IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID,
+        expectedErrorMessage,
+        null /*lineNumber*/, project);
+    WorkspaceHelpers.assertMarkerLocation(new MarkerLocation(14, 11, 19), marker);
 
     expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"jar\")";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
@@ -507,8 +510,9 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
 
     String expectedErrorMessage = "Packaging type test-packaging-a configured in embedded lifecycle mapping configuration does not match the packaging type test-packaging-empty of the current project.";
-    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
-        1 /*lineNumber*/, project);
+    IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID,
+        expectedErrorMessage, null /*lineNumber*/, project);
+    WorkspaceHelpers.assertMarkerLocation(new MarkerLocation(25, 11, 25), marker);
 
     expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"test-packaging-empty\")";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
