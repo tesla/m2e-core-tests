@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>LifecycleMappingTest</groupId>
+  <artifactId>twoMojoExecutions</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <packaging>test-packaging-a</packaging>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.eclipse.m2e.test.lifecyclemapping</groupId>
+        <artifactId>test-lifecyclemapping-plugin</artifactId>
+        <version>1.0.0</version>
+        <extensions>true</extensions>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

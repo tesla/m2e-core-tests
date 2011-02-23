@@ -22,6 +22,7 @@ import org.eclipse.m2e.tests.common.AbstractLifecycleMappingTest;
 import org.eclipse.ui.internal.Workbench;
 import org.junit.Test;
 
+@SuppressWarnings("restriction")
 public class ConfigurationUpdateStartupTest extends
 		AbstractLifecycleMappingTest {
 	

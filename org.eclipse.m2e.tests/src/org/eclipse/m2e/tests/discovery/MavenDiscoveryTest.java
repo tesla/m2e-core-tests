@@ -11,14 +11,16 @@
 
 package org.eclipse.m2e.tests.discovery;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Collections;
 
 import junit.framework.TestCase;
 
-import org.apache.maven.model.Plugin;
-import org.apache.maven.plugin.MojoExecution;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.equinox.internal.p2.discovery.AbstractCatalogSource;
 import org.eclipse.equinox.internal.p2.discovery.Catalog;
 import org.eclipse.equinox.internal.p2.discovery.DiscoveryCore;
 import org.eclipse.equinox.internal.p2.discovery.compatibility.BundleDiscoveryStrategy;
@@ -26,6 +28,7 @@ import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.IShellProvider;
+import org.eclipse.m2e.core.project.configurator.MojoExecutionKey;
 import org.eclipse.m2e.internal.discovery.MavenDiscovery;
 import org.eclipse.m2e.internal.discovery.wizards.MavenCatalogConfiguration;
 import org.eclipse.m2e.internal.discovery.wizards.MavenCatalogViewer;
@@ -203,12 +206,34 @@ public class MavenDiscoveryTest extends TestCase implements IShellProvider {
         getCatalogItem(catalogId).hasTag(MavenDiscovery.APPLICABLE_TAG));
   }
 
-  private static MojoExecution getMojoExecution(String artifactId, String groupId, String version, String goal,
+  private static MojoExecutionKey getMojoExecution(String artifactId, String groupId, String version, String goal,
       String executionId) {
-    Plugin plugin = new Plugin();
-    plugin.setArtifactId(artifactId);
-    plugin.setGroupId(groupId);
-    plugin.setVersion(version);
-    return new MojoExecution(plugin, goal, executionId);
+    return new MojoExecutionKey(groupId, artifactId, version, goal, "compile", executionId);
+  }
+
+  public void testCatalogItemWithoutMappingMetadata() throws Exception {
+    final File emptydir = new File("target/emptydir").getCanonicalFile();
+    emptydir.mkdirs();
+    assertEquals(0, emptydir.list().length);
+
+    CatalogItem item = new CatalogItem();
+    item.setSource(new AbstractCatalogSource() {
+
+      @Override
+      public URL getResource(String resourceName) {
+        try {
+          return new File(emptydir, resourceName).toURL();
+        } catch(MalformedURLException e) {
+          throw new RuntimeException(e);
+        }
+      }
+
+      @Override
+      public Object getId() {
+        return emptydir;
+      }
+    });
+
+    assertNull(MavenDiscovery.getLifecycleMappingMetadataSource(item));
   }
 }
