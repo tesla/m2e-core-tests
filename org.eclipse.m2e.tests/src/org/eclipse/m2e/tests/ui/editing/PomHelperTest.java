@@ -122,17 +122,17 @@ public class PomHelperTest extends TestCase {
 	static void assertDependencyChild(String msg, String groupId, String artifactId, String version, Element dep) {
 		assertEquals(msg + ": element name", "dependency", dep.getLocalName());
 		if (groupId != null) {
-			assertEquals(msg + ":groupId", groupId, findChild(dep, "groupId").getTextContent());
+			assertEquals(msg + ":groupId", groupId, PomEdits.getTextValue(findChild(dep, "groupId")));
 		} else {
 			assertNull(msg + ":groupId", findChild(dep, "groupId"));
 		}
 		if (artifactId != null) {
-			assertEquals(msg + ":artifactId", artifactId, findChild(dep, "artifactId").getTextContent());
+			assertEquals(msg + ":artifactId", artifactId, PomEdits.getTextValue(findChild(dep, "artifactId")));
 		} else {
 			assertNull(msg + ":artifactId", findChild(dep, "artifactId"));
 		}
 		if (version != null) {
-			assertEquals(msg + ":version", version, findChild(dep, "version").getTextContent());
+			assertEquals(msg + ":version", version, PomEdits.getTextValue(findChild(dep, "version")));
 		} else {
 			assertNull(msg + ":version", findChild(dep, "version"));
 		}

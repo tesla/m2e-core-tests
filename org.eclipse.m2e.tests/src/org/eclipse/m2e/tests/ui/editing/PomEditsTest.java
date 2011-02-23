@@ -27,6 +27,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.eclipse.m2e.core.ui.internal.editing.PomEdits;
 import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
 import org.w3c.dom.Document;
@@ -153,12 +154,12 @@ public class PomEditsTest extends TestCase {
 
 	private static void assertDependencyChild(String msg, String groupId, String artifactId, String tag, Element dep) {
 		if (groupId != null) {
-			assertEquals(msg + ":groupId", groupId, findChild(dep, "groupId").getTextContent());
+			assertEquals(msg + ":groupId", groupId, PomEdits.getTextValue(findChild(dep, "groupId")));
 		} else {
 			assertNull(msg + ":groupId", findChild(dep, "groupId"));
 		}
 		if (artifactId != null) {
-			assertEquals(msg + ":artifactId", artifactId, findChild(dep, "artifactId").getTextContent());
+			assertEquals(msg + ":artifactId", artifactId, PomEdits.getTextValue(findChild(dep, "artifactId")));
 		} else {
 			assertNull(msg + ":artifactId", findChild(dep, "artifactId"));
 		}
