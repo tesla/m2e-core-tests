@@ -22,7 +22,7 @@ import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
 
 @SuppressWarnings("restriction")
-public class MarkerLocationHelperTest extends AbstractMavenProjectTestCase {
+public class SourceLocationHelperTest extends AbstractMavenProjectTestCase {
   private MavenProjectManager mavenProjectManager;
 
   @Override
