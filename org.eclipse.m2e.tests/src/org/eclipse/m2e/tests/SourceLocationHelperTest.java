@@ -42,7 +42,7 @@ public class SourceLocationHelperTest extends AbstractMavenProjectTestCase {
   }
 
   public void testPackagingLocation() throws Exception {
-    IMavenProjectFacade facade = importMavenProject("projects/markers/MarkerLocationHelperTest/testPackagingLocation",
+    IMavenProjectFacade facade = importMavenProject("projects/markers/SourceLocationHelperTest/testPackagingLocation",
         "pom.xml");
     assertNotNull("Expected not null MavenProjectFacade", facade);
     IProject project = facade.getProject();
@@ -54,7 +54,7 @@ public class SourceLocationHelperTest extends AbstractMavenProjectTestCase {
 
   public void testPluginAttributeLocation() throws Exception {
     IMavenProjectFacade facade = importMavenProject(
-        "projects/markers/MarkerLocationHelperTest/testPluginAttributeLocation",
+        "projects/markers/SourceLocationHelperTest/testPluginAttributeLocation",
         "pom.xml");
     assertNotNull("Expected not null MavenProjectFacade", facade);
     IProject project = facade.getProject();
@@ -71,7 +71,7 @@ public class SourceLocationHelperTest extends AbstractMavenProjectTestCase {
 
   public void testMojoExecutionLocation() throws Exception {
     IMavenProjectFacade facade = importMavenProject(
-        "projects/markers/MarkerLocationHelperTest/testMojoExecutionLocation", "parent/pom.xml");
+        "projects/markers/SourceLocationHelperTest/testMojoExecutionLocation", "parent/pom.xml");
     assertNotNull("Expected not null MavenProjectFacade", facade);
     IProject project = facade.getProject();
     WorkspaceHelpers.assertNoErrors(project);
@@ -87,7 +87,7 @@ public class SourceLocationHelperTest extends AbstractMavenProjectTestCase {
     markerLocation = SourceLocationHelper.findLocation(parentMavenProject, mojoExecutionKey);
     assertMarkerLocation(new SourceLocation(11, 7, 14), markerLocation);
 
-    facade = importMavenProject("projects/markers/MarkerLocationHelperTest/testMojoExecutionLocation",
+    facade = importMavenProject("projects/markers/SourceLocationHelperTest/testMojoExecutionLocation",
         "parent/child/pom.xml");
     assertNotNull("Expected not null MavenProjectFacade", facade);
     project = facade.getProject();
