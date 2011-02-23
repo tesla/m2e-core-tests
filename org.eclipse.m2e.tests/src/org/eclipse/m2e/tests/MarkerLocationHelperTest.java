@@ -61,11 +61,12 @@ public class MarkerLocationHelperTest extends AbstractMavenProjectTestCase {
     WorkspaceHelpers.assertNoErrors(project);
     MavenProject mavenProject = facade.getMavenProject();
     String pomPath = mavenProject.getFile().getAbsolutePath();
+    String pomId = WorkspaceHelpers.getModelId(mavenProject);
     Plugin plugin = mavenProject.getPlugin("org.apache.maven.plugins:maven-install-plugin");
     SourceLocation markerLocation = SourceLocationHelper.findLocation(plugin, "version");
-    assertMarkerLocation(new SourceLocation(pomPath, 14, 9, 17), markerLocation);
+    assertMarkerLocation(new SourceLocation(pomPath, pomId, 14, 9, 17), markerLocation);
     markerLocation = SourceLocationHelper.findLocation(plugin, "xxx");
-    assertMarkerLocation(new SourceLocation(pomPath, 11, 7, 14), markerLocation);
+    assertMarkerLocation(new SourceLocation(pomPath, pomId, 11, 7, 14), markerLocation);
   }
 
   public void testMojoExecutionLocation() throws Exception {
@@ -74,16 +75,16 @@ public class MarkerLocationHelperTest extends AbstractMavenProjectTestCase {
     assertNotNull("Expected not null MavenProjectFacade", facade);
     IProject project = facade.getProject();
     WorkspaceHelpers.assertNoErrors(project);
-    MavenProject mavenProject = facade.getMavenProject();
+    MavenProject parentMavenProject = facade.getMavenProject();
     // Plugin from maven lifecycle
     MojoExecutionKey mojoExecutionKey = getMojoExecutionKey("org.apache.maven.plugins", "maven-clean-plugin",
         ((MavenProjectFacade) facade).getMojoExecutions());
-    SourceLocation markerLocation = SourceLocationHelper.findLocation(mavenProject, mojoExecutionKey);
+    SourceLocation markerLocation = SourceLocationHelper.findLocation(parentMavenProject, mojoExecutionKey);
     assertMarkerLocation(new SourceLocation(7, 3, 13), markerLocation);
     // Plugin from current pom
     mojoExecutionKey = getMojoExecutionKey("org.apache.maven.plugins", "maven-install-plugin",
         ((MavenProjectFacade) facade).getMojoExecutions());
-    markerLocation = SourceLocationHelper.findLocation(mavenProject, mojoExecutionKey);
+    markerLocation = SourceLocationHelper.findLocation(parentMavenProject, mojoExecutionKey);
     assertMarkerLocation(new SourceLocation(11, 7, 14), markerLocation);
 
     facade = importMavenProject("projects/markers/MarkerLocationHelperTest/testMojoExecutionLocation",
@@ -91,7 +92,7 @@ public class MarkerLocationHelperTest extends AbstractMavenProjectTestCase {
     assertNotNull("Expected not null MavenProjectFacade", facade);
     project = facade.getProject();
     WorkspaceHelpers.assertNoErrors(project);
-    mavenProject = facade.getMavenProject();
+    MavenProject mavenProject = facade.getMavenProject();
     // Plugin from maven lifecycle
     mojoExecutionKey = getMojoExecutionKey("org.apache.maven.plugins", "maven-clean-plugin",
         ((MavenProjectFacade) facade).getMojoExecutions());
@@ -107,7 +108,8 @@ public class MarkerLocationHelperTest extends AbstractMavenProjectTestCase {
         ((MavenProjectFacade) facade).getMojoExecutions());
     markerLocation = SourceLocationHelper.findLocation(mavenProject, mojoExecutionKey);
     assertMarkerLocation(new SourceLocation(5, 3, 10, new SourceLocation(
-        mavenProject.getParentFile().getAbsolutePath(), 12, 10, 17)), markerLocation);
+        parentMavenProject.getFile().getAbsolutePath(), WorkspaceHelpers.getModelId(parentMavenProject), 12, 10, 17)),
+        markerLocation);
     // The above assert should actually be (but it's not due to a bug in maven):
 //    assertMarkerLocation(new MarkerLocation(5, 3, 10, new MarkerLocation(
 //        mavenProject.getParentFile().getAbsolutePath(), 11, 7, 14)), markerLocation);
