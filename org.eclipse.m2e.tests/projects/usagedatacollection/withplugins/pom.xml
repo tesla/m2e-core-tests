@@ -6,7 +6,7 @@
 	<groupId>org.eclipse.m2e.projects</groupId>
 	<artifactId>withplugins</artifactId>
 	<version>1.0.0</version>
-	<packaging>pom</packaging>
+	<packaging>jar</packaging>
 	<build>
 		<pluginManagement>
 			<plugins>

@@ -34,8 +34,8 @@ import org.eclipse.m2e.core.internal.lifecyclemapping.model.LifecycleMappingMeta
 import org.eclipse.m2e.core.internal.lifecyclemapping.model.LifecycleMappingMetadataSource;
 import org.eclipse.m2e.core.internal.lifecyclemapping.model.PluginExecutionAction;
 import org.eclipse.m2e.core.internal.lifecyclemapping.model.PluginExecutionMetadata;
-import org.eclipse.m2e.core.internal.markers.SourceLocation;
 import org.eclipse.m2e.core.internal.markers.MavenProblemInfo;
+import org.eclipse.m2e.core.internal.markers.SourceLocation;
 import org.eclipse.m2e.core.internal.project.registry.MavenProjectFacade;
 import org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
@@ -46,6 +46,7 @@ import org.eclipse.m2e.core.project.configurator.AbstractProjectConfigurator;
 import org.eclipse.m2e.core.project.configurator.ILifecycleMapping;
 import org.eclipse.m2e.core.project.configurator.MojoExecutionBuildParticipant;
 import org.eclipse.m2e.core.project.configurator.MojoExecutionKey;
+import org.eclipse.m2e.core.project.configurator.NoopLifecycleMapping;
 import org.eclipse.m2e.jdt.internal.JarLifecycleMapping;
 import org.eclipse.m2e.jdt.internal.JavaProjectConfigurator;
 import org.eclipse.m2e.tests.common.AbstractLifecycleMappingTest;
@@ -589,5 +590,27 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
 
     // assert configurators activated by non-default lifecycle mojos are not considered during the build
     assertEquals(0, lifecycleMapping.getBuildParticipants(facade, monitor).size());
+  }
+
+  public void testPomPackagingType() throws Exception {
+    IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping", "pomPackagingType/pom.xml");
+    assertNotNull("Expected not null MavenProjectFacade", facade);
+    IProject project = facade.getProject();
+    WorkspaceHelpers.assertNoErrors(project);
+
+    ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade);
+
+    assertTrue(lifecycleMapping instanceof NoopLifecycleMapping);
+
+    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
+    assertNotNull("Expected not null configurators", configurators);
+    assertEquals(configurators.toString(), 0, configurators.size());
+
+    List<MojoExecutionKey> notCoveredMojoExecutions = getNotCoveredMojoExecutions(facade);
+    assertEquals(notCoveredMojoExecutions.toString(), 0, notCoveredMojoExecutions.size());
+
+    Map<MojoExecutionKey, List<AbstractBuildParticipant>> buildParticipants = lifecycleMapping.getBuildParticipants(
+        facade, monitor);
+    assertEquals(0, buildParticipants.size());
   }
 }
