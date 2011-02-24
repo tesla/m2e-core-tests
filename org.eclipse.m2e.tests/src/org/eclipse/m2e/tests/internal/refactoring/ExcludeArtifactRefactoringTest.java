@@ -2,7 +2,6 @@ package org.eclipse.m2e.tests.internal.refactoring;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -326,14 +325,6 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 			}
 		}
 		fail("Failed to get Model");
-		return null;
-	}
-
-	private EditingDomain getEditingDomain() {
-		IEditorPart part = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();
-		if (part != null && part instanceof MavenPomEditor) {
-			return ((MavenPomEditor) part).getEditingDomain();
-		}
 		return null;
 	}
 
