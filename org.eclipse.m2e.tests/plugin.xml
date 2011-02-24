@@ -172,5 +172,90 @@
                url="http://eclipse.org/tycho/">
          </overview>
       </connectorDescriptor>
+      <connectorDescriptor
+            categoryId="com.sonatype.m2e.discovery-directories.lifecycles"
+            description="%connectorDescriptor.description.tycho"
+            groupId="lifecycles"
+            id="iu.with.no.version"
+            kind="lifecycles"
+            license="%connectorDescriptor.license.tycho"
+            name="%connectorDescriptor.name.tycho"
+            provider="%connectorDescriptor.provider.tycho"
+            siteUrl="http://localhost:10123/">
+        <iu id="test.iu">
+        </iu>
+         <overview
+               summary="%connectorDescriptor.overview.summary.tycho"
+               url="http://eclipse.org/tycho/">
+         </overview>
+      </connectorDescriptor>
+      <connectorDescriptor
+            categoryId="com.sonatype.m2e.discovery-directories.lifecycles"
+            description="%connectorDescriptor.description.tycho"
+            groupId="lifecycles"
+            id="iu.with.highest.version"
+            kind="lifecycles"
+            license="%connectorDescriptor.license.tycho"
+            name="%connectorDescriptor.name.tycho"
+            provider="%connectorDescriptor.provider.tycho"
+            siteUrl="http://localhost:10123/">
+        <iu id="test.iu/2.0.0.201102231450">
+        </iu>
+         <overview
+               summary="%connectorDescriptor.overview.summary.tycho"
+               url="http://eclipse.org/tycho/">
+         </overview>
+      </connectorDescriptor>
+      <connectorDescriptor
+            categoryId="com.sonatype.m2e.discovery-directories.lifecycles"
+            description="%connectorDescriptor.description.tycho"
+            groupId="lifecycles"
+            id="iu.with.lowest.version"
+            kind="lifecycles"
+            license="%connectorDescriptor.license.tycho"
+            name="%connectorDescriptor.name.tycho"
+            provider="%connectorDescriptor.provider.tycho"
+            siteUrl="http://localhost:10123/">
+        <iu id="test.iu/1.0.0.201102231450">
+        </iu>
+         <overview
+               summary="%connectorDescriptor.overview.summary.tycho"
+               url="http://eclipse.org/tycho/">
+         </overview>
+      </connectorDescriptor>
+      <connectorDescriptor
+            categoryId="com.sonatype.m2e.discovery-directories.lifecycles"
+            description="MissingIU"
+            groupId="lifecycles"
+            id="missing.iu"
+            kind="lifecycles"
+            license="%connectorDescriptor.license.tycho"
+            name="MissingIU"
+            provider="%connectorDescriptor.provider.tycho"
+            siteUrl="http://localhost:10123/">
+        <iu id="missing.iu/1.0.0.201102231450">
+        </iu>
+         <overview
+               summary="%connectorDescriptor.overview.summary.tycho"
+               url="http://eclipse.org/tycho/">
+         </overview>
+      </connectorDescriptor>
+      <connectorDescriptor
+            categoryId="com.sonatype.m2e.discovery-directories.lifecycles"
+            description="MissingRepository"
+            groupId="lifecycles"
+            id="missing.repository"
+            kind="lifecycles"
+            license="%connectorDescriptor.license.tycho"
+            name="MissingRepository"
+            provider="%connectorDescriptor.provider.tycho"
+            siteUrl="http://localhost:10123/missingrepository/">
+        <iu id="test.iu/1.0.0.201102231450">
+        </iu>
+         <overview
+               summary="%connectorDescriptor.overview.summary.tycho"
+               url="http://eclipse.org/tycho/">
+         </overview>
+      </connectorDescriptor>
    </extension>
 </plugin>

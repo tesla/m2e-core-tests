@@ -23,7 +23,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.equinox.internal.p2.discovery.AbstractCatalogSource;
 import org.eclipse.equinox.internal.p2.discovery.Catalog;
 import org.eclipse.equinox.internal.p2.discovery.DiscoveryCore;
-import org.eclipse.equinox.internal.p2.discovery.compatibility.BundleDiscoveryStrategy;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -60,7 +59,7 @@ public class MavenDiscoveryTest extends TestCase implements IShellProvider {
     catalog = new Catalog();
     catalog.setEnvironment(DiscoveryCore.createEnvironment());
     catalog.setVerifyUpdateSiteAvailability(false);
-    catalog.getDiscoveryStrategies().add(new BundleDiscoveryStrategy());
+	catalog.getDiscoveryStrategies().add(new TestM2eBundleStrategy());
 
     // Build the list of tags to show in the Wizard header
     catalog.setTags(Collections.singletonList(MavenDiscovery.APPLICABLE_TAG));

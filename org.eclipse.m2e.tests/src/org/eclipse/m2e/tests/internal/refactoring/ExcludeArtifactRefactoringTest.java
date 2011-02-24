@@ -284,7 +284,7 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 		private PartInitException exception;
 
 		FindEditorRunnable(IFile file) {
-			IEditorInput editorInput = new FileEditorInput(file);
+			editorInput = new FileEditorInput(file);
 		}
 
 		MavenPomEditor open() throws CoreException, InterruptedException {
