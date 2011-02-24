@@ -5,11 +5,15 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.List;
 
+import org.eclipse.core.resources.IProject;
+
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.MojoExecution;
-import org.eclipse.core.resources.IProject;
+
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
+import org.eclipse.m2e.core.project.configurator.AbstractProjectConfigurator;
+import org.eclipse.m2e.core.project.configurator.ILifecycleMapping;
 import org.eclipse.m2e.core.project.configurator.MojoExecutionKey;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 
@@ -100,6 +104,36 @@ public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
 
     assertEquals("1.5", plugin.getMaven().getMojoParameterValue(session, executions.get(0), "source", String.class));
     assertEquals("1.6", plugin.getMaven().getMojoParameterValue(session, executions.get(0), "target", String.class));
+  }
+
+  public void testGetProjectConfigurators() throws Exception {
+    IProject project = importProject("projects/getmojoexecution/pom.xml");
+    assertNoErrors(project);
+
+    IMavenProjectFacade facade = plugin.getMavenProjectManager().create(project, monitor);
+    assertNotNull("Expected not null MavenProjectFacade", facade);
+    ILifecycleMapping lifecycleMapping = plugin.getProjectConfigurationManager().getLifecycleMapping(facade);
+    assertNotNull("Expected not null LifecycleMapping", lifecycleMapping);
+
+    List<AbstractProjectConfigurator> projectConfigurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
+    assertNotNull("Expected not null projectConfigurators", projectConfigurators);
+    assertEquals(1, projectConfigurators.size());
+  }
+
+  public void testGetProjectConfiguratorsAfterWorkspaceRestart() throws Exception {
+    IProject project = importProject("projects/getmojoexecution/pom.xml");
+    assertNoErrors(project);
+
+    IMavenProjectFacade facade = plugin.getMavenProjectManager().create(project, monitor);
+    assertNotNull("Expected not null MavenProjectFacade", facade);
+    deserialize(facade);
+
+    ILifecycleMapping lifecycleMapping = plugin.getProjectConfigurationManager().getLifecycleMapping(facade);
+    assertNotNull("Expected not null LifecycleMapping", lifecycleMapping);
+
+    List<AbstractProjectConfigurator> projectConfigurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
+    assertNotNull("Expected not null projectConfigurators", projectConfigurators);
+    assertEquals(1, projectConfigurators.size());
   }
 
   private void deserialize(IMavenProjectFacade facade) throws IllegalArgumentException, IllegalAccessException {
