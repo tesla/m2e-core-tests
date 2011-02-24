@@ -60,7 +60,7 @@ public class PluginExecutionActionsTest extends AbstractLifecycleMappingTest {
     assertEquals(0, buildParticipants.values().iterator().next().size()); // no build participants
 
     WorkspaceHelpers.assertWarningMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID,
-        "Ignore plugin execution test message", 11 /*lineNumber*/, "pom.xml", project);
+        "Ignore plugin execution test message", 17 /*lineNumber*/, "pom.xml", project);
   }
 
   public void testMojoExecutionExecute() throws Exception {
@@ -106,7 +106,7 @@ public class PluginExecutionActionsTest extends AbstractLifecycleMappingTest {
     assertTrue(buildParticipants.values().iterator().next().get(0) instanceof MojoExecutionBuildParticipant);
 
     WorkspaceHelpers.assertWarningMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID,
-        "Execute plugin execution test message", 12 /*lineNumber*/, "pom.xml", project);
+        "Execute plugin execution test message", 18 /*lineNumber*/, "pom.xml", project);
   }
 
   public void testMojoExecutionConfigurator() throws Exception {
@@ -149,7 +149,7 @@ public class PluginExecutionActionsTest extends AbstractLifecycleMappingTest {
         .assertErrorMarker(
             IMavenConstants.MARKER_LIFECYCLEMAPPING_ID,
             "Plugin execution marked as error in lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 (execution: standard, phase: compile)",
-            12 /*lineNumber*/, "pom.xml", project);
+            18 /*lineNumber*/, "pom.xml", project);
   }
 
   public void testMojoExecutionErrorWithMessage() throws Exception {
@@ -172,6 +172,6 @@ public class PluginExecutionActionsTest extends AbstractLifecycleMappingTest {
     assertEquals(0, buildParticipants.values().iterator().next().size());
 
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID,
-        "Error plugin execution test message", 12 /*lineNumber*/, "pom.xml", project);
+        "Error plugin execution test message", 18 /*lineNumber*/, "pom.xml", project);
   }
 }

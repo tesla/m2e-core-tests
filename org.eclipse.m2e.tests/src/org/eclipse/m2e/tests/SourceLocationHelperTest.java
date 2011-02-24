@@ -69,6 +69,48 @@ public class SourceLocationHelperTest extends AbstractMavenProjectTestCase {
     assertMarkerLocation(new SourceLocation(pomPath, pomId, 11, 7, 14), markerLocation);
   }
 
+  public void testMojoExecutionLocationWithExecutions() throws Exception {
+    IMavenProjectFacade facade = importMavenProject(
+        "projects/markers/SourceLocationHelperTest/testMojoExecutionLocationWithExecutions", "parent1/pom.xml");
+    assertNotNull("Expected not null MavenProjectFacade", facade);
+    IProject project = facade.getProject();
+    WorkspaceHelpers.assertNoErrors(project);
+    MavenProject parent1MavenProject = facade.getMavenProject();
+
+    facade = importMavenProject("projects/markers/SourceLocationHelperTest/testMojoExecutionLocationWithExecutions",
+        "parent1/parent2/pom.xml");
+    assertNotNull("Expected not null MavenProjectFacade", facade);
+    project = facade.getProject();
+    WorkspaceHelpers.assertNoErrors(project);
+    MavenProject parent2MavenProject = facade.getMavenProject();
+
+    facade = importMavenProject("projects/markers/SourceLocationHelperTest/testMojoExecutionLocationWithExecutions",
+        "parent1/parent2/child/pom.xml");
+    assertNotNull("Expected not null MavenProjectFacade", facade);
+    project = facade.getProject();
+    WorkspaceHelpers.assertNoErrors(project);
+    MavenProject childMavenProject = facade.getMavenProject();
+
+    MojoExecutionKey mojoExecutionKey = getMojoExecutionKey("org.eclipse.m2e.test.lifecyclemapping",
+        "test-lifecyclemapping-plugin", "default-test-goal-1", ((MavenProjectFacade) facade).getMojoExecutions());
+    SourceLocation markerLocation = SourceLocationHelper.findLocation(childMavenProject, mojoExecutionKey);
+    assertMarkerLocation(new SourceLocation(16, 7, 14), markerLocation);
+    mojoExecutionKey = getMojoExecutionKey("org.eclipse.m2e.test.lifecyclemapping", "test-lifecyclemapping-plugin",
+        "default-test-goal-2", ((MavenProjectFacade) facade).getMojoExecutions());
+    markerLocation = SourceLocationHelper.findLocation(childMavenProject, mojoExecutionKey);
+    assertMarkerLocation(new SourceLocation(16, 7, 14), markerLocation);
+    mojoExecutionKey = getMojoExecutionKey("org.eclipse.m2e.test.lifecyclemapping", "test-lifecyclemapping-plugin",
+        "parent2Execution", ((MavenProjectFacade) facade).getMojoExecutions());
+    markerLocation = SourceLocationHelper.findLocation(childMavenProject, mojoExecutionKey);
+    SourceLocation causeLocation = new SourceLocation(parent2MavenProject.getFile().getAbsolutePath(),
+        WorkspaceHelpers.getModelId(parent2MavenProject), 21, 11, 21);
+    assertMarkerLocation(new SourceLocation(5, 3, 10, causeLocation), markerLocation);
+    mojoExecutionKey = getMojoExecutionKey("org.eclipse.m2e.test.lifecyclemapping", "test-lifecyclemapping-plugin",
+        "childExecution", ((MavenProjectFacade) facade).getMojoExecutions());
+    markerLocation = SourceLocationHelper.findLocation(childMavenProject, mojoExecutionKey);
+    assertMarkerLocation(new SourceLocation(21, 11, 21), markerLocation);
+  }
+
   public void testMojoExecutionLocation() throws Exception {
     IMavenProjectFacade facade = importMavenProject(
         "projects/markers/SourceLocationHelperTest/testMojoExecutionLocation", "parent/pom.xml");
@@ -108,11 +150,8 @@ public class SourceLocationHelperTest extends AbstractMavenProjectTestCase {
         ((MavenProjectFacade) facade).getMojoExecutions());
     markerLocation = SourceLocationHelper.findLocation(mavenProject, mojoExecutionKey);
     assertMarkerLocation(new SourceLocation(5, 3, 10, new SourceLocation(
-        parentMavenProject.getFile().getAbsolutePath(), WorkspaceHelpers.getModelId(parentMavenProject), 12, 10, 17)),
+        parentMavenProject.getFile().getAbsolutePath(), WorkspaceHelpers.getModelId(parentMavenProject), 11, 7, 14)),
         markerLocation);
-    // The above assert should actually be (but it's not due to a bug in maven):
-//    assertMarkerLocation(new MarkerLocation(5, 3, 10, new MarkerLocation(
-//        mavenProject.getParentFile().getAbsolutePath(), 11, 7, 14)), markerLocation);
   }
 
   private void assertMarkerLocation(SourceLocation expected, SourceLocation actual) {
@@ -130,9 +169,16 @@ public class SourceLocationHelperTest extends AbstractMavenProjectTestCase {
   }
 
   private MojoExecutionKey getMojoExecutionKey(String groupId, String artifactId, List<MojoExecution> mojoExecutions) {
+    return getMojoExecutionKey(groupId, artifactId, null /*executionId*/, mojoExecutions);
+  }
+
+  private MojoExecutionKey getMojoExecutionKey(String groupId, String artifactId, String executionId,
+      List<MojoExecution> mojoExecutions) {
     for(MojoExecution mojoExecution : mojoExecutions) {
       if(groupId.equals(mojoExecution.getGroupId()) && artifactId.equals(mojoExecution.getArtifactId())) {
-        return new MojoExecutionKey(mojoExecution);
+        if(executionId == null || executionId.equals(mojoExecution.getExecutionId())) {
+          return new MojoExecutionKey(mojoExecution);
+        }
       }
     }
     return null;
