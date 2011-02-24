@@ -2,6 +2,7 @@ package org.eclipse.m2e.tests.internal.refactoring;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -10,21 +11,21 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.ArtifactKey;
-import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.editor.pom.MavenPomEditor;
-import org.eclipse.m2e.integration.tests.common.UIThreadTask;
 import org.eclipse.m2e.model.edit.pom.Dependency;
 import org.eclipse.m2e.model.edit.pom.Exclusion;
 import org.eclipse.m2e.model.edit.pom.Model;
 import org.eclipse.m2e.refactoring.exclude.ExcludeArtifactRefactoring;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
 import org.junit.AfterClass;
@@ -66,7 +67,7 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 		IProject project = importProjects(EXCLUDE_PATH, new String[] { "noParent/pom.xml" }, new ResolverConfiguration())[0];
 		waitForJobsToComplete();
 
-		openPomFile(project.getFile("pom.xml"));
+		new FindEditorRunnable(project.getFile("pom.xml")).open();
 		Refactoring refactoring = new ExcludeArtifactRefactoring(new ArtifactKey[] { MISSING }, project.getFile("pom.xml"));
 		RefactoringStatus status = refactoring.checkInitialConditions(monitor);
 		assertEquals("Expected FATAL status from checkInitialConditions: ", RefactoringStatus.FATAL, status.getSeverity());
@@ -80,7 +81,7 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 		IProject project = importProjects(EXCLUDE_PATH, new String[] { "noParent/pom.xml" }, new ResolverConfiguration())[0];
 		waitForJobsToComplete();
 
-		openPomFile(project.getFile("pom.xml"));
+		new FindEditorRunnable(project.getFile("pom.xml")).open();
 		Refactoring refactoring = new ExcludeArtifactRefactoring(new ArtifactKey[] { VALID }, project.getFile("pom.xml"));
 		RefactoringStatus status = refactoring.checkInitialConditions(monitor);
 		assertTrue("Expected OK status from checkInitialConditions: " + status.toString(), status.isOK());
@@ -107,7 +108,7 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 		waitForJobsToComplete();
 		IProject project = getProject(projects, "workspaceParentModule");
 
-		openPomFile(project.getFile("pom.xml"));
+		new FindEditorRunnable(project.getFile("pom.xml")).open();
 		Refactoring refactoring = new ExcludeArtifactRefactoring(new ArtifactKey[] { VALID }, project.getFile("pom.xml"));
 		RefactoringStatus status = refactoring.checkInitialConditions(monitor);
 		assertTrue("Expected OK status from checkInitialConditions: " + status.toString(), status.isOK());
@@ -135,7 +136,7 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 				"workspaceParentWithDependencyModule/pom.xml" }, new ResolverConfiguration());
 		waitForJobsToComplete();
 		IProject project = getProject(projects, "workspaceParentWithDependencyModule");
-		openPomFile(project.getFile("pom.xml"));
+		new FindEditorRunnable(project.getFile("pom.xml")).open();
 		Refactoring refactoring = new ExcludeArtifactRefactoring(new ArtifactKey[] { VALID }, project.getFile("pom.xml"));
 		RefactoringStatus status = refactoring.checkInitialConditions(monitor);
 		assertTrue("Expected OK status from checkInitialConditions: " + status.toString(), status.isOK());
@@ -160,7 +161,7 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 		IProject project = importProjects(EXCLUDE_PATH, new String[] { "hasRemoteParent/pom.xml" }, new ResolverConfiguration())[0];
 		waitForJobsToComplete();
 
-		openPomFile(project.getFile("pom.xml"));
+		new FindEditorRunnable(project.getFile("pom.xml")).open();
 		Refactoring refactoring = new ExcludeArtifactRefactoring(new ArtifactKey[] { VALID }, project.getFile("pom.xml"));
 		RefactoringStatus status = refactoring.checkInitialConditions(monitor);
 		assertTrue("Expected OK status from checkInitialConditions: " + status.toString(), status.isOK());
@@ -186,7 +187,7 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 		IProject project = importProjects(EXCLUDE_PATH, new String[] { "noParent/pom.xml" }, new ResolverConfiguration())[0];
 		waitForJobsToComplete();
 
-		openPomFile(project.getFile("pom.xml"));
+		new FindEditorRunnable(project.getFile("pom.xml")).open();
 		Refactoring refactoring = new ExcludeArtifactRefactoring(new ArtifactKey[] { VALID, MISSING }, project.getFile("pom.xml"));
 		RefactoringStatus status = refactoring.checkInitialConditions(monitor);
 		assertEquals("Expected FATAL status from checkInitialConditions: ", RefactoringStatus.FATAL, status.getSeverity());
@@ -202,7 +203,7 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 
 		IProject module = getProject(projects, "workspaceParent2Module");
 		IProject project = getProject(projects, "workspaceParent2Project");
-		openPomFile(module.getFile("pom.xml"));
+		new FindEditorRunnable(module.getFile("pom.xml")).open();
 		Refactoring refactoring = new ExcludeArtifactRefactoring(new ArtifactKey[] { VALID, VALID3 }, module.getFile("pom.xml"));
 		RefactoringStatus status = refactoring.checkInitialConditions(monitor);
 		assertTrue("Expected OK status from checkInitialConditions: " + status.toString(), status.isOK());
@@ -230,7 +231,7 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 		IProject project = importProjects(EXCLUDE_PATH, new String[] { "noParent/pom.xml" }, new ResolverConfiguration())[0];
 		waitForJobsToComplete();
 
-		openPomFile(project.getFile("pom.xml"));
+		new FindEditorRunnable(project.getFile("pom.xml")).open();
 		Refactoring refactoring = new ExcludeArtifactRefactoring(new ArtifactKey[] { VALID, VALID2 },
 				project.getFile("pom.xml"));
 		RefactoringStatus status = refactoring.checkInitialConditions(monitor);
@@ -258,7 +259,7 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 		IProject project = importProjects(EXCLUDE_PATH, new String[] { "noParent/test-pom.xml" }, new ResolverConfiguration())[0];
 		waitForJobsToComplete();
 
-		openPomFile(project.getFile("pom.xml"));
+		new FindEditorRunnable(project.getFile("pom.xml")).open();
 		Refactoring refactoring = new ExcludeArtifactRefactoring(new ArtifactKey[] { VALID }, project.getFile("pom.xml"));
 		RefactoringStatus status = refactoring.checkInitialConditions(monitor);
 		assertTrue("Expected OK status from checkInitialConditions: " + status.toString(), status.isOK());
@@ -277,22 +278,35 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 		assertExclusionSet("pom has exclusion set", editor, ROOT, VALID);
 	}
 
-	private IMavenProjectFacade getProjectFacade(IProject project) {
-		return MavenPlugin.getDefault().getMavenProjectManager().getProject(project);
-	}
+	private class FindEditorRunnable implements Runnable {
+		MavenPomEditor editor;
+		private IEditorInput editorInput;
+		private PartInitException exception;
 
-	// Modified from PomEditorTEstBase
-	protected MavenPomEditor openPomFile(IFile file) throws Exception {
-		final IEditorInput editorInput = new FileEditorInput(file);
-		editor = (MavenPomEditor) UIThreadTask.executeOnEventQueue(new UIThreadTask() {
+		FindEditorRunnable(IFile file) {
+			IEditorInput editorInput = new FileEditorInput(file);
+		}
 
-			public Object runEx() throws Exception {
-				return getActivePage().openEditor(editorInput, "org.eclipse.m2e.editor.MavenPomEditor", true);
+		MavenPomEditor open() throws CoreException, InterruptedException {
+			if (Display.getDefault().getThread() == Thread.currentThread()) {
+				editor = (MavenPomEditor) getActivePage().openEditor(editorInput, "org.eclipse.m2e.editor.MavenPomEditor", true);
+			} else {
+				Display.getDefault().syncExec(this);
+				if (exception != null) {
+					throw new CoreException(exception.getStatus());
+				}
 			}
-		});
+			waitForJobsToComplete();
+			return editor;
+		}
 
-		waitForJobsToComplete();
-		return editor;
+		public void run() {
+			try {
+				editor = (MavenPomEditor) getActivePage().openEditor(editorInput, "org.eclipse.m2e.editor.MavenPomEditor", true);
+			} catch (PartInitException e) {
+				this.exception = e;
+			}
+		}
 	}
 
 	protected static IWorkbenchPage getActivePage() {
