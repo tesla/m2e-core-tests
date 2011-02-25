@@ -370,7 +370,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
         "projects/lifecyclemapping/lifecycleMappingMetadata/testNotInterestingPhaseConfigurator", "pom.xml");
     assertNotNull("Expected not null MavenProjectFacade", facade);
 
-    ILifecycleMapping lifecycleMapping = mavenProjectManager.getLifecycleMapping(facade);
+    ILifecycleMapping lifecycleMapping = LifecycleMappingFactory.getLifecycleMapping(facade);
 
     Map<MojoExecutionKey, List<AbstractBuildParticipant>> buildParticipants = lifecycleMapping.getBuildParticipants(
         facade, monitor);

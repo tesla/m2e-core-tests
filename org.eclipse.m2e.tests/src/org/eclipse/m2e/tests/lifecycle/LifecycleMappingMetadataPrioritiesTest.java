@@ -50,7 +50,7 @@ public class LifecycleMappingMetadataPrioritiesTest extends AbstractLifecycleMap
     IProject project = facade.getProject();
     WorkspaceHelpers.assertNoErrors(project);
 
-    ILifecycleMapping lifecycleMapping = mavenProjectManager.getLifecycleMapping(facade);
+    ILifecycleMapping lifecycleMapping = LifecycleMappingFactory.getLifecycleMapping(facade);
     assertNotNull(lifecycleMapping);
     assertTrue(lifecycleMapping.getClass().getCanonicalName(), lifecycleMapping instanceof TestLifecycleMapping);
   }
