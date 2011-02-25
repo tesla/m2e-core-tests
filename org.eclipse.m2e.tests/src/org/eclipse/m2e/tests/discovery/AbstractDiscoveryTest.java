@@ -29,7 +29,7 @@ public class AbstractDiscoveryTest extends TestCase implements IShellProvider {
 		catalog = new Catalog();
 		catalog.setEnvironment(DiscoveryCore.createEnvironment());
 		catalog.setVerifyUpdateSiteAvailability(false);
-		catalog.getDiscoveryStrategies().add(new TestM2eBundleStrategy());
+		catalog.getDiscoveryStrategies().add(new TestM2EBundleStrategy());
 
 		// Build the list of tags to show in the Wizard header
 		catalog.setTags(Collections.singletonList(MavenDiscovery.APPLICABLE_TAG));

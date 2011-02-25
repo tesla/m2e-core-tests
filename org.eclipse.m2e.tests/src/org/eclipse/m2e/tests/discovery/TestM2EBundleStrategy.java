@@ -12,10 +12,10 @@ import org.eclipse.equinox.internal.p2.discovery.Policy;
 import org.eclipse.equinox.internal.p2.discovery.compatibility.BundleDiscoverySource;
 import org.eclipse.equinox.internal.p2.discovery.compatibility.ConnectorDiscoveryExtensionReader;
 import org.eclipse.equinox.internal.p2.discovery.compatibility.Messages;
-import org.eclipse.m2e.internal.discovery.strategy.M2eRemoteBundleDiscoveryStrategy;
+import org.eclipse.m2e.internal.discovery.strategy.M2ERemoteBundleDiscoveryStrategy;
 
 @SuppressWarnings("restriction")
-public class TestM2eBundleStrategy extends M2eRemoteBundleDiscoveryStrategy {
+public class TestM2EBundleStrategy extends M2ERemoteBundleDiscoveryStrategy {
 
 	@Override
 	public void performDiscovery(IProgressMonitor monitor) throws CoreException {
