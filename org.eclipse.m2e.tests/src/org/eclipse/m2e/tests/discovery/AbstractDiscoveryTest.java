@@ -18,7 +18,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.internal.Workbench;
 
 @SuppressWarnings("restriction")
-public class AbstractDiscoveryTest extends TestCase implements IShellProvider {
+public abstract class AbstractDiscoveryTest extends TestCase implements IShellProvider {
 
 	protected Catalog catalog;
 	protected MavenCatalogConfiguration configuration;
