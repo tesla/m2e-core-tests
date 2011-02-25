@@ -25,29 +25,47 @@ import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.removeIfNoChildE
 
 import java.util.List;
 
-import junit.framework.TestCase;
-
-import org.eclipse.m2e.core.ui.internal.editing.PomEdits;
-import org.eclipse.wst.sse.core.StructuredModelManager;
-import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import junit.framework.TestCase;
+
+import org.eclipse.wst.sse.core.StructuredModelManager;
+import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
+
+import org.eclipse.m2e.core.ui.internal.editing.PomEdits;
+
 @SuppressWarnings("restriction")
 public class PomEditsTest extends TestCase {
-
 	private IDOMModel tempModel;
 
-
-	/* (non-Javadoc)
-	 * @see junit.framework.TestCase#setUp()
-	 */
 	@Override
 	protected void setUp() throws Exception {
 	  tempModel = (IDOMModel) StructuredModelManager.getModelManager().createUnManagedStructuredModelFor(
           "org.eclipse.m2e.core.pomFile");
 	}
 
+  public void testRemoveChild() {
+    assertEquals("<project></project>", removeChild("<project><build></build></project>"));
+    assertEquals("<project>a</project>", removeChild("<project>a\nb<build></build></project>"));
+    assertEquals("<project>a\nc</project>", removeChild("<project>a\nc\nb<build></build></project>"));
+    assertEquals("<project>a</project>", removeChild("<project>a\r\nb<build></build></project>"));
+    assertEquals("<project>a\r\nc</project>", removeChild("<project>a\r\nc\r\nb<build></build></project>"));
+    assertEquals("<project>a</project>", removeChild("<project>a\rb<build></build></project>"));
+    assertEquals("<project>a\rc</project>", removeChild("<project>a\rc\rb<build></build></project>"));
+    assertEquals("<project>a\n</project>", removeChild("<project>a\n\rb<build></build></project>"));
+    assertEquals("<project>a\rc</project>", removeChild("<project>a\rc\nb<build></build></project>"));
+    assertEquals("<project>a\nc</project>", removeChild("<project>a\nc\rb<build></build></project>"));
+  }
+
+  private String removeChild(String xml) {
+    tempModel.getStructuredDocument().setText(StructuredModelManager.getModelManager(), xml);
+    Document doc = tempModel.getDocument();
+    Element parent = doc.getDocumentElement();
+    Element child = PomEdits.findChild(parent, PomEdits.BUILD);
+    PomEdits.removeChild(parent, child);
+    return tempModel.getStructuredDocument().getText();
+  }
 
 	public void testRemoveIfNoChildElement() {
 		tempModel.getStructuredDocument().setText(StructuredModelManager.getModelManager(), 
@@ -59,7 +77,7 @@ public class PomEditsTest extends TestCase {
 				"</build>" + 
 				"</project>");
 		Document doc = tempModel.getDocument();
-		Element plugins = findChild(findChild(findChild(doc.getDocumentElement(), BUILD), PLUGIN_MANAGEMENT), PLUGINS);
+    Element plugins = findChild(findChild(findChild(doc.getDocumentElement(), BUILD), PLUGIN_MANAGEMENT), PLUGINS);
 		assertNotNull(plugins);
 		removeIfNoChildElement(plugins);
 		assertNull(findChild(doc.getDocumentElement(), BUILD));
