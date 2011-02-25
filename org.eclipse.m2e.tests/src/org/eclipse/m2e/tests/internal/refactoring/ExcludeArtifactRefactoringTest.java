@@ -17,6 +17,7 @@ import org.eclipse.m2e.model.edit.pom.Dependency;
 import org.eclipse.m2e.model.edit.pom.Exclusion;
 import org.eclipse.m2e.model.edit.pom.Model;
 import org.eclipse.m2e.refactoring.exclude.ExcludeArtifactRefactoring;
+import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
