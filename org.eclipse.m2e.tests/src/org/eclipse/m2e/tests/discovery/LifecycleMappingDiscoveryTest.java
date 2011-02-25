@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -77,6 +78,11 @@ public class LifecycleMappingDiscoveryTest extends AbstractMavenProjectTestCase 
     MavenDiscoveryService srv = new MavenDiscoveryService();
 
     CatalogItem[] items = new CatalogItem[] {new CatalogItem(), new CatalogItem()};
+
+    items[0].setSiteUrl("0");
+    items[0].setInstallableUnits(Arrays.asList("0"));
+    items[1].setSiteUrl("1");
+    items[1].setInstallableUnits(Arrays.asList("1"));
 
     srv.addCatalogItem(items[0], readLifecycleMappingMetadata("projects/discovery/match-test-packaging-a.xml"));
     srv.addCatalogItem(items[1], readLifecycleMappingMetadata("projects/discovery/match-test-goal-1-and-2.xml"));
