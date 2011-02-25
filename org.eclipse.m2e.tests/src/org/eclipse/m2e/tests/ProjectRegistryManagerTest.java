@@ -18,11 +18,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.DefaultArtifact;
-import org.apache.maven.execution.MavenExecutionRequest;
-import org.apache.maven.project.MavenProject;
-import org.codehaus.plexus.util.FileUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -34,6 +29,14 @@ import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+
+import org.codehaus.plexus.util.FileUtils;
+
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.DefaultArtifact;
+import org.apache.maven.execution.MavenExecutionRequest;
+import org.apache.maven.project.MavenProject;
+
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.embedder.ArtifactRef;
@@ -592,12 +595,12 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     IProject project = createExisting("t013-p2");
     waitForJobsToComplete();
 
-    String expectedErrorMessage = "Missing artifact missing:missing:jar:0.0.0:compile";
+    String expectedErrorMessage = "Missing artifact missing:missing:jar:0.0.0";
     List<IMarker> markers = WorkspaceHelpers.findErrorMarkers(project);
     // (jdt) The container 'Maven Dependencies' references non existing library ...missing/missing/0.0.0/missing-0.0.0.jar'
-    // (maven) Missing artifact missing:missing:jar:0.0.0:compile
+    // (maven) Missing artifact missing:missing:jar:0.0.0
     assertEquals(WorkspaceHelpers.toString(markers), 2, markers.size());
-    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_DEPENDENCY_ID, expectedErrorMessage, 1 /*lineNumber*/,
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_DEPENDENCY_ID, expectedErrorMessage, 9 /*lineNumber*/,
         project);
 
     workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
@@ -606,9 +609,9 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     markers = WorkspaceHelpers.findErrorMarkers(project);
     // (jdt) The container 'Maven Dependencies' references non existing library ...missing/missing/0.0.0/missing-0.0.0.jar'
     // (jdt) The project cannot be built until build path errors are resolved
-    // (maven) Missing artifact missing:missing:jar:0.0.0:compile
+    // (maven) Missing artifact missing:missing:jar:0.0.0
     assertEquals(WorkspaceHelpers.toString(markers), 3, markers.size());
-    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_DEPENDENCY_ID, expectedErrorMessage, 1 /*lineNumber*/,
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_DEPENDENCY_ID, expectedErrorMessage, 9 /*lineNumber*/,
         project);
   }
 

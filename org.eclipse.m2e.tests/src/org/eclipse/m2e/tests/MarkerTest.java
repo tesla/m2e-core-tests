@@ -70,12 +70,12 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     copyContent(project, "pom_badDependency.xml", "pom.xml");
     waitForJobsToComplete();
     MavenPlugin.getDefault().getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
-    expectedErrorMessage = "Missing artifact missing:missing:jar:0.0.0:compile";
+    expectedErrorMessage = "Missing artifact missing:missing:jar:0.0.0";
     List<IMarker> markers = WorkspaceHelpers.findErrorMarkers(project);
     // (jdt) The container 'Maven Dependencies' references non existing library ...missing/missing/0.0.0/missing-0.0.0.jar'
-    // (maven) Missing artifact missing:missing:jar:0.0.0:compile
+    // (maven) Missing artifact missing:missing:jar:0.0.0
     assertEquals(WorkspaceHelpers.toString(markers), 2, markers.size());
-    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_DEPENDENCY_ID, expectedErrorMessage, 1 /*lineNumber*/,
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_DEPENDENCY_ID, expectedErrorMessage, 9 /*lineNumber*/,
         project);
 
     // Building the project should not remove the marker
@@ -86,7 +86,7 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     // (jdt) The project cannot be built until build path errors are resolved
     // (maven) Missing artifact missing:missing:jar:0.0.0:compile
     assertEquals(WorkspaceHelpers.toString(markers), 3, markers.size());
-    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_DEPENDENCY_ID, expectedErrorMessage, 1 /*lineNumber*/,
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_DEPENDENCY_ID, expectedErrorMessage, 9 /*lineNumber*/,
         project);
 
     // Fix the current dependency problem

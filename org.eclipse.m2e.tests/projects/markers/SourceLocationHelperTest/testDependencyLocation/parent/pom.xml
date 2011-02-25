@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>SourceLocationHelperTest</groupId>
+  <artifactId>parent</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  
+  <dependencies> 
+    <dependency>
+      <groupId>missing</groupId>
+      <artifactId>missing-parent1</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>missing</groupId>
+      <artifactId>missing-parent2</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+  </dependencies>
+</project>
