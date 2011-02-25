@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -119,5 +120,31 @@ public class LifecycleMappingDiscoveryTest extends AbstractMavenProjectTestCase 
         project.getMavenProject(), project.getMojoExecutions(), new ArrayList<IMavenDiscoveryProposal>(), monitor);
 
     assertEquals(2, proposalsmap.size());
+  }
+
+  public void testIsMappingComplete() throws Exception {
+    LifecycleMappingConfiguration configuration = loadMappingConfiguration(new File(
+        "projects/discovery/twoMojoExecutions/pom.xml"));
+
+    assertFalse(configuration.isMappingComplete());
+
+    CatalogItem item = new CatalogItem();
+    item.setSiteUrl("url");
+    item.setInstallableUnits(Arrays.asList("iu"));
+    IMavenDiscoveryProposal proposal = new InstallCatalogItemMavenDiscoveryProposal(item);
+
+    ProjectLifecycleMappingConfiguration project = configuration.getProjects().get(0);
+    Map<ILifecycleMappingElementKey, List<IMavenDiscoveryProposal>> allproposals = new LinkedHashMap<ILifecycleMappingElementKey, List<IMavenDiscoveryProposal>>();
+    allproposals.put(project.getPackagingTypeMappingConfiguration().getLifecycleMappingElementKey(),
+        Arrays.asList(proposal));
+    for(MojoExecutionMappingConfiguration mojoExecution : project.getMojoExecutionConfigurations()) {
+      allproposals.put(mojoExecution.getLifecycleMappingElementKey(), Arrays.asList(proposal));
+    }
+    configuration.setProposals(allproposals);
+    assertFalse(configuration.isMappingComplete());
+    
+    configuration.addSelectedProposal(proposal);
+
+    assertTrue(configuration.isMappingComplete());
   }
 }
