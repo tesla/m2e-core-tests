@@ -19,14 +19,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.maven.execution.MavenExecutionRequest;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
-
-import org.apache.maven.execution.MavenExecutionRequest;
-
 import org.eclipse.m2e.core.core.IMavenConstants;
+import org.eclipse.m2e.core.internal.lifecyclemapping.DefaultLifecycleMapping;
 import org.eclipse.m2e.core.internal.lifecyclemapping.InvalidLifecycleMapping;
 import org.eclipse.m2e.core.internal.lifecyclemapping.LifecycleMappingFactory;
 import org.eclipse.m2e.core.internal.lifecyclemapping.LifecycleMappingResult;
@@ -347,13 +346,13 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping", "unknownPackagingType/pom.xml");
     assertNotNull("Expected not null MavenProjectFacade", facade);
     IProject project = facade.getProject();
-    String expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"rar\")";
+    String expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"test-packaging-empty\")";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
         7 /*lineNumber for <packaging>*/, project);
-    WorkspaceHelpers.assertLifecyclePackagingErrorMarkerAttributes(project, "rar");
+    WorkspaceHelpers.assertLifecyclePackagingErrorMarkerAttributes(project, "test-packaging-empty");
 
     ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade);
-    assertTrue(lifecycleMapping instanceof InvalidLifecycleMapping);
+    assertTrue(lifecycleMapping instanceof DefaultLifecycleMapping);
 
     project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
     waitForJobsToComplete();
@@ -362,7 +361,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertEquals(WorkspaceHelpers.toString(errorMarkers), 1, errorMarkers.size());
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
         7 /*lineNumber for <packaging>*/, project);
-    WorkspaceHelpers.assertLifecyclePackagingErrorMarkerAttributes(project, "rar");
+    WorkspaceHelpers.assertLifecyclePackagingErrorMarkerAttributes(project, "test-packaging-empty");
   }
 
   public void testNotInterestingPhaseConfigurator() throws Exception {
@@ -391,7 +390,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
 
     List<MavenProblemInfo> problems = mappingResult.getProblems();
 
-    assertEquals(2, problems.size());
+    assertEquals(problems.toString(), 2, problems.size());
     assertEquals(
         "Conflicting lifecycle mapping metadata (project packaging type=\"test-packaging-a\"). To enable full functionality, remove the conflicting mapping and run Maven->Update Project Configuration.",
         problems.get(0).getMessage());

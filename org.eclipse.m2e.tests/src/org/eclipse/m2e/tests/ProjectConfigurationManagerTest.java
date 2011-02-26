@@ -208,4 +208,14 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     assertNoErrors(project);
   }
 
+  public void testImportJavaProjectWithUnknownPackaging() throws Exception {
+    IProject project = importProject("projects/detectJavaProject/default/pom.xml");
+    assertTrue("default compilerId", project.hasNature(JavaCore.NATURE_ID));
+
+    project = importProject("projects/detectJavaProject/explicitJavac/pom.xml");
+    assertTrue("compilerId=javac", project.hasNature(JavaCore.NATURE_ID));
+
+    project = importProject("projects/detectJavaProject/nonJavac/pom.xml");
+    assertFalse("compilerId=jikes", project.hasNature(JavaCore.NATURE_ID));
+  }
 }
