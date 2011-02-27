@@ -90,7 +90,6 @@ public class ConfigurationUpdateStartupTest extends
 		importMavenProject(BASE_DIR, "simple-pom/pom.xml");
 		// Configuration Errors
 		importMavenProject(BASE_DIR, "notCoveredMojoExecutions/pom.xml");
-		importMavenProject(BASE_DIR, "unknownPackagingType/pom.xml");
 		// Other Maven errors (not selected)
 		importMavenProject(BASE_DIR, "buildError/pom.xml");
 
@@ -101,8 +100,7 @@ public class ConfigurationUpdateStartupTest extends
 		waitForJobsToComplete();
 
 		UpdateConfigurationStartup.saveMarkedProjects();
-		assertEquals("Expected no projects", 2,
-				UpdateConfigurationStartup.getSavedProjects().length);
+    assertEquals("Expected no projects", 1, UpdateConfigurationStartup.getSavedProjects().length);
 	}
 
 	@Test

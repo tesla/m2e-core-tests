@@ -55,18 +55,6 @@ public class MavenDiscoveryMarkerResolutionGeneratorTest extends AbstractLifecyc
     assertEquals(1, resolutions.length);
   }
 
-  @Test
-  public void testCanResolvePackagingMarker() throws Exception {
-    IMavenProjectFacade facade = importMavenProject("projects/discovery", "unknownPackaging/pom.xml");
-    assertNotNull("Expected not null MavenProjectFacade", facade);
-    IProject project = facade.getProject();
-
-    List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
-    assertEquals("Error markers", 1, errorMarkers.size());
-
-    WorkspaceHelpers.assertLifecyclePackagingErrorMarkerAttributes(errorMarkers.get(0), "rar");
-    assertTrue("Resolve packaging marker", generator.hasResolutions(errorMarkers.get(0)));
-  }
 
   @Test
   public void testCanResolveLifecycleIdMarker() throws Exception {
@@ -108,7 +96,7 @@ public class MavenDiscoveryMarkerResolutionGeneratorTest extends AbstractLifecyc
   @Test
   public void testResolveMultipleMarkers() throws Exception {
     ResolverConfiguration configuration = new ResolverConfiguration();
-    IProject[] projects = importProjects("projects/discovery", new String[] {"configurator/pom.xml", "unknownPackaging/pom.xml",
+    IProject[] projects = importProjects("projects/discovery", new String[] {"configurator/pom.xml",
         "lifecycleId/pom.xml", "mojoExecutions/pom.xml"}, configuration);
     waitForJobsToComplete();
 
@@ -129,7 +117,7 @@ public class MavenDiscoveryMarkerResolutionGeneratorTest extends AbstractLifecyc
     //we have a MavenDiscoveryMarkerResolution instance per resource because of 335299, 335490
     //that means we cannot pinpoint exactly the ONE marker that is associated with the findOtherMarkers() call,
     //so we exclude all associated with the file. thus 6->5 in the assert
-    assertEquals(4, resolvable.length);
+    assertEquals(3, resolvable.length);
     assertFalse(Arrays.asList(resolvable).contains(errorMarkers.get(0)));
   }
 }

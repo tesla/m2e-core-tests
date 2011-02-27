@@ -79,18 +79,12 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
 
     List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
     assertNotNull(errorMarkers);
-    assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
+    assertEquals(WorkspaceHelpers.toString(errorMarkers), 1, errorMarkers.size());
 
     String expectedErrorMessage = "Could not resolve artifact testLifecycleMappingMetadata:missing:xml:lifecycle-mapping-metadata:0.0.1";
     IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID,
         expectedErrorMessage, null /*lineNumber*/, project);
     WorkspaceHelpers.assertMarkerLocation(new SourceLocation(17, 11, 25), marker);
-
-    expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"jar\")";
-    marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID,
-        expectedErrorMessage, null /*lineNumber*/, project);
-    WorkspaceHelpers.assertMarkerLocation(new SourceLocation(7, 3, 13), marker);
-    WorkspaceHelpers.assertLifecyclePackagingErrorMarkerAttributes(marker, "jar");
 
     ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade);
     assertTrue(lifecycleMapping instanceof InvalidLifecycleMapping);
@@ -346,22 +340,14 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping", "unknownPackagingType/pom.xml");
     assertNotNull("Expected not null MavenProjectFacade", facade);
     IProject project = facade.getProject();
-    String expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"test-packaging-empty\")";
-    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
-        7 /*lineNumber for <packaging>*/, project);
-    WorkspaceHelpers.assertLifecyclePackagingErrorMarkerAttributes(project, "test-packaging-empty");
+    WorkspaceHelpers.assertNoErrors(project);
 
     ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade);
     assertTrue(lifecycleMapping instanceof DefaultLifecycleMapping);
 
     project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
     waitForJobsToComplete();
-    List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
-    assertNotNull(errorMarkers);
-    assertEquals(WorkspaceHelpers.toString(errorMarkers), 1, errorMarkers.size());
-    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
-        7 /*lineNumber for <packaging>*/, project);
-    WorkspaceHelpers.assertLifecyclePackagingErrorMarkerAttributes(project, "test-packaging-empty");
+    WorkspaceHelpers.assertNoErrors(project);
   }
 
   public void testNotInterestingPhaseConfigurator() throws Exception {
@@ -390,10 +376,12 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
 
     List<MavenProblemInfo> problems = mappingResult.getProblems();
 
-    assertEquals(problems.toString(), 2, problems.size());
+    assertEquals(problems.toString(), 1, problems.size());
     assertEquals(
         "Conflicting lifecycle mapping metadata (project packaging type=\"test-packaging-a\"). To enable full functionality, remove the conflicting mapping and run Maven->Update Project Configuration.",
         problems.get(0).getMessage());
+
+    assertNull(mappingResult.getLifecycleMapping());
   }
 
   public void testDuplicatePluginExecution1() throws Exception {
@@ -480,7 +468,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     IProject project = facade.getProject();
     List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
     assertNotNull(errorMarkers);
-    assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
+    assertEquals(WorkspaceHelpers.toString(errorMarkers), 1, errorMarkers.size());
 
     String expectedErrorMessage = "Incompatible lifecycle mapping plugin version 1000.0.0";
     IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID,
@@ -488,9 +476,8 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
         null /*lineNumber*/, project);
     WorkspaceHelpers.assertMarkerLocation(new SourceLocation(14, 11, 19), marker);
 
-    expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"jar\")";
-    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
-        2 /*lineNumber of <project> for cases without local <packaging> section.*/, project);
+    ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade);
+    assertTrue(lifecycleMapping instanceof InvalidLifecycleMapping);
   }
 
   public void testPackagingTypeMismatch() throws Exception {
@@ -507,16 +494,15 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertNotNull("Expected not null project", project);
     List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
     assertNotNull(errorMarkers);
-    assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
+    assertEquals(WorkspaceHelpers.toString(errorMarkers), 1, errorMarkers.size());
 
     String expectedErrorMessage = "Packaging type test-packaging-a configured in embedded lifecycle mapping configuration does not match the packaging type test-packaging-empty of the current project.";
     IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID,
         expectedErrorMessage, null /*lineNumber*/, project);
     WorkspaceHelpers.assertMarkerLocation(new SourceLocation(25, 11, 25), marker);
 
-    expectedErrorMessage = "Unknown or missing lifecycle mapping (project packaging type=\"test-packaging-empty\")";
-    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
-        7 /*lineNumber*/, project);
+    ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade);
+    assertTrue(lifecycleMapping instanceof InvalidLifecycleMapping);
   }
 
   public void testSameConfiguratorUsedTwice() throws Exception {

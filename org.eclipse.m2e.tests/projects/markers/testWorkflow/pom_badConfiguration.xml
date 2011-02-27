@@ -15,5 +15,26 @@
         <extensions>true</extensions>
       </plugin>
     </plugins>
+
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <lifecycleMappings>
+                <lifecycleMapping>
+                  <packagingType>test-packaging-empty</packagingType>
+                  <lifecycleMappingId>no such lifecycle mapping for test-packaging-empty</lifecycleMappingId>
+                </lifecycleMapping>
+              </lifecycleMappings>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
   </build>
 </project>
