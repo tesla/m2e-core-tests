@@ -9,8 +9,8 @@ import static org.junit.Assert.assertTrue;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.m2e.core.MavenPlugin;
-import org.eclipse.m2e.core.core.Messages;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
+import org.eclipse.m2e.core.ui.internal.Messages;
 import org.eclipse.m2e.integration.tests.common.SwtbotUtil;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.junit.Test;
@@ -34,9 +34,9 @@ public class MngEclipseRefactorRenameMultiProjectTest extends M2EUIIntegrationTe
     try {
       shell.activate();
 
-      bot.textWithLabel(Messages.getString("artifactComponent.groupId")).setText("x.y.z");
-      bot.textWithLabel(Messages.getString("artifactComponent.artifactId")).setText("project2");
-      bot.textWithLabel(Messages.getString("artifactComponent.version")).setText("1.1.1");
+      bot.textWithLabel(Messages.artifactComponentGroupId).setText("x.y.z");
+      bot.textWithLabel(Messages.artifactComponentArtifactId).setText("project2");
+      bot.textWithLabel(Messages.artifactComponentVersion).setText("1.1.1");
       bot.checkBox("Rename Eclipse project in Workspace").select();
       bot.button("OK").click();
     } finally {

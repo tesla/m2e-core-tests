@@ -10,7 +10,7 @@ package org.eclipse.m2e.integration.tests;
 
 import static org.junit.Assert.fail;
 
-import org.eclipse.m2e.core.core.Messages;
+import org.eclipse.m2e.core.ui.internal.Messages;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.junit.Test;
 
@@ -38,12 +38,12 @@ public class MngEclipse1964PomChangeTest extends M2EUIIntegrationTestCase {
     bot.shell("New Project").activate();
     bot.tree().expandNode("Maven").getNode("Maven Project").doubleClick();
 
-    bot.checkBox(Messages.getString("wizard.project.page.project.simpleProject")).select();
+    bot.checkBox(Messages.wizardProjectPageProjectSimpleProject).select();
     bot.button("Next >").click();
 
-    bot.comboBoxWithLabel(Messages.getString("artifactComponent.groupId")).setText("group");
-    bot.comboBoxWithLabel(Messages.getString("artifactComponent.artifactId")).setText("parent");
-    bot.comboBoxWithLabel(Messages.getString("artifactComponent.packaging")).setText("pom");
+    bot.comboBoxWithLabel(Messages.artifactComponentGroupId).setText("group");
+    bot.comboBoxWithLabel(Messages.artifactComponentArtifactId).setText("parent");
+    bot.comboBoxWithLabel(Messages.artifactComponentPackaging).setText("pom");
     bot.button("Finish").click();
 
     waitForAllBuildsToComplete();
@@ -60,10 +60,10 @@ public class MngEclipse1964PomChangeTest extends M2EUIIntegrationTestCase {
     bot.tree().expandNode("Maven").getNode("Maven Module").doubleClick();
 
     // child project
-    bot.checkBox(Messages.getString("wizard.project.page.project.simpleProject")).select();
-    bot.comboBoxWithLabel(Messages.getString("wizard.module.page.parent.moduleName")).setText("child");
-    bot.button(Messages.getString("wizard.module.page.parent.browse")).click();
-    bot.shell(Messages.getString("projectSelectionDialog.title")).activate();
+    bot.checkBox(Messages.wizardProjectPageProjectSimpleProject).select();
+    bot.comboBoxWithLabel(Messages.wizardModulePageParentModuleName).setText("child");
+    bot.button(Messages.wizardModulePageParentBrowse).click();
+    bot.shell(Messages.projectSelectionDialogTitle).activate();
     bot.tree().getTreeItem("parent").doubleClick();
     bot.button("Finish").click();
 

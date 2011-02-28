@@ -12,7 +12,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.m2e.core.core.Messages;
+import org.eclipse.m2e.core.ui.internal.Messages;
 import org.eclipse.m2e.integration.tests.common.SwtbotUtil;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.junit.Ignore;
@@ -84,9 +84,9 @@ public class MNGEclipse1687ArchetypeCreationTest extends M2EUIIntegrationTestCas
         takeScreenShot(ex);
       }
 
-      bot.comboBoxWithLabel(Messages.getString("artifactComponent.groupId")).setText("org.sonatype.test");
-      bot.comboBoxWithLabel(Messages.getString("artifactComponent.artifactId")).setText(PROJECT_NAME);
-      bot.comboBoxWithLabel(Messages.getString("artifactComponent.package")).setText("org.sonatype.test");
+      bot.comboBoxWithLabel(Messages.artifactComponentGroupId).setText("org.sonatype.test");
+      bot.comboBoxWithLabel(Messages.artifactComponentArtifactId).setText(PROJECT_NAME);
+      bot.comboBoxWithLabel(Messages.artifactComponentPackage).setText("org.sonatype.test");
       bot.button("Finish").click();
     } finally {
       SwtbotUtil.waitForClose(shell);
