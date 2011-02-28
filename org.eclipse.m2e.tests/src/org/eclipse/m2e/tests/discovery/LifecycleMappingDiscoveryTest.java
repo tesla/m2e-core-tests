@@ -55,6 +55,16 @@ public class LifecycleMappingDiscoveryTest extends AbstractMavenProjectTestCase 
     assertSame(catalogItem, ((InstallCatalogItemMavenDiscoveryProposal) proposals.get(0)).getCatalogItem());
   }
 
+  private CatalogItem newCatalogItem(MavenDiscoveryService srv, String metadataPath) throws Exception {
+    CatalogItem item = new CatalogItem();
+    item.setSiteUrl(metadataPath);
+    item.setInstallableUnits(Arrays.asList(metadataPath));
+
+    srv.addCatalogItem(item, readLifecycleMappingMetadata(metadataPath));
+
+    return item;
+  }
+
   public void testNoProposals() throws CoreException {
 
     LifecycleMappingConfiguration configuration = loadMappingConfiguration(new File(
@@ -78,15 +88,9 @@ public class LifecycleMappingDiscoveryTest extends AbstractMavenProjectTestCase 
 
     MavenDiscoveryService srv = new MavenDiscoveryService();
 
-    CatalogItem[] items = new CatalogItem[] {new CatalogItem(), new CatalogItem()};
-
-    items[0].setSiteUrl("0");
-    items[0].setInstallableUnits(Arrays.asList("0"));
-    items[1].setSiteUrl("1");
-    items[1].setInstallableUnits(Arrays.asList("1"));
-
-    srv.addCatalogItem(items[0], readLifecycleMappingMetadata("projects/discovery/match-test-packaging-a.xml"));
-    srv.addCatalogItem(items[1], readLifecycleMappingMetadata("projects/discovery/match-test-goal-1-and-2.xml"));
+    List<CatalogItem> items = new ArrayList<CatalogItem>();
+    items.add(newCatalogItem(srv, "projects/discovery/match-test-packaging-a.xml"));
+    items.add(newCatalogItem(srv, "projects/discovery/match-test-goal-1-and-2.xml"));
 
     ProjectLifecycleMappingConfiguration project = configuration.getProjects().get(0);
     Map<ILifecycleMappingElementKey, List<IMavenDiscoveryProposal>> proposals = srv.discover(project.getMavenProject(),
@@ -97,13 +101,13 @@ public class LifecycleMappingDiscoveryTest extends AbstractMavenProjectTestCase 
     List<ILifecycleMappingElementKey> elementKeys = new ArrayList<ILifecycleMappingElementKey>(proposals.keySet());
 
     assertEquals("test-packaging-a", ((PackagingTypeMappingConfiguration.Key) elementKeys.get(0)).getPackaging());
-    assertInstallCatalogItemProposal(items[0], proposals.get(elementKeys.get(0)));
+    assertInstallCatalogItemProposal(items.get(0), proposals.get(elementKeys.get(0)));
 
     assertEquals("test-goal-1", ((MojoExecutionMappingConfiguration.Key) elementKeys.get(1)).getExecution().getGoal());
-    assertInstallCatalogItemProposal(items[1], proposals.get(elementKeys.get(1)));
+    assertInstallCatalogItemProposal(items.get(1), proposals.get(elementKeys.get(1)));
 
     assertEquals("test-goal-2", ((MojoExecutionMappingConfiguration.Key) elementKeys.get(2)).getExecution().getGoal());
-    assertInstallCatalogItemProposal(items[1], proposals.get(elementKeys.get(2)));
+    assertInstallCatalogItemProposal(items.get(1), proposals.get(elementKeys.get(2)));
   }
 
   public void testPreselectedProposals() throws Exception {
@@ -142,9 +146,84 @@ public class LifecycleMappingDiscoveryTest extends AbstractMavenProjectTestCase 
     }
     configuration.setProposals(allproposals);
     assertFalse(configuration.isMappingComplete());
-    
+
     configuration.addSelectedProposal(proposal);
 
     assertTrue(configuration.isMappingComplete());
+  }
+
+  public void testAutomaticSelectionOfSingleProposal() throws Exception {
+    LifecycleMappingConfiguration configuration = loadMappingConfiguration(new File(
+        "projects/discovery/twoMojoExecutions/pom.xml"));
+
+    MavenDiscoveryService srv = new MavenDiscoveryService();
+
+    List<CatalogItem> items = new ArrayList<CatalogItem>();
+    items.add(newCatalogItem(srv, "projects/discovery/match-test-packaging-a.xml"));
+    items.add(newCatalogItem(srv, "projects/discovery/match-test-goal-1-and-2.xml"));
+
+    ProjectLifecycleMappingConfiguration project = configuration.getProjects().get(0);
+    Map<ILifecycleMappingElementKey, List<IMavenDiscoveryProposal>> proposals = srv.discover(project.getMavenProject(),
+        project.getMojoExecutions(), new ArrayList<IMavenDiscoveryProposal>(), monitor);
+
+    assertEquals(3, proposals.size());
+
+    configuration.setProposals(proposals);
+
+    // sanity check
+    assertEquals(0, configuration.getSelectedProposals().size());
+
+    assertTrue(configuration.autoCompleteMapping());
+
+    List<ILifecycleMappingElementKey> elementKeys = new ArrayList<ILifecycleMappingElementKey>(proposals.keySet());
+
+    PackagingTypeMappingConfiguration.Key packagingType = (PackagingTypeMappingConfiguration.Key) elementKeys.get(0);
+    MojoExecutionMappingConfiguration.Key goal1 = (MojoExecutionMappingConfiguration.Key) elementKeys.get(1);
+    MojoExecutionMappingConfiguration.Key goal2 = (MojoExecutionMappingConfiguration.Key) elementKeys.get(2);
+
+    assertEquals("test-packaging-a", packagingType.getPackaging());
+    assertEquals("test-goal-1", goal1.getExecution().getGoal());
+    assertEquals("test-goal-2", goal2.getExecution().getGoal());
+
+    assertNull(configuration.getSelectedProposal(packagingType)); // packaging type is mapped by default, make sure we don't override the mapping
+    assertSame(items.get(1),
+        ((InstallCatalogItemMavenDiscoveryProposal) configuration.getSelectedProposal(goal1)).getCatalogItem());
+    assertSame(items.get(1),
+        ((InstallCatalogItemMavenDiscoveryProposal) configuration.getSelectedProposal(goal2)).getCatalogItem());
+
+  }
+
+  public void testAutomaticSelectionWithAmbiguousProposals() throws Exception {
+    LifecycleMappingConfiguration configuration = loadMappingConfiguration(new File(
+        "projects/discovery/twoMojoExecutions/pom.xml"));
+
+    MavenDiscoveryService srv = new MavenDiscoveryService();
+
+    // can't choose between match and another-match automatically
+    List<CatalogItem> items = new ArrayList<CatalogItem>();
+    items.add(newCatalogItem(srv, "projects/discovery/match-test-goal-1.xml"));
+    items.add(newCatalogItem(srv, "projects/discovery/another-match-test-goal-1.xml"));
+
+    ProjectLifecycleMappingConfiguration project = configuration.getProjects().get(0);
+    Map<ILifecycleMappingElementKey, List<IMavenDiscoveryProposal>> proposals = srv.discover(project.getMavenProject(),
+        project.getMojoExecutions(), new ArrayList<IMavenDiscoveryProposal>(), monitor);
+
+    assertEquals(1, proposals.size());
+
+    configuration.setProposals(proposals);
+
+    // sanity check
+    assertFalse(configuration.isMappingComplete());
+    assertEquals(0, configuration.getSelectedProposals().size());
+
+    configuration.autoCompleteMapping();
+
+    List<ILifecycleMappingElementKey> elementKeys = new ArrayList<ILifecycleMappingElementKey>(proposals.keySet());
+
+    MojoExecutionMappingConfiguration.Key goal1 = (MojoExecutionMappingConfiguration.Key) elementKeys.get(0);
+
+    assertEquals("test-goal-1", goal1.getExecution().getGoal());
+
+    assertNull(configuration.getSelectedProposal(goal1));
   }
 }
