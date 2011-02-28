@@ -117,15 +117,15 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     MavenPlugin.getDefault().getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
     project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
     waitForJobsToComplete();
-    expectedErrorMessage = "Exception: " + ThrowBuildExceptionProjectConfigurator.ERROR_MESSAGE;
+    expectedErrorMessage = ThrowBuildExceptionProjectConfigurator.ERROR_MESSAGE;
     IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_BUILD_ID, expectedErrorMessage,
-        null /*lineNumber*/, project);
+        2 /*lineNumber*/, project);
 
     // Verify that the marker is removed by a new build
     project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
     waitForJobsToComplete();
     IMarker newMarker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_BUILD_ID, expectedErrorMessage,
-        null /*lineNumber*/, project);
+        2 /*lineNumber*/, project);
     assertFalse(marker.getId() == newMarker.getId());
   }
 
