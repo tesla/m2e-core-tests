@@ -19,11 +19,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.maven.execution.MavenExecutionRequest;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
+
+import org.apache.maven.execution.MavenExecutionRequest;
+
 import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.internal.lifecyclemapping.DefaultLifecycleMapping;
 import org.eclipse.m2e.core.internal.lifecyclemapping.InvalidLifecycleMapping;
@@ -597,5 +599,27 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     Map<MojoExecutionKey, List<AbstractBuildParticipant>> buildParticipants = lifecycleMapping.getBuildParticipants(
         facade, monitor);
     assertEquals(0, buildParticipants.size());
+  }
+
+  public void testFailToGetPluginParameterValue() throws Exception {
+    MavenProjectFacade facade = (MavenProjectFacade) importMavenProject("projects/lifecyclemapping",
+        "testFailToGetPluginParameterValue/pom.xml");
+    assertNotNull("Expected not null MavenProjectFacade", facade);
+
+    LifecycleMappingResult mappingResult = LifecycleMappingFactory.calculateLifecycleMapping(plugin.getMaven()
+        .createExecutionRequest(monitor), facade, monitor);
+
+    List<MavenProblemInfo> problems = mappingResult.getProblems();
+
+    assertEquals(problems.toString(), 2, problems.size());
+    assertTrue(
+        problems.get(0).toString(),
+        problems.get(0).getMessage()
+            .contains("Plugin missing:missing:1.0.0 or one of its dependencies could not be resolved"));
+    assertEquals(
+        "Plugin execution not covered by lifecycle configuration: missing:missing:1.0.0:run (execution: test, phase: compile)",
+        problems.get(1).getMessage());
+    // [0] CoreException: Could not calculate build plan: Plugin missing:missing:1.0.0 or one of its dependencies could not be resolved: Failed to read artifact descriptor for missing:missing:jar:1.0.0: ArtifactResolutionException: Failure to find missing:missing:pom:1.0.0 in file:repositories/testrepo was cached in the local repository, resolution will not be reattempted until the update interval of testrepo has elapsed or updates are forced
+    // [1] Plugin execution not covered by lifecycle configuration: missing:missing:1.0.0:run (execution: test, phase: compile))
   }
 }
