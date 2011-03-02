@@ -5,13 +5,14 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
-import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.ArtifactKey;
+import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
+import org.eclipse.m2e.editor.composites.ParentGatherer;
 import org.eclipse.m2e.editor.pom.MavenPomEditor;
 import org.eclipse.m2e.model.edit.pom.Dependency;
 import org.eclipse.m2e.model.edit.pom.Exclusion;
@@ -20,11 +21,8 @@ import org.eclipse.m2e.refactoring.exclude.ExcludeArtifactRefactoring;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
@@ -68,9 +66,12 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 		waitForJobsToComplete();
 
 		new FindEditorRunnable(project.getFile("pom.xml")).open();
-		Refactoring refactoring = new ExcludeArtifactRefactoring( project.getFile("pom.xml"), new ArtifactKey[] { MISSING });
+		ExcludeArtifactRefactoring refactoring = createRefactoring(project.getFile("pom.xml"), new ArtifactKey[] { MISSING });
 		RefactoringStatus status = refactoring.checkInitialConditions(monitor);
-		assertEquals("Expected FATAL status from checkInitialConditions: ", RefactoringStatus.FATAL, status.getSeverity());
+		assertEquals("Expected OK status from checkInitialConditions: ", RefactoringStatus.OK, status.getSeverity());
+
+		status = refactoring.checkFinalConditions(monitor);
+		assertEquals("Expected FATAL status from checkFinalConditions: ", RefactoringStatus.FATAL, status.getSeverity());
 		assertMessage("Unexpected message", "No pom found for operation", status);
 	}
 
@@ -82,7 +83,7 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 		waitForJobsToComplete();
 
 		new FindEditorRunnable(project.getFile("pom.xml")).open();
-		Refactoring refactoring = new ExcludeArtifactRefactoring( project.getFile("pom.xml"), new ArtifactKey[] { VALID });
+		ExcludeArtifactRefactoring refactoring = createRefactoring(project.getFile("pom.xml"), new ArtifactKey[] { VALID });
 		RefactoringStatus status = refactoring.checkInitialConditions(monitor);
 		assertTrue("Expected OK status from checkInitialConditions: " + status.toString(), status.isOK());
 
@@ -109,7 +110,7 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 		IProject project = getProject(projects, "workspaceParentModule");
 
 		new FindEditorRunnable(project.getFile("pom.xml")).open();
-		Refactoring refactoring = new ExcludeArtifactRefactoring(project.getFile("pom.xml"), new ArtifactKey[] { VALID });
+		ExcludeArtifactRefactoring refactoring = createRefactoring(project.getFile("pom.xml"), new ArtifactKey[] { VALID });
 		RefactoringStatus status = refactoring.checkInitialConditions(monitor);
 		assertTrue("Expected OK status from checkInitialConditions: " + status.toString(), status.isOK());
 
@@ -137,7 +138,7 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 		waitForJobsToComplete();
 		IProject project = getProject(projects, "workspaceParentWithDependencyModule");
 		new FindEditorRunnable(project.getFile("pom.xml")).open();
-		Refactoring refactoring = new ExcludeArtifactRefactoring(project.getFile("pom.xml"), new ArtifactKey[] { VALID });
+		ExcludeArtifactRefactoring refactoring = createRefactoring(project.getFile("pom.xml"), new ArtifactKey[] { VALID });
 		RefactoringStatus status = refactoring.checkInitialConditions(monitor);
 		assertTrue("Expected OK status from checkInitialConditions: " + status.toString(), status.isOK());
 
@@ -146,12 +147,12 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 
 		Change change = refactoring.createChange(monitor);
 		assertTrue(change.isEnabled());
-		assertAffected("Expected parent to be changed", getProject(projects, "workspaceParentWithDependencyProject").getFile("pom.xml"), change);
+		assertAffected("Expected parent to be changed", getProject(projects, "workspaceParentWithDependencyModule").getFile("pom.xml"), change);
 
 		Change undo = change.perform(monitor);
 		assertNotNull("Undo Operation", undo);
 
-		assertExclusionSet("pom has exclusion set", getProject(projects, "workspaceParentWithDependencyProject"), ROOT, VALID);
+		assertExclusionSet("pom has exclusion set", getProject(projects, "workspaceParentWithDependencyModule"), ROOT, VALID);
 	}
 
 	/*
@@ -162,7 +163,7 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 		waitForJobsToComplete();
 
 		new FindEditorRunnable(project.getFile("pom.xml")).open();
-		Refactoring refactoring = new ExcludeArtifactRefactoring(project.getFile("pom.xml"), new ArtifactKey[] { VALID });
+		ExcludeArtifactRefactoring refactoring = createRefactoring(project.getFile("pom.xml"), new ArtifactKey[] { VALID });
 		RefactoringStatus status = refactoring.checkInitialConditions(monitor);
 		assertTrue("Expected OK status from checkInitialConditions: " + status.toString(), status.isOK());
 
@@ -188,10 +189,23 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 		waitForJobsToComplete();
 
 		new FindEditorRunnable(project.getFile("pom.xml")).open();
-		Refactoring refactoring = new ExcludeArtifactRefactoring(project.getFile("pom.xml"), new ArtifactKey[] { VALID, MISSING });
+		ExcludeArtifactRefactoring refactoring = createRefactoring(project.getFile("pom.xml"), new ArtifactKey[] { VALID, MISSING });
 		RefactoringStatus status = refactoring.checkInitialConditions(monitor);
-		assertEquals("Expected FATAL status from checkInitialConditions: ", RefactoringStatus.FATAL, status.getSeverity());
-		assertMessage("Missing Dependency Expected", "Failed to locate: a-fake-artifact:that-should-never-exist:1.2.3", status);
+		assertEquals("Expected OK status from checkInitialConditions: ", RefactoringStatus.OK, status.getSeverity());
+
+		status = refactoring.checkFinalConditions(monitor);
+		assertEquals("Expected FATAL status from checkFinalConditions: ", RefactoringStatus.ERROR, status.getSeverity());
+		assertMessage("Missing Dependency Expected", "Unable to locate source for dependency a-fake-artifact:that-should-never-exist:1.2.3 in the workspace.", status);
+
+		Change change = refactoring.createChange(monitor);
+		assertTrue(change.isEnabled());
+
+		assertAffected("Expected change to affect pom.xml", project.getFile("pom.xml"), change);
+		Change undo = change.perform(monitor);
+		assertTrue("Editor is dirty", editor.isDirty());
+		assertNotNull("Undo Operation", undo);
+
+		assertExclusionSet("pom has exclusion set", editor, ROOT, VALID);
 	}
 
 	/*
@@ -202,9 +216,8 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 		waitForJobsToComplete();
 
 		IProject module = getProject(projects, "workspaceParent2Module");
-		IProject project = getProject(projects, "workspaceParent2Project");
 		new FindEditorRunnable(module.getFile("pom.xml")).open();
-		Refactoring refactoring = new ExcludeArtifactRefactoring(module.getFile("pom.xml"), new ArtifactKey[] { VALID, VALID3 });
+		ExcludeArtifactRefactoring refactoring = createRefactoring(module.getFile("pom.xml"), new ArtifactKey[] { VALID, VALID3 });
 		RefactoringStatus status = refactoring.checkInitialConditions(monitor);
 		assertTrue("Expected OK status from checkInitialConditions: " + status.toString(), status.isOK());
 
@@ -215,13 +228,12 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 		assertTrue(change.isEnabled());
 
 		assertAffected("Expected change to affect pom.xml", module.getFile("pom.xml"), change);
-		assertAffected("Expected change to affect pom.xml", project.getFile("pom.xml"), change);
 		Change undo = change.perform(monitor);
 		assertTrue("Editor is dirty", editor.isDirty());
 		assertNotNull("Undo Operation", undo);
 
 		assertExclusionSet("pom has exclusion set", editor, ROOT, VALID);
-		assertExclusionSet("pom has exclusion set", project, ROOT2, VALID3);
+		assertExclusionSet("pom has exclusion set", editor, ROOT2, VALID3);
 	}
 
 	/*
@@ -232,8 +244,7 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 		waitForJobsToComplete();
 
 		new FindEditorRunnable(project.getFile("pom.xml")).open();
-		Refactoring refactoring = new ExcludeArtifactRefactoring(
-				project.getFile("pom.xml"), new ArtifactKey[] { VALID, VALID2 });
+		ExcludeArtifactRefactoring refactoring = createRefactoring(project.getFile("pom.xml"), new ArtifactKey[] { VALID, VALID2 });
 		RefactoringStatus status = refactoring.checkInitialConditions(monitor);
 		assertTrue("Expected OK status from checkInitialConditions: " + status.toString(), status.isOK());
 
@@ -260,7 +271,7 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 		waitForJobsToComplete();
 
 		new FindEditorRunnable(project.getFile("pom.xml")).open();
-		Refactoring refactoring = new ExcludeArtifactRefactoring( project.getFile("pom.xml"), new ArtifactKey[] { VALID });
+		ExcludeArtifactRefactoring refactoring = createRefactoring(project.getFile("pom.xml"), new ArtifactKey[] { VALID });
 		RefactoringStatus status = refactoring.checkInitialConditions(monitor);
 		assertTrue("Expected OK status from checkInitialConditions: " + status.toString(), status.isOK());
 
@@ -276,6 +287,15 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 		assertNotNull("Undo Operation", undo);
 
 		assertExclusionSet("pom has exclusion set", editor, ROOT, VALID);
+	}
+
+	private static ExcludeArtifactRefactoring createRefactoring(IFile pomFile, ArtifactKey[] keys) throws CoreException {
+		ExcludeArtifactRefactoring refactoring = new ExcludeArtifactRefactoring(pomFile, keys);
+		IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectManager().create(pomFile, true, monitor);
+		ParentGatherer g = new ParentGatherer(facade.getMavenProject(monitor), facade);
+		refactoring.setHierarchy(g.getParentHierarchy(monitor));
+		refactoring.setExclusionPoint(facade.getMavenProject(monitor));
+		return refactoring;
 	}
 
 	private class FindEditorRunnable implements Runnable {
@@ -320,24 +340,6 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 			}
 		}
 		fail("Failed to locate project " + name);
-		return null;
-	}
-
-	private Model getModelFromEditor() throws Exception {
-		if (editor != null) {
-			return editor.readProjectDocument();
-		}
-		for (IWorkbenchWindow window : PlatformUI.getWorkbench().getWorkbenchWindows()) {
-			for (IWorkbenchPage page : window.getPages()) {
-				for (IEditorReference ref : page.getEditorReferences()) {
-					IEditorPart part = ref.getEditor(true);
-					if (part != null && part instanceof MavenPomEditor) {
-						return ((MavenPomEditor) part).readProjectDocument();
-					}
-				}
-			}
-		}
-		fail("Failed to get Model");
 		return null;
 	}
 
