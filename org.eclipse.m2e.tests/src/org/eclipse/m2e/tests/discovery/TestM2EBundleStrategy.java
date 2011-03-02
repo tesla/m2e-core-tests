@@ -11,7 +11,6 @@ import org.eclipse.equinox.internal.p2.discovery.AbstractCatalogSource;
 import org.eclipse.equinox.internal.p2.discovery.Policy;
 import org.eclipse.equinox.internal.p2.discovery.compatibility.BundleDiscoverySource;
 import org.eclipse.equinox.internal.p2.discovery.compatibility.ConnectorDiscoveryExtensionReader;
-import org.eclipse.equinox.internal.p2.discovery.compatibility.Messages;
 import org.eclipse.m2e.internal.discovery.strategy.M2ERemoteBundleDiscoveryStrategy;
 
 @SuppressWarnings("restriction")
@@ -24,7 +23,7 @@ public class TestM2EBundleStrategy extends M2ERemoteBundleDiscoveryStrategy {
 		}
 		IExtensionPoint extensionPoint = getExtensionRegistry().getExtensionPoint(ConnectorDiscoveryExtensionReader.EXTENSION_POINT_ID);
 		IExtension[] extensions = extensionPoint.getExtensions();
-		monitor.beginTask(Messages.BundleDiscoveryStrategy_task_loading_local_extensions, extensions.length == 0 ? 1 : extensions.length);
+		monitor.beginTask("Loading local extensions", extensions.length == 0 ? 1 : extensions.length);
 		try {
 			if (extensions.length > 0) {
 				processExtensions(new SubProgressMonitor(monitor, extensions.length), extensions);
