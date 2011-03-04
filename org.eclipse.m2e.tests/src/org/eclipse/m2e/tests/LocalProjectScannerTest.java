@@ -106,7 +106,7 @@ public class LocalProjectScannerTest extends TestCase {
 
 	    //the point of asserts here is to verify the to_skip/pom.xml ones didn't get in
 	    MavenProjectInfo parent = projects.get(0);
-	    assertEquals("/pom.xml", parent.getLabel());
+	    assertEquals("/aparent/pom.xml", parent.getLabel());
 	    assertEquals(new File(baseDir, "aparent/pom.xml"), parent.getPomFile());
 
 	    List<MavenProjectInfo> modules = new ArrayList<MavenProjectInfo>(parent.getProjects());
@@ -133,7 +133,7 @@ public class LocalProjectScannerTest extends TestCase {
     assertEquals(1, projects.size());
 
     MavenProjectInfo parent = projects.get(0);
-    assertEquals("/pom.xml", parent.getLabel());
+    assertEquals("/parent/pom.xml", parent.getLabel());
     assertEquals(new File(baseDir, "pom.xml"), parent.getPomFile());
 
     List<MavenProjectInfo> modules = new ArrayList<MavenProjectInfo>(parent.getProjects());
