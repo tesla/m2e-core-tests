@@ -63,6 +63,64 @@ public class LocalProjectScannerTest extends TestCase {
     assertEquals("submodule/pom.xml", submodule.getLabel());
     assertEquals(new File(baseDir, "module/submodule/pom.xml"), submodule.getPomFile());
   }
+  
+  /**
+   * the modules can be referenced either by <module>path</module> or by <module>path/pom.xml</module>
+   * @throws Exception
+   */
+  public void testModuleReferencedByFile() throws Exception {
+	    File baseDir = new File("projects/localprojectscanner/module_referenced_by_file/parent").getCanonicalFile();
+
+	    LocalProjectScanner scanner = new LocalProjectScanner(baseDir, baseDir.getAbsolutePath(), false, modelManager);
+	    scanner.run(new NullProgressMonitor());
+
+	    List<MavenProjectInfo> projects = scanner.getProjects();
+	    assertEquals(1, projects.size());
+
+	    MavenProjectInfo parent = projects.get(0);
+	    assertEquals("/pom.xml", parent.getLabel());
+	    assertEquals(new File(baseDir, "pom.xml"), parent.getPomFile());
+
+	    List<MavenProjectInfo> modules = new ArrayList<MavenProjectInfo>(parent.getProjects());
+	    assertEquals(1, modules.size());
+
+	    MavenProjectInfo module = modules.get(0);
+	    assertEquals("module/pom.xml", module.getLabel());
+	    assertEquals(new File(baseDir, "module/pom.xml"), module.getPomFile());
+
+	  }  
+  
+  /**
+   * when scanning a directory without a pom file, iterate the children recursively to find poms, but never include
+   * projects inside projects if not referenced via <modules>. Preventive measure against including test poms and traversing the tree very deep. 
+   * @throws Exception
+   */
+  public void testSkipNested() throws Exception {
+	    File baseDir = new File("projects/localprojectscanner/skip_nested").getCanonicalFile();
+
+	    LocalProjectScanner scanner = new LocalProjectScanner(baseDir, baseDir.getAbsolutePath(), false, modelManager);
+	    scanner.run(new NullProgressMonitor());
+
+	    List<MavenProjectInfo> projects = scanner.getProjects();
+	    assertEquals(1, projects.size()); //mkleint: here it's currently very error prone, depends on which folder comes first
+
+	    //the point of asserts here is to verify the to_skip/pom.xml ones didn't get in
+	    MavenProjectInfo parent = projects.get(0);
+	    assertEquals("/pom.xml", parent.getLabel());
+	    assertEquals(new File(baseDir, "aparent/pom.xml"), parent.getPomFile());
+
+	    List<MavenProjectInfo> modules = new ArrayList<MavenProjectInfo>(parent.getProjects());
+	    assertEquals(1, modules.size());
+
+	    MavenProjectInfo module = modules.get(0);
+	    assertEquals("../module/pom.xml", module.getLabel());
+
+	    List<MavenProjectInfo> submodules = new ArrayList<MavenProjectInfo>(module.getProjects());
+	    assertEquals(1, submodules.size());
+
+	    MavenProjectInfo submodule = submodules.get(0);
+	    assertEquals("submodule/pom.xml", submodule.getLabel());
+	  }  
 
   public void testDeepNesting002() throws Exception {
     File baseDir = new File("projects/localprojectscanner/deepnesting/parent").getCanonicalFile();
