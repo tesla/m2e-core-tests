@@ -3,16 +3,11 @@ package org.eclipse.m2e.tests;
 
 import java.util.List;
 
-import org.eclipse.core.resources.IProject;
-
 import org.apache.maven.RepositoryUtils;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.project.MavenProject;
-
-import org.sonatype.aether.graph.Dependency;
-import org.sonatype.aether.util.artifact.DefaultArtifactTypeRegistry;
-
+import org.eclipse.core.resources.IProject;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.internal.markers.SourceLocation;
 import org.eclipse.m2e.core.internal.markers.SourceLocationHelper;
@@ -23,6 +18,8 @@ import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.core.project.configurator.MojoExecutionKey;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
+import org.sonatype.aether.graph.Dependency;
+import org.sonatype.aether.util.artifact.DefaultArtifactTypeRegistry;
 
 
 @SuppressWarnings("restriction")
@@ -78,7 +75,6 @@ public class SourceLocationHelperTest extends AbstractMavenProjectTestCase {
     assertNotNull("Expected not null MavenProjectFacade", facade);
     IProject project = facade.getProject();
     WorkspaceHelpers.assertNoErrors(project);
-    MavenProject parent1MavenProject = facade.getMavenProject();
 
     facade = importMavenProject("projects/markers/SourceLocationHelperTest/testMojoExecutionLocationWithExecutions",
         "parent1/parent2/pom.xml");
@@ -161,7 +157,6 @@ public class SourceLocationHelperTest extends AbstractMavenProjectTestCase {
     IMavenProjectFacade facade = importMavenProject("projects/markers/SourceLocationHelperTest/testDependencyLocation",
         "parent/pom.xml");
     assertNotNull("Expected not null MavenProjectFacade", facade);
-    IProject project = facade.getProject();
     MavenProject parentMavenProject = facade.getMavenProject();
     // Dependency from current pom
     Dependency dependency = getDependency("missing", "missing-parent1", parentMavenProject);
@@ -174,7 +169,6 @@ public class SourceLocationHelperTest extends AbstractMavenProjectTestCase {
     facade = importMavenProject("projects/markers/SourceLocationHelperTest/testDependencyLocation",
         "parent/child/pom.xml");
     assertNotNull("Expected not null MavenProjectFacade", facade);
-    project = facade.getProject();
     MavenProject mavenProject = facade.getMavenProject();
     // Dependency from current pom
     dependency = getDependency("missing", "missing-parent2", mavenProject);
