@@ -239,11 +239,9 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
 
     IMarker[] markers = p2.findMarkers(null, true, IResource.DEPTH_INFINITE);
     assertEquals(WorkspaceHelpers.toString(markers), 1, markers.length);
-    WorkspaceHelpers
-        .assertErrorMarker(
-            IMavenConstants.MARKER_POM_LOADING_ID,
-            "Project build error: Non-resolvable parent POM: Failure to find t001:t001-p3:pom:0.0.1-SNAPSHOT",
-            1 /*lineNumber*/, p2);
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_POM_LOADING_ID,
+        "Project build error: Non-resolvable parent POM: Failure to find t001:t001-p3:pom:0.0.1-SNAPSHOT",
+        6 /*lineNumber*/, p2);
 
     IProject p3 = createExisting("t001-p3");
     waitForJobsToComplete();
