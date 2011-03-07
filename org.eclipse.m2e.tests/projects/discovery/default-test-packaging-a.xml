@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lifecycleMappingMetadata>
+  <lifecycleMappings>
+    <lifecycleMapping>
+      <packagingType>test-packaging-a</packagingType>
+      <lifecycleMappingId>TEST</lifecycleMappingId>
+    </lifecycleMapping>
+  </lifecycleMappings>
+  <pluginExecutions>
+    <pluginExecution>
+      <pluginExecutionFilter>
+        <groupId>org.eclipse.m2e.test.lifecyclemapping</groupId>
+        <artifactId>test-lifecyclemapping-plugin</artifactId>
+        <versionRange>[1.0.0,)</versionRange>
+        <goals>
+          <goal>test-goal-1</goal>
+          <goal>test-goal-2</goal>
+        </goals>
+      </pluginExecutionFilter>
+      <action>
+        <configurator>
+          <id>org.eclipse.m2e.configurator.test</id>
+        </configurator>
+      </action>
+    </pluginExecution>
+  </pluginExecutions>
+</lifecycleMappingMetadata>
