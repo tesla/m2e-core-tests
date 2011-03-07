@@ -15,7 +15,9 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import junit.framework.TestCase;
 
@@ -59,7 +61,7 @@ public class MavenDiscoveryTest extends TestCase implements IShellProvider {
     catalog = new Catalog();
     catalog.setEnvironment(DiscoveryCore.createEnvironment());
     catalog.setVerifyUpdateSiteAvailability(false);
-	catalog.getDiscoveryStrategies().add(new TestM2EBundleStrategy());
+    catalog.getDiscoveryStrategies().add(new TestM2EBundleStrategy());
 
     // Build the list of tags to show in the Wizard header
     catalog.setTags(Collections.singletonList(MavenDiscovery.APPLICABLE_TAG));
@@ -234,5 +236,36 @@ public class MavenDiscoveryTest extends TestCase implements IShellProvider {
     });
 
     assertNull(MavenDiscovery.getLifecycleMappingMetadataSource(item));
+  }
+
+  public void testCatalogItemExtensionsMetadata() throws Exception {
+    final File pluginxml = new File("projects/discovery/projectConfigurator.pluginxml").getCanonicalFile();
+
+    CatalogItem item = new CatalogItem();
+    item.setSource(new AbstractCatalogSource() {
+
+      @Override
+      public URL getResource(String resourceName) {
+        try {
+          return pluginxml.toURL();
+        } catch(MalformedURLException e) {
+          throw new RuntimeException(e);
+        }
+      }
+
+      @Override
+      public Object getId() {
+        return pluginxml;
+      }
+    });
+
+    item.setName("name");
+    item.setId("id");
+
+    List<String> configurators = new ArrayList<String>();
+    MavenDiscovery.getProvidedProjectConfigurators(item, configurators, new ArrayList<String>());
+
+    assertEquals(1, configurators.size());
+    assertEquals("LifecycleMappingTest.projectConfigurator", configurators.get(0));
   }
 }

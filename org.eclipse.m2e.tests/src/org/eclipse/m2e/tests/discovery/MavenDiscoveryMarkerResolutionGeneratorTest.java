@@ -68,10 +68,10 @@ public class MavenDiscoveryMarkerResolutionGeneratorTest extends AbstractLifecyc
     List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
     assertEquals("Error markers", 1, errorMarkers.size());
 
-    String expectedErrorMessage = "Lifecycle mapping \"unknown-or-missing\" is not available. To enable full functionality, install the lifecycle mapping and run Maven->Update Project Configuration.";
+    String expectedErrorMessage = "Lifecycle mapping \"lifecycleId\" is not available. To enable full functionality, install the lifecycle mapping and run Maven->Update Project Configuration.";
     IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
         null /*lineNumber*/, project);
-    WorkspaceHelpers.assertLifecycleIdErrorMarkerAttributes(marker, "unknown-or-missing");
+    WorkspaceHelpers.assertLifecycleIdErrorMarkerAttributes(marker, "lifecycleId");
     assertTrue("Resolve packaging marker", generator.hasResolutions(marker));
   }
 

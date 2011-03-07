@@ -17,7 +17,7 @@
               <lifecycleMappings>
                 <lifecycleMapping>
                   <packagingType>jar</packagingType>
-                  <lifecycleMappingId>unknown-or-missing</lifecycleMappingId>
+                  <lifecycleMappingId>lifecycleId</lifecycleMappingId>
                 </lifecycleMapping>
               </lifecycleMappings>
             </lifecycleMappingMetadata>
