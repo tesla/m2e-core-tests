@@ -28,6 +28,7 @@ import org.eclipse.m2e.core.internal.lifecyclemapping.discovery.PackagingTypeMap
 import org.eclipse.m2e.core.internal.lifecyclemapping.discovery.PackagingTypeMappingConfiguration.PackagingTypeMappingRequirement;
 import org.eclipse.m2e.core.internal.lifecyclemapping.discovery.ProjectLifecycleMappingConfiguration;
 import org.eclipse.m2e.core.internal.lifecyclemapping.model.LifecycleMappingMetadataSource;
+import org.eclipse.m2e.core.internal.lifecyclemapping.model.PluginExecutionAction;
 import org.eclipse.m2e.core.project.MavenProjectInfo;
 import org.eclipse.m2e.core.project.ProjectImportConfiguration;
 import org.eclipse.m2e.internal.discovery.InstallCatalogItemMavenDiscoveryProposal;
@@ -275,6 +276,18 @@ public class LifecycleMappingDiscoveryTest extends AbstractLifecycleMappingTest 
     items.add(newCatalogItem(srv, null, "projects/discovery/projectConfigurator.pluginxml"));
 
     ProjectLifecycleMappingConfiguration project = getProjectMappingConfiguration(configuration, 0);
+
+    MojoExecutionMappingConfiguration goal1 = project.getMojoExecutionConfigurations().get(1);
+    ILifecycleMappingRequirement goal1Requirement = goal1.getLifecycleMappingRequirement();
+
+    // sanity checks
+    assertEquals("test-goal-1", goal1.getGoal());
+    assertNotNull(goal1.getMapping());
+    assertEquals(PluginExecutionAction.configurator, goal1.getMapping().getAction());
+    assertEquals("LifecycleMappingTest.projectConfigurator",
+        LifecycleMappingFactory.getProjectConfiguratorId(goal1.getMapping()));
+    assertTrue(goal1Requirement instanceof ProjectConfiguratorMappingRequirement);
+
     Map<ILifecycleMappingRequirement, List<IMavenDiscoveryProposal>> proposals = srv.discover(
         project.getMavenProject(), project.getMojoExecutions(), new ArrayList<IMavenDiscoveryProposal>(), monitor);
 
