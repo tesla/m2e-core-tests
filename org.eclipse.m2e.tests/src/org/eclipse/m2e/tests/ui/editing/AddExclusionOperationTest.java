@@ -1,0 +1,140 @@
+/*******************************************************************************
+ * Copyright (c) 2011 Sonatype, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *      Sonatype, Inc. - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.m2e.tests.ui.editing;
+
+import org.w3c.dom.Element;
+
+import org.eclipse.wst.sse.core.StructuredModelManager;
+import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
+import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
+
+import org.apache.maven.model.Dependency;
+
+import org.eclipse.m2e.core.embedder.ArtifactKey;
+import org.eclipse.m2e.core.ui.internal.editing.AddExclusionOperation;
+import org.eclipse.m2e.core.ui.internal.editing.PomEdits;
+import org.eclipse.m2e.core.ui.internal.editing.PomEdits.OperationTuple;
+import org.eclipse.m2e.core.ui.internal.editing.PomHelper;
+
+
+@SuppressWarnings("restriction")
+public class AddExclusionOperationTest extends AbstractOperationTest {
+	private IDOMModel tempModel;
+	private Dependency d;
+	private IStructuredDocument document;
+	private ArtifactKey e;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see junit.framework.TestCase#setUp()
+	 */
+	@Override
+	protected void setUp() throws Exception {
+		tempModel = (IDOMModel) StructuredModelManager.getModelManager().createUnManagedStructuredModelFor("org.eclipse.m2e.core.pomFile");
+		document = tempModel.getStructuredDocument();
+
+		d = new Dependency();
+		d.setArtifactId("BBBB");
+		d.setGroupId("AAA");
+		d.setVersion("1.0");
+
+		e = new ArtifactKey("g", "a", "1.0", null);
+	}
+
+	public void testMissingDependency_noDependenciesElement() throws Exception {
+		document.setText(StructuredModelManager.getModelManager(), //
+				"<project></project>");
+		PomEdits.performOnDOMDocument(new OperationTuple(tempModel, new AddExclusionOperation(d, e)));
+		assertEquals("Expected no dependency: " + d.toString() + "\n" + document.getText(), 0, dependencyCount(tempModel, d));
+	}
+
+	public void testMissingDependency_emptyDependenciesElement() throws Exception {
+		document.setText(StructuredModelManager.getModelManager(), //
+				"<project><dependencies>" + //
+						"</dependencies></project>");
+		PomEdits.performOnDOMDocument(new OperationTuple(tempModel, new AddExclusionOperation(d, e)));
+		assertEquals("Expected no dependency: " + d.toString() + "\n" + document.getText(), 0, dependencyCount(tempModel, d));
+	}
+
+	public void testMissingDependency_withDependencies() throws Exception {
+		document.setText(StructuredModelManager.getModelManager(), //
+				"<project><dependencies>" + //
+						"<dependency><groupId>AAA</groupId><artifactId>BBB</artifactId><version>1.0</version></dependency>" + //
+						"<dependency><groupId>AAAB</groupId><artifactId>BBB</artifactId><version>1.0</version></dependency>" + //
+						"</dependencies></project>");
+		PomEdits.performOnDOMDocument(new OperationTuple(tempModel, new AddExclusionOperation(d, e)));
+		assertEquals("Expected no dependency: " + d.toString() + "\n" + document.getText(), 0, dependencyCount(tempModel, d));
+    assertEquals("Dependency Count: \n" + document.getText(), 2, getDependencyCount(tempModel));
+	}
+
+	public void testAddExclusion() throws Exception {
+		document.setText(StructuredModelManager.getModelManager(), //
+				"<project><dependencies>" + //
+						"<dependency><groupId>AAA</groupId><artifactId>BBB</artifactId><version>1.0</version></dependency>" + //
+						"<dependency><groupId>AAAB</groupId><artifactId>BBB</artifactId><version>1.0</version></dependency>" + //
+						"<dependency><groupId>AAA</groupId><artifactId>BBBB</artifactId><version>1.0</version></dependency>" + //
+						"</dependencies></project>");
+		PomEdits.performOnDOMDocument(new OperationTuple(tempModel, new AddExclusionOperation(d, e)));
+		assertEquals("Expected no dependency: " + d.toString() + "\n" + document.getText(), 1, dependencyCount(tempModel, d));
+		assertTrue("Has exclusion " + e.toString() + "\n" + document.getText(), hasExclusion(tempModel, d, e));
+		assertEquals("Exclusions", 1, getExclusionCount(tempModel, d));
+    assertEquals("Dependency Count: \n" + document.getText(), 3, getDependencyCount(tempModel));
+	}
+
+	public void testAddExclusion_duplicateExclusion() throws Exception {
+		document.setText(StructuredModelManager.getModelManager(), //
+				"<project><dependencies>" + //
+						"<dependency><groupId>AAA</groupId><artifactId>BBB</artifactId><version>1.0</version></dependency>" + //
+						"<dependency><groupId>AAAB</groupId><artifactId>BBB</artifactId><version>1.0</version></dependency>" + //
+						"<dependency><groupId>AAA</groupId><artifactId>BBBB</artifactId><version>1.0</version>" + //
+						"<exclusions><exclusion><groupId>g</groupId><artifactId>a</artifactId><version>1.0</version></exclusion></exclusions></dependency>" + //
+						"</dependencies></project>");
+		PomEdits.performOnDOMDocument(new OperationTuple(tempModel, new AddExclusionOperation(d, e)));
+		assertEquals("Expected no dependency: " + d.toString() + "\n" + document.getText(), 1, dependencyCount(tempModel, d));
+		assertTrue("Has exclusion " + e.toString() + "\n" + document.getText(), hasExclusion(tempModel, d, e));
+		assertEquals("Exclusions", 1, getExclusionCount(tempModel, d));
+    assertEquals("Dependency Count: \n" + document.getText(), 3, getDependencyCount(tempModel));
+	}
+
+	public void testAddExclusion_existingExclusion() throws Exception {
+		document.setText(StructuredModelManager.getModelManager(), //
+				"<project><dependencies>" + //
+						"<dependency><groupId>AAA</groupId><artifactId>BBB</artifactId><version>1.0</version></dependency>" + //
+						"<dependency><groupId>AAAB</groupId><artifactId>BBB</artifactId><version>1.0</version></dependency>" + //
+						"<dependency><groupId>AAA</groupId><artifactId>BBBB</artifactId><version>1.0</version>" + //
+						"<exclusions><exclusion><groupId>g</groupId><artifactId>b</artifactId><version>1.0</version></exclusion></exclusions></dependency>" + //
+						"</dependencies></project>");
+		PomEdits.performOnDOMDocument(new OperationTuple(tempModel, new AddExclusionOperation(d, e)));
+		assertEquals("Expected no dependency: " + d.toString() + "\n" + document.getText(), 1, dependencyCount(tempModel, d));
+		assertTrue("Has exclusion " + e.toString() + "\n" + document.getText(), hasExclusion(tempModel, d, e));
+
+		ArtifactKey key = new ArtifactKey("g", "b", "1.0", null);
+		assertTrue("Existing Exclusion Present " + key.toString() + "\n" + document.getText(), hasExclusion(tempModel, d, key));
+		assertEquals("Exclusions", 2, getExclusionCount(tempModel, d));
+    assertEquals("Dependency Count: \n" + document.getText(), 3, getDependencyCount(tempModel));
+	}
+
+	private static boolean hasExclusion(IDOMModel model, Dependency dependency, ArtifactKey exclusion) {
+		Element depElement = PomHelper.findDependency(model.getDocument(), dependency);
+		if (depElement == null) {
+			throw new IllegalArgumentException("Missing dependency " + dependency.toString());
+		}
+		Element exclusionsElement = PomEdits.findChild(depElement, "exclusions");
+		if (exclusionsElement == null) {
+			return false;
+		}
+		return null != PomEdits.findChild(
+				exclusionsElement,
+				"exclusion",
+				new PomEdits.Matcher[] { PomEdits.childEquals("artifactId", exclusion.getArtifactId()), PomEdits.childEquals("groupId", exclusion.getGroupId()) });
+	}
+}
