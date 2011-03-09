@@ -15,12 +15,19 @@ import java.util.List;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.ui.IMarkerResolution;
 import org.eclipse.ui.ide.IDE;
 
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.core.IMavenConstants;
+import org.eclipse.m2e.core.internal.Messages;
+import org.eclipse.m2e.core.internal.markers.MavenMarkerManager;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.editor.xml.internal.lifecycle.LifecycleMappingProposal;
 import org.eclipse.m2e.internal.discovery.markers.DiscoveryWizardProposal;
@@ -411,6 +418,18 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     assertNotNull(getResolution(resolutions, LifecycleMappingProposal.class));
   }
 
+  public void testNoDuplicateMarker() throws CoreException {
+	  final IProject p = workspace.getRoot().getProject(getName());
+	  p.create(new NullProgressMonitor());
+	  p.open(new NullProgressMonitor());
+	  MavenMarkerManager mmm = new MavenMarkerManager(null);
+	  mmm.addMarker(p, IMavenConstants.MARKER_CONFIGURATION_ID, Messages.ProjectConfigurationUpdateRequired, -1, IMarker.SEVERITY_ERROR);
+	  assertEquals(1, p.findMarkers( IMavenConstants.MARKER_CONFIGURATION_ID, false /*includeSubtypes*/, IResource.DEPTH_ZERO).length);
+	  
+	  mmm.addMarker(p, IMavenConstants.MARKER_CONFIGURATION_ID, Messages.ProjectConfigurationUpdateRequired, -1, IMarker.SEVERITY_ERROR);
+	  assertEquals(1, p.findMarkers( IMavenConstants.MARKER_CONFIGURATION_ID, false /*includeSubtypes*/, IResource.DEPTH_ZERO).length);
+  }
+  
   private IMarkerResolution getResolution(IMarkerResolution[] resolutions, Class<? extends IMarkerResolution> type) {
     if(resolutions == null) {
       return null;
@@ -422,4 +441,6 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     }
     return null;
   }
+  
+  
 }
