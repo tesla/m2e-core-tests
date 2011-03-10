@@ -36,7 +36,7 @@ public class MavenInstallOperationTest extends AbstractDiscoveryTest {
 	}
 
 	public void testMatchNoVersion() throws Exception {
-		MavenDiscoveryInstallOperation operation = new MavenDiscoveryInstallOperation(Collections.singletonList(getCatalogItem("iu.with.no.version")), null, false);
+		MavenDiscoveryInstallOperation operation = new MavenDiscoveryInstallOperation(Collections.singletonList(getCatalogItem("iu.with.no.version")), null, false, null);
 		IInstallableUnit[] ius = operation.computeInstallableUnits(monitor);
 		assertEquals("# IUs", 1, ius.length);
 		assertEquals("IU id", "test.iu", ius[0].getId());
@@ -44,7 +44,7 @@ public class MavenInstallOperationTest extends AbstractDiscoveryTest {
 	}
 
 	public void testMatchHighestVersion() throws Exception {
-		MavenDiscoveryInstallOperation operation = new MavenDiscoveryInstallOperation(Collections.singletonList(getCatalogItem("iu.with.highest.version")), null, false);
+		MavenDiscoveryInstallOperation operation = new MavenDiscoveryInstallOperation(Collections.singletonList(getCatalogItem("iu.with.highest.version")), null, false, null);
 		IInstallableUnit[] ius = operation.computeInstallableUnits(monitor);
 		assertEquals("# IUs", 1, ius.length);
 		assertEquals("IU id", "test.iu", ius[0].getId());
@@ -52,7 +52,7 @@ public class MavenInstallOperationTest extends AbstractDiscoveryTest {
 	}
 
 	public void testMatchLowestVersion() throws Exception {
-		MavenDiscoveryInstallOperation operation = new MavenDiscoveryInstallOperation(Collections.singletonList(getCatalogItem("iu.with.lowest.version")), null, false);
+		MavenDiscoveryInstallOperation operation = new MavenDiscoveryInstallOperation(Collections.singletonList(getCatalogItem("iu.with.lowest.version")), null, false, null);
 		IInstallableUnit[] ius = operation.computeInstallableUnits(monitor);
 		assertEquals("# IUs", 1, ius.length);
 		assertEquals("IU id", "test.iu", ius[0].getId());
@@ -60,7 +60,7 @@ public class MavenInstallOperationTest extends AbstractDiscoveryTest {
 	}
 
 	public void testMissingRepository() throws Exception {
-		MavenDiscoveryInstallOperation operation = new MavenDiscoveryInstallOperation(Collections.singletonList(getCatalogItem("missing.repository")), null, false);
+		MavenDiscoveryInstallOperation operation = new MavenDiscoveryInstallOperation(Collections.singletonList(getCatalogItem("missing.repository")), null, false, null);
 		try {
 			operation.computeInstallableUnits(monitor);
 		} catch (CoreException e) {
@@ -75,7 +75,7 @@ public class MavenInstallOperationTest extends AbstractDiscoveryTest {
 	}
 
 	public void testMissingIU() throws Exception {
-		MavenDiscoveryInstallOperation operation = new MavenDiscoveryInstallOperation(Collections.singletonList(getCatalogItem("missing.iu")), null, false);
+		MavenDiscoveryInstallOperation operation = new MavenDiscoveryInstallOperation(Collections.singletonList(getCatalogItem("missing.iu")), null, false, null);
 		try {
 			operation.computeInstallableUnits(monitor);
 		} catch (CoreException e) {

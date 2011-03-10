@@ -12,15 +12,18 @@
 package org.eclipse.m2e.tests.discovery;
 
 import java.io.File;
+import java.util.Arrays;
+
+import org.junit.Test;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.ui.internal.Workbench;
+
 import org.eclipse.m2e.internal.discovery.DiscoveryActivator;
 import org.eclipse.m2e.internal.discovery.startup.UpdateConfigurationStartup;
 import org.eclipse.m2e.tests.common.AbstractLifecycleMappingTest;
-import org.eclipse.ui.internal.Workbench;
-import org.junit.Test;
 
 @SuppressWarnings("restriction")
 public class ConfigurationUpdateStartupTest extends
@@ -103,6 +106,21 @@ public class ConfigurationUpdateStartupTest extends
     assertEquals("Expected no projects", 1, UpdateConfigurationStartup.getSavedProjects().length);
 	}
 
+  @Test
+  public void testConfigureSpecifiedProjects() throws Exception {
+    assertEquals("Expected no projects", 0, UpdateConfigurationStartup.getSavedProjects().length);
+
+    String[] projects = new String[] {"projectA", "projectB", "projectC"};
+    UpdateConfigurationStartup.enableStartup(Arrays.asList(projects));
+
+    IProject[] persisted = UpdateConfigurationStartup.getSavedProjects();
+    assertEquals("Expected no projects", projects.length, persisted.length);
+
+    for(String projectName : projects) {
+      assertTrue("Missing Project:" + projectName, hasProject(persisted, projectName));
+    }
+  }
+
 	@Test
 	public void testToggleEarlyStartup() {
 		assertFalse("Plugin Disabled", pluginDisabled());
@@ -111,6 +129,15 @@ public class ConfigurationUpdateStartupTest extends
 		UpdateConfigurationStartup.enableStartup();
 		assertFalse("Plugin Disabled", pluginDisabled());
 	}
+
+  private static boolean hasProject(IProject[] projects, String name) {
+    for(IProject project : projects) {
+      if(name.equals(project.getName())) {
+        return true;
+      }
+    }
+    return false;
+  }
 
 	private static void importProject(String name, String base)
 			throws Exception {
