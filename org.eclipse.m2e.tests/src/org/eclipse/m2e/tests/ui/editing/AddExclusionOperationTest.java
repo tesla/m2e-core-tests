@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.m2e.tests.ui.editing;
 
-import org.w3c.dom.Element;
-
 import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
@@ -22,7 +20,6 @@ import org.eclipse.m2e.core.embedder.ArtifactKey;
 import org.eclipse.m2e.core.ui.internal.editing.AddExclusionOperation;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits.OperationTuple;
-import org.eclipse.m2e.core.ui.internal.editing.PomHelper;
 
 
 @SuppressWarnings("restriction")
@@ -121,20 +118,5 @@ public class AddExclusionOperationTest extends AbstractOperationTest {
 		assertTrue("Existing Exclusion Present " + key.toString() + "\n" + document.getText(), hasExclusion(tempModel, d, key));
 		assertEquals("Exclusions", 2, getExclusionCount(tempModel, d));
     assertEquals("Dependency Count: \n" + document.getText(), 3, getDependencyCount(tempModel));
-	}
-
-	private static boolean hasExclusion(IDOMModel model, Dependency dependency, ArtifactKey exclusion) {
-		Element depElement = PomHelper.findDependency(model.getDocument(), dependency);
-		if (depElement == null) {
-			throw new IllegalArgumentException("Missing dependency " + dependency.toString());
-		}
-		Element exclusionsElement = PomEdits.findChild(depElement, "exclusions");
-		if (exclusionsElement == null) {
-			return false;
-		}
-		return null != PomEdits.findChild(
-				exclusionsElement,
-				"exclusion",
-				new PomEdits.Matcher[] { PomEdits.childEquals("artifactId", exclusion.getArtifactId()), PomEdits.childEquals("groupId", exclusion.getGroupId()) });
 	}
 }

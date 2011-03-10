@@ -18,6 +18,7 @@ import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
 
 import org.apache.maven.model.Dependency;
 
+import org.eclipse.m2e.core.embedder.ArtifactKey;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits;
 import org.eclipse.m2e.core.ui.internal.editing.PomHelper;
 
@@ -58,5 +59,21 @@ public abstract class AbstractOperationTest extends TestCase {
       return 0;
     }
     return PomEdits.findChilds(dependencies, "dependency").size();
+  }
+
+  protected static boolean hasExclusion(IDOMModel model, Dependency dependency, ArtifactKey exclusion) {
+    Element depElement = PomHelper.findDependency(model.getDocument(), dependency);
+    if(depElement == null) {
+      throw new IllegalArgumentException("Missing dependency " + dependency.toString());
+    }
+    Element exclusionsElement = PomEdits.findChild(depElement, "exclusions");
+    if(exclusionsElement == null) {
+      return false;
+    }
+    return null != PomEdits.findChild(
+        exclusionsElement,
+        "exclusion",
+        new PomEdits.Matcher[] {PomEdits.childEquals("artifactId", exclusion.getArtifactId()),
+            PomEdits.childEquals("groupId", exclusion.getGroupId())});
   }
 }

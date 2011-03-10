@@ -10,12 +10,16 @@
  *******************************************************************************/
 package org.eclipse.m2e.tests.ui.editing;
 
+import java.util.Collections;
+
 import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
 
 import org.apache.maven.model.Dependency;
+import org.apache.maven.model.Exclusion;
 
+import org.eclipse.m2e.core.embedder.ArtifactKey;
 import org.eclipse.m2e.core.ui.internal.editing.AddDependencyOperation;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits.OperationTuple;
@@ -80,4 +84,25 @@ public class AddDependencyOperationTest extends AbstractOperationTest {
 		assertEquals("Expected dependency: " + d.toString() + "\n" + document.getText(), 1, dependencyCount(tempModel, d));
     assertEquals("Dependency Count: \n" + document.getText(), 3, getDependencyCount(tempModel));
 	}
+
+  public void testExclusionsAdded() throws Exception {
+    Exclusion e = new Exclusion();
+    e.setArtifactId("E");
+    e.setGroupId("G");
+    d.setExclusions(Collections.singletonList(e));
+
+    document.setText(StructuredModelManager.getModelManager(), //
+        "<project><dependencies>" + //
+            "<dependency><groupId>AAA</groupId><artifactId>BBB</artifactId><version>1.0</version></dependency>" + //
+            "<dependency><groupId>AAAB</groupId><artifactId>BBB</artifactId><version>1.0</version></dependency>" + //
+            "</dependencies></project>");
+    PomEdits.performOnDOMDocument(new OperationTuple(tempModel, new AddDependencyOperation(d)));
+    assertEquals("Dependency Count: \n" + document.getText(), 3, getDependencyCount(tempModel));
+    assertEquals("Expected dependency: " + d.toString() + "\n" + document.getText(), 1, dependencyCount(tempModel, d));
+    assertTrue("Missing exclusion:\n" + document.getText(), hasExclusion(tempModel, d, toArtifactKey(e)));
+  }
+
+  private static ArtifactKey toArtifactKey(Exclusion ex) {
+    return new ArtifactKey(ex.getGroupId(), ex.getArtifactId(), null, null);
+  }
 }
