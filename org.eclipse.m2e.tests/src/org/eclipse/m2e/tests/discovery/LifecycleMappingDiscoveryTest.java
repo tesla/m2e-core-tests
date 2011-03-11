@@ -12,10 +12,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.maven.model.Model;
-import org.codehaus.plexus.util.IOUtil;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
+
+import org.codehaus.plexus.util.IOUtil;
+
+import org.apache.maven.model.Model;
+
 import org.eclipse.m2e.core.internal.lifecyclemapping.LifecycleMappingFactory;
 import org.eclipse.m2e.core.internal.lifecyclemapping.discovery.ILifecycleMappingRequirement;
 import org.eclipse.m2e.core.internal.lifecyclemapping.discovery.IMavenDiscoveryProposal;
@@ -102,8 +105,16 @@ public class LifecycleMappingDiscoveryTest extends AbstractLifecycleMappingTest 
     return iter.next();
   }
 
-  public void testNoProposals() throws CoreException {
+  public void testPackagingPom() throws CoreException {
+    LifecycleMappingConfiguration configuration = loadMappingConfiguration(new File(
+        "projects/discovery/packagingPom/pom.xml"));
 
+    // sanity check
+    assertEquals(1, configuration.getProjects().size());
+    assertTrue("Expected complete mapping", configuration.isMappingComplete());
+  }
+
+  public void testNoProposals() throws CoreException {
     LifecycleMappingConfiguration configuration = loadMappingConfiguration(new File(
         "projects/discovery/mojoExecutions/pom.xml"));
 
