@@ -14,14 +14,17 @@ import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.m2e.integration.tests.common.SWTBotMenuEx;
-import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
-import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
+
+import org.eclipse.m2e.integration.tests.common.SWTBotMenuEx;
 
 
 /**
@@ -32,12 +35,12 @@ public class MngEclipse1882LaunchNoSettingsTest extends M2EUIIntegrationTestCase
   private static String oldUserSettings;
 
   @BeforeClass
-  public static void setUpBeforeClass() {
+  public static void setUpBeforeClass() throws CoreException {
     oldUserSettings = setUserSettings("resources/settings-non-existent.xml");
   }
 
   @AfterClass
-  public static void tearDownAfterclass() {
+  public static void tearDownAfterclass() throws CoreException {
     setUserSettings(oldUserSettings);
   }
 

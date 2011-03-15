@@ -8,16 +8,19 @@
 
 package org.eclipse.m2e.integration.tests;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.jdt.core.IClasspathContainer;
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.m2e.jdt.internal.BuildPathManager;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.IClasspathContainer;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+
+import org.eclipse.m2e.jdt.internal.BuildPathManager;
 
 
 /**
@@ -36,14 +39,14 @@ public class MngEclipse1377ExcludeArtifactTest extends M2EUIIntegrationTestCase 
   private static String oldUserSettings;
 
   @BeforeClass
-  public static void setUpBeforeClass() {
+  public static void setUpBeforeClass() throws CoreException {
     oldUserSettings = setUserSettings("resources/settings.xml");
     updateRepositoryRegistry();
     updateIndex("file:resources/remote-repo");
   }
 
   @AfterClass
-  public static void tearDownAfterclass() {
+  public static void tearDownAfterclass() throws CoreException {
     setUserSettings(oldUserSettings);
   }
 

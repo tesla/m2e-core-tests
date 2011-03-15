@@ -47,12 +47,16 @@ public class MEclipse163ResolveDependenciesTest extends M2EUIIntegrationTestCase
   private String oldUserSettings;
 
   @Before
-  public void setUp() {
+    public void setUp()
+        throws Exception
+    {
     oldUserSettings = setUserSettings("resources/settings.xml");
   }
 
   @After
-  public void tearDown() {
+    public void tearDown()
+        throws Exception
+    {
     setUserSettings(oldUserSettings);
   }
 
