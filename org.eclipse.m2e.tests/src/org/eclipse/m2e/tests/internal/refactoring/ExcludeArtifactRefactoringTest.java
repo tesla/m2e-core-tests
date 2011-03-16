@@ -1,6 +1,7 @@
 package org.eclipse.m2e.tests.internal.refactoring;
 
 import org.junit.AfterClass;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.*;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -33,6 +34,16 @@ import org.eclipse.m2e.model.edit.pom.Exclusion;
 import org.eclipse.m2e.model.edit.pom.Model;
 import org.eclipse.m2e.refactoring.exclude.ExcludeArtifactRefactoring;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.part.FileEditorInput;
+import org.junit.AfterClass;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase {
 
@@ -440,22 +451,28 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 	/*
 	 * The editor has the given exclusion set
 	 */
-	protected static boolean hasExclusionSet(MavenPomEditor editor, ArtifactKey dependencyKey, ArtifactKey excluded) throws Exception {
-		Model model = editor.readProjectDocument();
-		Dependency d = null;
-		for (Dependency dep : model.getDependencies()) {
-			if (dep.getArtifactId().equals(dependencyKey.getArtifactId()) && dep.getGroupId().equals(dependencyKey.getGroupId()) && dep.getVersion().equals(dependencyKey.getVersion())) {
-				d = dep;
-				break;
+	protected static void assertExclusionSet(String msg, MavenPomEditor editor, final ArtifactKey dependencyKey, final ArtifactKey excluded) throws Exception {
+		final boolean[] found = new boolean[1];
+		found[0] = false;
+		performOnDOMDocument(new OperationTuple(editor.getDocument(), new Operation() {
+			public void process(Document document) {
+				Element dep = findChild(findChild(document.getDocumentElement(), DEPENDENCIES), DEPENDENCY, 
+						childEquals(GROUP_ID, dependencyKey.getGroupId()), 
+						childEquals(ARTIFACT_ID, dependencyKey.getArtifactId()), 
+						childEquals(VERSION, dependencyKey.getVersion()) 
+						);
+				if (dep != null) {
+					Element exclusion = findChild(findChild(dep, EXCLUSIONS), EXCLUSION,
+							childEquals(GROUP_ID, excluded.getGroupId()), 
+							childEquals(ARTIFACT_ID, excluded.getArtifactId()) 
+							);
+					found[0] = exclusion != null;
+					
+				}
 			}
-		}
-		if (d == null) {
-			return false;
-		}
-		for (Exclusion ex : d.getExclusions()) {
-			if (ex.getArtifactId().equals(excluded.getArtifactId()) && ex.getGroupId().equals(excluded.getGroupId())) {
-				return true;
-			}
+		}, true));
+		if (!found[0]) {
+			fail(msg);
 		}
 		return false;
 	}
