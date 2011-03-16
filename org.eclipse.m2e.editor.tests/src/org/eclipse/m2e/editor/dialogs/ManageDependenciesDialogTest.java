@@ -16,8 +16,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
 
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.*;
+
+import org.apache.maven.execution.MavenExecutionRequest;
+import org.apache.maven.model.Dependency;
+import org.apache.maven.model.Model;
+import org.apache.maven.project.MavenProject;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -33,19 +38,26 @@ import org.eclipse.m2e.core.embedder.IMaven;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.MavenProjectManager;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
+import org.eclipse.m2e.core.ui.internal.editing.PomEdits;
 import org.eclipse.m2e.editor.AbstractMavenProjectTestJunit4;
-import org.eclipse.m2e.model.edit.pom.Dependency;
-import org.eclipse.m2e.model.edit.pom.Model;
+import org.eclipse.m2e.editor.pom.ValueProvider;
 import org.eclipse.m2e.model.edit.pom.util.PomResourceImpl;
+
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.wst.sse.core.StructuredModelManager;
+import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
+import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
+import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
+import org.junit.Test;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 
 public class ManageDependenciesDialogTest extends AbstractMavenProjectTestJunit4 {
-  private static final String VERSION = "1.0.0";
-
-  public static String GROUP_ID = "org.eclipse.m2e.tests";
-
-  private TestDialog dialog;
-
+  private static final String TEST_VERSION = "1.0.0";
+  public static String TEST_GROUP_ID = "org.eclipse.m2e.tests";
   private Color foreground;
 
   /*
@@ -56,13 +68,14 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestJunit4
    * colour for poms not in the workspace - test moving a dependency from A to C, where C -> B -> A is the hierarchy
    */
 
+  
+  //mkleint: this test is more or less useless. every change done to the label provider is to be manually (visually) tested, no test can be better..
   @Test
   public void testDepLabelProvider() throws Exception {
-    Model model = loadModels("projects/colourprovider", new String[] {"child/pom.xml"}).get("child");
-    assertEquals(model.getArtifactId(), "child");
-
-    IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectManager()
-        .getMavenProject(GROUP_ID, "child", VERSION);
+	importProjects("projects/colourprovider", new String[] { "child/pom.xml" }, new ResolverConfiguration());
+    //    assertEquals(model.getArtifactId(), "child");
+    
+    IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectManager().getMavenProject(TEST_GROUP_ID, "child", TEST_VERSION);
     final MavenProject project = facade.getMavenProject();
     assertEquals(project.getArtifactId(), "child");
 
@@ -100,257 +113,269 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestJunit4
   @Test
   public void testSamePOM() throws Exception {
 
-    Model model = loadModels("projects/same", new String[] {"parent/pom.xml", "child/pom.xml"}).get("child");
-    assertEquals(model.getArtifactId(), "child");
-
-    IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectManager()
-        .getMavenProject(GROUP_ID + ".same", "child", VERSION);
+    IStructuredModel model = loadModels("projects/same", new String[] { "parent/pom.xml", "child/pom.xml" }).get("child");
+    
+    assertNotNull(model);
+    IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectManager().getMavenProject(TEST_GROUP_ID+".same", "child", TEST_VERSION);
     MavenProject project = facade.getMavenProject();
     assertEquals(project.getArtifactId(), "child");
 
     LinkedList<MavenProject> hierarchy = new LinkedList<MavenProject>();
     hierarchy.add(project);
 
-    initDialog(model, hierarchy);
-
     LinkedList<Dependency> dependencies = new LinkedList<Dependency>();
-    assertNotNull(model.getDependencies().get(0));
-    dependencies.add(model.getDependencies().get(0));
-
-    dialog.setDependenciesList(dependencies);
-    dialog.setTargetPOM(project);
-
-    assertNull(model.getDependencyManagement());
-
-    dialog.compute();
-
-    assertNotNull(model.getDependencyManagement());
-    assertEquals(1, model.getDependencyManagement().getDependencies().size());
-
-    Dependency depManDep = model.getDependencyManagement().getDependencies().get(0);
-    assertEquals(depManDep.getGroupId(), "test");
-    assertEquals(depManDep.getArtifactId(), "a");
-    assertEquals(depManDep.getVersion(), "1.0");
-
-    assertNotNull(model.getDependencies());
-    assertNotNull(model.getDependencies().get(0));
-    Dependency oldDep = model.getDependencies().get(0);
-    assertEquals(oldDep.getGroupId(), "test");
-    assertEquals(oldDep.getArtifactId(), "a");
-    assertTrue(oldDep.getVersion() == null || oldDep.getVersion().equals(""));
+    assertNotNull(project.getOriginalModel().getDependencies().get(0));
+    dependencies.add(project.getOriginalModel().getDependencies().get(0));
+    
+	IDOMModel tempModel = createTempModel(model);
+    
+	tempModel.aboutToChangeModel();
+    new CompoundOperation(ManageDependenciesDialog.createManageOperation(dependencies), 
+					              ManageDependenciesDialog.createRemoveVersionOperation(dependencies)).process(tempModel.getDocument());
+	tempModel.changedModel();
+	
+		// now assert..
+		List<Element> deps = findChilds(
+				findChild(tempModel.getDocument().getDocumentElement(),
+						DEPENDENCIES), DEPENDENCY);
+		assertEquals(1, deps.size());
+		Element dep = deps.get(0);
+		assertNotNull(dep);
+		assertEquals("test", getTextValue(findChild(dep, PomEdits.GROUP_ID)));
+		assertEquals("a", getTextValue(findChild(dep, ARTIFACT_ID)));
+		assertNull(findChild(dep, PomEdits.VERSION));
+		Element dm = findChild(tempModel.getDocument().getDocumentElement(),
+				DEPENDENCY_MANAGEMENT);
+		assertNotNull(dm);
+		deps = findChilds(findChild(dm, DEPENDENCIES), DEPENDENCY);
+		assertEquals(1, deps.size());
+		dep = deps.get(0);
+		Element g = findChild(dep, PomEdits.GROUP_ID);
+		assertNotNull(g);
+		assertEquals("test", getTextValue(g));
+		assertEquals("a", getTextValue(findChild(dep, ARTIFACT_ID)));
+		assertEquals("1.0", getTextValue(findChild(dep, PomEdits.VERSION)));
+	    
   }
 
+private IDOMModel createTempModel(IStructuredModel model) {
+	IDOMModel tempModel = (IDOMModel) StructuredModelManager.getModelManager().createUnManagedStructuredModelFor(
+      "org.eclipse.m2e.core.pomFile");
+	assertNotNull(tempModel);
+	tempModel.getStructuredDocument().setText(StructuredModelManager.getModelManager(), model.getStructuredDocument().getText());
+    assertNotNull(tempModel.getStructuredDocument());
+	return tempModel;
+}
+  
   /*
    * Move dep from child to parent
    */
   @Test
   public void testDiffPOMs() throws Exception {
-    Map<String, Model> models = loadModels("projects/diff", new String[] {"child/pom.xml", "parent/pom.xml"});
-    Model child = models.get("child-diff");
-    Model parent = models.get("parent-diff");
-
+    Map<String, IStructuredModel> models = loadModels("projects/diff", new String[] { "child/pom.xml", "parent/pom.xml" });
+    IStructuredModel child = models.get("child-diff");
+    IStructuredModel parent = models.get("parent-diff");
+    
     assertNotNull(child);
     assertNotNull(parent);
-    assertEquals(child.getArtifactId(), "child-diff");
-    assertEquals(parent.getArtifactId(), "parent-diff");
-
-    MavenProject childProject = getMavenProject(GROUP_ID + ".diff", "child-diff", VERSION);
-    MavenProject parentProject = getMavenProject(GROUP_ID + ".diff", "parent-diff", VERSION);
-
+    
+    MavenProject childProject = getMavenProject(TEST_GROUP_ID+".diff", "child-diff", TEST_VERSION);
+    MavenProject parentProject = getMavenProject(TEST_GROUP_ID+".diff", "parent-diff", TEST_VERSION);
+    
     LinkedList<MavenProject> hierarchy = new LinkedList<MavenProject>();
     hierarchy.addFirst(childProject);
     hierarchy.addLast(parentProject);
-
-    initDialog(child, hierarchy);
-
+    
+    
     LinkedList<Dependency> selectedDeps = new LinkedList<Dependency>();
-    List<Dependency> dependencies = child.getDependencies();
+    List<Dependency> dependencies = childProject.getOriginalModel().getDependencies();
     assertNotNull(dependencies);
     assertEquals(dependencies.size(), 1);
     selectedDeps.add(dependencies.get(0));
-    dialog.setDependenciesList(selectedDeps);
 
-    dialog.setTargetPOM(parentProject);
-    dialog.setTargetModel(parent);
-
-    assertNull(parent.getDependencyManagement());
-
-    dialog.compute();
-
-    assertNotNull(parent.getDependencyManagement());
-    assertEquals(1, parent.getDependencyManagement().getDependencies().size());
-
-    Dependency depManDep = parent.getDependencyManagement().getDependencies().get(0);
-    assertEquals(depManDep.getGroupId(), "test");
-    assertEquals(depManDep.getArtifactId(), "a");
-    assertEquals(depManDep.getVersion(), "1.0");
-
-    assertNotNull(child.getDependencies());
-    assertNotNull(child.getDependencies().get(0));
-    Dependency oldDep = child.getDependencies().get(0);
-    assertEquals(oldDep.getGroupId(), "test");
-    assertEquals(oldDep.getArtifactId(), "a");
-    assertTrue(oldDep.getVersion() == null || oldDep.getVersion().equals(""));
+	IDOMModel tempChild = createTempModel(child); 
+	IDOMModel tempParent = createTempModel(parent);
+	
+	tempChild.aboutToChangeModel();
+	tempParent.aboutToChangeModel();
+  	ManageDependenciesDialog.createManageOperation(dependencies).process(tempParent.getDocument()); 
+  	ManageDependenciesDialog.createRemoveVersionOperation(dependencies).process(tempChild.getDocument());
+	tempChild.changedModel();
+	tempParent.changedModel();
+    
+    
+    //now asserts
+	List<Element> deps = findChilds(findChild(findChild(tempParent.getDocument().getDocumentElement(), DEPENDENCY_MANAGEMENT), DEPENDENCIES), DEPENDENCY);
+    assertEquals(1, deps.size());
+    
+    Element depManDep = deps.get(0);
+    assertEquals("test", getTextValue(findChild(depManDep, PomEdits.GROUP_ID)));
+    assertEquals("a", getTextValue(findChild(depManDep, ARTIFACT_ID)));
+    assertEquals("1.0", getTextValue(findChild(depManDep, PomEdits.VERSION)));
+    
+	deps = findChilds(findChild(tempChild.getDocument().getDocumentElement(), DEPENDENCIES), DEPENDENCY);
+    assertEquals(1, deps.size());
+    Element oldDep = deps.get(0);
+    assertEquals("test", getTextValue(findChild(depManDep, PomEdits.GROUP_ID)));
+    assertEquals("a", getTextValue(findChild(depManDep, ARTIFACT_ID)));
+	assertNull(findChild(oldDep, PomEdits.VERSION));
   }
 
   @Test
   public void testDepExists() throws Exception {
-    final String ARTIFACT_ID = "dep_exists";
-
-    Model model = loadModels("projects/dep_exists", new String[] {"project/pom.xml"}).get(ARTIFACT_ID);
-    assertEquals(model.getArtifactId(), ARTIFACT_ID);
-
-    IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectManager()
-        .getMavenProject(GROUP_ID, ARTIFACT_ID, VERSION);
+    
+    IStructuredModel model = loadModels("projects/dep_exists", new String[] { "project/pom.xml" }).get("dep_exists");
+    
+    IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectManager().getMavenProject(TEST_GROUP_ID, "dep_exists", TEST_VERSION);
     MavenProject project = facade.getMavenProject();
-    assertEquals(project.getArtifactId(), ARTIFACT_ID);
-
+    
     LinkedList<MavenProject> hierarchy = new LinkedList<MavenProject>();
     hierarchy.add(project);
-
-    initDialog(model, hierarchy);
+    
 
     LinkedList<Dependency> dependencies = new LinkedList<Dependency>();
-    assertNotNull(model.getDependencies().get(0));
-    dependencies.add(model.getDependencies().get(0));
-
-    dialog.setDependenciesList(dependencies);
-    dialog.setTargetPOM(project);
-
-    assertNotNull(model.getDependencyManagement());
-    assertNotNull(model.getDependencyManagement().getDependencies());
-    assertEquals(model.getDependencyManagement().getDependencies().size(), 1);
-    Dependency dep = model.getDependencyManagement().getDependencies().get(0);
-    assertEquals(dep.getGroupId(), "test");
-    assertEquals(dep.getArtifactId(), "b");
-    assertEquals(dep.getVersion(), "0.1");
-
-    dialog.compute();
-
-    assertNotNull(model.getDependencyManagement());
-    assertEquals(1, model.getDependencyManagement().getDependencies().size());
-
-    Dependency depManDep = model.getDependencyManagement().getDependencies().get(0);
-    assertEquals(depManDep.getGroupId(), "test");
-    assertEquals(depManDep.getArtifactId(), "b");
-    assertEquals(depManDep.getVersion(), "0.1");
-
-    assertNotNull(model.getDependencies());
-    assertNotNull(model.getDependencies().get(0));
-    Dependency oldDep = model.getDependencies().get(0);
-    assertEquals(oldDep.getGroupId(), "test");
-    assertEquals(oldDep.getArtifactId(), "b");
-    assertTrue(oldDep.getVersion() == null || oldDep.getVersion().equals(""));
+    dependencies.add(project.getOriginalModel().getDependencies().get(0));
+    
+    IDOMModel temp = createTempModel(model);
+    
+	temp.aboutToChangeModel();
+    new CompoundOperation(ManageDependenciesDialog.createManageOperation(dependencies), 
+					              ManageDependenciesDialog.createRemoveVersionOperation(dependencies)).process(temp.getDocument());
+	temp.changedModel();
+    
+    
+	// now assert..
+	List<Element> deps = findChilds(
+			findChild(temp.getDocument().getDocumentElement(),
+					DEPENDENCIES), DEPENDENCY);
+	assertEquals(1, deps.size());
+	Element dep = deps.get(0);
+	assertNotNull(dep);
+	assertEquals("test", getTextValue(findChild(dep, PomEdits.GROUP_ID)));
+	assertEquals("b", getTextValue(findChild(dep, ARTIFACT_ID)));
+	assertNull(findChild(dep, PomEdits.VERSION));
+	Element dm = findChild(temp.getDocument().getDocumentElement(),
+			DEPENDENCY_MANAGEMENT);
+	assertNotNull(dm);
+	deps = findChilds(findChild(dm, DEPENDENCIES), DEPENDENCY);
+	assertEquals(1, deps.size());
+	dep = deps.get(0);
+	Element g = findChild(dep, PomEdits.GROUP_ID);
+	assertNotNull(g);
+	assertEquals("test", getTextValue(g));
+	assertEquals("b", getTextValue(findChild(dep, ARTIFACT_ID)));
+	assertEquals("0.1", getTextValue(findChild(dep, PomEdits.VERSION)));
   }
 
   @Test
   public void testDepExistsDiffVersion() throws Exception {
-    final String ARTIFACT_ID = "dep_exists_diff_version";
-
-    Model model = loadModels("projects/dep_exists_diff_version", new String[] {"project/pom.xml"}).get(ARTIFACT_ID);
-    assertEquals(model.getArtifactId(), ARTIFACT_ID);
-
-    IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectManager()
-        .getMavenProject(GROUP_ID, ARTIFACT_ID, VERSION);
+    
+    IStructuredModel model = loadModels("projects/dep_exists_diff_version", new String[] { "project/pom.xml" }).get("dep_exists_diff_version");
+    
+    IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectManager().getMavenProject(TEST_GROUP_ID, "dep_exists_diff_version", TEST_VERSION);
     MavenProject project = facade.getMavenProject();
-    assertEquals(project.getArtifactId(), ARTIFACT_ID);
-
+    
     LinkedList<MavenProject> hierarchy = new LinkedList<MavenProject>();
     hierarchy.add(project);
-
-    initDialog(model, hierarchy);
+    
 
     LinkedList<Dependency> dependencies = new LinkedList<Dependency>();
-    assertNotNull(model.getDependencies().get(0));
-    assertEquals(model.getDependencies().get(0).getVersion(), "0.1");
-    dependencies.add(model.getDependencies().get(0));
+    assertNotNull(project.getOriginalModel().getDependencies().get(0));
+    assertEquals(project.getOriginalModel().getDependencies().get(0).getVersion(), "0.1");
+    dependencies.add(project.getOriginalModel().getDependencies().get(0));
 
-    dialog.setDependenciesList(dependencies);
-    dialog.setTargetPOM(project);
+    IDOMModel temp = createTempModel(model);
+    
+	temp.aboutToChangeModel();
+    new CompoundOperation(ManageDependenciesDialog.createManageOperation(dependencies), 
+					              ManageDependenciesDialog.createRemoveVersionOperation(dependencies)).process(temp.getDocument());
+	temp.changedModel();
+    
+    //
+	List<Element> deps = findChilds(
+			findChild(temp.getDocument().getDocumentElement(),
+					DEPENDENCIES), DEPENDENCY);
+	assertEquals(1, deps.size());
+	Element dep = deps.get(0);
+	assertNotNull(dep);
+	assertEquals("test", getTextValue(findChild(dep, PomEdits.GROUP_ID)));
+	assertEquals("b", getTextValue(findChild(dep, ARTIFACT_ID)));
+	assertNull(findChild(dep, PomEdits.VERSION));
+	Element dm = findChild(temp.getDocument().getDocumentElement(),
+			DEPENDENCY_MANAGEMENT);
+	assertNotNull(dm);
+	deps = findChilds(findChild(dm, DEPENDENCIES), DEPENDENCY);
+	assertEquals(1, deps.size());
+	dep = deps.get(0);
+	Element g = findChild(dep, PomEdits.GROUP_ID);
+	assertNotNull(g);
+	assertEquals("test", getTextValue(g));
+	assertEquals("b", getTextValue(findChild(dep, ARTIFACT_ID)));
+	assertEquals("0.2", getTextValue(findChild(dep, PomEdits.VERSION)));
 
-    assertNotNull(model.getDependencyManagement());
-    assertNotNull(model.getDependencyManagement().getDependencies());
-    assertEquals(model.getDependencyManagement().getDependencies().size(), 1);
-    Dependency dep = model.getDependencyManagement().getDependencies().get(0);
-    assertEquals(dep.getGroupId(), "test");
-    assertEquals(dep.getArtifactId(), "b");
-    assertEquals(dep.getVersion(), "0.2");
-
-    dialog.compute();
-
-    assertNotNull(model.getDependencyManagement());
-    assertEquals(1, model.getDependencyManagement().getDependencies().size());
-
-    Dependency depManDep = model.getDependencyManagement().getDependencies().get(0);
-    assertEquals(depManDep.getGroupId(), "test");
-    assertEquals(depManDep.getArtifactId(), "b");
-    assertEquals(depManDep.getVersion(), "0.2");
-
-    assertNotNull(model.getDependencies());
-    assertNotNull(model.getDependencies().get(0));
-    Dependency oldDep = model.getDependencies().get(0);
-    assertEquals(oldDep.getGroupId(), "test");
-    assertEquals(oldDep.getArtifactId(), "b");
-    assertTrue(oldDep.getVersion() == null || oldDep.getVersion().equals(""));
   }
 
   @Test
   public void testDepExistsDiffVersionDiffPOMs() throws Exception {
     String ARTIFACT_ID_CHILD = "dep_exists_diff_version_diff_poms_child";
     String ARTIFACT_ID_PARENT = "dep_exists_diff_version_diff_poms_parent";
-    Map<String, Model> models = loadModels("projects/dep_exists_diff_version_diff_poms", new String[] {"child/pom.xml",
-        "parent/pom.xml"});
-    Model child = models.get(ARTIFACT_ID_CHILD);
-    Model parent = models.get(ARTIFACT_ID_PARENT);
-
+    Map<String, IStructuredModel> models = loadModels("projects/dep_exists_diff_version_diff_poms", new String[] { "child/pom.xml", "parent/pom.xml" });
+    IStructuredModel child = models.get(ARTIFACT_ID_CHILD);
+    IStructuredModel parent = models.get(ARTIFACT_ID_PARENT);
+    
     assertNotNull(child);
     assertNotNull(parent);
-    assertEquals(child.getArtifactId(), ARTIFACT_ID_CHILD);
-    assertEquals(parent.getArtifactId(), ARTIFACT_ID_PARENT);
-
-    MavenProject childProject = getMavenProject(GROUP_ID, ARTIFACT_ID_CHILD, VERSION);
-    MavenProject parentProject = getMavenProject(GROUP_ID, ARTIFACT_ID_PARENT, VERSION);
-
+    
+    MavenProject childProject = getMavenProject(TEST_GROUP_ID, ARTIFACT_ID_CHILD, TEST_VERSION);
+    MavenProject parentProject = getMavenProject(TEST_GROUP_ID, ARTIFACT_ID_PARENT, TEST_VERSION);
+    
     LinkedList<MavenProject> hierarchy = new LinkedList<MavenProject>();
     hierarchy.addFirst(childProject);
     hierarchy.addLast(parentProject);
-
-    initDialog(child, hierarchy);
-
+    
+    
     LinkedList<Dependency> selectedDeps = new LinkedList<Dependency>();
-    List<Dependency> dependencies = child.getDependencies();
+    List<Dependency> dependencies = childProject.getOriginalModel().getDependencies();
     assertNotNull(dependencies);
     assertEquals(dependencies.size(), 1);
     assertEquals(dependencies.get(0).getVersion(), "1.0");
     selectedDeps.add(dependencies.get(0));
-    dialog.setDependenciesList(selectedDeps);
+    
+    assertNotNull(parentProject.getOriginalModel().getDependencyManagement());
+    assertEquals(parentProject.getOriginalModel().getDependencyManagement().getDependencies().get(0).getVersion(), "1.1");
+    
+    IDOMModel tempChild = createTempModel(child);
+    IDOMModel tempParent = createTempModel(parent);
+    
+	tempChild.aboutToChangeModel();
+	tempParent.aboutToChangeModel();
+    ManageDependenciesDialog.createManageOperation(dependencies).process(tempParent.getDocument());
+    ManageDependenciesDialog.createRemoveVersionOperation(dependencies).process(tempChild.getDocument());
+	tempChild.changedModel();
+	tempParent.changedModel();
 
-    dialog.setTargetPOM(parentProject);
-    dialog.setTargetModel(parent);
 
-    assertNotNull(parent.getDependencyManagement());
-    assertEquals(parent.getDependencyManagement().getDependencies().get(0).getVersion(), "1.1");
-
-    assertNull(child.getDependencyManagement());
-
-    dialog.compute();
-
-    assertNull(child.getDependencyManagement());
-
-    assertNotNull(parent.getDependencyManagement());
-    assertEquals(1, parent.getDependencyManagement().getDependencies().size());
-
-    Dependency depManDep = parent.getDependencyManagement().getDependencies().get(0);
-    assertEquals(depManDep.getGroupId(), "test");
-    assertEquals(depManDep.getArtifactId(), "a");
-    assertEquals(depManDep.getVersion(), "1.1");
-
-    assertNotNull(child.getDependencies());
-    assertNotNull(child.getDependencies().get(0));
-    Dependency oldDep = child.getDependencies().get(0);
-    assertEquals(oldDep.getGroupId(), "test");
-    assertEquals(oldDep.getArtifactId(), "a");
-    assertTrue(oldDep.getVersion() == null || oldDep.getVersion().equals(""));
+    //
+    assertNull(findChild(tempChild.getDocument().getDocumentElement(), DEPENDENCY_MANAGEMENT));
+    
+    List<Element> deps = findChilds(findChild(findChild(tempParent.getDocument().getDocumentElement(), DEPENDENCY_MANAGEMENT), DEPENDENCIES), DEPENDENCY);
+    assertEquals(1, deps.size());
+    
+    Element depManDep = deps.get(0);
+    assertEquals("test", getTextValue(findChild(depManDep, PomEdits.GROUP_ID)));
+    assertEquals("a", getTextValue(findChild(depManDep, ARTIFACT_ID)));
+    assertEquals("1.1", getTextValue(findChild(depManDep, PomEdits.VERSION)));
+    
+    
+    deps = findChilds(findChild(tempChild.getDocument().getDocumentElement(), DEPENDENCIES), DEPENDENCY);
+    assertEquals(1, deps.size());
+    assertNotNull(deps.get(0));
+    
+    Element oldDep = deps.get(0);
+    assertEquals("test", getTextValue(findChild(oldDep, PomEdits.GROUP_ID)));
+    assertEquals("a", getTextValue(findChild(oldDep, ARTIFACT_ID)));
+    assertNull(getTextValue(findChild(oldDep, VERSION)));
+    
   }
 
   @Test
@@ -372,91 +397,29 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestJunit4
 
     }
   }
-
-  @Test
-  public void testBiggerHierarchy() throws Exception {
-    Map<String, Model> models = loadModels("projects/grandparent", new String[] {"child/pom.xml", "parent/pom.xml",
-        "grandparent/pom.xml"});
-    Model child = models.get("grandparent-child");
-    Model parent = models.get("grandparent-parent");
-    Model grandparent = models.get("grandparent-grandparent");
-
-    assertNotNull(child);
-    assertNotNull(parent);
-    assertNotNull(grandparent);
-    assertEquals(child.getArtifactId(), "grandparent-child");
-    assertEquals(parent.getArtifactId(), "grandparent-parent");
-    assertEquals(grandparent.getArtifactId(), "grandparent-grandparent");
-
-    MavenProject childProject = getMavenProject(GROUP_ID, "grandparent-child", VERSION);
-    MavenProject parentProject = getMavenProject(GROUP_ID, "grandparent-parent", VERSION);
-    MavenProject grandparentProject = getMavenProject(GROUP_ID, "grandparent-grandparent", VERSION);
-
-    LinkedList<MavenProject> hierarchy = new LinkedList<MavenProject>();
-    hierarchy.addFirst(childProject);
-    hierarchy.add(parentProject);
-    hierarchy.addLast(grandparentProject);
-
-    initDialog(child, hierarchy);
-
-    LinkedList<Dependency> selectedDeps = new LinkedList<Dependency>();
-    List<Dependency> dependencies = child.getDependencies();
-    assertNotNull(dependencies);
-    assertEquals(dependencies.size(), 1);
-    selectedDeps.add(dependencies.get(0));
-    dialog.setDependenciesList(selectedDeps);
-
-    dialog.setTargetPOM(grandparentProject);
-    dialog.setTargetModel(grandparent);
-
-    assertNull(parent.getDependencyManagement());
-    assertNull(grandparent.getDependencyManagement());
-
-    dialog.compute();
-
-    assertNotNull(grandparent.getDependencyManagement());
-    assertEquals(1, grandparent.getDependencyManagement().getDependencies().size());
-
-    Dependency depManDep = grandparent.getDependencyManagement().getDependencies().get(0);
-    assertEquals(depManDep.getGroupId(), "test");
-    assertEquals(depManDep.getArtifactId(), "a");
-    assertEquals(depManDep.getVersion(), "1.0");
-
-    assertNotNull(child.getDependencies());
-    assertNotNull(child.getDependencies().get(0));
-    Dependency oldDep = child.getDependencies().get(0);
-    assertEquals(oldDep.getGroupId(), "test");
-    assertEquals(oldDep.getArtifactId(), "a");
-    assertTrue(oldDep.getVersion() == null || oldDep.getVersion().equals(""));
-
-    assertNull(parent.getDependencyManagement());
-  }
-
+  
   @Test
   public void testMultipleDependencies() throws Exception {
     String ARTIFACT_CHILD = "multi-child";
     String ARTIFACT_PARENT = "multi-parent";
-    Map<String, Model> models = loadModels("projects/multi", new String[] {"child/pom.xml", "parent/pom.xml"});
-    final Model child = models.get(ARTIFACT_CHILD);
-    Model parent = models.get(ARTIFACT_PARENT);
-
+    Map<String, IStructuredModel> models = loadModels("projects/multi", new String[] { "child/pom.xml", "parent/pom.xml" });
+    final IStructuredModel child = models.get(ARTIFACT_CHILD);
+    IStructuredModel parent = models.get(ARTIFACT_PARENT);
+    
     assertNotNull(child);
     assertNotNull(parent);
-    assertEquals(child.getArtifactId(), ARTIFACT_CHILD);
-    assertEquals(parent.getArtifactId(), ARTIFACT_PARENT);
-
-    MavenProject childProject = getMavenProject(GROUP_ID, ARTIFACT_CHILD, VERSION);
-    MavenProject parentProject = getMavenProject(GROUP_ID, ARTIFACT_PARENT, VERSION);
-
+    
+    MavenProject childProject = getMavenProject(TEST_GROUP_ID, ARTIFACT_CHILD, TEST_VERSION);
+    MavenProject parentProject = getMavenProject(TEST_GROUP_ID, ARTIFACT_PARENT, TEST_VERSION);
+    
     final LinkedList<MavenProject> hierarchy = new LinkedList<MavenProject>();
     hierarchy.addFirst(childProject);
     hierarchy.addLast(parentProject);
-
-    initDialog(child, hierarchy);
-
+    
+    
     LinkedList<Dependency> selectedDeps = new LinkedList<Dependency>();
-    List<Dependency> dependencies = child.getDependencies();
-
+    List<Dependency> dependencies = childProject.getOriginalModel().getDependencies();
+    
     assertNotNull(dependencies);
     assertEquals(dependencies.size(), 4);
 
@@ -467,69 +430,52 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestJunit4
     }
 
     assertEquals(selectedDeps.size(), 3);
-
-    dialog.setDependenciesList(selectedDeps);
-
-    dialog.setTargetPOM(parentProject);
-    dialog.setTargetModel(parent);
-
-    assertNotNull(parent.getDependencyManagement());
-
-    dialog.compute();
-
-    assertNotNull(parent.getDependencyManagement());
-    assertEquals(3, parent.getDependencyManagement().getDependencies().size());
-
-    checkContainsDependency(parent.getDependencyManagement().getDependencies(), "test", "to-move", "1.0");
-    checkContainsDependency(parent.getDependencyManagement().getDependencies(), "test2", "to-move", "0.242");
-    checkContainsDependency(parent.getDependencyManagement().getDependencies(), "test", "move-but-exists", "0.9");
-
-    Dependency shouldBeNull = findDependency(parent.getDependencyManagement().getDependencies(), "test", "dont-move",
-        "1.0");
-    assertNull(shouldBeNull);
-
-    assertNotNull(child.getDependencies());
-    assertEquals(child.getDependencies().size(), 4);
-
-    Dependency dep = findDependency(child.getDependencies(), "test", "to-move", null);
+    
+    IDOMModel tempChild = createTempModel(child);
+    IDOMModel tempParent = createTempModel(parent);
+    
+	tempChild.aboutToChangeModel();
+	tempParent.aboutToChangeModel();
+    ManageDependenciesDialog.createManageOperation(selectedDeps).process(tempParent.getDocument());
+    ManageDependenciesDialog.createRemoveVersionOperation(selectedDeps).process(tempChild.getDocument());
+	tempChild.changedModel();
+	tempParent.changedModel();
+	
+    
+	Element deps = findChild(findChild(tempParent.getDocument().getDocumentElement(), DEPENDENCY_MANAGEMENT), DEPENDENCIES);
+    assertNotNull(deps);
+//    assertEquals(3, findChilds(deps, DEPENDENCY).size());
+    
+    checkContainsDependency(deps, "test", "to-move", "1.0");
+    checkContainsDependency(deps, "test2", "to-move", "0.242");
+    checkContainsDependency(deps, "test", "move-but-exists", "0.9");
+    
+    assertNull(findChild(deps, DEPENDENCY, childEquals(GROUP_ID, "test"), childEquals(ARTIFACT_ID, "dont-move"), childEquals(VERSION, "1.0")));
+     
+	deps = findChild(tempChild.getDocument().getDocumentElement(), DEPENDENCIES);
+    assertNotNull(deps);
+    assertEquals(4, findChilds(deps, DEPENDENCY).size());
+    
+    Element dep = findChild(deps, DEPENDENCY, childEquals(GROUP_ID, "test"), childEquals(ARTIFACT_ID, "to-move")); 
     assertNotNull(dep);
-    assertTrue(dep.getVersion() == null || dep.getVersion().equals(""));
-    dep = findDependency(child.getDependencies(), "test2", "to-move", null);
+    assertNull(findChild(dep, VERSION));
+    dep = findChild(deps, DEPENDENCY, childEquals(GROUP_ID, "test2"), childEquals(ARTIFACT_ID, "to-move"));  
     assertNotNull(dep);
-    assertTrue(dep.getVersion() == null || dep.getVersion().equals(""));
-    dep = findDependency(child.getDependencies(), "test", "move-but-exists", null);
+    assertNull(findChild(dep, VERSION));
+    dep = findChild(deps, DEPENDENCY, childEquals(GROUP_ID, "test"), childEquals(ARTIFACT_ID, "move-but-exists")); 
     assertNotNull(dep);
-    assertTrue(dep.getVersion() == null || dep.getVersion().equals(""));
-
-    checkContainsDependency(child.getDependencies(), "test", "dont-move", "1.0");
+    assertNull(findChild(dep, VERSION));
+    
+    checkContainsDependency(deps, "test", "dont-move", "1.0");
   }
 
-  protected void initDialog(final Model model, final LinkedList<MavenProject> hierarchy) {
-    Display.getDefault().syncExec(new Runnable() {
-
-      @SuppressWarnings("synthetic-access")
-      public void run() {
-        dialog = new TestDialog(Display.getDefault().getActiveShell(), model, hierarchy);
-      }
-    });
+  protected void checkContainsDependency(Element deps, String group, String artifact, String version) {
+    Element dep = findChild(deps, DEPENDENCY, childEquals(GROUP_ID, group), childEquals(ARTIFACT_ID, artifact), childEquals(VERSION, version));
+    assertNotNull("Dependency '"+group+"-"+artifact+"-"+version+"' not found.", dep);
   }
+  
 
-  protected void checkContainsDependency(List<Dependency> deps, String group, String artifact, String version) {
-    Dependency dep = findDependency(deps, group, artifact, version);
-    assertNotNull("Dependency '" + group + "-" + artifact + "-" + version + "' not found.", dep);
-  }
-
-  protected Dependency findDependency(List<Dependency> deps, String group, String artifact, String version) {
-    for(Dependency dep : deps) {
-      if(dep.getGroupId().equals(group) && dep.getArtifactId().equals(artifact)) {
-        if(version == null || version.equals("") || dep.getVersion().equals(version)) {
-          return dep;
-        }
-      }
-    }
-    return null;
-  }
-
+  
   protected MavenProject getMavenProject(String groupID, String artifactID, String version) {
     MavenProjectManager mavenProjectManager = MavenPlugin.getDefault().getMavenProjectManager();
     assertNotNull(mavenProjectManager);
@@ -551,59 +497,18 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestJunit4
    * @return
    * @throws Exception
    */
-  protected Map<String, Model> loadModels(String baseDir, String[] poms) throws Exception {
+  protected Map<String, IStructuredModel> loadModels(String baseDir, String[] poms) throws Exception {
     IProject[] projects = importProjects(baseDir, poms, new ResolverConfiguration());
-    HashMap<String, Model> models = new HashMap<String, Model>(poms.length);
+    HashMap<String, IStructuredModel> models = new HashMap<String, IStructuredModel>(poms.length);
 
     for(int i = 0; i < poms.length; i++ ) {
       IProject project = projects[i];
       IFile pomFile = project.getFile("pom.xml");
-
-      PomResourceImpl resource = MavenPlugin.getDefault().getMavenModelManager().loadResource(pomFile);
-      Model model = resource.getModel();
-      models.put(model.getArtifactId(), model);
+      IStructuredModel model = StructuredModelManager.getModelManager().getModelForRead(pomFile);
+      models.put(pomFile.getParent().getName(), model);
     }
 
     return models;
   }
 
-  private static class TestDialog extends ManageDependenciesDialog {
-
-    private MavenProject targetPOM;
-
-    private LinkedList<Dependency> dependencies;
-
-    private Model targetModel;
-
-    public TestDialog(Shell parent, Model model, LinkedList<MavenProject> hierarchy) {
-      super(parent, model, hierarchy);
-      isTest = true;
-    }
-
-    public void compute() {
-      assertNotNull(dependencies);
-      assertNotNull(targetPOM);
-      computeResult();
-    }
-
-    public void setDependenciesList(LinkedList<Dependency> dependencies) {
-      this.dependencies = dependencies;
-    }
-
-    public void setTargetPOM(MavenProject targetPOM) {
-      this.targetPOM = targetPOM;
-    }
-
-    protected LinkedList<Dependency> getDependenciesList() {
-      return dependencies;
-    }
-
-    protected MavenProject getTargetPOM() {
-      return targetPOM;
-    }
-
-    protected void setTargetModel(Model target) {
-      this.targetModel = target;
-    }
-  }
 }
