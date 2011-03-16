@@ -451,7 +451,7 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 	/*
 	 * The editor has the given exclusion set
 	 */
-	protected static void assertExclusionSet(String msg, MavenPomEditor editor, final ArtifactKey dependencyKey, final ArtifactKey excluded) throws Exception {
+	protected static boolean hasExclusionSet(MavenPomEditor editor, final ArtifactKey dependencyKey, final ArtifactKey excluded) throws Exception {
 		final boolean[] found = new boolean[1];
 		found[0] = false;
 		performOnDOMDocument(new OperationTuple(editor.getDocument(), new Operation() {
@@ -471,10 +471,8 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 				}
 			}
 		}, true));
-		if (!found[0]) {
-			fail(msg);
-		}
-		return false;
+		
+		return found[0];
 	}
 
 	/*
