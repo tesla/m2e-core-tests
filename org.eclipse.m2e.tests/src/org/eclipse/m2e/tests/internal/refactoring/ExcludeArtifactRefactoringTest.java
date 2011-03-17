@@ -1,11 +1,17 @@
 package org.eclipse.m2e.tests.internal.refactoring;
 
+import java.util.HashMap;
+
 import org.junit.AfterClass;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.*;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
@@ -13,6 +19,7 @@ import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IWorkbench;
@@ -32,7 +39,10 @@ import org.eclipse.m2e.editor.pom.MavenPomEditor;
 import org.eclipse.m2e.model.edit.pom.Dependency;
 import org.eclipse.m2e.model.edit.pom.Exclusion;
 import org.eclipse.m2e.model.edit.pom.Model;
+import org.eclipse.m2e.model.edit.pom.util.PomResourceFactoryImpl;
+import org.eclipse.m2e.model.edit.pom.util.PomResourceImpl;
 import org.eclipse.m2e.refactoring.exclude.ExcludeArtifactRefactoring;
+import org.eclipse.m2e.refactoring.internal.Activator;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
@@ -474,12 +484,27 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 		
 		return found[0];
 	}
+	
+	 public static PomResourceImpl loadResource(IFile pomFile) throws CoreException {
+	    String path = pomFile.getFullPath().toOSString();
+	    URI uri = URI.createPlatformResourceURI(path, true);
+
+	    try {
+	      Resource resource = new PomResourceFactoryImpl().createResource(uri);
+	      resource.load(new HashMap());
+	      return (PomResourceImpl)resource;
+
+	    } catch(Exception ex) {
+	      String msg = NLS.bind("Can't load model {0}", pomFile);
+	      throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, -1, msg, ex));
+	    }
+	  }  	
 
 	/*
 	 * The editor has the given exclusion set
 	 */
 	protected static boolean hasExclusionSet(IProject project, ArtifactKey dependencyKey, ArtifactKey excluded) throws Exception {
-		Model model = MavenPlugin.getDefault().getMavenModelManager().loadResource(project.getFile("pom.xml")).getModel();
+		Model model = loadResource(project.getFile("pom.xml")).getModel();
 		Dependency d = null;
 		for (Dependency dep : model.getDependencies()) {
 			if (dep.getArtifactId().equals(dependencyKey.getArtifactId()) && dep.getGroupId().equals(dependencyKey.getGroupId()) && dep.getVersion().equals(dependencyKey.getVersion())) {
