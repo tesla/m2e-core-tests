@@ -21,18 +21,12 @@ import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.*;
 
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.model.Dependency;
-import org.apache.maven.model.Model;
 import org.apache.maven.project.MavenProject;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
-
-import org.apache.maven.execution.MavenExecutionRequest;
-import org.apache.maven.project.MavenProject;
-
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.IMaven;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
@@ -40,18 +34,10 @@ import org.eclipse.m2e.core.project.MavenProjectManager;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits;
 import org.eclipse.m2e.editor.AbstractMavenProjectTestJunit4;
-import org.eclipse.m2e.editor.pom.ValueProvider;
-import org.eclipse.m2e.model.edit.pom.util.PomResourceImpl;
-
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
-import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
 import org.junit.Test;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 

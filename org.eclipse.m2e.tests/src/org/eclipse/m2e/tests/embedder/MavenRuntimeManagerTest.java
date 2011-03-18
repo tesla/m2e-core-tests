@@ -19,6 +19,7 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.IMavenLauncherConfiguration;
 import org.eclipse.m2e.core.embedder.MavenRuntime;
@@ -63,7 +64,6 @@ public class MavenRuntimeManagerTest extends TestCase {
     assertFalse(runtimeManager.getMavenRuntimes().isEmpty());
   }
 
-  @SuppressWarnings("restriction")
   public void testDefaultRuntime() throws Exception {
     MavenRuntime runtime = runtimeManager.getDefaultRuntime();
     assertFalse(runtime.isEditable());
