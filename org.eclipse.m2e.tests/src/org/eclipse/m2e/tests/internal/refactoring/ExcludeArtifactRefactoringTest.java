@@ -42,7 +42,6 @@ import org.eclipse.m2e.model.edit.pom.Model;
 import org.eclipse.m2e.model.edit.pom.util.PomResourceFactoryImpl;
 import org.eclipse.m2e.model.edit.pom.util.PomResourceImpl;
 import org.eclipse.m2e.refactoring.exclude.ExcludeArtifactRefactoring;
-import org.eclipse.m2e.refactoring.internal.Activator;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
@@ -496,7 +495,7 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 
 	    } catch(Exception ex) {
 	      String msg = NLS.bind("Can't load model {0}", pomFile);
-	      throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, -1, msg, ex));
+	      throw new CoreException(new Status(IStatus.ERROR, "test", -1, msg, ex));
 	    }
 	  }  	
 
