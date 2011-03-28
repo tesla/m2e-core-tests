@@ -23,10 +23,14 @@ import org.eclipse.m2e.core.project.MavenProjectChangedEvent;
 
 public class TestMavenProjectChangedListener implements IMavenProjectChangedListener {
 
+  public static volatile boolean record = false;
+
   public final static List<MavenProjectChangedEvent> events = new ArrayList<MavenProjectChangedEvent>();
 
   public void mavenProjectChanged(MavenProjectChangedEvent[] events, IProgressMonitor monitor) {
-    TestMavenProjectChangedListener.events.addAll(Arrays.asList(events));
+    if (record) {
+      TestMavenProjectChangedListener.events.addAll(Arrays.asList(events));
+    }
   }
 
 }

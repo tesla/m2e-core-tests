@@ -18,10 +18,15 @@ import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 public class MavenProjectChangedListenerExtensionTest extends AbstractMavenProjectTestCase {
   public void testExtension() throws Exception {
     TestMavenProjectChangedListener.events.clear();
-
-    importProject("projects/projectimport/p001/pom.xml");
-    waitForJobsToComplete();
-
-    assertFalse(TestMavenProjectChangedListener.events.isEmpty());
+    TestMavenProjectChangedListener.record = true;
+    
+    try {
+      importProject("projects/projectimport/p001/pom.xml");
+      waitForJobsToComplete();
+  
+      assertFalse(TestMavenProjectChangedListener.events.isEmpty());
+    } finally {
+      TestMavenProjectChangedListener.record = false;
+    }
   }
 }
