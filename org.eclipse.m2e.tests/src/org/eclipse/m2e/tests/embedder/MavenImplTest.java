@@ -389,6 +389,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
     MavenProject parent = maven.resolveParentProject(request, project, monitor);
     assertEquals("local-parent", parent.getArtifactId());
   }
+
   public void testReadRemoteParent() throws Exception {
     MavenExecutionRequest request = maven.createExecutionRequest(monitor);
     request.setPom(new File("projects/readparent/remote/module02/pom.xml"));
@@ -430,7 +431,14 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
     } finally {
       configuration.setUserSettingsFile(origSettings);
     }
-    
+  }
+
+  public void testExecutionRequestContainsSystemProperties() throws Exception {
+    MavenExecutionRequest request = maven.createExecutionRequest(monitor);
+    assertNotNull(request);
+    assertNotNull(request.getSystemProperties());
+    assertNotNull(request.getSystemProperties().getProperty("java.version"));
+    assertNotNull(request.getSystemProperties().getProperty("java.home"));
   }
 
 }
