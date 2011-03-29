@@ -19,9 +19,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import org.apache.maven.archetype.catalog.Archetype;
+import org.eclipse.core.externaltools.internal.model.BuilderCoreUtils;
+import org.eclipse.core.externaltools.internal.model.ExternalToolBuilder;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IWorkspaceRunnable;
@@ -34,6 +36,9 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+
+import org.apache.maven.archetype.catalog.Archetype;
+
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.internal.Messages;
@@ -217,5 +222,70 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
 
     project = importProject("projects/detectJavaProject/nonJavac/pom.xml");
     assertFalse("compilerId=jikes", project.hasNature(JavaCore.NATURE_ID));
+  }
+
+  public void testAddRemoveMavenBuilder() throws Exception {
+    IProject project = createExisting("testAddRemoveMavenBuilder",
+        "projects/AddRemoveMavenBuilder/testAddRemoveMavenBuilder");
+    IProjectDescription projectDescription = project.getDescription();
+    // The project has only java builder
+    assertEquals(1, projectDescription.getBuildSpec().length);
+    assertNotSame(IMavenConstants.BUILDER_ID, projectDescription.getBuildSpec()[0].getBuilderName());
+
+    // Add the maven builder
+    plugin.getProjectConfigurationManager().addMavenBuilder(project, null /*description*/, monitor);
+    projectDescription = project.getDescription();
+    assertEquals(2, projectDescription.getBuildSpec().length);
+    assertEquals(IMavenConstants.BUILDER_ID, projectDescription.getBuildSpec()[1].getBuilderName());
+
+    // Add the maven builder again
+    plugin.getProjectConfigurationManager().addMavenBuilder(project, null /*description*/, monitor);
+    projectDescription = project.getDescription();
+    assertEquals(2, projectDescription.getBuildSpec().length);
+    assertEquals(IMavenConstants.BUILDER_ID, projectDescription.getBuildSpec()[1].getBuilderName());
+
+    // Remove the maven builder
+    plugin.getProjectConfigurationManager().removeMavenBuilder(project, null /*description*/, monitor);
+    projectDescription = project.getDescription();
+    assertEquals(1, projectDescription.getBuildSpec().length);
+    assertNotSame(IMavenConstants.BUILDER_ID, projectDescription.getBuildSpec()[0].getBuilderName());
+
+    // Remove the maven builder again
+    plugin.getProjectConfigurationManager().removeMavenBuilder(project, null /*description*/, monitor);
+    projectDescription = project.getDescription();
+    assertEquals(1, projectDescription.getBuildSpec().length);
+    assertNotSame(IMavenConstants.BUILDER_ID, projectDescription.getBuildSpec()[0].getBuilderName());
+  }
+
+  public void testAddRemoveMavenBuilderDisabled() throws Exception {
+    IProject project = createExisting("testAddRemoveMavenDisabled",
+        "projects/AddRemoveMavenBuilder/testAddRemoveMavenBuilderDisabled");
+    IProjectDescription projectDescription = project.getDescription();
+    // The project has only java builder
+    assertEquals(2, projectDescription.getBuildSpec().length);
+    String firstBuilderId = projectDescription.getBuildSpec()[0].getBuilderName();
+    assertNotSame(IMavenConstants.BUILDER_ID, firstBuilderId);
+    assertEquals(ExternalToolBuilder.ID, projectDescription.getBuildSpec()[1].getBuilderName());
+    String launchConfigHandleArg = (String) projectDescription.getBuildSpec()[1].getArguments().get(
+        BuilderCoreUtils.LAUNCH_CONFIG_HANDLE);
+    assertNotNull(launchConfigHandleArg);
+    assertTrue(launchConfigHandleArg.contains(IMavenConstants.BUILDER_ID));
+
+    // Add the maven builder
+    plugin.getProjectConfigurationManager().addMavenBuilder(project, null /*description*/, monitor);
+    projectDescription = project.getDescription();
+    assertEquals(2, projectDescription.getBuildSpec().length);
+    assertNotSame(IMavenConstants.BUILDER_ID, projectDescription.getBuildSpec()[0].getBuilderName());
+    assertEquals(ExternalToolBuilder.ID, projectDescription.getBuildSpec()[1].getBuilderName());
+    launchConfigHandleArg = (String) projectDescription.getBuildSpec()[1].getArguments().get(
+        BuilderCoreUtils.LAUNCH_CONFIG_HANDLE);
+    assertNotNull(launchConfigHandleArg);
+    assertTrue(launchConfigHandleArg.contains(IMavenConstants.BUILDER_ID));
+
+    // Remove the maven builder
+    plugin.getProjectConfigurationManager().removeMavenBuilder(project, null /*description*/, monitor);
+    projectDescription = project.getDescription();
+    assertEquals(1, projectDescription.getBuildSpec().length);
+    assertEquals(firstBuilderId, projectDescription.getBuildSpec()[0].getBuilderName());
   }
 }
