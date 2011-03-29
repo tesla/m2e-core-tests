@@ -26,7 +26,9 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.m2e.core.core.IMavenConstants;
+import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
+import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
 public class MavenBuilderTest extends AbstractMavenProjectTestCase {
 
@@ -188,4 +190,25 @@ public class MavenBuilderTest extends AbstractMavenProjectTestCase {
     assertTrue(aFile.isAccessible());
   }
   
+  public void test_crossproject() throws Exception {
+    IProject[] projects = importProjects("projects/resourcefiltering/crossproject", new String[] {"module-a/pom.xml",
+        "module-b/pom.xml"}, new ResolverConfiguration());
+    waitForJobsToComplete();
+
+    projects[0].build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+    projects[1].build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+    waitForJobsToComplete();
+
+    IFile aFile = projects[0].getFile("temporary-filtered-resources/filtered.properties");
+    assertTrue(aFile.isAccessible());
+    Properties properties = loadProperties(aFile.getFullPath());
+    assertEquals("model-a-value", properties.getProperty("key"));
+
+    IFile bFile = projects[1].getFile("target/classes/filtered.properties");
+    assertTrue(bFile.isAccessible());
+    properties = loadProperties(bFile.getFullPath());
+    assertEquals("model-b-value", properties.getProperty("key"));
+
+    // TODO test warning marker
+  }
 }
