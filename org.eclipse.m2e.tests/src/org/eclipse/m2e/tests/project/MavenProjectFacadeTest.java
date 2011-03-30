@@ -6,12 +6,15 @@ import java.lang.reflect.Modifier;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IPath;
 
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.MojoExecution;
 
+import org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
+import org.eclipse.m2e.core.project.MavenUpdateRequest;
 import org.eclipse.m2e.core.project.configurator.AbstractProjectConfigurator;
 import org.eclipse.m2e.core.project.configurator.ILifecycleMapping;
 import org.eclipse.m2e.core.project.configurator.MojoExecutionKey;
@@ -144,5 +147,28 @@ public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
         field.set(facade, null);
       }
     }
+  }
+
+  public void testIsStale() throws Exception {
+    IProject project = importProject("projects/testIsStale/pom.xml");
+    waitForJobsToComplete();
+    assertNoErrors(project);
+
+    testIsStale(project, "pom.xml");
+    for(IPath filename : ProjectRegistryManager.METADATA_PATH) {
+      MavenUpdateRequest updateRequest = new MavenUpdateRequest(project, true /*offline*/, false /*updateSnapshots*/);
+      plugin.getMavenProjectManagerImpl().refresh(updateRequest, monitor);
+
+      testIsStale(project, filename.toString());
+    }
+  }
+
+  private void testIsStale(IProject project, String filename) throws Exception {
+    IMavenProjectFacade projectFacade = plugin.getMavenProjectManager().create(project, monitor);
+    assertFalse("Expected not stale MavenProjectFacade before changing the " + filename + " file",
+        projectFacade.isStale());
+
+    project.getFile(filename).touch(monitor);
+    assertTrue("Expected stale MavenProjectFacade after changing the " + filename + " file", projectFacade.isStale());
   }
 }
