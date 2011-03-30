@@ -17,12 +17,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
-import org.apache.maven.archetype.catalog.Archetype;
-import org.apache.maven.model.Build;
-import org.apache.maven.model.Dependency;
-import org.apache.maven.model.Model;
-import org.apache.maven.model.Plugin;
-import org.codehaus.plexus.util.DirectoryScanner;
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -44,6 +38,15 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.launching.JavaRuntime;
+
+import org.codehaus.plexus.util.DirectoryScanner;
+
+import org.apache.maven.archetype.catalog.Archetype;
+import org.apache.maven.model.Build;
+import org.apache.maven.model.Dependency;
+import org.apache.maven.model.Model;
+import org.apache.maven.model.Plugin;
+
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.index.IMutableIndex;
@@ -332,8 +335,8 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
       // cleanup
       deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t001/0.0.1/"));
       deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t002/0.0.1/"));
-      MavenPlugin.getDefault().getMavenProjectManager().refresh(
-          new MavenUpdateRequest(new IProject[] {project}, false /*offline*/, false));
+      MavenPlugin.getDefault().getMavenProjectManager()
+          .refresh(new MavenUpdateRequest(project, false /*offline*/, false));
       waitForJobsToComplete();
     }
 
@@ -1056,6 +1059,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
 
   public void testMNGECLIPSE_2367_same_sources_resources() throws Exception {
     IProject project = importProject("projects/MNGECLIPSE-2367_sourcesResourcesOverlap/project01/pom.xml");
+    waitForJobsToComplete();
     project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
 
     IJavaProject javaProject = JavaCore.create(project);
@@ -1073,6 +1077,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
 
   public void testMNGECLIPSE_2367_sources_encloses_resources() throws Exception {
     IProject project = importProject("projects/MNGECLIPSE-2367_sourcesResourcesOverlap/project02/pom.xml");
+    waitForJobsToComplete();
     project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
 
     IJavaProject javaProject = JavaCore.create(project);
@@ -1090,6 +1095,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
 
   public void testMNGECLIPSE_2367_testSources_encloses_resources() throws Exception {
     IProject project = importProject("projects/MNGECLIPSE-2367_sourcesResourcesOverlap/project03/pom.xml");
+    waitForJobsToComplete();
     project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
 
     // this project has resources and test-sources folders overlap. m2e does not support this properly
