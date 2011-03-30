@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.eclipse.epp.usagedata.internal.gathering.events.UsageDataEvent;
 import org.eclipse.epp.usagedata.internal.gathering.services.UsageDataService;
+
 import org.eclipse.m2e.internal.udc.Activator;
 import org.eclipse.m2e.internal.udc.PomImportMonitor;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
@@ -28,12 +29,15 @@ public class M2EUsageDataCollectorTests extends AbstractMavenProjectTestCase {
 		monitor.startMonitoring(usageDataService);
 	}
 
-	public void tearDown() throws Exception {
-		super.tearDown();
-		monitor.stopMonitoring();
-		monitor = null;
-		usageDataService = null;
-	}
+  public void tearDown() throws Exception {
+    try {
+      monitor.stopMonitoring();
+      monitor = null;
+      usageDataService = null;
+    } finally {
+      super.tearDown();
+    }
+  }
 
 	public void testPackagingEvent() throws Exception {
 		importProject("projects/usagedatacollection/simple/pom.xml");

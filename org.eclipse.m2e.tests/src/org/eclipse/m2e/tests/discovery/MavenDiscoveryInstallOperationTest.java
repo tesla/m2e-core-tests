@@ -9,6 +9,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
 import org.eclipse.equinox.p2.metadata.Version;
+
 import org.eclipse.m2e.internal.discovery.operation.MavenDiscoveryInstallOperation;
 import org.eclipse.m2e.tests.common.HttpServer;
 
@@ -29,10 +30,13 @@ public class MavenDiscoveryInstallOperationTest extends AbstractDiscoveryTest {
 	}
 
 	public void tearDown() throws Exception {
-		super.tearDown();
-		if (httpServer != null) {
-			httpServer.stop();
-		}
+    try {
+      if(httpServer != null) {
+        httpServer.stop();
+      }
+    } finally {
+      super.tearDown();
+    }
 	}
 
 	public void testMatchNoVersion() throws Exception {

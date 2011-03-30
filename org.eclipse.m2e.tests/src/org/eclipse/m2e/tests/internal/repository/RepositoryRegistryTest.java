@@ -13,10 +13,12 @@ package org.eclipse.m2e.tests.internal.repository;
 
 import java.io.File;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
-import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.internal.repository.RepositoryRegistry;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
@@ -36,9 +38,11 @@ public class RepositoryRegistryTest extends AbstractMavenProjectTestCase {
   }
 
   protected void tearDown() throws Exception {
-    repositoryRegistry = null;
-
-    super.tearDown();
+    try {
+      repositoryRegistry = null;
+    } finally {
+      super.tearDown();
+    }
   }
 
   private Server newServer(String id, String username, String password) {

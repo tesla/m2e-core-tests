@@ -3,11 +3,16 @@ package org.eclipse.m2e.tests;
 
 import java.util.List;
 
+import org.eclipse.core.resources.IProject;
+
 import org.apache.maven.RepositoryUtils;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.project.MavenProject;
-import org.eclipse.core.resources.IProject;
+
+import org.sonatype.aether.graph.Dependency;
+import org.sonatype.aether.util.artifact.DefaultArtifactTypeRegistry;
+
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.internal.markers.SourceLocation;
 import org.eclipse.m2e.core.internal.markers.SourceLocationHelper;
@@ -18,8 +23,6 @@ import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.core.project.configurator.MojoExecutionKey;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
-import org.sonatype.aether.graph.Dependency;
-import org.sonatype.aether.util.artifact.DefaultArtifactTypeRegistry;
 
 
 @SuppressWarnings("restriction")
@@ -36,10 +39,12 @@ public class SourceLocationHelperTest extends AbstractMavenProjectTestCase {
 
   @Override
   protected void tearDown() throws Exception {
-    //projectConfigurationManager = null;
-    mavenProjectManager = null;
-
-    super.tearDown();
+    try {
+      //projectConfigurationManager = null;
+      mavenProjectManager = null;
+    } finally {
+      super.tearDown();
+    }
   }
 
   public void testPackagingLocation() throws Exception {

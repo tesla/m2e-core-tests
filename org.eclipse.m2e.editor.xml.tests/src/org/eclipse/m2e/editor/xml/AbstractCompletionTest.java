@@ -15,11 +15,11 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.wst.xml.ui.internal.contentassist.XMLContentAssistProcessor;
 
 
+@SuppressWarnings("restriction")
 public abstract class AbstractCompletionTest extends AbstractPOMEditorTestCase {
   protected XMLContentAssistProcessor xmlContentAssistProcessor = null;
   
   protected IFile loadProjectsAndFiles() throws Exception {
-    // TODO Auto-generated method stub
     return null;
   }
 
@@ -30,8 +30,11 @@ public abstract class AbstractCompletionTest extends AbstractPOMEditorTestCase {
   
 
   protected void tearDown() throws Exception {
-    super.tearDown();
-    xmlContentAssistProcessor.release();
+    try {
+      xmlContentAssistProcessor.release();
+    } finally {
+      super.tearDown();
+    }
   }
 
   protected ICompletionProposal[] getProposals(int offset) throws Exception {

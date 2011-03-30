@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.junit.Test;
+
 import junit.framework.TestCase;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -29,13 +31,13 @@ import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.IShellProvider;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.internal.Workbench;
+
 import org.eclipse.m2e.core.project.configurator.MojoExecutionKey;
 import org.eclipse.m2e.internal.discovery.MavenDiscovery;
 import org.eclipse.m2e.internal.discovery.wizards.MavenCatalogConfiguration;
 import org.eclipse.m2e.internal.discovery.wizards.MavenCatalogViewer;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.internal.Workbench;
-import org.junit.Test;
 
 
 @SuppressWarnings("restriction")
@@ -58,6 +60,8 @@ public class MavenDiscoveryTest extends TestCase implements IShellProvider {
 
   @Override
   public void setUp() throws Exception {
+    super.setUp();
+
     catalog = new Catalog();
     catalog.setEnvironment(DiscoveryCore.createEnvironment());
     catalog.setVerifyUpdateSiteAvailability(false);
@@ -80,8 +84,12 @@ public class MavenDiscoveryTest extends TestCase implements IShellProvider {
   }
 
   public void tearDown() throws Exception {
-    shell.dispose();
-    shell = null;
+    try {
+      shell.dispose();
+      shell = null;
+    } finally {
+      super.tearDown();
+    }
   }
 
   @Test

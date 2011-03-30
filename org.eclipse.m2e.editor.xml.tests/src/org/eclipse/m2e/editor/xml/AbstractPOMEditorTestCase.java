@@ -11,17 +11,12 @@
 
 package org.eclipse.m2e.editor.xml;
 
-import java.io.IOException;
-
 import junit.framework.Assert;
 
-import org.apache.maven.project.MavenProject;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.text.source.IOverviewRuler;
 import org.eclipse.jface.text.source.IVerticalRuler;
-import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -30,13 +25,16 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
-import org.eclipse.wst.sse.core.internal.provisional.exceptions.ResourceAlreadyExists;
-import org.eclipse.wst.sse.core.internal.provisional.exceptions.ResourceInUse;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
 import org.eclipse.wst.sse.ui.internal.StructuredTextViewer;
 import org.eclipse.wst.xml.ui.StructuredTextViewerConfigurationXML;
 
+import org.apache.maven.project.MavenProject;
 
+import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
+
+
+@SuppressWarnings("restriction")
 public abstract class AbstractPOMEditorTestCase extends AbstractMavenProjectTestCase {
   protected DummyStructuredTextViewer sourceViewer;
 
@@ -46,6 +44,7 @@ public abstract class AbstractPOMEditorTestCase extends AbstractMavenProjectTest
 
   private IStructuredModel model;
 
+  @Override
   protected void setUp() throws Exception {
     super.setUp();
     file = loadProjectsAndFiles();
@@ -61,7 +60,7 @@ public abstract class AbstractPOMEditorTestCase extends AbstractMavenProjectTest
     sourceViewer.setDocument(document);
   }
 
-  protected void loadXMLFile() throws ResourceAlreadyExists, ResourceInUse, IOException, CoreException {
+  protected void loadXMLFile() throws Exception {
     IModelManager modelManager = StructuredModelManager.getModelManager();
     model = modelManager.getModelForEdit(file);
     document = model.getStructuredDocument();
@@ -98,7 +97,6 @@ public abstract class AbstractPOMEditorTestCase extends AbstractMavenProjectTest
     public DummyStructuredTextViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler,
         boolean showAnnotationsOverview, int styles) {
       super(parent, verticalRuler, overviewRuler, showAnnotationsOverview, styles);
-      // TODO Auto-generated constructor stub
     }
     
     public void setMavenProject(MavenProject mp) {
@@ -106,19 +104,19 @@ public abstract class AbstractPOMEditorTestCase extends AbstractMavenProjectTest
     }
 
     public Object getAdapter(Class adapter) {
-      // TODO Auto-generated method stub
       if (MavenProject.class.equals(adapter)) {
         return mavenProject;
       }
       return null;
     }
-    
   }
 
+  @Override
   protected void tearDown() throws Exception {
-      super.tearDown();
+    try {
       model.releaseFromEdit();
+    } finally {
+      super.tearDown();
+    }
   }
-  
-  
 }

@@ -17,14 +17,17 @@ import java.io.StringWriter;
 
 import junit.framework.TestCase;
 
-import org.apache.maven.model.Model;
-import org.codehaus.plexus.util.IOUtil;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.codehaus.plexus.util.IOUtil;
+
+import org.apache.maven.model.Model;
+
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.MavenModelManager;
 import org.eclipse.m2e.model.edit.pom.util.PomResourceImpl;
@@ -56,10 +59,13 @@ public class MavenModelManagerTest extends TestCase {
   }
   
   protected void tearDown() throws Exception {
-    if (resource != null) {
-      resource.unload();
+    try {
+      if(resource != null) {
+        resource.unload();
+      }
+    } finally {
+      super.tearDown();
     }
-    super.tearDown();
   }
   
   

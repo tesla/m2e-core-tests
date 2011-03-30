@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IClasspathEntry;
+
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.project.IProjectConfigurationManager;
@@ -48,8 +49,11 @@ public class ResourceChangeListenerTest extends AbstractMavenProjectTestCase {
   }
 
   protected void tearDown() throws Exception {
-    deleteProject("resourcechange");
-    super.tearDown();
+    try {
+      deleteProject("resourcechange");
+    } finally {
+      super.tearDown();
+    }
   }
 
   //TODO Does this test actually test anything?!

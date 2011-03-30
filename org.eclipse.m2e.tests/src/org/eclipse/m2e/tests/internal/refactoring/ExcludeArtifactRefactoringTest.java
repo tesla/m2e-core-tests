@@ -1,9 +1,22 @@
 package org.eclipse.m2e.tests.internal.refactoring;
 
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.ARTIFACT_ID;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.DEPENDENCIES;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.DEPENDENCY;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.EXCLUSION;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.EXCLUSIONS;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.GROUP_ID;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.VERSION;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.childEquals;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.findChild;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.performOnDOMDocument;
+
 import java.util.HashMap;
 
 import org.junit.AfterClass;
-import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.*;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -34,6 +47,8 @@ import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.ArtifactKey;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
+import org.eclipse.m2e.core.ui.internal.editing.PomEdits.Operation;
+import org.eclipse.m2e.core.ui.internal.editing.PomEdits.OperationTuple;
 import org.eclipse.m2e.editor.composites.ParentGatherer;
 import org.eclipse.m2e.editor.pom.MavenPomEditor;
 import org.eclipse.m2e.model.edit.pom.Dependency;
@@ -43,8 +58,6 @@ import org.eclipse.m2e.model.edit.pom.util.PomResourceFactoryImpl;
 import org.eclipse.m2e.model.edit.pom.util.PomResourceImpl;
 import org.eclipse.m2e.refactoring.exclude.ExcludeArtifactRefactoring;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase {
 
@@ -65,10 +78,13 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 	private MavenPomEditor editor = null;
 
 	public void tearDown() throws Exception {
-		if (editor != null) {
-			editor.close(false);
-		}
-		super.tearDown();
+    try {
+      if(editor != null) {
+        editor.close(false);
+      }
+    } finally {
+      super.tearDown();
+    }
 	}
 
 	@AfterClass
