@@ -125,6 +125,8 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     expectedErrorMessage = ThrowBuildExceptionProjectConfigurator.ERROR_MESSAGE;
     IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_BUILD_ID, expectedErrorMessage,
         2 /*lineNumber*/, project);
+    assertTrue(marker.getAttribute(IMarker.MESSAGE).toString()
+        .endsWith(" (org.apache.maven.plugins:maven-deploy-plugin:2.5:deploy:default-deploy:deploy)"));
 
     // Verify that the marker is removed by a new build
     project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
@@ -147,9 +149,13 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     IMarker errorMarker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_BUILD_PARTICIPANT_ID,
         AddMarkersProjectConfiguratorFoo.ERROR_MESSAGE, AddMarkersProjectConfiguratorFoo.ERROR_LINE_NUMBER,
         AddMarkersProjectConfiguratorFoo.FILE_NAME, project);
+    assertTrue(errorMarker.getAttribute(IMarker.MESSAGE).toString()
+        .endsWith(" (org.apache.maven.plugins:maven-deploy-plugin:2.5:deploy:default-deploy:deploy)"));
     IMarker warningMarker = WorkspaceHelpers.assertWarningMarker(IMavenConstants.MARKER_BUILD_PARTICIPANT_ID,
         AddMarkersProjectConfiguratorFoo.WARNING_MESSAGE, AddMarkersProjectConfiguratorFoo.WARNING_LINE_NUMBER,
         AddMarkersProjectConfiguratorFoo.FILE_NAME, project);
+    assertTrue(warningMarker.getAttribute(IMarker.MESSAGE).toString()
+        .endsWith(" (org.apache.maven.plugins:maven-deploy-plugin:2.5:deploy:default-deploy:deploy)"));
 
     // An incremental build without interesting changes should not remove the markers
     copyContent(project, AddMarkersProjectConfiguratorFoo.FILE_NAME, "x.txt");
