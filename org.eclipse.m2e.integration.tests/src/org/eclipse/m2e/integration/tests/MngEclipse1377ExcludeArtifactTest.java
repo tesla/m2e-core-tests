@@ -63,7 +63,7 @@ public class MngEclipse1377ExcludeArtifactTest extends M2EUIIntegrationTestCase 
 
     assertMavenCPEntry(jp, JAR, false);
 
-    openPomFile(projectName + "/pom.xml");
+    //openPomFile(projectName + "/pom.xml");
     addDependency(project, GROUP_ID, ARTIFACT_ID, VERSION);
     waitForAllBuildsToComplete();
 
