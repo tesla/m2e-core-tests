@@ -33,12 +33,13 @@ import org.eclipse.m2e.core.internal.lifecyclemapping.LifecycleMappingFactory;
 import org.eclipse.m2e.core.internal.lifecyclemapping.LifecycleMappingResult;
 import org.eclipse.m2e.core.internal.lifecyclemapping.model.LifecycleMappingMetadata;
 import org.eclipse.m2e.core.internal.lifecyclemapping.model.LifecycleMappingMetadataSource;
-import org.eclipse.m2e.core.internal.lifecyclemapping.model.PluginExecutionAction;
 import org.eclipse.m2e.core.internal.lifecyclemapping.model.PluginExecutionMetadata;
 import org.eclipse.m2e.core.internal.markers.MavenProblemInfo;
 import org.eclipse.m2e.core.internal.markers.SourceLocation;
 import org.eclipse.m2e.core.internal.project.registry.MavenProjectFacade;
 import org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager;
+import org.eclipse.m2e.core.lifecyclemapping.model.IPluginExecutionMetadata;
+import org.eclipse.m2e.core.lifecyclemapping.model.PluginExecutionAction;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.configurator.AbstractBuildParticipant;
 import org.eclipse.m2e.core.project.configurator.AbstractCustomizableLifecycleMapping;
@@ -554,7 +555,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
         "pom.xml");
     assertNotNull("Expected not null MavenProjectFacade", facade);
 
-    List<Map.Entry<MojoExecutionKey, List<PluginExecutionMetadata>>> executionMapping = new ArrayList<Map.Entry<MojoExecutionKey, List<PluginExecutionMetadata>>>(
+    List<Map.Entry<MojoExecutionKey, List<IPluginExecutionMetadata>>> executionMapping = new ArrayList<Map.Entry<MojoExecutionKey, List<IPluginExecutionMetadata>>>(
         facade.getMojoExecutionMapping().entrySet());
     assertEquals(4, executionMapping.size());
     assertEquals(0, executionMapping.get(0).getValue().size()); // maven-clean-plugin

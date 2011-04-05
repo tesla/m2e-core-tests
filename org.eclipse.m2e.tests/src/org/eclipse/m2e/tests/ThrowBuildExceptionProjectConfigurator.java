@@ -2,11 +2,13 @@ package org.eclipse.m2e.tests;
 
 import java.util.Set;
 
-import org.apache.maven.plugin.MojoExecution;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.m2e.core.internal.lifecyclemapping.model.PluginExecutionMetadata;
+
+import org.apache.maven.plugin.MojoExecution;
+
+import org.eclipse.m2e.core.lifecyclemapping.model.IPluginExecutionMetadata;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.configurator.AbstractBuildParticipant;
 import org.eclipse.m2e.core.project.configurator.AbstractProjectConfigurator;
@@ -25,7 +27,7 @@ public class ThrowBuildExceptionProjectConfigurator
 
     @Override
     public AbstractBuildParticipant getBuildParticipant( IMavenProjectFacade projectFacade, MojoExecution execution,
-                                                         PluginExecutionMetadata executionMetadata )
+                                                         IPluginExecutionMetadata executionMetadata )
     {
         return new AbstractBuildParticipant()
         {

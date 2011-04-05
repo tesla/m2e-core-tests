@@ -31,7 +31,7 @@ import org.eclipse.m2e.core.internal.lifecyclemapping.discovery.PackagingTypeMap
 import org.eclipse.m2e.core.internal.lifecyclemapping.discovery.PackagingTypeMappingConfiguration.PackagingTypeMappingRequirement;
 import org.eclipse.m2e.core.internal.lifecyclemapping.discovery.ProjectLifecycleMappingConfiguration;
 import org.eclipse.m2e.core.internal.lifecyclemapping.model.LifecycleMappingMetadataSource;
-import org.eclipse.m2e.core.internal.lifecyclemapping.model.PluginExecutionAction;
+import org.eclipse.m2e.core.lifecyclemapping.model.PluginExecutionAction;
 import org.eclipse.m2e.core.project.MavenProjectInfo;
 import org.eclipse.m2e.core.project.ProjectImportConfiguration;
 import org.eclipse.m2e.internal.discovery.InstallCatalogItemMavenDiscoveryProposal;

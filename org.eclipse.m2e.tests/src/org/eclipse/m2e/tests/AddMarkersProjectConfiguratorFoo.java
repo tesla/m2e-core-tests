@@ -3,18 +3,21 @@ package org.eclipse.m2e.tests;
 import java.io.File;
 import java.util.Set;
 
-import org.apache.maven.plugin.MojoExecution;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.m2e.core.internal.lifecyclemapping.model.PluginExecutionMetadata;
+
+import org.apache.maven.plugin.MojoExecution;
+
+import org.sonatype.plexus.build.incremental.BuildContext;
+import org.sonatype.plexus.build.incremental.ThreadBuildContext;
+
+import org.eclipse.m2e.core.lifecyclemapping.model.IPluginExecutionMetadata;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.configurator.AbstractBuildParticipant;
 import org.eclipse.m2e.core.project.configurator.AbstractProjectConfigurator;
 import org.eclipse.m2e.core.project.configurator.ProjectConfigurationRequest;
-import org.sonatype.plexus.build.incremental.BuildContext;
-import org.sonatype.plexus.build.incremental.ThreadBuildContext;
 
 
 public class AddMarkersProjectConfiguratorFoo extends AbstractProjectConfigurator {
@@ -36,7 +39,7 @@ public class AddMarkersProjectConfiguratorFoo extends AbstractProjectConfigurato
 
   @Override
   public AbstractBuildParticipant getBuildParticipant(IMavenProjectFacade projectFacade, MojoExecution execution,
-                                                      PluginExecutionMetadata executionMetadata) {
+                                                      IPluginExecutionMetadata executionMetadata) {
     return new AbstractBuildParticipant() {
       public Set<IProject> build(int kind, IProgressMonitor monitor) throws Exception {
         Exception error = doBuild(FILE_NAME);
