@@ -12,6 +12,7 @@ import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.MojoExecution;
 
+import org.eclipse.m2e.core.internal.MavenPluginActivator;
 import org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.MavenUpdateRequest;
@@ -157,7 +158,7 @@ public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
     testIsStale(project, "pom.xml");
     for(IPath filename : ProjectRegistryManager.METADATA_PATH) {
       MavenUpdateRequest updateRequest = new MavenUpdateRequest(project, true /*offline*/, false /*updateSnapshots*/);
-      plugin.getMavenProjectManagerImpl().refresh(updateRequest, monitor);
+      MavenPluginActivator.getDefault().getMavenProjectManagerImpl().refresh(updateRequest, monitor);
 
       testIsStale(project, filename.toString());
     }

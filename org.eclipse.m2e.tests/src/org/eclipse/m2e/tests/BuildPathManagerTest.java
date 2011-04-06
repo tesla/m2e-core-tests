@@ -50,6 +50,7 @@ import org.apache.maven.model.Plugin;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.index.IMutableIndex;
+import org.eclipse.m2e.core.internal.MavenPluginActivator;
 import org.eclipse.m2e.core.internal.index.NexusIndex;
 import org.eclipse.m2e.core.internal.index.NexusIndexManager;
 import org.eclipse.m2e.core.internal.preferences.MavenConfigurationImpl;
@@ -984,7 +985,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     final MavenPlugin plugin = MavenPlugin.getDefault();
 
     @SuppressWarnings("unchecked")
-    List<Archetype> archetypes = plugin.getArchetypeManager().getArchetypeCatalogFactory("internal")
+    List<Archetype> archetypes = MavenPluginActivator.getDefault().getArchetypeManager().getArchetypeCatalogFactory("internal")
         .getArchetypeCatalog().getArchetypes();
     for(Archetype archetype : archetypes) {
       if("org.apache.maven.archetypes".equals(archetype.getGroupId())

@@ -18,7 +18,9 @@ import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.m2e.core.core.IMavenConstants;
+import org.eclipse.m2e.core.internal.MavenPluginActivator;
 import org.eclipse.m2e.core.internal.embedder.MavenImpl;
 import org.eclipse.m2e.core.internal.project.ProjectConfigurationManager;
 import org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager;
@@ -40,7 +42,7 @@ public class ImportSortOrderTestCase extends AbstractMavenProjectTestCase {
     List<IMavenProjectFacade> facades =  new ArrayList<IMavenProjectFacade>();
     
     ProjectRegistryManager manager = new ProjectRegistryManager((MavenImpl) plugin.getMaven(), null, false,
-        plugin.getMavenMarkerManager());
+        MavenPluginActivator.getDefault().getMavenMarkerManager());
     
     List<IProject> projects = new ArrayList<IProject>();
     

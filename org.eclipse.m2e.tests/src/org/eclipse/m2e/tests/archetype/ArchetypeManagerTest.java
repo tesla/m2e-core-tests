@@ -17,7 +17,7 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.apache.maven.archetype.catalog.ArchetypeCatalog;
-import org.eclipse.m2e.core.MavenPlugin;
+
 import org.eclipse.m2e.core.archetype.ArchetypeCatalogFactory;
 import org.eclipse.m2e.core.archetype.ArchetypeCatalogFactory.DefaultLocalCatalogFactory;
 import org.eclipse.m2e.core.archetype.ArchetypeCatalogFactory.InternalCatalogFactory;
@@ -25,6 +25,7 @@ import org.eclipse.m2e.core.archetype.ArchetypeCatalogFactory.LocalCatalogFactor
 import org.eclipse.m2e.core.archetype.ArchetypeCatalogFactory.NexusIndexerCatalogFactory;
 import org.eclipse.m2e.core.archetype.ArchetypeCatalogFactory.RemoteCatalogFactory;
 import org.eclipse.m2e.core.archetype.ArchetypeManager;
+import org.eclipse.m2e.core.internal.MavenPluginActivator;
 import org.eclipse.m2e.tests.common.HttpServer;
 
 
@@ -38,7 +39,7 @@ public class ArchetypeManagerTest extends TestCase {
   protected void setUp() throws Exception {
     super.setUp();
     
-    archetypeManager = MavenPlugin.getDefault().getArchetypeManager();
+    archetypeManager = MavenPluginActivator.getDefault().getArchetypeManager();
   }
   
   public void testArchetypeManager() throws Exception {

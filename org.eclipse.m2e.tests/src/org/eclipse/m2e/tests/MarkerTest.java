@@ -24,6 +24,7 @@ import org.eclipse.ui.ide.IDE;
 
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.core.IMavenConstants;
+import org.eclipse.m2e.core.internal.MavenPluginActivator;
 import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.internal.markers.MavenMarkerManager;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
@@ -40,7 +41,7 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     IProject project = createExisting("markerTest", "projects/markers/testWorkflow");
     waitForJobsToComplete();
     assertNotNull("Expected not null project", project);
-    IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectManagerImpl().create(project, monitor);
+    IMavenProjectFacade facade = MavenPluginActivator.getDefault().getMavenProjectManagerImpl().create(project, monitor);
     assertNull("Expected null MavenProjectFacade", facade);
     String expectedErrorMessage = "Project build error: Non-readable POM ";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_POM_LOADING_ID, expectedErrorMessage, 1 /*lineNumber*/,
@@ -49,7 +50,7 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     // Fix the pom, introduce a configuration problem
     copyContent(project, "pom_badConfiguration.xml", "pom.xml");
     waitForJobsToComplete();
-    facade = MavenPlugin.getDefault().getMavenProjectManagerImpl().getProject(project);
+    facade = MavenPluginActivator.getDefault().getMavenProjectManagerImpl().getProject(project);
     assertNotNull("Expected not null MavenProjectFacade", facade);
     project = facade.getProject();
     expectedErrorMessage = "Lifecycle mapping \"no such lifecycle mapping for test-packaging-empty\" is not available. To enable full functionality, install the lifecycle mapping and run Maven->Update Project Configuration.";
@@ -140,7 +141,7 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     IProject project = createExisting("markerTest", "projects/markers/testBuildContextWithOneProjectConfigurator");
     waitForJobsToComplete();
     assertNotNull("Expected not null project", project);
-    IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectManagerImpl().create(project, monitor);
+    IMavenProjectFacade facade = MavenPluginActivator.getDefault().getMavenProjectManagerImpl().create(project, monitor);
     assertNotNull("Expected not null MavenProjectFacade", facade);
     WorkspaceHelpers.assertNoErrors(project);
 
@@ -210,7 +211,7 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     IProject project = createExisting("markerTest", "projects/markers/testBuildContextWithTwoProjectConfigurators");
     waitForJobsToComplete();
     assertNotNull("Expected not null project", project);
-    IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectManagerImpl().create(project, monitor);
+    IMavenProjectFacade facade = MavenPluginActivator.getDefault().getMavenProjectManagerImpl().create(project, monitor);
     assertNotNull("Expected not null MavenProjectFacade", facade);
     WorkspaceHelpers.assertNoErrors(project);
 
@@ -256,7 +257,7 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     IProject project = createExisting("markerTest", "projects/markers/testBuildContextWithSameProjectConfiguratorTwice");
     waitForJobsToComplete();
     assertNotNull("Expected not null project", project);
-    IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectManagerImpl().create(project, monitor);
+    IMavenProjectFacade facade = MavenPluginActivator.getDefault().getMavenProjectManagerImpl().create(project, monitor);
     assertNotNull("Expected not null MavenProjectFacade", facade);
     WorkspaceHelpers.assertNoErrors(project);
 
