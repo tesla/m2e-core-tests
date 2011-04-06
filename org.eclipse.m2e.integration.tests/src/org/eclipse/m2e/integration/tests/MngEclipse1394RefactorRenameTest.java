@@ -23,7 +23,7 @@ public class MngEclipse1394RefactorRenameTest extends M2EUIIntegrationTestCase {
     String newName = "testProject2";
 
     createArchetypeProject("maven-archetype-quickstart", "someTestProject");
-    IMavenProjectFacade mavenProject = MavenPlugin.getDefault().getMavenProjectManager().getMavenProject(
+    IMavenProjectFacade mavenProject = MavenPlugin.getDefault().getMavenProjectRegistry().getMavenProject(
         "org.sonatype.test", originalName, "0.0.1-SNAPSHOT");
     Assert.assertNotNull(mavenProject);
 
@@ -48,10 +48,10 @@ public class MngEclipse1394RefactorRenameTest extends M2EUIIntegrationTestCase {
 
     IProject project2 = ResourcesPlugin.getWorkspace().getRoot().getProject(newName);
     Assert.assertTrue(project2.exists());
-    mavenProject = MavenPlugin.getDefault().getMavenProjectManager().getMavenProject("org.sonatype.test", originalName,
+    mavenProject = MavenPlugin.getDefault().getMavenProjectRegistry().getMavenProject("org.sonatype.test", originalName,
         "0.0.1-SNAPSHOT");
     Assert.assertNull(mavenProject);
-    IMavenProjectFacade mavenProject2 = MavenPlugin.getDefault().getMavenProjectManager().getMavenProject("x.y.z",
+    IMavenProjectFacade mavenProject2 = MavenPlugin.getDefault().getMavenProjectRegistry().getMavenProject("x.y.z",
         newName, "1.1.1");
     Assert.assertNotNull(mavenProject2);
   }

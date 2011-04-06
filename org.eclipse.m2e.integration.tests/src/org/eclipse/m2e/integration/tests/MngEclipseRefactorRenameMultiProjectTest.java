@@ -22,7 +22,7 @@ public class MngEclipseRefactorRenameMultiProjectTest extends M2EUIIntegrationTe
   public void testMngEclipseRefactorRenameMultiProject() throws Exception {
 
     importMavenProjects("projects/refactor_multiprojects.zip");
-    IMavenProjectFacade mavenProject = MavenPlugin.getDefault().getMavenProjectManager().getMavenProject(
+    IMavenProjectFacade mavenProject = MavenPlugin.getDefault().getMavenProjectRegistry().getMavenProject(
         "org.sonatype.test", "someproject", "0.0.1-SNAPSHOT");
     assertNotNull(mavenProject);
 
@@ -47,10 +47,10 @@ public class MngEclipseRefactorRenameMultiProjectTest extends M2EUIIntegrationTe
 
     IProject project2 = ResourcesPlugin.getWorkspace().getRoot().getProject("project2");
     assertTrue("project2 is expected to exist in the workspace", project2.exists());
-    mavenProject = MavenPlugin.getDefault().getMavenProjectManager().getMavenProject("org.sonatype.test", "Dep",
+    mavenProject = MavenPlugin.getDefault().getMavenProjectRegistry().getMavenProject("org.sonatype.test", "Dep",
         "0.0.1-SNAPSHOT");
     assertNull("Paven project \"Dep\" should not exist anymore", mavenProject);
-    IMavenProjectFacade mavenProject2 = MavenPlugin.getDefault().getMavenProjectManager().getMavenProject("x.y.z",
+    IMavenProjectFacade mavenProject2 = MavenPlugin.getDefault().getMavenProjectRegistry().getMavenProject("x.y.z",
         "project2", "1.1.1");
     assertNotNull("Maven project \"project2\" is expected to exist", mavenProject2);
   }

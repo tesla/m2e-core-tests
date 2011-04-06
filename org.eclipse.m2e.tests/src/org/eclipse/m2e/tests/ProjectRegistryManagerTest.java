@@ -565,7 +565,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     jar.delete();
 
     MavenUpdateRequest request = new MavenUpdateRequest(p1, false /*offline*/, false /*updateSnapshots*/);
-    plugin.getMavenProjectManager().refresh(request);
+    plugin.getMavenProjectRegistry().refresh(request);
     waitForJobsToComplete();
 
     IMavenProjectFacade f1 = manager.create(p1, monitor);

@@ -336,7 +336,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
       // cleanup
       deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t001/0.0.1/"));
       deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t002/0.0.1/"));
-      MavenPlugin.getDefault().getMavenProjectManager()
+      MavenPlugin.getDefault().getMavenProjectRegistry()
           .refresh(new MavenUpdateRequest(project, false /*offline*/, false));
       waitForJobsToComplete();
     }
@@ -354,7 +354,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
       // cleanup
       deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t001/0.0.1/"));
       deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t002/0.0.1/"));
-      MavenPlugin.getDefault().getMavenProjectManager().refresh(
+      MavenPlugin.getDefault().getMavenProjectRegistry().refresh(
           new MavenUpdateRequest(new IProject[] {project}, false /*offline*/, false));
       waitForJobsToComplete();
     }
@@ -626,7 +626,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     try {
       ((MavenConfigurationImpl) mavenConfiguration).setDownloadSources(true);
       MavenUpdateRequest request = new MavenUpdateRequest(project, false/*offline*/, false/*updateSnapshots*/);
-      plugin.getMavenProjectManager().refresh(request );
+      plugin.getMavenProjectRegistry().refresh(request );
       waitForJobsToComplete();
       container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
       cp = container.getClasspathEntries();
@@ -982,7 +982,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
   }
 
   private Archetype findQuickStartArchetype() throws CoreException {
-    final MavenPlugin plugin = MavenPlugin.getDefault();
+    final MavenPluginActivator plugin = MavenPluginActivator.getDefault();
 
     @SuppressWarnings("unchecked")
     List<Archetype> archetypes = MavenPluginActivator.getDefault().getArchetypeManager().getArchetypeCatalogFactory("internal")

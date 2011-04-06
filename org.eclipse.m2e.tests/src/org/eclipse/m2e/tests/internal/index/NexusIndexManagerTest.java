@@ -397,7 +397,7 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
     waitForJobsToComplete();
 
     // make facade shallow as it would be when the workspace was just started and its state deserialized
-    IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectManager().getProject(project);
+    IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectRegistry().getProject(project);
     Field field = MavenProjectFacade.class.getDeclaredField("mavenProject");
     field.setAccessible(true);
     field.set(facade, null);

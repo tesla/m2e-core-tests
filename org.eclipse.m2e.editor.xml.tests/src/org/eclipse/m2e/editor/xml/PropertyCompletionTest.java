@@ -45,7 +45,7 @@ public class PropertyCompletionTest extends AbstractCompletionTest {
   public void testCompletion() throws Exception {
     //Get the location of the place where we want to start the completion
     String docString = sourceViewer.getDocument().get();
-    IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectManager().getProject(projects[1]);
+    IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectRegistry().getProject(projects[1]);
     assertNotNull(facade);
     assertNotNull(facade.getMavenProject());
     sourceViewer.setMavenProject(facade.getMavenProject());

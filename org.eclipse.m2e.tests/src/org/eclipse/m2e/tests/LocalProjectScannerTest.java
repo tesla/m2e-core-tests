@@ -19,6 +19,7 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.MavenModelManager;
 import org.eclipse.m2e.core.project.LocalProjectScanner;
@@ -32,8 +33,7 @@ public class LocalProjectScannerTest extends TestCase {
   protected void setUp() throws Exception {
     super.setUp();
 
-    MavenPlugin mavenPlugin = MavenPlugin.getDefault();
-    modelManager = mavenPlugin.getMavenModelManager();
+    modelManager = MavenPlugin.getDefault().getMavenModelManager();
   }
 
   public void testDeepNesting() throws Exception {

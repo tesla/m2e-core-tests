@@ -28,7 +28,7 @@ public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
     IProject project = importProject("projects/getmojoexecution/pom.xml");
     assertNoErrors(project);
 
-    IMavenProjectFacade facade = plugin.getMavenProjectManager().create(project, monitor);
+    IMavenProjectFacade facade = plugin.getMavenProjectRegistry().create(project, monitor);
 
     MojoExecutionKey compileKey = null;
     for(MojoExecutionKey executionKey : facade.getMojoExecutionMapping().keySet()) {
@@ -53,7 +53,7 @@ public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
     IProject project = importProject("projects/getmojoexecution/pom.xml");
     assertNoErrors(project);
 
-    IMavenProjectFacade facade = plugin.getMavenProjectManager().create(project, monitor);
+    IMavenProjectFacade facade = plugin.getMavenProjectRegistry().create(project, monitor);
     deserialize(facade);
 
     MojoExecutionKey compileKey = null;
@@ -79,7 +79,7 @@ public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
     IProject project = importProject("projects/getmojoexecution/pom.xml");
     assertNoErrors(project);
 
-    IMavenProjectFacade facade = plugin.getMavenProjectManager().create(project, monitor);
+    IMavenProjectFacade facade = plugin.getMavenProjectRegistry().create(project, monitor);
 
     List<MojoExecution> executions = facade.getMojoExecutions("org.apache.maven.plugins", "maven-compiler-plugin",
         monitor, "compile");
@@ -96,7 +96,7 @@ public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
     IProject project = importProject("projects/getmojoexecution/pom.xml");
     assertNoErrors(project);
 
-    IMavenProjectFacade facade = plugin.getMavenProjectManager().create(project, monitor);
+    IMavenProjectFacade facade = plugin.getMavenProjectRegistry().create(project, monitor);
     deserialize(facade);
 
     List<MojoExecution> executions = facade.getMojoExecutions("org.apache.maven.plugins", "maven-compiler-plugin",
@@ -114,7 +114,7 @@ public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
     IProject project = importProject("projects/getmojoexecution/pom.xml");
     assertNoErrors(project);
 
-    IMavenProjectFacade facade = plugin.getMavenProjectManager().create(project, monitor);
+    IMavenProjectFacade facade = plugin.getMavenProjectRegistry().create(project, monitor);
     assertNotNull("Expected not null MavenProjectFacade", facade);
     ILifecycleMapping lifecycleMapping = plugin.getProjectConfigurationManager().getLifecycleMapping(facade);
     assertNotNull("Expected not null LifecycleMapping", lifecycleMapping);
@@ -128,7 +128,7 @@ public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
     IProject project = importProject("projects/getmojoexecution/pom.xml");
     assertNoErrors(project);
 
-    IMavenProjectFacade facade = plugin.getMavenProjectManager().create(project, monitor);
+    IMavenProjectFacade facade = plugin.getMavenProjectRegistry().create(project, monitor);
     assertNotNull("Expected not null MavenProjectFacade", facade);
     deserialize(facade);
 
@@ -165,7 +165,7 @@ public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
   }
 
   private void testIsStale(IProject project, String filename) throws Exception {
-    IMavenProjectFacade projectFacade = plugin.getMavenProjectManager().create(project, monitor);
+    IMavenProjectFacade projectFacade = plugin.getMavenProjectRegistry().create(project, monitor);
     assertFalse("Expected not stale MavenProjectFacade before changing the " + filename + " file",
         projectFacade.isStale());
 

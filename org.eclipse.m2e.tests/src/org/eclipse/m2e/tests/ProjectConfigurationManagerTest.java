@@ -62,7 +62,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     IWorkspaceRoot root = workspace.getRoot();
     IProject project = root.getProject("maven-project");
     assertNotNull(project);
-    IMavenProjectFacade facade = plugin.getMavenProjectManager().getMavenProject("MNGECLIPSE-1793_basedirRename", "maven-project", "0.0.1-SNAPSHOT");
+    IMavenProjectFacade facade = plugin.getMavenProjectRegistry().getMavenProject("MNGECLIPSE-1793_basedirRename", "maven-project", "0.0.1-SNAPSHOT");
     assertNotNull(facade);
     assertEquals(project, facade.getProject());
   }
@@ -73,7 +73,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     IWorkspaceRoot root = workspace.getRoot();
     IProject project = root.getProject("mavenNNNNNNN");
     assertNotNull(project);
-    IMavenProjectFacade facade = plugin.getMavenProjectManager().getMavenProject("MNGECLIPSE-1793_basedirRename", "maven-project", "0.0.1-SNAPSHOT");
+    IMavenProjectFacade facade = plugin.getMavenProjectRegistry().getMavenProject("MNGECLIPSE-1793_basedirRename", "maven-project", "0.0.1-SNAPSHOT");
     assertNotNull(facade);
     assertEquals(project, facade.getProject());
   }
@@ -171,7 +171,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     IProject project = importProject("projects/staleconfiguration/pom.xml");
     assertNoErrors(project);
 
-    final IMavenProjectFacade projectFacade = plugin.getMavenProjectManager().create(project, monitor);
+    final IMavenProjectFacade projectFacade = plugin.getMavenProjectRegistry().create(project, monitor);
 
     copyContent(project, new File("projects/staleconfiguration/pom-changed.xml"), "pom.xml");
     WorkspaceHelpers.assertMarker(IMavenConstants.MARKER_CONFIGURATION_ID, IMarker.SEVERITY_ERROR,
@@ -190,7 +190,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     IProject project = importProject("projects/staleconfiguration/pom.xml");
     assertNoErrors(project);
 
-    final IMavenProjectFacade projectFacade = plugin.getMavenProjectManager().create(project, monitor);
+    final IMavenProjectFacade projectFacade = plugin.getMavenProjectRegistry().create(project, monitor);
 
     // pretend it was deserialized from workspace state
     for(Field field : projectFacade.getClass().getDeclaredFields()) {

@@ -51,7 +51,7 @@ public class HyperlinkTest extends AbstractPOMEditorTestCase {
   public void testHasLink() throws BadLocationException {
     //Locate the area where we want to detect the link
     IRegion region = new Region(sourceViewer.getDocument().getLineOffset(12) + 17, 10);
-    IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectManager().getProject(projects[1]);
+    IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectRegistry().getProject(projects[1]);
     assertNotNull(facade);
     assertNotNull(facade.getMavenProject());
     sourceViewer.setMavenProject(facade.getMavenProject());

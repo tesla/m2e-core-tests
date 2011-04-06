@@ -46,7 +46,7 @@ public class MngEclipse1526InstallationPreferencesTest extends M2EUIIntegrationT
   public void testInstallationPrefs() throws Exception {
     importMavenProjects("projects/someproject.zip");
     MavenPlugin.getDefault().getMavenRuntimeManager().getDefaultRuntime();
-    IMavenProjectFacade mavenProject = MavenPlugin.getDefault().getMavenProjectManager().getMavenProject(
+    IMavenProjectFacade mavenProject = MavenPlugin.getDefault().getMavenProjectRegistry().getMavenProject(
         "org.sonatype.test", "someproject", "0.0.1-SNAPSHOT");
     Assert.assertNotNull(mavenProject);
 

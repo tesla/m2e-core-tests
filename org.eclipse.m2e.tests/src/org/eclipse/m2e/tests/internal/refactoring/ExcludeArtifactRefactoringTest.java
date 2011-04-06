@@ -374,11 +374,11 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 
 	private static ExcludeArtifactRefactoring createRefactoring(IFile pomFile, ArtifactKey[] keys, IFile exclusionPoint) throws CoreException {
 		ExcludeArtifactRefactoring refactoring = new ExcludeArtifactRefactoring(pomFile, keys);
-		IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectManager().create(pomFile, true, monitor);
+		IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectRegistry().create(pomFile, true, monitor);
 		ParentGatherer g = new ParentGatherer(facade.getMavenProject(monitor), facade);
 		refactoring.setHierarchy(g.getParentHierarchy(monitor));
 
-		IMavenProjectFacade excFacade = MavenPlugin.getDefault().getMavenProjectManager().create(exclusionPoint, true, monitor);
+		IMavenProjectFacade excFacade = MavenPlugin.getDefault().getMavenProjectRegistry().create(exclusionPoint, true, monitor);
 		refactoring.setExclusionPoint(excFacade.getMavenProject(monitor));
 		return refactoring;
 	}

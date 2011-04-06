@@ -42,7 +42,7 @@ public class HoverTest extends AbstractPOMEditorTestCase {
   public void testHasHover() {
     //Locate the area where we want to detect the hover
     String docString = sourceViewer.getDocument().get();
-    IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectManager().getProject(projects[1]);
+    IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectRegistry().getProject(projects[1]);
     assertNotNull(facade);
     assertNotNull(facade.getMavenProject());
     sourceViewer.setMavenProject(facade.getMavenProject());

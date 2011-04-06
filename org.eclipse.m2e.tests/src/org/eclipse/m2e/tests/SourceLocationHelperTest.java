@@ -18,7 +18,7 @@ import org.eclipse.m2e.core.internal.markers.SourceLocation;
 import org.eclipse.m2e.core.internal.markers.SourceLocationHelper;
 import org.eclipse.m2e.core.internal.project.registry.MavenProjectFacade;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
-import org.eclipse.m2e.core.project.MavenProjectManager;
+import org.eclipse.m2e.core.project.IMavenProjectRegistry;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.core.project.configurator.MojoExecutionKey;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
@@ -27,13 +27,13 @@ import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
 @SuppressWarnings("restriction")
 public class SourceLocationHelperTest extends AbstractMavenProjectTestCase {
-  private MavenProjectManager mavenProjectManager;
+  private IMavenProjectRegistry mavenProjectManager;
 
   @Override
   protected void setUp() throws Exception {
     super.setUp();
 
-    mavenProjectManager = MavenPlugin.getDefault().getMavenProjectManager();
+    mavenProjectManager = MavenPlugin.getDefault().getMavenProjectRegistry();
     //projectConfigurationManager = MavenPlugin.getDefault().getProjectConfigurationManager();
   }
 
