@@ -272,20 +272,20 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     assertTrue(launchConfigHandleArg.contains(IMavenConstants.BUILDER_ID));
 
     // Add the maven builder
+    // The maven builder is there, but it is disabled - since detecting that would require m2e core to depend on internal m2e classes,
+    // we just ignore the disabled maven builder
     plugin.getProjectConfigurationManager().addMavenBuilder(project, null /*description*/, monitor);
     projectDescription = project.getDescription();
-    assertEquals(2, projectDescription.getBuildSpec().length);
-    assertNotSame(IMavenConstants.BUILDER_ID, projectDescription.getBuildSpec()[0].getBuilderName());
+    assertEquals(3, projectDescription.getBuildSpec().length);
+    assertEquals(firstBuilderId, projectDescription.getBuildSpec()[0].getBuilderName());
     assertEquals(ExternalToolBuilder.ID, projectDescription.getBuildSpec()[1].getBuilderName());
-    launchConfigHandleArg = (String) projectDescription.getBuildSpec()[1].getArguments().get(
-        BuilderCoreUtils.LAUNCH_CONFIG_HANDLE);
-    assertNotNull(launchConfigHandleArg);
-    assertTrue(launchConfigHandleArg.contains(IMavenConstants.BUILDER_ID));
+    assertEquals(IMavenConstants.BUILDER_ID, projectDescription.getBuildSpec()[2].getBuilderName());
 
     // Remove the maven builder
     plugin.getProjectConfigurationManager().removeMavenBuilder(project, null /*description*/, monitor);
     projectDescription = project.getDescription();
-    assertEquals(1, projectDescription.getBuildSpec().length);
+    assertEquals(2, projectDescription.getBuildSpec().length);
     assertEquals(firstBuilderId, projectDescription.getBuildSpec()[0].getBuilderName());
+    assertEquals(ExternalToolBuilder.ID, projectDescription.getBuildSpec()[1].getBuilderName());
   }
 }
