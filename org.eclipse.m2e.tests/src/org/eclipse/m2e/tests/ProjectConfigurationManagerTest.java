@@ -168,12 +168,12 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
   }
 
   public void testStaleProjectConfigurationMarker() throws Exception {
-    IProject project = importProject("projects/staleconfiguration/pom.xml");
+    IProject project = importProject("projects/staleconfiguration/basic/pom.xml");
     assertNoErrors(project);
 
     final IMavenProjectFacade projectFacade = plugin.getMavenProjectRegistry().create(project, monitor);
 
-    copyContent(project, new File("projects/staleconfiguration/pom-changed.xml"), "pom.xml");
+    copyContent(project, new File("projects/staleconfiguration/basic/pom-changed.xml"), "pom.xml");
     WorkspaceHelpers.assertMarker(IMavenConstants.MARKER_CONFIGURATION_ID, IMarker.SEVERITY_ERROR,
         Messages.ProjectConfigurationUpdateRequired, null, null, project);
 
@@ -187,7 +187,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
   }
 
   public void testStaleProjectConfigurationMarkerAfterWorkspaceRestart() throws Exception {
-    IProject project = importProject("projects/staleconfiguration/pom.xml");
+    IProject project = importProject("projects/staleconfiguration/basic/pom.xml");
     assertNoErrors(project);
 
     final IMavenProjectFacade projectFacade = plugin.getMavenProjectRegistry().create(project, monitor);
@@ -200,7 +200,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
       }
     }
 
-    copyContent(project, new File("projects/staleconfiguration/pom-changed.xml"), "pom.xml");
+    copyContent(project, new File("projects/staleconfiguration/basic/pom-changed.xml"), "pom.xml");
     WorkspaceHelpers.assertMarker(IMavenConstants.MARKER_CONFIGURATION_ID, IMarker.SEVERITY_ERROR,
         Messages.ProjectConfigurationUpdateRequired, null, null, project);
 
@@ -213,6 +213,28 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     assertNoErrors(project);
   }
 
+  public void testStaleProjectConfigurationMarkerAfterFixingMissingBuildExtension() throws Exception {
+    IProject project = importProjects("projects/staleconfiguration/missingextension", new String[] {"pom.xml"},
+        new ResolverConfiguration(), true)[0];
+    
+    WorkspaceHelpers.assertMarker(IMavenConstants.MARKER_POM_LOADING_ID, IMarker.SEVERITY_ERROR,
+        null, null, "pom.xml", project);
+
+    copyContent(project, new File("projects/staleconfiguration/missingextension/pom-changed.xml"), "pom.xml");
+    WorkspaceHelpers.assertMarker(IMavenConstants.MARKER_CONFIGURATION_ID, IMarker.SEVERITY_ERROR,
+        Messages.ProjectConfigurationUpdateRequired, null, null, project);
+
+    final IMavenProjectFacade projectFacade = plugin.getMavenProjectRegistry().create(project, monitor);
+
+    workspace.run(new IWorkspaceRunnable() {
+      public void run(IProgressMonitor monitor) throws CoreException {
+        plugin.getProjectConfigurationManager().updateProjectConfiguration(projectFacade.getProject(),
+            monitor);
+      }
+    }, monitor);
+    assertNoErrors(project);
+  }
+  
   public void testImportJavaProjectWithUnknownPackaging() throws Exception {
     IProject project = importProject("projects/detectJavaProject/default/pom.xml");
     assertTrue("default compilerId", project.hasNature(JavaCore.NATURE_ID));
