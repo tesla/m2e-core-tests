@@ -1,0 +1,50 @@
+<settings>
+  <localRepository>target/updateTestLocalRepo</localRepository>
+
+  <profiles>
+    <profile>
+      <id>updateRepo1</id>
+      <repositories>
+        <repository>
+          <id>updateRepo1</id>
+          <url>file:repositories/updateRepo2</url>
+          <snapshots><enabled>true</enabled></snapshots>
+          <releases><enabled>true</enabled></releases>
+        </repository>
+      </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>updateRepo1</id>
+          <url>file:repositories/updateRepo2</url>
+          <snapshots><enabled>true</enabled></snapshots>
+          <releases><enabled>true</enabled></releases>
+        </pluginRepository>
+      </pluginRepositories>
+    </profile>
+    <profile>
+      <id>localcentral</id>
+      <repositories>
+        <repository>
+          <id>central</id>
+          <url>file:repositories/remoterepo</url>
+          <snapshots><enabled>true</enabled></snapshots>
+          <releases><enabled>true</enabled></releases>
+        </repository>
+      </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>central</id>
+          <url>file:repositories/remoterepo</url>
+          <snapshots><enabled>true</enabled></snapshots>
+          <releases><enabled>true</enabled></releases>
+        </pluginRepository>
+      </pluginRepositories>
+    </profile>
+  </profiles>
+
+  <activeProfiles>
+    <activeProfile>updateRepo1</activeProfile>
+	<activeProfile>localcentral</activeProfile>
+  </activeProfiles>
+
+</settings>
