@@ -8,7 +8,10 @@
         <repository>
           <id>updateRepo1</id>
           <url>file:repositories/updateRepo2</url>
-          <snapshots><enabled>true</enabled></snapshots>
+          <snapshots>
+          	<enabled>true</enabled>
+          	<updatePolicy>daily</updatePolicy>
+          </snapshots>
           <releases><enabled>true</enabled></releases>
         </repository>
       </repositories>
@@ -16,7 +19,10 @@
         <pluginRepository>
           <id>updateRepo1</id>
           <url>file:repositories/updateRepo2</url>
-          <snapshots><enabled>true</enabled></snapshots>
+          <snapshots>
+          	<enabled>true</enabled>
+          	<updatePolicy>daily</updatePolicy>
+          </snapshots>
           <releases><enabled>true</enabled></releases>
         </pluginRepository>
       </pluginRepositories>

@@ -50,8 +50,9 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
   }
 
   public void testUpdateNotForced() throws Exception {
-    projectRefreshJob.refresh(new MavenUpdateRequest(project, false, false));
-    Thread.sleep(1000); // Refresh job is delayed
+    MavenUpdateRequest request = new MavenUpdateRequest(project, false, false);
+    request.setForce(false);
+    projectRefreshJob.refresh(request);
     waitForJobsToComplete();
     WorkspaceHelpers.assertNoErrors(project);
 
@@ -60,7 +61,6 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
 
   public void testUpdateForced() throws Exception {
     projectRefreshJob.refresh(new MavenUpdateRequest(project, false, true));
-    Thread.sleep(1000); // Refresh job is delayed
     waitForJobsToComplete();
     WorkspaceHelpers.assertNoErrors(project);
 

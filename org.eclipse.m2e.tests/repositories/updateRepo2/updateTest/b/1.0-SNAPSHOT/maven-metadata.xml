@@ -14,12 +14,12 @@
     <snapshotVersions>
       <snapshotVersion>
         <extension>jar</extension>
-        <value>1.0-20110411112327</value>
+        <value>1.0-20110411.112327-73</value>
         <updated>20110411112327</updated>
       </snapshotVersion>
       <snapshotVersion>
         <extension>pom</extension>
-        <value>1.0-20110411112327</value>
+        <value>1.0-20110411.112327-73</value>
         <updated>20110411112327</updated>
       </snapshotVersion>
     </snapshotVersions>
