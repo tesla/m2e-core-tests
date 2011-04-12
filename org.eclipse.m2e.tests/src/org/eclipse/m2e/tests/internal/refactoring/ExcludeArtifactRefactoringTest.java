@@ -49,7 +49,7 @@ import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits.Operation;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits.OperationTuple;
-import org.eclipse.m2e.editor.composites.ParentGatherer;
+import org.eclipse.m2e.core.ui.internal.util.ParentGatherer;
 import org.eclipse.m2e.editor.pom.MavenPomEditor;
 import org.eclipse.m2e.model.edit.pom.Dependency;
 import org.eclipse.m2e.model.edit.pom.Exclusion;
