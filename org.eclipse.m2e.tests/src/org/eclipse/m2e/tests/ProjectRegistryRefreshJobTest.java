@@ -15,10 +15,12 @@ import java.io.File;
 import org.eclipse.core.resources.IProject;
 
 import org.eclipse.m2e.core.project.MavenUpdateRequest;
+import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
 
+@SuppressWarnings("restriction")
 public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase {
 
   private static final String SETTINGS_ONE = "settings_updateRepo.xml";
@@ -39,17 +41,17 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
     delete(LOCAL_REPO);
     mavenConfiguration.setUserSettingsFile(new File(SETTINGS_ONE).getAbsolutePath());
     waitForJobsToComplete();
+  }
 
+  public void testUpdateNotForced() throws Exception {
     // import project
-    project = importProject("projects/updateProject/pom.xml");
+    project = importProject("projects/updateProject/simple/pom.xml");
     waitForJobsToComplete();
     WorkspaceHelpers.assertNoErrors(project);
 
     mavenConfiguration.setUserSettingsFile(new File(SETTINGS_TWO).getAbsolutePath());
     waitForJobsToComplete();
-  }
 
-  public void testUpdateNotForced() throws Exception {
     MavenUpdateRequest request = new MavenUpdateRequest(project, false, false);
     request.setForce(false);
     projectRefreshJob.refresh(request);
@@ -60,11 +62,63 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
   }
 
   public void testUpdateForced() throws Exception {
+    // import project
+    project = importProject("projects/updateProject/simple/pom.xml");
+    waitForJobsToComplete();
+    WorkspaceHelpers.assertNoErrors(project);
+
+    mavenConfiguration.setUserSettingsFile(new File(SETTINGS_TWO).getAbsolutePath());
+    waitForJobsToComplete();
+
     projectRefreshJob.refresh(new MavenUpdateRequest(project, false, true));
     waitForJobsToComplete();
     WorkspaceHelpers.assertNoErrors(project);
 
     assertEquals(785, LOCAL_ARTIFACT.length());
+  }
+
+  /*
+   * Adding a new dependency should not force an update of the original
+   */
+  public void testDependencyAdded_NoUpdate() throws Exception {
+    // import project
+    project = importProject("projects/updateProject/simple/pom.xml");
+    waitForJobsToComplete();
+    WorkspaceHelpers.assertNoErrors(project);
+
+    mavenConfiguration.setUserSettingsFile(new File(SETTINGS_TWO).getAbsolutePath());
+    waitForJobsToComplete();
+
+    copyContent(project, "pomWithSecondDependency.xml", "pom.xml");
+    waitForJobsToComplete();
+    WorkspaceHelpers.assertNoErrors(project);
+
+    assertEquals(338, LOCAL_ARTIFACT.length());
+  }
+
+  /*
+   * 
+   */
+  public void testMultiProject() throws Exception {
+    // import project
+    IProject[] projects = importProjects("projects/updateProject/multiProject/", new String[] {"projectA/pom.xml",
+        "projectB/pom.xml"}, new ResolverConfiguration());
+    waitForJobsToComplete();
+    WorkspaceHelpers.assertNoErrors(projects[0]);
+    WorkspaceHelpers.assertNoErrors(projects[1]);
+
+    mavenConfiguration.setUserSettingsFile(new File(SETTINGS_TWO).getAbsolutePath());
+    waitForJobsToComplete();
+
+    assertEquals(338, LOCAL_ARTIFACT.length());
+
+    // Add dependency to original project
+    copyContent(projects[0], "pomWithDependency.xml", "pom.xml");
+    waitForJobsToComplete();
+    WorkspaceHelpers.assertNoErrors(projects[0]);
+    WorkspaceHelpers.assertNoErrors(projects[1]);
+
+    assertEquals(338, LOCAL_ARTIFACT.length());
   }
 
   private static void delete(File file) {
