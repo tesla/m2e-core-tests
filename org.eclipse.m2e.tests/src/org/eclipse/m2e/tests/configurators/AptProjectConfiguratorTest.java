@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 
 
@@ -31,7 +32,6 @@ import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
  */
 @SuppressWarnings("restriction")
 public class AptProjectConfiguratorTest extends AbstractMavenProjectTestCase {
-
   /**
    * Imports the <code>projects/aptConfigurator/datanucleus</code> Maven project and ensures that APT is configured
    * correctly for it.
@@ -67,5 +67,45 @@ public class AptProjectConfiguratorTest extends AbstractMavenProjectTestCase {
       }
     }
     Assert.assertTrue("Expected datanucleus-jdo-query in factory path.", jdoQueryJarFound);
+  }
+
+  /**
+   * Imports the <code>projects/aptConfigurator/artifact-exclusions</code> Maven project and ensures that APT is
+   * configured correctly for it.
+   */
+  public void testAgainstArtifactExclusions() throws Exception {
+    IProject[] projects = importProjects("projects/aptConfigurator/artifact-exclusions", new String[] {
+        "artifact-exclusions-a/pom.xml", "artifact-exclusions-b/pom.xml"}, new ResolverConfiguration());
+    IJavaProject javaProjectA = JavaCore.create(projects[0]);
+
+    // Make sure that the generated sources folder is set in the APT config
+    String aptGenSrcDir = AptConfig.getGenSrcDir(javaProjectA);
+    Assert.assertTrue("Expected generated annotations source folder.", aptGenSrcDir.startsWith("target"));
+    Assert.assertTrue("Expected generated annotations source folder.", aptGenSrcDir.contains("generated-sources"));
+    Assert.assertTrue("Expected generated annotations source folder.", aptGenSrcDir.endsWith("annotations"));
+
+    // Make sure the actual Eclipse class path contains the generated sources
+    boolean generatedAnnotationsFound = false;
+    for(IClasspathEntry cpe : javaProjectA.getRawClasspath()) {
+      IPath cpePath = cpe.getPath();
+      String cpePortablePath = cpePath.toPortableString();
+      if(cpePortablePath.contains("target/generated-sources/annotations"))
+        generatedAnnotationsFound = true;
+    }
+    Assert.assertTrue("Expected generated annotations source folder.", generatedAnnotationsFound);
+
+    // Ensure that the APT factory path is set correctly
+    FactoryPath factoryPath = (FactoryPath) AptConfig.getFactoryPath(javaProjectA);
+    Assert.assertEquals("Unexpected number of entries in factory path.", 2, factoryPath.getEnabledContainers().keySet()
+        .size());
+    boolean log4jFound = false;
+    for(FactoryContainer container : factoryPath.getEnabledContainers().keySet()) {
+      if(container instanceof ExtJarFactoryContainer) {
+        ExtJarFactoryContainer extJarContainer = (ExtJarFactoryContainer) container;
+        if(extJarContainer.getJarFile().getName().contains("log4j"))
+          log4jFound = true;
+      }
+    }
+    Assert.assertTrue("Expected log4j in factory path.", log4jFound);
   }
 }
