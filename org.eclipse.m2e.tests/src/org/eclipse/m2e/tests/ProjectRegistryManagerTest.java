@@ -343,6 +343,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     getParentProject(f1);
     assertEquals(p2.getFile(IMavenConstants.POM_FILE_NAME).getLocation().toFile(), f1.getMavenProject(monitor)
         .getParentArtifact().getFile());
+    assertEquals("workspace", f1.getMavenProject(monitor).getProperties().get("property"));
 
     deleteProject(p2);
     waitForJobsToComplete();
@@ -351,6 +352,38 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     getParentProject(f1);
     // assertTrue(f1.getMavenProject().getParent().getFile().getAbsolutePath().startsWith(repo.getAbsolutePath()));
     assertStartWith(repo.getAbsolutePath(), f1.getMavenProject(monitor).getParentArtifact().getFile().getAbsolutePath());
+    assertEquals("repository", f1.getMavenProject(monitor).getProperties().get("property"));
+  }
+
+  
+  public void test006_parentAvailableFromLocalRepoAndWorkspace01() throws Exception {
+    boolean oldSuspended = Job.getJobManager().isSuspended();
+
+    Job.getJobManager().suspend();
+    try {
+      IProject p1 = createExisting("t006-p1");
+      IProject p2 = createExisting("t006-p2");
+
+      // sanity check
+      assertNull(manager.getProject(p1));
+      assertNull(manager.getProject(p2));
+
+      MavenUpdateRequest request = new MavenUpdateRequest(new IProject[] {p1, p2}, false, true);
+      manager.refresh(request, monitor);
+
+      IMavenProjectFacade f1 = manager.create(p1, monitor);
+      assertEquals("workspace", f1.getMavenProject(monitor).getProperties().get("property"));
+
+      p2.delete(true, monitor);
+      manager.refresh(request, monitor);
+
+      f1 = manager.create(p1, monitor);
+      assertEquals("repository", f1.getMavenProject(monitor).getProperties().get("property"));
+    } finally {
+      if(!oldSuspended) {
+        Job.getJobManager().resume();
+      }
+    }
   }
 
   protected MavenProject getParentProject(IMavenProjectFacade f) throws CoreException {
@@ -406,6 +439,8 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertEquals("junit", a1.get(1).getArtifactId());
 
     assertEquals(2, events.size());
+    assertEquals(p1.getFile(IMavenConstants.POM_FILE_NAME), events.get(0).getSource());
+    assertEquals(p2.getFile(IMavenConstants.POM_FILE_NAME), events.get(1).getSource());
   }
 
   public void test007_changedVersion() throws Exception {
