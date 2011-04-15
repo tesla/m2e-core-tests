@@ -37,10 +37,13 @@ import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.project.MavenProject;
 
+import org.sonatype.aether.repository.RepositoryPolicy;
+
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.embedder.ArtifactRef;
 import org.eclipse.m2e.core.internal.MavenPluginActivator;
+import org.eclipse.m2e.core.internal.preferences.MavenConfigurationImpl;
 import org.eclipse.m2e.core.internal.project.registry.MavenProjectFacade;
 import org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager;
 import org.eclipse.m2e.core.internal.project.registry.ProjectRegistryRefreshJob;
@@ -923,5 +926,48 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     a1 = new ArrayList<Artifact>(f1.getMavenProject(monitor).getArtifacts());
     assertEquals(1, a1.size());
     assertEquals(p2.getFile(IMavenConstants.POM_FILE_NAME).getLocation().toFile(), a1.get(0).getFile());
+  }
+
+  public void testGlobalUpdatePolicyNever() throws Exception {
+    // clean local repo
+    FileUtils.deleteDirectory(new File(repo, "updateTest/b"));
+
+    // reset/setup "remote" repo
+    File updatepolicyrepoDir = new File("target/updatepolicynever-repo");
+    FileUtils.deleteDirectory(updatepolicyrepoDir);
+    FileUtils.copyDirectoryStructure(new File("repositories/updateRepo1"), updatepolicyrepoDir);
+
+    String origPolicy = mavenConfiguration.getGlobalUpdatePolicy();
+
+    ((MavenConfigurationImpl) mavenConfiguration).setGlobalUpdatePolicy(RepositoryPolicy.UPDATE_POLICY_NEVER);
+    try {
+      IProject p1 = importProject("projects/updatepolicynever/pom.xml");
+      waitForJobsToComplete();
+
+      MavenProjectFacade f1 = manager.create(p1, monitor);
+      List<Artifact> a1 = new ArrayList<Artifact>(f1.getMavenProject(monitor).getArtifacts());
+      assertEquals(1, a1.size());
+      assertEquals("1.0-20110411.112213-72", a1.get(0).getVersion());
+
+      FileUtils.copyDirectoryStructure(new File("repositories/updateRepo2"), updatepolicyrepoDir);
+
+      manager.refresh(new MavenUpdateRequest(p1, false, false), monitor);
+
+      // assert dependency version did not change
+      f1 = manager.create(p1, monitor);
+      a1 = new ArrayList<Artifact>(f1.getMavenProject(monitor).getArtifacts());
+      assertEquals(1, a1.size());
+      assertEquals("1.0-20110411.112213-72", a1.get(0).getVersion());
+
+      ((MavenConfigurationImpl) mavenConfiguration).setGlobalUpdatePolicy(null);
+
+      manager.refresh(new MavenUpdateRequest(p1, false, false), monitor);
+      f1 = manager.create(p1, monitor);
+      a1 = new ArrayList<Artifact>(f1.getMavenProject(monitor).getArtifacts());
+      assertEquals(1, a1.size());
+      assertEquals("1.0-20110411.112327-73", a1.get(0).getVersion());
+    } finally {
+      ((MavenConfigurationImpl) mavenConfiguration).setGlobalUpdatePolicy(origPolicy);
+    }
   }
 }
