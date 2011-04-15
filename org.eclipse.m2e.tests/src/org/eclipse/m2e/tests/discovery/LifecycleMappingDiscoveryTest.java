@@ -19,6 +19,7 @@ import org.codehaus.plexus.util.IOUtil;
 
 import org.apache.maven.model.Model;
 
+import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.internal.lifecyclemapping.LifecycleMappingFactory;
 import org.eclipse.m2e.core.internal.lifecyclemapping.discovery.ILifecycleMappingRequirement;
 import org.eclipse.m2e.core.internal.lifecyclemapping.discovery.IMavenDiscoveryProposal;
@@ -45,7 +46,7 @@ public class LifecycleMappingDiscoveryTest extends AbstractLifecycleMappingTest 
 
   private LifecycleMappingConfiguration loadMappingConfiguration(File pomFile) throws CoreException {
     List<MavenProjectInfo> projects = new ArrayList<MavenProjectInfo>();
-    Model model = plugin.getMaven().readModel(pomFile);
+    Model model = MavenPlugin.getMaven().readModel(pomFile);
     projects.add(new MavenProjectInfo(pomFile.toString(), pomFile, model, null));
     LifecycleMappingConfiguration configuration = LifecycleMappingConfiguration.calculate(projects,
         new ProjectImportConfiguration(), monitor);

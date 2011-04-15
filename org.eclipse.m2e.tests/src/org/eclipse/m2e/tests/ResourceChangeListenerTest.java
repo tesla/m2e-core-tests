@@ -40,7 +40,7 @@ public class ResourceChangeListenerTest extends AbstractMavenProjectTestCase {
     deleteProject("resourcechange");
     project = createProject("resourcechange", "projects/resourcechange/pom.xml");
 
-    IProjectConfigurationManager configurationManager = MavenPlugin.getDefault().getProjectConfigurationManager();
+    IProjectConfigurationManager configurationManager = MavenPlugin.getProjectConfigurationManager();
     ResolverConfiguration configuration = new ResolverConfiguration();
     configurationManager.enableMavenNature(project, configuration, monitor);
     configurationManager.updateProjectConfiguration(project, monitor);

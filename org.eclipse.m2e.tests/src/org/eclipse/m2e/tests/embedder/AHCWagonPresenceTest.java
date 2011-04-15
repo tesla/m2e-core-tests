@@ -22,7 +22,7 @@ import org.eclipse.m2e.core.internal.embedder.MavenImpl;
 
 public class AHCWagonPresenceTest extends TestCase {
   public void testAHCisHere() throws ComponentLookupException, CoreException {
-    assertEquals("org.sonatype.maven.wagon.AhcWagon", ((MavenImpl) MavenPlugin.getDefault().getMaven())
+    assertEquals("org.sonatype.maven.wagon.AhcWagon", ((MavenImpl) MavenPlugin.getMaven())
         .getPlexusContainer().lookup(Wagon.class, "http").getClass().getName());
   }
 }

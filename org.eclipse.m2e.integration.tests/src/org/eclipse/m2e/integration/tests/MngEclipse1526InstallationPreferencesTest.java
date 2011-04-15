@@ -45,19 +45,19 @@ public class MngEclipse1526InstallationPreferencesTest extends M2EUIIntegrationT
   @Test
   public void testInstallationPrefs() throws Exception {
     importMavenProjects("projects/someproject.zip");
-    MavenPlugin.getDefault().getMavenRuntimeManager().getDefaultRuntime();
-    IMavenProjectFacade mavenProject = MavenPlugin.getDefault().getMavenProjectRegistry().getMavenProject(
+    MavenPlugin.getMavenRuntimeManager().getDefaultRuntime();
+    IMavenProjectFacade mavenProject = MavenPlugin.getMavenProjectRegistry().getMavenProject(
         "org.sonatype.test", "someproject", "0.0.1-SNAPSHOT");
     Assert.assertNotNull(mavenProject);
 
     //add external maven runtime
 
     MavenRuntime newRuntime = MavenRuntimeManager.createExternalRuntime(externalRuntime);
-    List<MavenRuntime> currRuntimes = MavenPlugin.getDefault().getMavenRuntimeManager().getMavenRuntimes();
+    List<MavenRuntime> currRuntimes = MavenPlugin.getMavenRuntimeManager().getMavenRuntimes();
     ArrayList<MavenRuntime> list = new ArrayList<MavenRuntime>(currRuntimes);
     list.add(newRuntime);
-    MavenPlugin.getDefault().getMavenRuntimeManager().setRuntimes(list);
-    MavenPlugin.getDefault().getMavenRuntimeManager().setDefaultRuntime(newRuntime);
+    MavenPlugin.getMavenRuntimeManager().setRuntimes(list);
+    MavenPlugin.getMavenRuntimeManager().setDefaultRuntime(newRuntime);
 
     //create the global_settings.xml file to use
     FileOutputStream out = null;

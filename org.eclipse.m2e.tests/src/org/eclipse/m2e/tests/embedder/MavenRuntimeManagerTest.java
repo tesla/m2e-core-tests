@@ -38,7 +38,7 @@ public class MavenRuntimeManagerTest extends TestCase {
 
   protected void setUp() throws Exception {
     super.setUp();
-    runtimeManager = MavenPlugin.getDefault().getMavenRuntimeManager();
+    runtimeManager = MavenPlugin.getMavenRuntimeManager();
     runtimeManager.reset();
   }
 

@@ -22,7 +22,7 @@ import org.eclipse.m2e.core.internal.Messages;
 @SuppressWarnings("restriction")
 public class MavenEmbeddedRuntimeTest extends TestCase {
   public void testGetVersion() throws Exception {
-    MavenRuntimeManager runtimeManager = MavenPlugin.getDefault().getMavenRuntimeManager();
+    MavenRuntimeManager runtimeManager = MavenPlugin.getMavenRuntimeManager();
     MavenRuntime embeddedRuntime = runtimeManager.getRuntime(MavenRuntimeManager.EMBEDDED);
     String mavenVersion = embeddedRuntime.getVersion();
     assertNotNull(mavenVersion);

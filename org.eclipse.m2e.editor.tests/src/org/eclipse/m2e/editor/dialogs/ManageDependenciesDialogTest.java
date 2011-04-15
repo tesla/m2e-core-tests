@@ -62,7 +62,7 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestJunit4
 	importProjects("projects/colourprovider", new String[] { "child/pom.xml" }, new ResolverConfiguration());
     //    assertEquals(model.getArtifactId(), "child");
     
-    IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectRegistry().getMavenProject(TEST_GROUP_ID, "child", TEST_VERSION);
+    IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().getMavenProject(TEST_GROUP_ID, "child", TEST_VERSION);
     final MavenProject project = facade.getMavenProject();
     assertEquals(project.getArtifactId(), "child");
 
@@ -78,9 +78,9 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestJunit4
     });
     assertNull(foreground);
 
-    IMaven maven = MavenPlugin.getDefault().getMaven();
+    IMaven maven = MavenPlugin.getMaven();
     maven.detachFromSession(project);
-    MavenExecutionRequest request = MavenPlugin.getDefault().getMavenProjectRegistry()
+    MavenExecutionRequest request = MavenPlugin.getMavenProjectRegistry()
         .createExecutionRequest(facade, new NullProgressMonitor());
 
     final MavenProject project2 = maven.resolveParentProject(request, project, new NullProgressMonitor());
@@ -103,7 +103,7 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestJunit4
     IStructuredModel model = loadModels("projects/same", new String[] { "parent/pom.xml", "child/pom.xml" }).get("child");
     
     assertNotNull(model);
-    IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectRegistry().getMavenProject(TEST_GROUP_ID+".same", "child", TEST_VERSION);
+    IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().getMavenProject(TEST_GROUP_ID+".same", "child", TEST_VERSION);
     MavenProject project = facade.getMavenProject();
     assertEquals(project.getArtifactId(), "child");
 
@@ -213,7 +213,7 @@ private IDOMModel createTempModel(IStructuredModel model) {
     
     IStructuredModel model = loadModels("projects/dep_exists", new String[] { "project/pom.xml" }).get("dep_exists");
     
-    IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectRegistry().getMavenProject(TEST_GROUP_ID, "dep_exists", TEST_VERSION);
+    IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().getMavenProject(TEST_GROUP_ID, "dep_exists", TEST_VERSION);
     MavenProject project = facade.getMavenProject();
     
     LinkedList<MavenProject> hierarchy = new LinkedList<MavenProject>();
@@ -259,7 +259,7 @@ private IDOMModel createTempModel(IStructuredModel model) {
     
     IStructuredModel model = loadModels("projects/dep_exists_diff_version", new String[] { "project/pom.xml" }).get("dep_exists_diff_version");
     
-    IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectRegistry().getMavenProject(TEST_GROUP_ID, "dep_exists_diff_version", TEST_VERSION);
+    IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().getMavenProject(TEST_GROUP_ID, "dep_exists_diff_version", TEST_VERSION);
     MavenProject project = facade.getMavenProject();
     
     LinkedList<MavenProject> hierarchy = new LinkedList<MavenProject>();
@@ -464,7 +464,7 @@ private IDOMModel createTempModel(IStructuredModel model) {
 
   
   protected MavenProject getMavenProject(String groupID, String artifactID, String version) {
-    IMavenProjectRegistry mavenProjectManager = MavenPlugin.getDefault().getMavenProjectRegistry();
+    IMavenProjectRegistry mavenProjectManager = MavenPlugin.getMavenProjectRegistry();
     assertNotNull(mavenProjectManager);
 
     IMavenProjectFacade facade = mavenProjectManager.getMavenProject(groupID, artifactID, version);

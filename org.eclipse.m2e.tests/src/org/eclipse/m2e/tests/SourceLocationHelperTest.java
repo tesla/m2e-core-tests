@@ -33,8 +33,8 @@ public class SourceLocationHelperTest extends AbstractMavenProjectTestCase {
   protected void setUp() throws Exception {
     super.setUp();
 
-    mavenProjectManager = MavenPlugin.getDefault().getMavenProjectRegistry();
-    //projectConfigurationManager = MavenPlugin.getDefault().getProjectConfigurationManager();
+    mavenProjectManager = MavenPlugin.getMavenProjectRegistry();
+    //projectConfigurationManager = MavenPlugin.getProjectConfigurationManager();
   }
 
   @Override

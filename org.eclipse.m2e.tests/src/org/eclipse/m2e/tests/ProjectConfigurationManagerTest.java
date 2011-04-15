@@ -62,7 +62,8 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     IWorkspaceRoot root = workspace.getRoot();
     IProject project = root.getProject("maven-project");
     assertNotNull(project);
-    IMavenProjectFacade facade = plugin.getMavenProjectRegistry().getMavenProject("MNGECLIPSE-1793_basedirRename", "maven-project", "0.0.1-SNAPSHOT");
+    IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().getMavenProject("MNGECLIPSE-1793_basedirRename",
+        "maven-project", "0.0.1-SNAPSHOT");
     assertNotNull(facade);
     assertEquals(project, facade.getProject());
   }
@@ -73,14 +74,14 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     IWorkspaceRoot root = workspace.getRoot();
     IProject project = root.getProject("mavenNNNNNNN");
     assertNotNull(project);
-    IMavenProjectFacade facade = plugin.getMavenProjectRegistry().getMavenProject("MNGECLIPSE-1793_basedirRename", "maven-project", "0.0.1-SNAPSHOT");
+    IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().getMavenProject("MNGECLIPSE-1793_basedirRename",
+        "maven-project", "0.0.1-SNAPSHOT");
     assertNotNull(facade);
     assertEquals(project, facade.getProject());
   }
 
   private void testBasedirRename(int renameRequired) throws IOException, CoreException {
     IWorkspaceRoot root = workspace.getRoot();
-    final MavenPlugin plugin = MavenPlugin.getDefault();
 
     String pathname = "projects/MNGECLIPSE-1793_basedirRename/mavenNNNNNNN";
     File src = new File(pathname);
@@ -95,9 +96,9 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
 
     workspace.run(new IWorkspaceRunnable() {
       public void run(IProgressMonitor monitor) throws CoreException {
-        plugin.getProjectConfigurationManager().importProjects(projectInfos, importConfiguration, monitor);
+        MavenPlugin.getProjectConfigurationManager().importProjects(projectInfos, importConfiguration, monitor);
       }
-    }, plugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
+    }, MavenPlugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
   }
 
   public void testWorkspaceResolutionOfInterModuleDependenciesDuringImport() throws Exception {
@@ -143,7 +144,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
       IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject("mngeclipse-2110");
       ProjectImportConfiguration pic = new ProjectImportConfiguration(new ResolverConfiguration());
 
-      IProjectConfigurationManager manager = MavenPlugin.getDefault().getProjectConfigurationManager();
+      IProjectConfigurationManager manager = MavenPlugin.getProjectConfigurationManager();
       manager.createArchetypeProject(project, null, archetype, "m2e.its", "mngeclipse-2110", "1.0-SNAPSHOT", "jar",
           new Properties(), pic, monitor);
 
@@ -171,7 +172,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     IProject project = importProject("projects/staleconfiguration/basic/pom.xml");
     assertNoErrors(project);
 
-    final IMavenProjectFacade projectFacade = plugin.getMavenProjectRegistry().create(project, monitor);
+    final IMavenProjectFacade projectFacade = MavenPlugin.getMavenProjectRegistry().create(project, monitor);
 
     copyContent(project, new File("projects/staleconfiguration/basic/pom-changed.xml"), "pom.xml");
     WorkspaceHelpers.assertMarker(IMavenConstants.MARKER_CONFIGURATION_ID, IMarker.SEVERITY_ERROR,
@@ -179,7 +180,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
 
     workspace.run(new IWorkspaceRunnable() {
       public void run(IProgressMonitor monitor) throws CoreException {
-        plugin.getProjectConfigurationManager().updateProjectConfiguration(projectFacade.getProject(),
+        MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(projectFacade.getProject(),
             monitor);
       }
     }, monitor);
@@ -190,7 +191,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     IProject project = importProject("projects/staleconfiguration/basic/pom.xml");
     assertNoErrors(project);
 
-    final IMavenProjectFacade projectFacade = plugin.getMavenProjectRegistry().create(project, monitor);
+    final IMavenProjectFacade projectFacade = MavenPlugin.getMavenProjectRegistry().create(project, monitor);
 
     // pretend it was deserialized from workspace state
     for(Field field : projectFacade.getClass().getDeclaredFields()) {
@@ -206,7 +207,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
 
     workspace.run(new IWorkspaceRunnable() {
       public void run(IProgressMonitor monitor) throws CoreException {
-        plugin.getProjectConfigurationManager().updateProjectConfiguration(projectFacade.getProject(),
+        MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(projectFacade.getProject(),
             monitor);
       }
     }, monitor);
@@ -224,11 +225,11 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     WorkspaceHelpers.assertMarker(IMavenConstants.MARKER_CONFIGURATION_ID, IMarker.SEVERITY_ERROR,
         Messages.ProjectConfigurationUpdateRequired, null, null, project);
 
-    final IMavenProjectFacade projectFacade = plugin.getMavenProjectRegistry().create(project, monitor);
+    final IMavenProjectFacade projectFacade = MavenPlugin.getMavenProjectRegistry().create(project, monitor);
 
     workspace.run(new IWorkspaceRunnable() {
       public void run(IProgressMonitor monitor) throws CoreException {
-        plugin.getProjectConfigurationManager().updateProjectConfiguration(projectFacade.getProject(),
+        MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(projectFacade.getProject(),
             monitor);
       }
     }, monitor);
@@ -255,25 +256,25 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     assertNotSame(IMavenConstants.BUILDER_ID, projectDescription.getBuildSpec()[0].getBuilderName());
 
     // Add the maven builder
-    plugin.getProjectConfigurationManager().addMavenBuilder(project, null /*description*/, monitor);
+    MavenPlugin.getProjectConfigurationManager().addMavenBuilder(project, null /*description*/, monitor);
     projectDescription = project.getDescription();
     assertEquals(2, projectDescription.getBuildSpec().length);
     assertEquals(IMavenConstants.BUILDER_ID, projectDescription.getBuildSpec()[1].getBuilderName());
 
     // Add the maven builder again
-    plugin.getProjectConfigurationManager().addMavenBuilder(project, null /*description*/, monitor);
+    MavenPlugin.getProjectConfigurationManager().addMavenBuilder(project, null /*description*/, monitor);
     projectDescription = project.getDescription();
     assertEquals(2, projectDescription.getBuildSpec().length);
     assertEquals(IMavenConstants.BUILDER_ID, projectDescription.getBuildSpec()[1].getBuilderName());
 
     // Remove the maven builder
-    plugin.getProjectConfigurationManager().removeMavenBuilder(project, null /*description*/, monitor);
+    MavenPlugin.getProjectConfigurationManager().removeMavenBuilder(project, null /*description*/, monitor);
     projectDescription = project.getDescription();
     assertEquals(1, projectDescription.getBuildSpec().length);
     assertNotSame(IMavenConstants.BUILDER_ID, projectDescription.getBuildSpec()[0].getBuilderName());
 
     // Remove the maven builder again
-    plugin.getProjectConfigurationManager().removeMavenBuilder(project, null /*description*/, monitor);
+    MavenPlugin.getProjectConfigurationManager().removeMavenBuilder(project, null /*description*/, monitor);
     projectDescription = project.getDescription();
     assertEquals(1, projectDescription.getBuildSpec().length);
     assertNotSame(IMavenConstants.BUILDER_ID, projectDescription.getBuildSpec()[0].getBuilderName());
@@ -296,7 +297,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     // Add the maven builder
     // The maven builder is there, but it is disabled - since detecting that would require m2e core to depend on internal m2e classes,
     // we just ignore the disabled maven builder
-    plugin.getProjectConfigurationManager().addMavenBuilder(project, null /*description*/, monitor);
+    MavenPlugin.getProjectConfigurationManager().addMavenBuilder(project, null /*description*/, monitor);
     projectDescription = project.getDescription();
     assertEquals(3, projectDescription.getBuildSpec().length);
     assertEquals(firstBuilderId, projectDescription.getBuildSpec()[0].getBuilderName());
@@ -304,7 +305,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     assertEquals(IMavenConstants.BUILDER_ID, projectDescription.getBuildSpec()[2].getBuilderName());
 
     // Remove the maven builder
-    plugin.getProjectConfigurationManager().removeMavenBuilder(project, null /*description*/, monitor);
+    MavenPlugin.getProjectConfigurationManager().removeMavenBuilder(project, null /*description*/, monitor);
     projectDescription = project.getDescription();
     assertEquals(2, projectDescription.getBuildSpec().length);
     assertEquals(firstBuilderId, projectDescription.getBuildSpec()[0].getBuilderName());

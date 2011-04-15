@@ -90,7 +90,7 @@ public class MavenModelManagerTest extends TestCase {
   }
 
   private void testCreateMavenModel(String pom, String pomFileName) throws Exception {
-    MavenModelManager modelManager = MavenPlugin.getDefault().getMavenModelManager();
+    MavenModelManager modelManager = MavenPlugin.getMavenModelManager();
     
     Model model = modelManager.readMavenModel(new ByteArrayInputStream(pom.getBytes("UTF-8")));
     

@@ -57,8 +57,6 @@ import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 @SuppressWarnings("restriction")
 public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
 
-  MavenPlugin plugin = MavenPlugin.getDefault();
-
   ProjectRegistryManager manager;
 
   ArrayList<MavenProjectChangedEvent> events;
@@ -388,7 +386,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
 
   protected MavenProject getParentProject(IMavenProjectFacade f) throws CoreException {
     MavenExecutionRequest r = manager.createExecutionRequest(f.getPom(), f.getResolverConfiguration(), monitor);
-    return plugin.getMaven().resolveParentProject(r, f.getMavenProject(monitor), monitor);
+    return MavenPlugin.getMaven().resolveParentProject(r, f.getMavenProject(monitor), monitor);
   }
 
   public void test007_staleDependencies() throws Exception {
@@ -600,7 +598,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     jar.delete();
 
     MavenUpdateRequest request = new MavenUpdateRequest(p1, false /*offline*/, false /*updateSnapshots*/);
-    plugin.getMavenProjectRegistry().refresh(request);
+    MavenPlugin.getMavenProjectRegistry().refresh(request);
     waitForJobsToComplete();
 
     IMavenProjectFacade f1 = manager.create(p1, monitor);
@@ -620,7 +618,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
         1 /*lineNumber*/, project);
 
     copyContent(project, "pom_good.xml", "pom.xml");
-    plugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
+    MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
     WorkspaceHelpers.assertNoErrors(project);
     assertNotNull(manager.create(project, monitor));
   }

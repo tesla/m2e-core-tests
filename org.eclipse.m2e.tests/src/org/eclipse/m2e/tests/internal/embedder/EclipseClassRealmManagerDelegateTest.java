@@ -34,7 +34,7 @@ public class EclipseClassRealmManagerDelegateTest extends TestCase {
   protected void setUp() throws Exception {
     super.setUp();
 
-    delegate = (EclipseClassRealmManagerDelegate) ((MavenImpl) MavenPlugin.getDefault().getMaven())
+    delegate = (EclipseClassRealmManagerDelegate) ((MavenImpl) MavenPlugin.getMaven())
         .getPlexusContainer().lookup(ClassRealmManagerDelegate.class);
   }
 

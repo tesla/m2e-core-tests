@@ -120,7 +120,7 @@ public abstract class PomEditorTestBase extends UIIntegrationTestCase {
       e.saveAndClose();
     }
 
-    final IProjectConfigurationManager configurationManager = MavenPlugin.getDefault().getProjectConfigurationManager();
+    final IProjectConfigurationManager configurationManager = MavenPlugin.getProjectConfigurationManager();
 
     final Model model = new Model();
     model.setModelVersion("4.0.0");

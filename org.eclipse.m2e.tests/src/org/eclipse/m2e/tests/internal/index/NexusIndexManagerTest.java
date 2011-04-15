@@ -59,11 +59,11 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
 
   private static final String REPO_URL_PUBLIC = "http://repository.sonatype.org/content/groups/public/";
 
-  private IMavenConfiguration mavenConfiguration = MavenPlugin.getDefault().getMavenConfiguration();
+  private IMavenConfiguration mavenConfiguration = MavenPlugin.getMavenConfiguration();
 
-  private NexusIndexManager indexManager = (NexusIndexManager) MavenPlugin.getDefault().getIndexManager();
+  private NexusIndexManager indexManager = (NexusIndexManager) MavenPlugin.getIndexManager();
 
-  private RepositoryRegistry repositoryRegistry = (RepositoryRegistry) MavenPlugin.getDefault().getRepositoryRegistry();
+  private RepositoryRegistry repositoryRegistry = (RepositoryRegistry) MavenPlugin.getRepositoryRegistry();
 
   protected void setUp() throws Exception {
     super.setUp();
@@ -397,7 +397,7 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
     waitForJobsToComplete();
 
     // make facade shallow as it would be when the workspace was just started and its state deserialized
-    IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectRegistry().getProject(project);
+    IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().getProject(project);
     Field field = MavenProjectFacade.class.getDeclaredField("mavenProject");
     field.setAccessible(true);
     field.set(facade, null);
@@ -406,7 +406,7 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
 
     MavenProjectChangedEvent event = new MavenProjectChangedEvent(facade.getPom(),
         MavenProjectChangedEvent.KIND_REMOVED, MavenProjectChangedEvent.FLAG_NONE, facade, null);
-    ((NexusIndexManager) MavenPlugin.getDefault().getIndexManager()).mavenProjectChanged(
+    ((NexusIndexManager) MavenPlugin.getIndexManager()).mavenProjectChanged(
         new MavenProjectChangedEvent[] {event}, new NullProgressMonitor());
   }
 

@@ -34,7 +34,7 @@ public class RepositoryRegistryTest extends AbstractMavenProjectTestCase {
     File securityFile = new File("src/org/eclipse/m2e/tests/internal/repository/settings-security.xml");
     System.setProperty("settings.security", securityFile.getAbsolutePath());
 
-    repositoryRegistry = (RepositoryRegistry) MavenPlugin.getDefault().getRepositoryRegistry();
+    repositoryRegistry = (RepositoryRegistry) MavenPlugin.getRepositoryRegistry();
   }
 
   protected void tearDown() throws Exception {

@@ -19,6 +19,7 @@ import java.util.Map;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.internal.MavenPluginActivator;
 import org.eclipse.m2e.core.internal.embedder.MavenImpl;
@@ -41,7 +42,7 @@ public class ImportSortOrderTestCase extends AbstractMavenProjectTestCase {
 
     List<IMavenProjectFacade> facades =  new ArrayList<IMavenProjectFacade>();
     
-    ProjectRegistryManager manager = new ProjectRegistryManager((MavenImpl) plugin.getMaven(), null, false,
+    ProjectRegistryManager manager = new ProjectRegistryManager((MavenImpl) MavenPlugin.getMaven(), null, false,
         MavenPluginActivator.getDefault().getMavenMarkerManager());
     
     List<IProject> projects = new ArrayList<IProject>();
@@ -80,7 +81,7 @@ public class ImportSortOrderTestCase extends AbstractMavenProjectTestCase {
   }
   
   public void testCollectionSortProject() throws Exception {
-    ProjectConfigurationManager manager = (ProjectConfigurationManager) plugin.getProjectConfigurationManager();
+    ProjectConfigurationManager manager = (ProjectConfigurationManager) MavenPlugin.getProjectConfigurationManager();
     
     List<IMavenProjectFacade> facades = createFacades();
     manager.sortProjects(facades, monitor);

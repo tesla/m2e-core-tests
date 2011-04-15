@@ -44,11 +44,11 @@ public class NexusIndexManagerSearchTest extends AbstractNexusIndexManagerTest {
 
   private static final String REPO_URL_ECLIPSE = "http://repository.sonatype.org/content/repositories/eclipse";
 
-  private IMavenConfiguration mavenConfiguration = MavenPlugin.getDefault().getMavenConfiguration();
+  private IMavenConfiguration mavenConfiguration = MavenPlugin.getMavenConfiguration();
 
-  private NexusIndexManager indexManager = (NexusIndexManager) MavenPlugin.getDefault().getIndexManager();
+  private NexusIndexManager indexManager = (NexusIndexManager) MavenPlugin.getIndexManager();
 
-  private RepositoryRegistry repositoryRegistry = (RepositoryRegistry) MavenPlugin.getDefault().getRepositoryRegistry();
+  private RepositoryRegistry repositoryRegistry = (RepositoryRegistry) MavenPlugin.getRepositoryRegistry();
 
   protected void setUp() throws Exception {
     super.setUp();

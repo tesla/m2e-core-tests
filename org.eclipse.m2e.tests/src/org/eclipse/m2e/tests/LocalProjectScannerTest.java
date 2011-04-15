@@ -33,7 +33,7 @@ public class LocalProjectScannerTest extends TestCase {
   protected void setUp() throws Exception {
     super.setUp();
 
-    modelManager = MavenPlugin.getDefault().getMavenModelManager();
+    modelManager = MavenPlugin.getMavenModelManager();
   }
 
   public void testDeepNesting() throws Exception {
