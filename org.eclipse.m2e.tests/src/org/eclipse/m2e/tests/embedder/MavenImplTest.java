@@ -213,7 +213,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
     FileUtils.deleteDirectory(new File(localRepository.getBasedir(), "junit/junit/3.8.2"));
 
     ILocalRepositoryListener listener = new ILocalRepositoryListener() {
-      public void artifactInstalled(File repositoryBasedir, ArtifactKey artifact, File artifactFile) {
+      public void artifactInstalled(File repositoryBasedir, ArtifactKey baseArtifact, ArtifactKey artifact, File artifactFile) {
         assertEquals(localRepository.getBasedir(), repositoryBasedir.getAbsolutePath());
 
         assertEquals("junit:junit:3.8.2::", artifact.toPortableString());

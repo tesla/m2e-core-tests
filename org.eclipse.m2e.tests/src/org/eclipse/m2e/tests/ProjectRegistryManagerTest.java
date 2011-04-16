@@ -836,6 +836,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
   }
 
   public void testRepositoryMetadataCacheUsed() throws Exception {
+    FileUtils.deleteDirectory(new File(repo, "mngeclipse1996"));
     String oldSettings = mavenConfiguration.getUserSettingsFile();
     try {
       injectFilexWagon();
@@ -969,5 +970,48 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     } finally {
       ((MavenConfigurationImpl) mavenConfiguration).setGlobalUpdatePolicy(origPolicy);
     }
+  }
+
+  public void testCorrelatedMissingDependency() throws Exception {
+    // clean local repo
+    FileUtils.deleteDirectory(new File(repo, "updateTest/b"));
+
+    // reset/setup "remote" repo
+    File updatepolicyrepoDir = new File("target/correlatedMissingDependency-repo");
+    FileUtils.deleteDirectory(updatepolicyrepoDir);
+
+    // import two projects with the same missing dependency
+
+    IProject[] projects = importProjects("projects/correlatedMissingDependency", new String[] {"p01/pom.xml",
+        "p02/pom.xml"}, new ResolverConfiguration());
+
+    MavenProjectFacade f1 = manager.create(projects[0], monitor);
+    List<Artifact> a1 = new ArrayList<Artifact>(f1.getMavenProject(monitor).getArtifacts());
+    assertEquals(1, a1.size());
+    assertFalse(a1.get(0).isResolved());
+
+    MavenProjectFacade f2 = manager.create(projects[1], monitor);
+    List<Artifact> a2 = new ArrayList<Artifact>(f2.getMavenProject(monitor).getArtifacts());
+    assertEquals(1, a2.size());
+    assertFalse(a2.get(0).isResolved());
+
+    // make the missing dependency available
+
+    FileUtils.copyDirectoryStructure(new File("repositories/updateRepo1"), updatepolicyrepoDir);
+
+    // refresh one of the two projects
+    manager.refresh(new MavenUpdateRequest(projects[0], false, true), monitor);
+
+    // both projects should now have resolved the missing dependency
+
+    f1 = manager.create(projects[0], monitor);
+    a1 = new ArrayList<Artifact>(f1.getMavenProject(monitor).getArtifacts());
+    assertEquals(1, a1.size());
+    assertTrue(a1.get(0).isResolved());
+    
+    f2 = manager.create(projects[1], monitor);
+    a2 = new ArrayList<Artifact>(f2.getMavenProject(monitor).getArtifacts());
+    assertEquals(1, a2.size());
+    assertTrue(a2.get(0).isResolved());
   }
 }
