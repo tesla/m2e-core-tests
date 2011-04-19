@@ -70,20 +70,16 @@ public class PomContentAssistProcessorTest extends TestCase {
     }
 
     public char getChar(int pos) throws BadLocationException {
-      // TODO Auto-generated method stub
       return value.charAt(pos);
     }
 
     public String get(int pos, int length) throws BadLocationException {
-      // TODO Auto-generated method stub
       return value.substring(pos, pos + length);
     }
 
     public int getLength() {
-      // TODO Auto-generated method stub
       return value.length();
     }
-
   }
 
   private class MockTextViewer implements ITextViewer {
@@ -91,210 +87,140 @@ public class PomContentAssistProcessorTest extends TestCase {
     public IDocument doc;
 
     public void activatePlugins() {
-      // TODO Auto-generated method stub
-
     }
 
     public void addTextInputListener(ITextInputListener listener) {
-      // TODO Auto-generated method stub
-
     }
 
     public void addTextListener(ITextListener listener) {
-      // TODO Auto-generated method stub
-
     }
 
     public void addViewportListener(IViewportListener listener) {
-      // TODO Auto-generated method stub
-
     }
 
     public void changeTextPresentation(TextPresentation presentation, boolean controlRedraw) {
-      // TODO Auto-generated method stub
-
     }
 
     public int getBottomIndex() {
-      // TODO Auto-generated method stub
       return 0;
     }
 
     public int getBottomIndexEndOffset() {
-      // TODO Auto-generated method stub
       return 0;
     }
 
     public IDocument getDocument() {
-      // TODO Auto-generated method stub
       return doc;
     }
 
     public IFindReplaceTarget getFindReplaceTarget() {
-      // TODO Auto-generated method stub
       return null;
     }
 
     public ITextOperationTarget getTextOperationTarget() {
-      // TODO Auto-generated method stub
       return null;
     }
 
     public int getTopIndex() {
-      // TODO Auto-generated method stub
       return 0;
     }
 
     public int getTopIndexStartOffset() {
-      // TODO Auto-generated method stub
       return 0;
     }
 
     public int getTopInset() {
-      // TODO Auto-generated method stub
       return 0;
     }
 
     public IRegion getVisibleRegion() {
-      // TODO Auto-generated method stub
       return null;
     }
 
     public void invalidateTextPresentation() {
-      // TODO Auto-generated method stub
-
     }
 
     public boolean isEditable() {
-      // TODO Auto-generated method stub
       return false;
     }
 
     public boolean overlapsWithVisibleRegion(int offset, int length) {
-      // TODO Auto-generated method stub
       return false;
     }
 
     public void removeTextInputListener(ITextInputListener listener) {
-      // TODO Auto-generated method stub
-
     }
 
     public void removeTextListener(ITextListener listener) {
-      // TODO Auto-generated method stub
-
     }
 
     public void removeViewportListener(IViewportListener listener) {
-      // TODO Auto-generated method stub
-
     }
 
     public void resetPlugins() {
-      // TODO Auto-generated method stub
-
     }
 
     public void resetVisibleRegion() {
-      // TODO Auto-generated method stub
-
     }
 
     public void revealRange(int offset, int length) {
-      // TODO Auto-generated method stub
-
     }
 
     public void setAutoIndentStrategy(IAutoIndentStrategy strategy, String contentType) {
-      // TODO Auto-generated method stub
-
     }
 
     public void setDefaultPrefixes(String[] defaultPrefixes, String contentType) {
-      // TODO Auto-generated method stub
-
     }
 
     public void setDocument(IDocument document) {
-      // TODO Auto-generated method stub
-
     }
 
     public void setDocument(IDocument document, int modelRangeOffset, int modelRangeLength) {
-      // TODO Auto-generated method stub
-
     }
 
     public void setEditable(boolean editable) {
-      // TODO Auto-generated method stub
-
     }
 
     public void setEventConsumer(IEventConsumer consumer) {
-      // TODO Auto-generated method stub
-
     }
 
     public void setIndentPrefixes(String[] indentPrefixes, String contentType) {
-      // TODO Auto-generated method stub
-
     }
 
     public void setSelectedRange(int offset, int length) {
-      // TODO Auto-generated method stub
-
     }
 
     public void setTextDoubleClickStrategy(ITextDoubleClickStrategy strategy, String contentType) {
-      // TODO Auto-generated method stub
-
     }
 
     public void setTextHover(ITextHover textViewerHover, String contentType) {
-      // TODO Auto-generated method stub
-
     }
 
     public void setTopIndex(int index) {
-      // TODO Auto-generated method stub
-
     }
 
     public void setUndoManager(IUndoManager undoManager) {
-      // TODO Auto-generated method stub
-
     }
 
     public void setVisibleRegion(int offset, int length) {
-      // TODO Auto-generated method stub
-
     }
 
     public ISelectionProvider getSelectionProvider() {
-      // TODO Auto-generated method stub
       return null;
     }
 
     public Point getSelectedRange() {
-      // TODO Auto-generated method stub
       return null;
     }
 
     public StyledText getTextWidget() {
-      // TODO Auto-generated method stub
       return null;
     }
 
     public void setTextColor(Color color) {
-      // TODO Auto-generated method stub
-
     }
 
     public void setTextColor(Color color, int offset, int length, boolean controlRedraw) {
-      // TODO Auto-generated method stub
-
     }
-
   }
-
 }
