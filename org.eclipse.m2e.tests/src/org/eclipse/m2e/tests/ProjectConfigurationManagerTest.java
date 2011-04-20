@@ -46,6 +46,7 @@ import org.eclipse.m2e.core.internal.project.registry.ProjectRegistryRefreshJob;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.IProjectConfigurationManager;
 import org.eclipse.m2e.core.project.MavenProjectInfo;
+import org.eclipse.m2e.core.project.MavenUpdateRequest;
 import org.eclipse.m2e.core.project.ProjectImportConfiguration;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
@@ -310,5 +311,12 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     assertEquals(2, projectDescription.getBuildSpec().length);
     assertEquals(firstBuilderId, projectDescription.getBuildSpec()[0].getBuilderName());
     assertEquals(ExternalToolBuilder.ID, projectDescription.getBuildSpec()[1].getBuilderName());
+  }
+
+  public void testBasicUpdateConfiguration() throws Exception {
+    IProject project = importProject("projects/projectimport/p001/pom.xml");
+    IProjectConfigurationManager manager = MavenPlugin.getProjectConfigurationManager();
+    // make sure #updateProjectConfiguration(MavenUpdateRequest, IProgressMonitor) does not blow up
+    manager.updateProjectConfiguration(new MavenUpdateRequest(project, true, false), monitor);
   }
 }
