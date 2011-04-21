@@ -57,7 +57,6 @@ import org.eclipse.m2e.tests.common.FilexWagon;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
 
-@SuppressWarnings("restriction")
 public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
 
   ProjectRegistryManager manager;

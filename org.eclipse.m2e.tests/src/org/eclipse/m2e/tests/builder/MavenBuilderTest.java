@@ -9,7 +9,7 @@
  *      Sonatype, Inc. - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.m2e.tests;
+package org.eclipse.m2e.tests.builder;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,10 +23,13 @@ import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 
+import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.core.IMavenConstants;
+import org.eclipse.m2e.core.project.IMavenProjectRegistry;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 
@@ -210,5 +213,29 @@ public class MavenBuilderTest extends AbstractMavenProjectTestCase {
     assertEquals("model-b-value", properties.getProperty("key"));
 
     // TODO test warning marker
+  }
+
+  public void test013_refreshFixedPom() throws Exception {
+    IProject project = createExisting("t013-p1", "resources/t013/t013-p1");
+    waitForJobsToComplete();
+
+    IMavenProjectRegistry manager = MavenPlugin.getMavenProjectRegistry();
+
+    // sanity check
+    assertNull(manager.create(project, monitor));
+
+    boolean suspended = Job.getJobManager().isSuspended();
+    try {
+      copyContent(project, "pom_good.xml", "pom.xml", false);
+
+      project.build(IncrementalProjectBuilder.INCREMENTAL_BUILD, monitor);
+
+      // facade should have been created by the builder
+      assertNotNull(manager.create(project, monitor));
+    } finally {
+      if(!suspended) {
+        Job.getJobManager().resume();
+      }
+    }
   }
 }
