@@ -54,7 +54,6 @@ import org.eclipse.m2e.tests.common.FilexWagon;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
 
-@SuppressWarnings("restriction")
 public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCase {
 
   public void testBasedirRenameRequired() throws Exception {
@@ -194,13 +193,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
 
     final IMavenProjectFacade projectFacade = MavenPlugin.getMavenProjectRegistry().create(project, monitor);
 
-    // pretend it was deserialized from workspace state
-    for(Field field : projectFacade.getClass().getDeclaredFields()) {
-      if(Modifier.isTransient(field.getModifiers())) {
-        field.setAccessible(true);
-        field.set(projectFacade, null);
-      }
-    }
+    deserializeFromWorkspaceState(projectFacade);
 
     copyContent(project, new File("projects/staleconfiguration/basic/pom-changed.xml"), "pom.xml");
     WorkspaceHelpers.assertMarker(IMavenConstants.MARKER_CONFIGURATION_ID, IMarker.SEVERITY_ERROR,

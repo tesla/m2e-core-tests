@@ -470,6 +470,43 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertEquals(p2.getFile(IMavenConstants.POM_FILE_NAME).getLocation().toFile(), a1.get(0).getFile());
   }
 
+  public void test007_dependentRefreshAfterWorkspaceRestart() throws Exception {
+    // p1 depends on p2
+    IProject p1 = createExisting("t007-p1");
+    IProject p2 = createExisting("t007-p2");
+    waitForJobsToComplete();
+
+    boolean origSuspended = Job.getJobManager().isSuspended();
+    
+    Job.getJobManager().suspend();
+    try {
+      // sanity check
+      MavenProjectFacade f1 = manager.create(p1, monitor);
+      List<Artifact> a1 = new ArrayList<Artifact>(f1.getMavenProject(monitor).getArtifacts());
+      assertEquals(1, a1.size());
+      assertEquals("t007-p2", a1.get(0).getArtifactId());
+
+      // simulate workspace restart
+      deserializeFromWorkspaceState(manager.create(p1, monitor));
+      deserializeFromWorkspaceState(manager.create(p2, monitor));
+
+      // add new dependency to p2, which should trigger update of p1
+      copyContent(p2, "pom_newDependency.xml", "pom.xml", false /*don't wait for jobs to complete*/);
+      manager.refresh(new MavenUpdateRequest(p2, false, false), monitor);
+
+      // assert p1 got refreshed
+      f1 = manager.create(p1, monitor);
+      a1 = new ArrayList<Artifact>(f1.getMavenProject(monitor).getArtifacts());
+      assertEquals(2, a1.size());
+      assertEquals("t007-p2", a1.get(0).getArtifactId());
+      assertEquals("junit", a1.get(1).getArtifactId());
+    } finally {
+      if(!origSuspended) {
+        Job.getJobManager().resume();
+      }
+    }
+  }
+
   public void test008_staleMissingParent() throws Exception {
     // p1 does not have parent
     IProject p1 = createExisting("t008-p1");
