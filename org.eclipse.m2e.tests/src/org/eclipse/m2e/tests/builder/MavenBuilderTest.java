@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.preferences.IScopeContext;
 
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.core.IMavenConstants;
+import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.IMavenProjectRegistry;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
@@ -225,6 +226,7 @@ public class MavenBuilderTest extends AbstractMavenProjectTestCase {
     assertNull(manager.create(project, monitor));
 
     boolean suspended = Job.getJobManager().isSuspended();
+    Job.getJobManager().suspend();
     try {
       copyContent(project, "pom_good.xml", "pom.xml", false);
 
@@ -238,4 +240,35 @@ public class MavenBuilderTest extends AbstractMavenProjectTestCase {
       }
     }
   }
+
+  public void test007_refreshChangedPom() throws Exception {
+    IProject project = createExisting("t007-p2", "resources/t007/t007-p2");
+    waitForJobsToComplete();
+
+    // prime workspace build delta
+    project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+
+    IMavenProjectRegistry manager = MavenPlugin.getMavenProjectRegistry();
+
+    // sanity check
+    IMavenProjectFacade f = manager.create(project, monitor);
+    assertEquals(0, f.getMavenProject(monitor).getArtifacts().size());
+
+    boolean suspended = Job.getJobManager().isSuspended();
+    Job.getJobManager().suspend();
+    try {
+      copyContent(project, "pom_newDependency.xml", "pom.xml", false);
+
+      project.build(IncrementalProjectBuilder.INCREMENTAL_BUILD, monitor);
+
+      // facade should have been created by the builder
+      f = manager.create(project, monitor);
+      assertEquals(1, f.getMavenProject(monitor).getArtifacts().size());
+    } finally {
+      if(!suspended) {
+        Job.getJobManager().resume();
+      }
+    }
+  }
+
 }
