@@ -53,7 +53,6 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
     waitForJobsToComplete();
 
     MavenUpdateRequest request = new MavenUpdateRequest(project, false, false);
-    request.setForce(false);
     projectRefreshJob.refresh(request);
     waitForJobsToComplete();
     WorkspaceHelpers.assertNoErrors(project);
