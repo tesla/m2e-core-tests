@@ -49,10 +49,10 @@ import org.apache.maven.model.Plugin;
 
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.core.IMavenConstants;
-import org.eclipse.m2e.core.index.IMutableIndex;
 import org.eclipse.m2e.core.internal.MavenPluginActivator;
-import org.eclipse.m2e.core.internal.index.NexusIndex;
-import org.eclipse.m2e.core.internal.index.NexusIndexManager;
+import org.eclipse.m2e.core.internal.index.IMutableIndex;
+import org.eclipse.m2e.core.internal.index.nexus.NexusIndex;
+import org.eclipse.m2e.core.internal.index.nexus.NexusIndexManager;
 import org.eclipse.m2e.core.internal.preferences.MavenConfigurationImpl;
 import org.eclipse.m2e.core.internal.repository.RepositoryRegistry;
 import org.eclipse.m2e.core.project.IProjectConfigurationManager;

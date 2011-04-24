@@ -16,7 +16,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.IMavenConfiguration;
-import org.eclipse.m2e.core.index.IndexManager;
+import org.eclipse.m2e.core.internal.index.IndexManager;
 import org.eclipse.m2e.integration.tests.common.ContextMenuHelper;
 import org.eclipse.m2e.integration.tests.common.matchers.ContainsMnemonic;
 import org.eclipse.m2e.jdt.internal.BuildPathManager;
