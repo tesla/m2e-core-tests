@@ -21,6 +21,7 @@ import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IClasspathEntry;
 
@@ -156,5 +157,18 @@ public class ResourceChangeListenerTest extends AbstractMavenProjectTestCase {
     // assert
     waitForJobsToComplete();
     assertEquals(0, getMavenContainerEntries(project).length);
+  }
+
+  public void testProjectDelete() throws Exception {
+    IClasspathEntry[] cp = getMavenContainerEntries(project);
+    assertEquals(1, cp.length);
+    assertEquals("junit-3.8.1.jar", cp[0].getPath().lastSegment());
+    waitForJobsToComplete();
+    assertEquals(1, MavenPlugin.getMavenProjectRegistry().getProjects().length);
+
+    project.delete(true, new NullProgressMonitor());
+
+    waitForJobsToComplete();
+    assertEquals(0, MavenPlugin.getMavenProjectRegistry().getProjects().length);
   }
 }
