@@ -40,7 +40,7 @@ import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
 
 import org.apache.maven.model.Dependency;
 
-import org.eclipse.m2e.core.core.IMavenConstants;
+import org.eclipse.m2e.core.internal.IMavenConstants;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits;
 import org.eclipse.m2e.core.ui.internal.editing.PomHelper;
 import org.eclipse.m2e.editor.pom.MavenPomEditor;

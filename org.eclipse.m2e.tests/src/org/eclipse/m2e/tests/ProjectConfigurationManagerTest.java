@@ -40,7 +40,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.apache.maven.archetype.catalog.Archetype;
 
 import org.eclipse.m2e.core.MavenPlugin;
-import org.eclipse.m2e.core.core.IMavenConstants;
+import org.eclipse.m2e.core.internal.IMavenConstants;
 import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.internal.project.registry.ProjectRegistryRefreshJob;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;

@@ -25,7 +25,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IClasspathEntry;
 
 import org.eclipse.m2e.core.MavenPlugin;
-import org.eclipse.m2e.core.core.IMavenConstants;
+import org.eclipse.m2e.core.internal.IMavenConstants;
 import org.eclipse.m2e.core.project.IProjectConfigurationManager;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;

@@ -48,7 +48,7 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
 
 import org.eclipse.m2e.core.MavenPlugin;
-import org.eclipse.m2e.core.core.IMavenConstants;
+import org.eclipse.m2e.core.internal.IMavenConstants;
 import org.eclipse.m2e.core.internal.MavenPluginActivator;
 import org.eclipse.m2e.core.internal.index.IMutableIndex;
 import org.eclipse.m2e.core.internal.index.nexus.NexusIndex;

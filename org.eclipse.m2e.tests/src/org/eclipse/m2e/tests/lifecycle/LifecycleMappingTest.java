@@ -27,7 +27,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.apache.maven.execution.MavenExecutionRequest;
 
 import org.eclipse.m2e.core.MavenPlugin;
-import org.eclipse.m2e.core.core.IMavenConstants;
+import org.eclipse.m2e.core.internal.IMavenConstants;
 import org.eclipse.m2e.core.internal.lifecyclemapping.DefaultLifecycleMapping;
 import org.eclipse.m2e.core.internal.lifecyclemapping.InvalidLifecycleMapping;
 import org.eclipse.m2e.core.internal.lifecyclemapping.LifecycleMappingFactory;

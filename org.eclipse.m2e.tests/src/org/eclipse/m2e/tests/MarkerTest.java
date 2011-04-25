@@ -23,7 +23,7 @@ import org.eclipse.ui.IMarkerResolution;
 import org.eclipse.ui.ide.IDE;
 
 import org.eclipse.m2e.core.MavenPlugin;
-import org.eclipse.m2e.core.core.IMavenConstants;
+import org.eclipse.m2e.core.internal.IMavenConstants;
 import org.eclipse.m2e.core.internal.MavenPluginActivator;
 import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.internal.markers.MavenMarkerManager;
