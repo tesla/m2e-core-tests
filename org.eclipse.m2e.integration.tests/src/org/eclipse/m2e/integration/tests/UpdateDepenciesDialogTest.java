@@ -45,6 +45,7 @@ public class UpdateDepenciesDialogTest extends M2EUIIntegrationTestCase {
     importProjects("projects/updateDepenciesDialogTest/other", new String[] {"pom.xml"});
     importProjects("projects/updateDepenciesDialogTest/withChildren", new String[] {"pom.xml", "projectA/pom.xml",
         "projectB/pom.xml"});
+    importProjects("projects/updateDepenciesDialogTest/namePrefixes", new String[] {"d/pom.xml", "dd/pom.xml"});
     bot = new SonatypeSWTBot();
     waitForAllBuildsToComplete();
   }
@@ -118,7 +119,7 @@ public class UpdateDepenciesDialogTest extends M2EUIIntegrationTestCase {
       SwtbotUtil.waitForClose(shell);
 
       // Check output
-      Assert.assertEquals(4, dialog.getSelectedProjects().length);
+      Assert.assertEquals(6, dialog.getSelectedProjects().length);
       Assert.assertFalse(dialog.isOffline());
     } finally {
       try {
@@ -220,6 +221,30 @@ public class UpdateDepenciesDialogTest extends M2EUIIntegrationTestCase {
     }
   }
 
+  /*
+   * Dialog builds tree by directory prefixes, need to ensure that if a sibling is a prefix of another... 
+   */
+  @Test
+  public void testPrefix() {
+    openDialog(new IProject[0]);
+    SWTBotShell shell = bot.shell("Update Maven Dependencies");
+    try {
+      shell.activate();
+      SWTBotTree tree = bot.tree();
+      Assert.assertEquals(0, tree.getTreeItem("d").getItems().length);
+      Assert.assertEquals(0, tree.getTreeItem("dd").getItems().length);
+    } finally {
+      try {
+        if(shell.isOpen()) {
+          bot.button("Cancel").click();
+        }
+      } catch(Exception e) {
+        // do nothing
+      }
+      SwtbotUtil.waitForClose(shell);
+    }
+  }
+
   private boolean contains(IProject[] projects, String text) {
     for(IProject project : projects) {
       if(project.getName().equals(text))
@@ -257,22 +282,26 @@ public class UpdateDepenciesDialogTest extends M2EUIIntegrationTestCase {
   }
 
   private static SWTBotMenu getSubMenuItem(final SWTBotMenu parent, final String menuText) {
+    final String[] menuItems = new String[1];
     MenuItem menuItem = UIThreadRunnable.syncExec(new WidgetResult<MenuItem>() {
 
       public MenuItem run() {
         Menu bar = parent.widget.getMenu();
         if(bar != null) {
+          StringBuilder builder = new StringBuilder();
           for(MenuItem item : bar.getItems()) {
-            if(item.getText().equals(menuText)) {
+            builder.append(item.getText()).append(',');
+            if(menuText.equals(item.getText().replace("&", ""))) {
               return item;
             }
           }
+          menuItems[0] = builder.toString();
         }
         return null;
       }
     });
     if(menuItem == null) {
-      throw new WidgetNotFoundException("Did not find menu: " + menuText);
+      throw new WidgetNotFoundException("Did not find menu: " + menuText + "(" + menuItems[0] + ")");
     }
     return new SWTBotMenu(menuItem);
   }
