@@ -10,25 +10,8 @@
   </parent>
 
   <groupId>org.eclipse.m2e.projects.resourceencoding</groupId>
-  <artifactId>p001</artifactId>
+  <artifactId>p003</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <description>Resources encoding test project</description>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
-
-  <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-resources-plugin</artifactId>
-          <configuration>
-            <encoding>UTF-16</encoding>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-  </build>
 </project>
