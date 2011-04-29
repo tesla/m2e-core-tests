@@ -1050,4 +1050,36 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertEquals(1, a2.size());
     assertTrue(a2.get(0).isResolved());
   }
+
+  public void test022_noChangeReloadWithUnrelatedRemoveProject() throws Exception {
+    IProject[] p = importProjects("resources/t022/", new String[] {"t022-p1/pom.xml", "t022-p2/pom.xml"},
+        new ResolverConfiguration());
+    waitForJobsToComplete();
+
+    boolean origSuspended = Job.getJobManager().isSuspended();
+
+    Job.getJobManager().suspend();
+    try {
+      this.events.clear();
+
+      p[0].close(monitor);
+
+      manager.refresh(new MavenUpdateRequest(p, false, true), monitor);
+
+      assertEquals(2, events.size());
+
+      MavenProjectChangedEvent e0 = events.get(0); // close events always appear before add/change events
+      assertEquals(p[0], e0.getOldMavenProject().getProject());
+      assertNull(e0.getMavenProject());
+
+      MavenProjectChangedEvent e1 = events.get(1);
+      assertEquals(p[1], e1.getMavenProject().getProject());
+      assertEquals(MavenProjectChangedEvent.KIND_CHANGED, e1.getKind());
+      assertEquals(MavenProjectChangedEvent.FLAG_NONE, e1.getFlags());
+    } finally {
+      if(!origSuspended) {
+        Job.getJobManager().resume();
+      }
+    }
+  }
 }
