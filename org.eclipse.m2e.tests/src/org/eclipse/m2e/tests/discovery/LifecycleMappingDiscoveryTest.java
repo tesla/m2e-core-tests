@@ -41,7 +41,6 @@ import org.eclipse.m2e.internal.discovery.MavenDiscoveryService;
 import org.eclipse.m2e.tests.common.AbstractLifecycleMappingTest;
 
 
-@SuppressWarnings("restriction")
 public class LifecycleMappingDiscoveryTest extends AbstractLifecycleMappingTest {
 
   private LifecycleMappingConfiguration loadMappingConfiguration(File pomFile) throws CoreException {

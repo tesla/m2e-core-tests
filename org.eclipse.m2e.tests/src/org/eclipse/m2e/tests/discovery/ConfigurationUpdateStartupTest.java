@@ -25,7 +25,6 @@ import org.eclipse.m2e.internal.discovery.DiscoveryActivator;
 import org.eclipse.m2e.internal.discovery.startup.UpdateConfigurationStartup;
 import org.eclipse.m2e.tests.common.AbstractLifecycleMappingTest;
 
-@SuppressWarnings("restriction")
 public class ConfigurationUpdateStartupTest extends
 		AbstractLifecycleMappingTest {
 	
