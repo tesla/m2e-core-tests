@@ -11,7 +11,7 @@
   
   <properties>
       <!-- References the latest m2eclipse build over https by default -->
-    <m2e-core.url>https://grid.sonatype.org/ci/view/M2E/job/m2eclipse-core-e37-at-eclipse/jdk=java-5x,label=m2e/lastSuccessfulBuild/artifact/org.eclipse.m2e.site/target/site/</m2e-core.url>
+    <m2e-core.url>https://repository.sonatype.org/content/repositories/forge-sites/m2e/0.13.0/N/LATEST/</m2e-core.url>
   </properties>
 
   <repositories>
