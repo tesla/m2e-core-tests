@@ -27,8 +27,8 @@ import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
 public class CompilerSettingsWithEncodingConfiguratorTest extends AbstractMavenProjectTestCase {
 
-  public void testEncodingSet() throws Exception {
-    IProject project = importProject("projects/compilerSettingsWithEncoding/pom.xml");
+  public void test001_shouldSetEncodingForBasicProject() throws Exception {
+    IProject project = importProject("projects/compilerSettingsWithEncoding/p001/pom.xml");
     IJavaProject javaProject = JavaCore.create(project);
     WorkspaceHelpers.assertNoErrors(project);
 
@@ -37,15 +37,39 @@ public class CompilerSettingsWithEncodingConfiguratorTest extends AbstractMavenP
     assertEquals("Encoding should match", "ISO-8859-1", encoding);
     
     
-    copyContent(project, new File("projects/compilerSettingsWithEncoding/pom-UTF-16.xml"), "pom.xml");
+    copyContent(project, new File("projects/compilerSettingsWithEncoding/p001/pom-UTF-16.xml"), "pom.xml");
     
     MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
 
     String encodingChanged = javaProject.getProject().getFolder(new Path("src/main/java")).getDefaultCharset();
     assertEquals("Encoding (changed) should match", "UTF-16", encodingChanged);
-    
-    
   }
+
+  public void test002_shouldResetToContainerDefinedEncoding() throws Exception {
+    IProject project = importProject("projects/compilerSettingsWithEncoding/p002/pom.xml");
+    IJavaProject javaProject = JavaCore.create(project);
+    WorkspaceHelpers.assertNoErrors(project);
+    
+    String containerMainJavaEncoding = javaProject.getProject().getFolder(new Path("src/main/java")).getDefaultCharset();
+    String containerTestJavaEncoding = javaProject.getProject().getFolder(new Path("src/test/java")).getDefaultCharset();
+    
+    copyContent(project, new File("projects/compilerSettingsWithEncoding/p002/pom2.xml"), "pom.xml");    
+    MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
+
+    String mainJavaEncodingChanged = javaProject.getProject().getFolder(new Path("src/main/java")).getDefaultCharset();
+    assertEquals("Encoding configured for plugin not set on folder", "ISO-8859-1", mainJavaEncodingChanged);
+    String testJavaEncodingChanged = javaProject.getProject().getFolder(new Path("src/test/java")).getDefaultCharset();
+    assertEquals("Encoding configured for plugin not set on folder", "UTF-16", testJavaEncodingChanged);
+
+    copyContent(project, new File("projects/compilerSettingsWithEncoding/p002/pom.xml"), "pom.xml");    
+    MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
+
+    String mainJavaEncodingReverted = javaProject.getProject().getFolder(new Path("src/main/java")).getDefaultCharset();
+    assertEquals("Folder encoding not reverted to container defined", containerMainJavaEncoding, mainJavaEncodingReverted);
+    String testJavaEncodingReverted = javaProject.getProject().getFolder(new Path("src/test/java")).getDefaultCharset();
+    assertEquals("Folder encoding not reverted to container defined", containerTestJavaEncoding, testJavaEncodingReverted);
+  }
+
   protected IFolder getFolder(IProject project, String absolutePath) {
     return project.getFolder(getProjectRelativePath(project, absolutePath));
   }
