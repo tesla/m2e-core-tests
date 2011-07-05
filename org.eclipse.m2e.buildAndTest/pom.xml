@@ -11,14 +11,14 @@
 
   <groupId>org.eclipse.m2e</groupId>
   <artifactId>org.eclipse.m2e.buildAndTest</artifactId>
-  <version>1.0.0.20110607-2117</version>
+  <version>1.0.100-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <properties>
     <tycho-version>0.12.0</tycho-version>
 
     <eclipse-repo.url>http://download.eclipse.org/releases/indigo</eclipse-repo.url>
-    <m2e-core.url>http://download.eclipse.org/technology/m2e/releases/1.0/1.0.0.20110607-2117</m2e-core.url>
+    <m2e-core.url>https://repository.sonatype.org/content/repositories/forge-sites/m2e/1.0.100/N/LATEST/</m2e-core.url>
   </properties>
 
   <repositories>

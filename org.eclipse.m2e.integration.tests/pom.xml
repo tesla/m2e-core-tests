@@ -9,7 +9,7 @@
   <parent>
     <groupId>org.eclipse.m2e</groupId>
     <artifactId>org.eclipse.m2e.buildAndTest</artifactId>
-    <version>1.0.0.20110607-2117</version>
+    <version>1.0.100-SNAPSHOT</version>
     <relativePath>../org.eclipse.m2e.buildAndTest</relativePath>
   </parent>
 
