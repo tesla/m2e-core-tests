@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.eclipse.m2e.tests;singleton:=true
-Bundle-Version: 0.13.0.qualifier
+Bundle-Version: 1.0.0.20110607-2117
 Require-Bundle: org.eclipse.core.externaltools,
  org.eclipse.core.runtime,
  org.eclipse.core.resources,

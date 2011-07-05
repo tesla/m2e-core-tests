@@ -6,13 +6,14 @@
   which accompanies this distribution, and is available at
   http://www.eclipse.org/legal/epl-v10.html
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.eclipse.m2e</groupId>
     <artifactId>org.eclipse.m2e.buildAndTest</artifactId>
-    <version>0.13.0-SNAPSHOT</version>
+    <version>1.0.0.20110607-2117</version>
     <relativePath>../org.eclipse.m2e.buildAndTest</relativePath>
   </parent>
 
@@ -20,29 +21,22 @@
   <packaging>eclipse-test-plugin</packaging>
 
   <name>Maven Integration for Eclipse tests</name>
-  
+
   <build>
-    <sourceDirectory>src</sourceDirectory>
-    <resources>
-      <resource>
-        <directory>src</directory>
-        <excludes>
-          <exclude>**/*.java</exclude>
-        </excludes>
-      </resource>
-    </resources>
-    <plugins>
-      <plugin>
-        <groupId>org.eclipse.tycho</groupId>
-        <artifactId>tycho-surefire-plugin</artifactId>
-        <configuration>
-          <forkedProcessTimeoutInSeconds>1800</forkedProcessTimeoutInSeconds>
-          <environmentVariables>
-            <TEMP>${java.io.tmpdir}</TEMP>
-          </environmentVariables>
-        </configuration>
-      </plugin>
-    </plugins>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.eclipse.tycho</groupId>
+          <artifactId>tycho-surefire-plugin</artifactId>
+          <configuration>
+            <appArgLine>-pluginCustomization ${basedir}/plugin_customization.ini</appArgLine>
+            <environmentVariables>
+              <TEMP>${java.io.tmpdir}</TEMP>
+            </environmentVariables>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
 
 </project>

@@ -1,33 +1,80 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <parent>
-    <artifactId>org.eclipse.m2e.parent</artifactId>
-    <groupId>org.eclipse.m2e</groupId>
-    <version>0.13.0-SNAPSHOT</version>
-  </parent>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.sonatype.forge</groupId>
+    <artifactId>forge-parent</artifactId>
+    <version>10</version>
+  </parent>
+
+  <groupId>org.eclipse.m2e</groupId>
   <artifactId>org.eclipse.m2e.buildAndTest</artifactId>
+  <version>1.0.0.20110607-2117</version>
   <packaging>pom</packaging>
-  
+
   <properties>
-      <!-- References the latest m2eclipse build over https by default -->
-    <m2e-core.url>https://repository.sonatype.org/content/repositories/forge-sites/m2e/0.13.0/N/LATEST/</m2e-core.url>
+    <tycho-version>0.12.0</tycho-version>
+
+    <eclipse-repo.url>http://download.eclipse.org/releases/indigo</eclipse-repo.url>
+    <m2e-core.url>http://download.eclipse.org/technology/m2e/releases/1.0/1.0.0.20110607-2117</m2e-core.url>
   </properties>
 
   <repositories>
     <repository>
       <id>snapshots</id>
       <url>https://repository.sonatype.org/content/repositories/snapshots/</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
     </repository>
     <repository>
-      <id>m2e-latest-build</id>
+      <id>eclipse</id>
+      <layout>p2</layout>
+      <url>${eclipse-repo.url}</url>
+    </repository>
+    <repository>
+      <id>m2e-core</id>
       <layout>p2</layout>
       <url>${m2e-core.url}</url>
     </repository>
   </repositories>
 
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>tycho-maven-plugin</artifactId>
+        <version>${tycho-version}</version>
+        <extensions>true</extensions>
+      </plugin>
+    </plugins>
+
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.eclipse.tycho</groupId>
+          <artifactId>tycho-surefire-plugin</artifactId>
+          <version>${tycho-version}</version>
+          <configuration>
+            <useUIHarness>true</useUIHarness>
+            <!-- kill test JVM if tests take more than 10 minutes (600 seconds) to finish -->
+            <forkedProcessTimeoutInSeconds>600</forkedProcessTimeoutInSeconds>
+            <argLine>${tycho.test.jvmArgs}</argLine>
+            <includes>
+              <include>**/*Test.class</include>
+            </includes>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
   <profiles>
-    
     <profile>
       <id>uts</id>
       <modules>
@@ -42,6 +89,52 @@
         <module>../org.eclipse.m2e.editor.tests</module>
         <module>../org.eclipse.m2e.editor.xml.tests</module>
       </modules>
+    </profile>
+
+    <profile>
+      <id>sun-jvm</id>
+      <activation>
+        <property>
+          <name>java.vendor.url</name>
+          <value>http://java.sun.com/</value>
+        </property>
+      </activation>
+      <properties>
+        <tycho.test.jvmArgs>-Xmx800m -XX:MaxPermSize=256m</tycho.test.jvmArgs>
+      </properties>
+    </profile>
+
+    <profile>
+      <id>osx</id>
+      <activation>
+        <property>
+          <name>java.vendor.url</name>
+          <value>http://www.apple.com/</value>
+        </property>
+      </activation>
+      <properties>
+        <tycho.test.jvmArgs>-Xmx800m -XX:MaxPermSize=256m -XstartOnFirstThread</tycho.test.jvmArgs>
+      </properties>
+      <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <groupId>org.eclipse.tycho</groupId>
+              <artifactId>tycho-surefire-plugin</artifactId>
+              <version>${tycho-version}</version>
+              <configuration>
+                <dependencies>
+                  <dependency>
+                    <artifactId>org.eclipse.jdt.launching.macosx</artifactId>
+                    <version>3.2.100</version>
+                    <type>eclipse-plugin</type>
+                  </dependency>
+                </dependencies>
+              </configuration>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+      </build>
     </profile>
   </profiles>
 </project>
