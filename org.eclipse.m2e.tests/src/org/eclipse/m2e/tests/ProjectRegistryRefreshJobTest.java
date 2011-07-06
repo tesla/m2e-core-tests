@@ -13,14 +13,16 @@ package org.eclipse.m2e.tests;
 import java.io.File;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspaceDescription;
 
+import org.eclipse.m2e.core.internal.MavenPluginActivator;
+import org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager;
 import org.eclipse.m2e.core.project.MavenUpdateRequest;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
 
-@SuppressWarnings("restriction")
 public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase {
 
   private static final String SETTINGS_ONE = "settings_updateRepo.xml";
@@ -118,6 +120,26 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
     WorkspaceHelpers.assertNoErrors(projects[1]);
 
     assertEquals(338, LOCAL_ARTIFACT.length());
+  }
+
+  public void testRefreshAfterOpen() throws Exception {
+    IWorkspaceDescription description = workspace.getDescription();
+    description.setAutoBuilding(true);
+    workspace.setDescription(description);
+
+    ProjectRegistryManager manager = MavenPluginActivator.getDefault().getMavenProjectManagerImpl();
+
+    IProject p1 = importProject("projects/updateProject/simple/pom.xml");
+    waitForJobsToComplete();
+    assertNotNull(manager.getProject(p1));
+
+    p1.close(monitor);
+    waitForJobsToComplete();
+    assertNull(manager.getProject(p1));
+
+    p1.open(monitor);
+    waitForJobsToComplete();
+    assertNotNull(manager.getProject(p1));
   }
 
   private static void delete(File file) {
