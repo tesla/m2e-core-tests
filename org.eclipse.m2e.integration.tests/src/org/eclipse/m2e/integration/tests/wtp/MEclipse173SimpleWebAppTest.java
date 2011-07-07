@@ -11,7 +11,8 @@ package org.eclipse.m2e.integration.tests.wtp;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.m2e.core.core.IMavenConstants;
+
+import org.eclipse.m2e.core.internal.IMavenConstants;
 import org.eclipse.m2e.integration.tests.M2EUIIntegrationTestCase;
 import org.eclipse.m2e.integration.tests.common.ContextMenuHelper;
 import org.eclipse.m2e.integration.tests.common.SwtbotUtil;

@@ -40,7 +40,6 @@ import org.eclipse.m2e.internal.discovery.wizards.MavenCatalogConfiguration;
 import org.eclipse.m2e.internal.discovery.wizards.MavenCatalogViewer;
 
 
-@SuppressWarnings("restriction")
 public class MavenDiscoveryTest extends TestCase implements IShellProvider {
   private static final String TYCHO_PACKAGE_TYPE = "eclipse-plugin";
 
@@ -75,10 +74,10 @@ public class MavenDiscoveryTest extends TestCase implements IShellProvider {
     configuration.setShowTagFilter(true);
     configuration.setSelectedTags(Collections.singletonList(MavenDiscovery.APPLICABLE_TAG));
     configuration.setShowInstalledFilter(false);
-    configuration.setSelectedPackagingTypes(Collections.EMPTY_LIST);
-    configuration.setSelectedMojos(Collections.EMPTY_LIST);
-    configuration.setSelectedLifecycleIds(Collections.EMPTY_LIST);
-    configuration.setSelectedConfigurators(Collections.EMPTY_LIST);
+    configuration.setSelectedPackagingTypes(Collections.<String>emptyList());
+    configuration.setSelectedMojos(Collections.<MojoExecutionKey>emptyList());
+    configuration.setSelectedLifecycleIds(Collections.<String>emptyList());
+    configuration.setSelectedConfigurators(Collections.<String>emptyList());
 
     shell = new Shell(Workbench.getInstance().getDisplay());
   }

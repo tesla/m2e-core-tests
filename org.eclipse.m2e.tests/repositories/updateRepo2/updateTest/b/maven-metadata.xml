@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata modelVersion="1.1.0">
+
+	<groupId>updateTest</groupId>
+	<artifactId>b</artifactId>
+
+  <versioning>
+    <latest>1.0-SNAPSHOT</latest>
+    <release></release>
+    <versions>
+      <version>1.0-SNAPSHOT</version>
+    </versions>
+    <lastUpdated>20110411112327</lastUpdated>
+  </versioning>
+</metadata>

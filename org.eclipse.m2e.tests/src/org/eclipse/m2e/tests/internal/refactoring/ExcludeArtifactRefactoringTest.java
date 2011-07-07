@@ -49,7 +49,7 @@ import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits.Operation;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits.OperationTuple;
-import org.eclipse.m2e.editor.composites.ParentGatherer;
+import org.eclipse.m2e.core.ui.internal.util.ParentGatherer;
 import org.eclipse.m2e.editor.pom.MavenPomEditor;
 import org.eclipse.m2e.model.edit.pom.Dependency;
 import org.eclipse.m2e.model.edit.pom.Exclusion;
@@ -374,11 +374,11 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 
 	private static ExcludeArtifactRefactoring createRefactoring(IFile pomFile, ArtifactKey[] keys, IFile exclusionPoint) throws CoreException {
 		ExcludeArtifactRefactoring refactoring = new ExcludeArtifactRefactoring(pomFile, keys);
-		IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectRegistry().create(pomFile, true, monitor);
+		IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().create(pomFile, true, monitor);
 		ParentGatherer g = new ParentGatherer(facade.getMavenProject(monitor), facade);
 		refactoring.setHierarchy(g.getParentHierarchy(monitor));
 
-		IMavenProjectFacade excFacade = MavenPlugin.getDefault().getMavenProjectRegistry().create(exclusionPoint, true, monitor);
+		IMavenProjectFacade excFacade = MavenPlugin.getMavenProjectRegistry().create(exclusionPoint, true, monitor);
 		refactoring.setExclusionPoint(excFacade.getMavenProject(monitor));
 		return refactoring;
 	}

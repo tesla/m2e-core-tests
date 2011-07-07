@@ -13,7 +13,7 @@ package org.eclipse.m2e.tests.internal.index;
 
 import junit.framework.TestCase;
 
-import org.eclipse.m2e.core.index.IndexedArtifact;
+import org.eclipse.m2e.core.internal.index.IndexedArtifact;
 
 public class IndexedArtifactTest extends TestCase {
 

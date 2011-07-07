@@ -23,7 +23,7 @@ import org.eclipse.ui.IMarkerResolution;
 import org.eclipse.ui.ide.IDE;
 
 import org.eclipse.m2e.core.MavenPlugin;
-import org.eclipse.m2e.core.core.IMavenConstants;
+import org.eclipse.m2e.core.internal.IMavenConstants;
 import org.eclipse.m2e.core.internal.MavenPluginActivator;
 import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.internal.markers.MavenMarkerManager;
@@ -66,7 +66,7 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
 
     // Fix the current configuration problem, introduce a new one
     copyContent(project, "pom_badConfiguration1.xml", "pom.xml");
-    plugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
+    MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
     waitForJobsToComplete();
     expectedErrorMessage = "Plugin execution not covered by lifecycle configuration: org.codehaus.modello:modello-maven-plugin:1.1:java (execution: standard, phase: generate-sources)";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
@@ -75,7 +75,7 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     // Fix the current configuration problem, introduce a dependency problem
     copyContent(project, "pom_badDependency.xml", "pom.xml");
     waitForJobsToComplete();
-    MavenPlugin.getDefault().getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
+    MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
     expectedErrorMessage = "Missing artifact missing:missing:jar:0.0.0";
     List<IMarker> markers = WorkspaceHelpers.findErrorMarkers(project);
     // (jdt) The container 'Maven Dependencies' references non existing library ...missing/missing/0.0.0/missing-0.0.0.jar'
@@ -117,10 +117,10 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
 
     // Add a maven build marker based on build participant exception
     copyContent(project, "pom_buildException.xml", "pom.xml");
-    MavenPlugin.getDefault().getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
+    MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
     waitForJobsToComplete();
     WorkspaceHelpers.assertNoErrors(project);
-    MavenPlugin.getDefault().getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
+    MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
     project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
     waitForJobsToComplete();
     expectedErrorMessage = ThrowBuildExceptionProjectConfigurator.ERROR_MESSAGE;
@@ -405,7 +405,7 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
 //    IProject[] project = importProjects(basedir, new String[] {pomName}, configuration);
 //    waitForJobsToComplete();
 //
-//    MavenProjectManager mavenProjectManager = MavenPlugin.getDefault().getMavenProjectManager();
+//    MavenProjectManager mavenProjectManager = MavenPlugin.getMavenProjectManager();
 //    return mavenProjectManager.create(project[0], monitor);
 //  }
 

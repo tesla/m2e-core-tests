@@ -20,14 +20,14 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.IMavenConfiguration;
-import org.eclipse.m2e.core.index.IIndex;
-import org.eclipse.m2e.core.index.IndexedArtifact;
-import org.eclipse.m2e.core.index.IndexedArtifactFile;
-import org.eclipse.m2e.core.index.SearchExpression;
-import org.eclipse.m2e.core.index.SourcedSearchExpression;
-import org.eclipse.m2e.core.index.UserInputSearchExpression;
-import org.eclipse.m2e.core.internal.index.NexusIndex;
-import org.eclipse.m2e.core.internal.index.NexusIndexManager;
+import org.eclipse.m2e.core.internal.index.IIndex;
+import org.eclipse.m2e.core.internal.index.IndexedArtifact;
+import org.eclipse.m2e.core.internal.index.IndexedArtifactFile;
+import org.eclipse.m2e.core.internal.index.SearchExpression;
+import org.eclipse.m2e.core.internal.index.SourcedSearchExpression;
+import org.eclipse.m2e.core.internal.index.UserInputSearchExpression;
+import org.eclipse.m2e.core.internal.index.nexus.NexusIndex;
+import org.eclipse.m2e.core.internal.index.nexus.NexusIndexManager;
 import org.eclipse.m2e.core.internal.repository.RepositoryRegistry;
 import org.eclipse.m2e.core.repository.IRepository;
 import org.eclipse.m2e.core.repository.IRepositoryRegistry;
@@ -44,11 +44,11 @@ public class NexusIndexManagerSearchTest extends AbstractNexusIndexManagerTest {
 
   private static final String REPO_URL_ECLIPSE = "http://repository.sonatype.org/content/repositories/eclipse";
 
-  private IMavenConfiguration mavenConfiguration = MavenPlugin.getDefault().getMavenConfiguration();
+  private IMavenConfiguration mavenConfiguration = MavenPlugin.getMavenConfiguration();
 
-  private NexusIndexManager indexManager = (NexusIndexManager) MavenPlugin.getDefault().getIndexManager();
+  private NexusIndexManager indexManager = (NexusIndexManager) MavenPlugin.getIndexManager();
 
-  private RepositoryRegistry repositoryRegistry = (RepositoryRegistry) MavenPlugin.getDefault().getRepositoryRegistry();
+  private RepositoryRegistry repositoryRegistry = (RepositoryRegistry) MavenPlugin.getRepositoryRegistry();
 
   protected void setUp() throws Exception {
     super.setUp();

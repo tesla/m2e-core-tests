@@ -37,10 +37,13 @@ import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.project.MavenProject;
 
+import org.sonatype.aether.repository.RepositoryPolicy;
+
 import org.eclipse.m2e.core.MavenPlugin;
-import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.embedder.ArtifactRef;
+import org.eclipse.m2e.core.internal.IMavenConstants;
 import org.eclipse.m2e.core.internal.MavenPluginActivator;
+import org.eclipse.m2e.core.internal.preferences.MavenConfigurationImpl;
 import org.eclipse.m2e.core.internal.project.registry.MavenProjectFacade;
 import org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager;
 import org.eclipse.m2e.core.internal.project.registry.ProjectRegistryRefreshJob;
@@ -54,10 +57,7 @@ import org.eclipse.m2e.tests.common.FilexWagon;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
 
-@SuppressWarnings("restriction")
 public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
-
-  MavenPlugin plugin = MavenPlugin.getDefault();
 
   ProjectRegistryManager manager;
 
@@ -343,6 +343,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     getParentProject(f1);
     assertEquals(p2.getFile(IMavenConstants.POM_FILE_NAME).getLocation().toFile(), f1.getMavenProject(monitor)
         .getParentArtifact().getFile());
+    assertEquals("workspace", f1.getMavenProject(monitor).getProperties().get("property"));
 
     deleteProject(p2);
     waitForJobsToComplete();
@@ -351,11 +352,43 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     getParentProject(f1);
     // assertTrue(f1.getMavenProject().getParent().getFile().getAbsolutePath().startsWith(repo.getAbsolutePath()));
     assertStartWith(repo.getAbsolutePath(), f1.getMavenProject(monitor).getParentArtifact().getFile().getAbsolutePath());
+    assertEquals("repository", f1.getMavenProject(monitor).getProperties().get("property"));
+  }
+
+  
+  public void test006_parentAvailableFromLocalRepoAndWorkspace01() throws Exception {
+    boolean oldSuspended = Job.getJobManager().isSuspended();
+
+    Job.getJobManager().suspend();
+    try {
+      IProject p1 = createExisting("t006-p1");
+      IProject p2 = createExisting("t006-p2");
+
+      // sanity check
+      assertNull(manager.getProject(p1));
+      assertNull(manager.getProject(p2));
+
+      MavenUpdateRequest request = new MavenUpdateRequest(new IProject[] {p1, p2}, false, true);
+      manager.refresh(request, monitor);
+
+      IMavenProjectFacade f1 = manager.create(p1, monitor);
+      assertEquals("workspace", f1.getMavenProject(monitor).getProperties().get("property"));
+
+      p2.delete(true, monitor);
+      manager.refresh(request, monitor);
+
+      f1 = manager.create(p1, monitor);
+      assertEquals("repository", f1.getMavenProject(monitor).getProperties().get("property"));
+    } finally {
+      if(!oldSuspended) {
+        Job.getJobManager().resume();
+      }
+    }
   }
 
   protected MavenProject getParentProject(IMavenProjectFacade f) throws CoreException {
     MavenExecutionRequest r = manager.createExecutionRequest(f.getPom(), f.getResolverConfiguration(), monitor);
-    return plugin.getMaven().resolveParentProject(r, f.getMavenProject(monitor), monitor);
+    return MavenPlugin.getMaven().resolveParentProject(r, f.getMavenProject(monitor), monitor);
   }
 
   public void test007_staleDependencies() throws Exception {
@@ -406,6 +439,8 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertEquals("junit", a1.get(1).getArtifactId());
 
     assertEquals(2, events.size());
+    assertEquals(p1.getFile(IMavenConstants.POM_FILE_NAME), events.get(0).getSource());
+    assertEquals(p2.getFile(IMavenConstants.POM_FILE_NAME), events.get(1).getSource());
   }
 
   public void test007_changedVersion() throws Exception {
@@ -432,6 +467,43 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     a1 = new ArrayList<Artifact>(f1.getMavenProject(monitor).getArtifacts());
     assertEquals(1, f1.getMavenProject(monitor).getArtifacts().size());
     assertEquals(p2.getFile(IMavenConstants.POM_FILE_NAME).getLocation().toFile(), a1.get(0).getFile());
+  }
+
+  public void test007_dependentRefreshAfterWorkspaceRestart() throws Exception {
+    // p1 depends on p2
+    IProject p1 = createExisting("t007-p1");
+    IProject p2 = createExisting("t007-p2");
+    waitForJobsToComplete();
+
+    boolean origSuspended = Job.getJobManager().isSuspended();
+    
+    Job.getJobManager().suspend();
+    try {
+      // sanity check
+      MavenProjectFacade f1 = manager.create(p1, monitor);
+      List<Artifact> a1 = new ArrayList<Artifact>(f1.getMavenProject(monitor).getArtifacts());
+      assertEquals(1, a1.size());
+      assertEquals("t007-p2", a1.get(0).getArtifactId());
+
+      // simulate workspace restart
+      deserializeFromWorkspaceState(manager.create(p1, monitor));
+      deserializeFromWorkspaceState(manager.create(p2, monitor));
+
+      // add new dependency to p2, which should trigger update of p1
+      copyContent(p2, "pom_newDependency.xml", "pom.xml", false /*don't wait for jobs to complete*/);
+      manager.refresh(new MavenUpdateRequest(p2, false, false), monitor);
+
+      // assert p1 got refreshed
+      f1 = manager.create(p1, monitor);
+      a1 = new ArrayList<Artifact>(f1.getMavenProject(monitor).getArtifacts());
+      assertEquals(2, a1.size());
+      assertEquals("t007-p2", a1.get(0).getArtifactId());
+      assertEquals("junit", a1.get(1).getArtifactId());
+    } finally {
+      if(!origSuspended) {
+        Job.getJobManager().resume();
+      }
+    }
   }
 
   public void test008_staleMissingParent() throws Exception {
@@ -565,7 +637,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     jar.delete();
 
     MavenUpdateRequest request = new MavenUpdateRequest(p1, false /*offline*/, false /*updateSnapshots*/);
-    plugin.getMavenProjectRegistry().refresh(request);
+    MavenPlugin.getMavenProjectRegistry().refresh(request);
     waitForJobsToComplete();
 
     IMavenProjectFacade f1 = manager.create(p1, monitor);
@@ -585,7 +657,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
         1 /*lineNumber*/, project);
 
     copyContent(project, "pom_good.xml", "pom.xml");
-    plugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
+    MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
     WorkspaceHelpers.assertNoErrors(project);
     assertNotNull(manager.create(project, monitor));
   }
@@ -800,6 +872,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
   }
 
   public void testRepositoryMetadataCacheUsed() throws Exception {
+    FileUtils.deleteDirectory(new File(repo, "mngeclipse1996"));
     String oldSettings = mavenConfiguration.getUserSettingsFile();
     try {
       injectFilexWagon();
@@ -890,5 +963,123 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     a1 = new ArrayList<Artifact>(f1.getMavenProject(monitor).getArtifacts());
     assertEquals(1, a1.size());
     assertEquals(p2.getFile(IMavenConstants.POM_FILE_NAME).getLocation().toFile(), a1.get(0).getFile());
+  }
+
+  public void testGlobalUpdatePolicyNever() throws Exception {
+    // clean local repo
+    FileUtils.deleteDirectory(new File(repo, "updateTest/b"));
+
+    // reset/setup "remote" repo
+    File updatepolicyrepoDir = new File("target/updatepolicynever-repo");
+    FileUtils.deleteDirectory(updatepolicyrepoDir);
+    FileUtils.copyDirectoryStructure(new File("repositories/updateRepo1"), updatepolicyrepoDir);
+
+    String origPolicy = mavenConfiguration.getGlobalUpdatePolicy();
+
+    ((MavenConfigurationImpl) mavenConfiguration).setGlobalUpdatePolicy(RepositoryPolicy.UPDATE_POLICY_NEVER);
+    try {
+      IProject p1 = importProject("projects/updatepolicynever/pom.xml");
+      waitForJobsToComplete();
+
+      MavenProjectFacade f1 = manager.create(p1, monitor);
+      List<Artifact> a1 = new ArrayList<Artifact>(f1.getMavenProject(monitor).getArtifacts());
+      assertEquals(1, a1.size());
+      assertEquals("1.0-20110411.112213-72", a1.get(0).getVersion());
+
+      FileUtils.copyDirectoryStructure(new File("repositories/updateRepo2"), updatepolicyrepoDir);
+
+      manager.refresh(new MavenUpdateRequest(p1, false, false), monitor);
+
+      // assert dependency version did not change
+      f1 = manager.create(p1, monitor);
+      a1 = new ArrayList<Artifact>(f1.getMavenProject(monitor).getArtifacts());
+      assertEquals(1, a1.size());
+      assertEquals("1.0-20110411.112213-72", a1.get(0).getVersion());
+
+      ((MavenConfigurationImpl) mavenConfiguration).setGlobalUpdatePolicy(null);
+
+      manager.refresh(new MavenUpdateRequest(p1, false, false), monitor);
+      f1 = manager.create(p1, monitor);
+      a1 = new ArrayList<Artifact>(f1.getMavenProject(monitor).getArtifacts());
+      assertEquals(1, a1.size());
+      assertEquals("1.0-20110411.112327-73", a1.get(0).getVersion());
+    } finally {
+      ((MavenConfigurationImpl) mavenConfiguration).setGlobalUpdatePolicy(origPolicy);
+    }
+  }
+
+  public void testCorrelatedMissingDependency() throws Exception {
+    // clean local repo
+    FileUtils.deleteDirectory(new File(repo, "updateTest/b"));
+
+    // reset/setup "remote" repo
+    File updatepolicyrepoDir = new File("target/correlatedMissingDependency-repo");
+    FileUtils.deleteDirectory(updatepolicyrepoDir);
+
+    // import two projects with the same missing dependency
+
+    IProject[] projects = importProjects("projects/correlatedMissingDependency", new String[] {"p01/pom.xml",
+        "p02/pom.xml"}, new ResolverConfiguration());
+
+    MavenProjectFacade f1 = manager.create(projects[0], monitor);
+    List<Artifact> a1 = new ArrayList<Artifact>(f1.getMavenProject(monitor).getArtifacts());
+    assertEquals(1, a1.size());
+    assertFalse(a1.get(0).isResolved());
+
+    MavenProjectFacade f2 = manager.create(projects[1], monitor);
+    List<Artifact> a2 = new ArrayList<Artifact>(f2.getMavenProject(monitor).getArtifacts());
+    assertEquals(1, a2.size());
+    assertFalse(a2.get(0).isResolved());
+
+    // make the missing dependency available
+
+    FileUtils.copyDirectoryStructure(new File("repositories/updateRepo1"), updatepolicyrepoDir);
+
+    // refresh one of the two projects
+    manager.refresh(new MavenUpdateRequest(projects[0], false, true), monitor);
+
+    // both projects should now have resolved the missing dependency
+
+    f1 = manager.create(projects[0], monitor);
+    a1 = new ArrayList<Artifact>(f1.getMavenProject(monitor).getArtifacts());
+    assertEquals(1, a1.size());
+    assertTrue(a1.get(0).isResolved());
+    
+    f2 = manager.create(projects[1], monitor);
+    a2 = new ArrayList<Artifact>(f2.getMavenProject(monitor).getArtifacts());
+    assertEquals(1, a2.size());
+    assertTrue(a2.get(0).isResolved());
+  }
+
+  public void test022_noChangeReloadWithUnrelatedRemoveProject() throws Exception {
+    IProject[] p = importProjects("resources/t022/", new String[] {"t022-p1/pom.xml", "t022-p2/pom.xml"},
+        new ResolverConfiguration());
+    waitForJobsToComplete();
+
+    boolean origSuspended = Job.getJobManager().isSuspended();
+
+    Job.getJobManager().suspend();
+    try {
+      this.events.clear();
+
+      p[0].close(monitor);
+
+      manager.refresh(new MavenUpdateRequest(p, false, true), monitor);
+
+      assertEquals(2, events.size());
+
+      MavenProjectChangedEvent e0 = events.get(0); // close events always appear before add/change events
+      assertEquals(p[0], e0.getOldMavenProject().getProject());
+      assertNull(e0.getMavenProject());
+
+      MavenProjectChangedEvent e1 = events.get(1);
+      assertEquals(p[1], e1.getMavenProject().getProject());
+      assertEquals(MavenProjectChangedEvent.KIND_CHANGED, e1.getKind());
+      assertEquals(MavenProjectChangedEvent.FLAG_NONE, e1.getFlags());
+    } finally {
+      if(!origSuspended) {
+        Job.getJobManager().resume();
+      }
+    }
   }
 }

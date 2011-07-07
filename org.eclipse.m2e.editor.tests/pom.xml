@@ -12,7 +12,7 @@
   <parent>
     <groupId>org.eclipse.m2e</groupId>
     <artifactId>org.eclipse.m2e.buildAndTest</artifactId>
-    <version>0.13.0-SNAPSHOT</version>
+    <version>1.0.100-SNAPSHOT</version>
     <relativePath>../org.eclipse.m2e.buildAndTest</relativePath>
   </parent>
 
@@ -26,8 +26,8 @@
     
     <plugins>
       <plugin>
-        <groupId>org.sonatype.tycho</groupId>
-        <artifactId>maven-osgi-test-plugin</artifactId>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>tycho-surefire-plugin</artifactId>
         <configuration>
           <useUIThread>false</useUIThread>
           <forkedProcessTimeoutInSeconds>360</forkedProcessTimeoutInSeconds>

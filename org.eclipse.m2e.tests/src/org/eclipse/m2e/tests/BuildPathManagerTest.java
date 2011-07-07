@@ -48,11 +48,11 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
 
 import org.eclipse.m2e.core.MavenPlugin;
-import org.eclipse.m2e.core.core.IMavenConstants;
-import org.eclipse.m2e.core.index.IMutableIndex;
+import org.eclipse.m2e.core.internal.IMavenConstants;
 import org.eclipse.m2e.core.internal.MavenPluginActivator;
-import org.eclipse.m2e.core.internal.index.NexusIndex;
-import org.eclipse.m2e.core.internal.index.NexusIndexManager;
+import org.eclipse.m2e.core.internal.index.IMutableIndex;
+import org.eclipse.m2e.core.internal.index.nexus.NexusIndex;
+import org.eclipse.m2e.core.internal.index.nexus.NexusIndexManager;
 import org.eclipse.m2e.core.internal.preferences.MavenConfigurationImpl;
 import org.eclipse.m2e.core.internal.repository.RepositoryRegistry;
 import org.eclipse.m2e.core.project.IProjectConfigurationManager;
@@ -81,7 +81,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     final IProject project2 = createProject("MNGECLIPSE-248child", "projects/MNGECLIPSE-248child/pom.xml");
 
     NullProgressMonitor monitor = new NullProgressMonitor();
-    IProjectConfigurationManager configurationManager = MavenPlugin.getDefault().getProjectConfigurationManager();
+    IProjectConfigurationManager configurationManager = MavenPlugin.getProjectConfigurationManager();
 
     ResolverConfiguration configuration = new ResolverConfiguration();
     configurationManager.enableMavenNature(project1, configuration, monitor);
@@ -130,7 +130,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertTrue(p.hasNature(JavaCore.NATURE_ID));
     assertNotNull(BuildPathManager.getMaven2ClasspathContainer(JavaCore.create(p)));
 
-    IProjectConfigurationManager configurationManager = MavenPlugin.getDefault().getProjectConfigurationManager();
+    IProjectConfigurationManager configurationManager = MavenPlugin.getProjectConfigurationManager();
     configurationManager.disableMavenNature(p, monitor);
     waitForJobsToComplete();
 
@@ -156,7 +156,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     final IProject project1 = createProject("MNGECLIPSE-248parent", "projects/MNGECLIPSE-248parent/pom.xml");
     final IProject project2 = createProject("MNGECLIPSE-248child", "projects/MNGECLIPSE-248child/pom.xml");
 
-    IProjectConfigurationManager importManager = MavenPlugin.getDefault().getProjectConfigurationManager();
+    IProjectConfigurationManager importManager = MavenPlugin.getProjectConfigurationManager();
 
     ResolverConfiguration configuration = new ResolverConfiguration();
     configuration.setResolveWorkspaceProjects(false);
@@ -269,7 +269,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     project2.build(IncrementalProjectBuilder.FULL_BUILD, null);
     waitForJobsToComplete();
 
-//    MavenPlugin.getDefault().getBuildpathManager().updateClasspathContainer(p1, new NullProgressMonitor());
+//    MavenPlugin.getBuildpathManager().updateClasspathContainer(p1, new NullProgressMonitor());
 
     IJavaProject javaProject = JavaCore.create(project1);
     IClasspathContainer maven2ClasspathContainer = BuildPathManager.getMaven2ClasspathContainer(javaProject);
@@ -336,7 +336,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
       // cleanup
       deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t001/0.0.1/"));
       deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t002/0.0.1/"));
-      MavenPlugin.getDefault().getMavenProjectRegistry()
+      MavenPlugin.getMavenProjectRegistry()
           .refresh(new MavenUpdateRequest(project, false /*offline*/, false));
       waitForJobsToComplete();
     }
@@ -354,7 +354,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
       // cleanup
       deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t001/0.0.1/"));
       deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t002/0.0.1/"));
-      MavenPlugin.getDefault().getMavenProjectRegistry().refresh(
+      MavenPlugin.getMavenProjectRegistry().refresh(
           new MavenUpdateRequest(new IProject[] {project}, false /*offline*/, false));
       waitForJobsToComplete();
     }
@@ -556,10 +556,10 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
   }
 
   public void testDownloadSources_006_nonMavenProject() throws Exception {
-    RepositoryRegistry repositoryRegistry = (RepositoryRegistry) MavenPlugin.getDefault().getRepositoryRegistry();
+    RepositoryRegistry repositoryRegistry = (RepositoryRegistry) MavenPlugin.getRepositoryRegistry();
     repositoryRegistry.updateRegistry(monitor);
 
-    NexusIndexManager indexManager = (NexusIndexManager) MavenPlugin.getDefault().getIndexManager();
+    NexusIndexManager indexManager = (NexusIndexManager) MavenPlugin.getIndexManager();
     indexManager.getIndexUpdateJob().join();
     IMutableIndex localIndex = indexManager.getLocalIndex();
     localIndex.updateIndex(true, monitor);
@@ -626,7 +626,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     try {
       ((MavenConfigurationImpl) mavenConfiguration).setDownloadSources(true);
       MavenUpdateRequest request = new MavenUpdateRequest(project, false/*offline*/, false/*updateSnapshots*/);
-      plugin.getMavenProjectRegistry().refresh(request );
+      MavenPlugin.getMavenProjectRegistry().refresh(request);
       waitForJobsToComplete();
       container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
       cp = container.getClasspathEntries();
@@ -666,8 +666,6 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
   }
 
   public void testCreateSimpleProject() throws CoreException {
-    final MavenPlugin plugin = MavenPlugin.getDefault();
-
     IProject project = createSimpleProject("simple-project", null);
 
     IJavaProject javaProject = JavaCore.create(project);
@@ -804,7 +802,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
 
     ResolverConfiguration configuration = new ResolverConfiguration();
 
-    IProjectConfigurationManager configurationManager = plugin.getProjectConfigurationManager();
+    IProjectConfigurationManager configurationManager = MavenPlugin.getProjectConfigurationManager();
 
     configurationManager.updateProjectConfiguration(project, monitor);
     verifyNaturesAndBuilders(project);
@@ -840,7 +838,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     final IProject project2 = createProject("MNGECLIPSE-1133child", "projects/MNGECLIPSE-1133/child/pom.xml");
 
     NullProgressMonitor monitor = new NullProgressMonitor();
-    IProjectConfigurationManager configurationManager = MavenPlugin.getDefault().getProjectConfigurationManager();
+    IProjectConfigurationManager configurationManager = MavenPlugin.getProjectConfigurationManager();
 
     ResolverConfiguration configuration = new ResolverConfiguration();
     configurationManager.enableMavenNature(project1, configuration, monitor);
@@ -914,17 +912,15 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
 
         ProjectImportConfiguration config = new ProjectImportConfiguration();
 
-        plugin.getProjectConfigurationManager().createSimpleProject(project, location, model, directories, config,
+        MavenPlugin.getProjectConfigurationManager().createSimpleProject(project, location, model, directories, config,
             monitor);
       }
-    }, plugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
+    }, MavenPlugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
 
     return project;
   }
 
   public void testSimpleProjectInExternalLocation() throws CoreException, IOException {
-    final MavenPlugin plugin = MavenPlugin.getDefault();
-
     File tmp = File.createTempFile("m2eclipse", "test");
     tmp.delete(); //deleting a tmp file so we can use the name for a folder
 
@@ -956,7 +952,6 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
   }
 
   public void testArchetypeProjectInExternalLocation() throws CoreException, IOException {
-    final MavenPlugin plugin = MavenPlugin.getDefault();
     Archetype quickStart = findQuickStartArchetype();
 
     File tmp = File.createTempFile("m2eclipse", "test");
@@ -1007,10 +1002,10 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
         ResolverConfiguration resolverConfiguration = new ResolverConfiguration();
         ProjectImportConfiguration pic = new ProjectImportConfiguration(resolverConfiguration);
 
-        plugin.getProjectConfigurationManager().createArchetypeProject(project, location, archetype, //
+        MavenPlugin.getProjectConfigurationManager().createArchetypeProject(project, location, archetype, //
             projectName, projectName, "0.0.1-SNAPSHOT", "jar", new Properties(), pic, monitor);
       }
-    }, plugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
+    }, MavenPlugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
 
     return project;
   }

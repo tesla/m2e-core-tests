@@ -16,7 +16,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.IMavenConfiguration;
-import org.eclipse.m2e.core.index.IndexManager;
+import org.eclipse.m2e.core.internal.index.IndexManager;
 import org.eclipse.m2e.integration.tests.common.ContextMenuHelper;
 import org.eclipse.m2e.integration.tests.common.matchers.ContainsMnemonic;
 import org.eclipse.m2e.jdt.internal.BuildPathManager;
@@ -46,11 +46,11 @@ public class MEclipse193IndexerTest extends M2EUIIntegrationTestCase {
 
 //    File settingsXML = new File(projectDir.getAbsolutePath() + "/m2/settings.xml");
 //    System.out.println("path to settings.xml: " + settingsXML.getAbsolutePath());
-    IMavenConfiguration mavenConfiguration = MavenPlugin.getDefault().getMavenConfiguration();
+    IMavenConfiguration mavenConfiguration = MavenPlugin.getMavenConfiguration();
     originalUserSettingsFile = mavenConfiguration.getUserSettingsFile();
 //    mavenConfiguration.setUserSettingsFile(settingsXML.getAbsolutePath());
     mavenConfiguration.setUserSettingsFile(new File( "resources/settings_mirror.xml" ).getAbsolutePath());
-    IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
+    IndexManager indexManager = MavenPlugin.getIndexManager();
     indexManager.getWorkspaceIndex().updateIndex(true, new NullProgressMonitor());
     waitForAllBuildsToComplete();
   }
@@ -59,7 +59,7 @@ public class MEclipse193IndexerTest extends M2EUIIntegrationTestCase {
     public static void restoreUserSettings()
         throws CoreException
     {
-    IMavenConfiguration mavenConfiguration = MavenPlugin.getDefault().getMavenConfiguration();
+    IMavenConfiguration mavenConfiguration = MavenPlugin.getMavenConfiguration();
     mavenConfiguration.setUserSettingsFile(originalUserSettingsFile);
   }
 

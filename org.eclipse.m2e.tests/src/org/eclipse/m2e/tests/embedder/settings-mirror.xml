@@ -19,6 +19,12 @@
             <snapshots><enabled>true</enabled></snapshots>
             <releases><enabled>true</enabled></releases>
           </repository>
+          <repository>
+            <id>testrepo</id>
+            <url>file:repositories/testrepo</url>
+            <snapshots><enabled>true</enabled></snapshots>
+            <releases><enabled>true</enabled></releases>
+          </repository>
         </repositories>
         <pluginRepositories>
           <pluginRepository>

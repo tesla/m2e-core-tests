@@ -18,14 +18,14 @@ import junit.framework.TestCase;
 
 import org.apache.maven.archetype.catalog.ArchetypeCatalog;
 
-import org.eclipse.m2e.core.archetype.ArchetypeCatalogFactory;
-import org.eclipse.m2e.core.archetype.ArchetypeCatalogFactory.DefaultLocalCatalogFactory;
-import org.eclipse.m2e.core.archetype.ArchetypeCatalogFactory.InternalCatalogFactory;
-import org.eclipse.m2e.core.archetype.ArchetypeCatalogFactory.LocalCatalogFactory;
-import org.eclipse.m2e.core.archetype.ArchetypeCatalogFactory.NexusIndexerCatalogFactory;
-import org.eclipse.m2e.core.archetype.ArchetypeCatalogFactory.RemoteCatalogFactory;
-import org.eclipse.m2e.core.archetype.ArchetypeManager;
 import org.eclipse.m2e.core.internal.MavenPluginActivator;
+import org.eclipse.m2e.core.internal.archetype.ArchetypeCatalogFactory;
+import org.eclipse.m2e.core.internal.archetype.ArchetypeManager;
+import org.eclipse.m2e.core.internal.archetype.ArchetypeCatalogFactory.DefaultLocalCatalogFactory;
+import org.eclipse.m2e.core.internal.archetype.ArchetypeCatalogFactory.InternalCatalogFactory;
+import org.eclipse.m2e.core.internal.archetype.ArchetypeCatalogFactory.LocalCatalogFactory;
+import org.eclipse.m2e.core.internal.archetype.ArchetypeCatalogFactory.NexusIndexerCatalogFactory;
+import org.eclipse.m2e.core.internal.archetype.ArchetypeCatalogFactory.RemoteCatalogFactory;
 import org.eclipse.m2e.tests.common.HttpServer;
 
 

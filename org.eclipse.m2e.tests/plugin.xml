@@ -258,4 +258,10 @@
          </overview>
       </connectorDescriptor>
    </extension>
+   <extension
+         point="org.eclipse.m2e.core.artifactFilters">
+      <artifactFilter
+            class="org.eclipse.m2e.tests.internal.index.filter.IndexFilterTest$TestIndexFilter">
+      </artifactFilter>
+   </extension>
 </plugin>

@@ -18,21 +18,29 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.maven.index.ArtifactInfo;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.index.ArtifactInfo;
+import org.apache.maven.settings.Settings;
+import org.apache.maven.wagon.authentication.AuthenticationInfo;
+
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.ArtifactKey;
+import org.eclipse.m2e.core.embedder.IMaven;
 import org.eclipse.m2e.core.embedder.IMavenConfiguration;
-import org.eclipse.m2e.core.index.IIndex;
-import org.eclipse.m2e.core.index.IndexedArtifact;
-import org.eclipse.m2e.core.index.IndexedArtifactFile;
-import org.eclipse.m2e.core.index.SourcedSearchExpression;
-import org.eclipse.m2e.core.index.UserInputSearchExpression;
-import org.eclipse.m2e.core.internal.index.IndexedArtifactGroup;
-import org.eclipse.m2e.core.internal.index.NexusIndex;
-import org.eclipse.m2e.core.internal.index.NexusIndexManager;
+import org.eclipse.m2e.core.internal.index.IIndex;
+import org.eclipse.m2e.core.internal.index.IndexedArtifact;
+import org.eclipse.m2e.core.internal.index.IndexedArtifactFile;
+import org.eclipse.m2e.core.internal.index.SourcedSearchExpression;
+import org.eclipse.m2e.core.internal.index.UserInputSearchExpression;
+import org.eclipse.m2e.core.internal.index.nexus.IndexedArtifactGroup;
+import org.eclipse.m2e.core.internal.index.nexus.NexusIndex;
+import org.eclipse.m2e.core.internal.index.nexus.NexusIndexManager;
 import org.eclipse.m2e.core.internal.project.registry.MavenProjectFacade;
+import org.eclipse.m2e.core.internal.repository.RepositoryInfo;
 import org.eclipse.m2e.core.internal.repository.RepositoryRegistry;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.MavenProjectChangedEvent;
@@ -59,11 +67,11 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
 
   private static final String REPO_URL_PUBLIC = "http://repository.sonatype.org/content/groups/public/";
 
-  private IMavenConfiguration mavenConfiguration = MavenPlugin.getDefault().getMavenConfiguration();
+  private IMavenConfiguration mavenConfiguration = MavenPlugin.getMavenConfiguration();
 
-  private NexusIndexManager indexManager = (NexusIndexManager) MavenPlugin.getDefault().getIndexManager();
+  private NexusIndexManager indexManager = (NexusIndexManager) MavenPlugin.getIndexManager();
 
-  private RepositoryRegistry repositoryRegistry = (RepositoryRegistry) MavenPlugin.getDefault().getRepositoryRegistry();
+  private RepositoryRegistry repositoryRegistry = (RepositoryRegistry) MavenPlugin.getRepositoryRegistry();
 
   protected void setUp() throws Exception {
     super.setUp();
@@ -224,9 +232,27 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
     mavenConfiguration.setUserSettingsFile(mirroredRepoFile.getCanonicalPath());
     waitForJobsToComplete();
 
+    updateIndex(REPO_URL_ECLIPSE);
+
     //this failed with the bug in authentication (NPE) in NexusIndexManager
     IndexedArtifactGroup[] rootGroups = indexManager.getRootIndexedArtifactGroups(getRepository(REPO_URL_ECLIPSE));
     assertTrue(rootGroups.length > 0);
+  }
+
+  private void updateIndex(String repoUrl) throws CoreException {
+    IMaven maven = MavenPlugin.getMaven();
+    Settings settings = maven.getSettings();
+    for(ArtifactRepository repo : maven.getArtifactRepositories()) {
+      if(repoUrl.equals(repo.getUrl())) {
+        AuthenticationInfo auth = repositoryRegistry.getAuthenticationInfo(settings, repo.getId());
+        RepositoryInfo repoInfo = new RepositoryInfo(repo.getId(), repo.getUrl(), IRepositoryRegistry.SCOPE_SETTINGS,
+            auth);
+        indexManager.updateIndex(repoInfo, true, monitor);
+        return;
+      }
+    }
+
+    throw new IllegalArgumentException("settings.xml does not define repository with url " + repoUrl);
   }
 
   /**
@@ -243,6 +269,7 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
 
     mavenConfiguration.setUserSettingsFile(mirroredRepoFile.getCanonicalPath());
     waitForJobsToComplete();
+    updateIndex(REPO_URL_ECLIPSE);
 
     IRepository repository = getRepository(REPO_URL_ECLIPSE);
     IndexedArtifactGroup[] rootGroups = indexManager.getRootIndexedArtifactGroups(repository);
@@ -263,10 +290,11 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
 
   public void testIndexedPublicArtifactGroups() throws Exception {
     // updateRepo(REPO_URL_PUBLIC, SETTINGS_PUBLIC_REPO);
+    updateIndex(REPO_URL_ECLIPSE);
 
     // 
-    Map<String, IndexedArtifact> search = indexManager.getIndex(getRepository(REPO_URL_ECLIPSE)).search(new UserInputSearchExpression("junit"),
-        IIndex.SEARCH_ARTIFACT);
+    Map<String, IndexedArtifact> search = indexManager.getIndex(getRepository(REPO_URL_ECLIPSE)).search(
+        new UserInputSearchExpression("junit"), IIndex.SEARCH_ARTIFACT);
     IndexedArtifact ia = search.get("null : null : org.eclipse : org.eclipse.jdt.junit");
     assertNotNull(ia);
     String version = null;
@@ -290,6 +318,8 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
   }
 
   public void testPublicMirror() throws Exception {
+    updateIndex(REPO_URL_ECLIPSE);
+
     List<IRepository> repositories = repositoryRegistry.getRepositories(IRepositoryRegistry.SCOPE_SETTINGS);
     assertEquals(2, repositories.size());
     IRepository eclipseRepo = null;
@@ -312,7 +342,8 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
     // This below is present in repo
     // org.eclipse : org.eclipse.jdt.junit : 3.3.1.r331_v20070829
     Collection<IndexedArtifact> junitArtifact = index.find(new SourcedSearchExpression("org.eclipse"),
-        new SourcedSearchExpression("org.eclipse.jdt.junit"), new UserInputSearchExpression("3.3.1"), new SourcedSearchExpression("jar"));
+        new SourcedSearchExpression("org.eclipse.jdt.junit"), new UserInputSearchExpression("3.3.1"),
+        new SourcedSearchExpression("jar"));
     assertTrue(junitArtifact.size() > 0);
   }
 
@@ -384,8 +415,11 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
       mavenConfiguration.setUserSettingsFile(settingsFile.getCanonicalPath());
       waitForJobsToComplete();
 
+      String repoUrl = "http://bad.host/repositories/remoterepo";
+      updateIndex(repoUrl);
+      
       IndexedArtifactGroup[] rootGroups = indexManager
-          .getRootIndexedArtifactGroups(getRepository("http://bad.host/repositories/remoterepo"));
+          .getRootIndexedArtifactGroups(getRepository(repoUrl));
       assertTrue(rootGroups.length > 0);
     } finally {
       httpServer.stop();
@@ -397,7 +431,7 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
     waitForJobsToComplete();
 
     // make facade shallow as it would be when the workspace was just started and its state deserialized
-    IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectRegistry().getProject(project);
+    IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().getProject(project);
     Field field = MavenProjectFacade.class.getDeclaredField("mavenProject");
     field.setAccessible(true);
     field.set(facade, null);
@@ -406,8 +440,8 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
 
     MavenProjectChangedEvent event = new MavenProjectChangedEvent(facade.getPom(),
         MavenProjectChangedEvent.KIND_REMOVED, MavenProjectChangedEvent.FLAG_NONE, facade, null);
-    ((NexusIndexManager) MavenPlugin.getDefault().getIndexManager()).mavenProjectChanged(
-        new MavenProjectChangedEvent[] {event}, new NullProgressMonitor());
+    ((NexusIndexManager) MavenPlugin.getIndexManager()).mavenProjectChanged(new MavenProjectChangedEvent[] {event},
+        new NullProgressMonitor());
   }
 
   public void testFetchIndexFromRepositoryWithAuthentication() throws Exception {
@@ -425,8 +459,9 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
       mavenConfiguration.setUserSettingsFile(settingsFile.getCanonicalPath());
       waitForJobsToComplete();
 
-      IndexedArtifactGroup[] rootGroups = indexManager.getRootIndexedArtifactGroups(getRepository(httpServer
-          .getHttpUrl() + "/repositories/remoterepo"));
+      String repoUrl = httpServer.getHttpUrl() + "/repositories/remoterepo";
+      updateIndex(repoUrl);
+      IndexedArtifactGroup[] rootGroups = indexManager.getRootIndexedArtifactGroups(getRepository(repoUrl));
       assertTrue(rootGroups.length > 0);
     } finally {
       httpServer.stop();

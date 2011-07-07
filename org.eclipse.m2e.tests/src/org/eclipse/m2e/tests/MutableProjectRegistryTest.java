@@ -34,7 +34,7 @@ import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 @SuppressWarnings("restriction")
 public class MutableProjectRegistryTest extends AbstractMavenProjectTestCase {
 
-  private IMaven maven = MavenPlugin.getDefault().getMaven();
+  private IMaven maven = MavenPlugin.getMaven();
 
   public void testAddProject() throws Exception {
     IProject project = createExisting("dummy", "resources/dummy");

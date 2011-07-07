@@ -18,8 +18,8 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.bindings.keys.KeyStroke;
 import org.eclipse.m2e.core.MavenPlugin;
-import org.eclipse.m2e.core.internal.index.NexusIndex;
-import org.eclipse.m2e.core.internal.index.NexusIndexManager;
+import org.eclipse.m2e.core.internal.index.nexus.NexusIndex;
+import org.eclipse.m2e.core.internal.index.nexus.NexusIndexManager;
 import org.eclipse.m2e.core.repository.IRepository;
 import org.eclipse.m2e.core.repository.IRepositoryRegistry;
 import org.eclipse.m2e.integration.tests.common.SwtbotUtil;
@@ -68,7 +68,7 @@ public class MEclipse163ResolveDependenciesTest extends M2EUIIntegrationTestCase
     Assert.assertTrue(project.exists());
     waitForAllBuildsToComplete();
     //rebuild the mirror
-    IRepositoryRegistry registry = MavenPlugin.getDefault().getRepositoryRegistry();
+    IRepositoryRegistry registry = MavenPlugin.getRepositoryRegistry();
     waitForAllBuildsToComplete();
     List<IRepository> repos = registry.getRepositories(IRepositoryRegistry.SCOPE_SETTINGS);
 
@@ -124,9 +124,9 @@ public class MEclipse163ResolveDependenciesTest extends M2EUIIntegrationTestCase
    * @param repo
    */
   private void buildFullRepoDetails(IRepository repo) throws Exception {
-    NexusIndexManager indexManager = (NexusIndexManager) MavenPlugin.getDefault().getIndexManager();
+    NexusIndexManager indexManager = (NexusIndexManager) MavenPlugin.getIndexManager();
     NexusIndex index = indexManager.getIndex(repo);
-    IRepositoryRegistry registry = MavenPlugin.getDefault().getRepositoryRegistry();
+    IRepositoryRegistry registry = MavenPlugin.getRepositoryRegistry();
 
     //build full repo details for the enabled non local/workspace repo
     if(index.isEnabled() && !(repo.equals(registry.getLocalRepository()))

@@ -18,7 +18,8 @@ import java.util.List;
 
 import org.codehaus.plexus.util.Scanner;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.m2e.core.builder.EclipseIncrementalBuildContext;
+
+import org.eclipse.m2e.core.internal.builder.EclipseIncrementalBuildContext;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 
 

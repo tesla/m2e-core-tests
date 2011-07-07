@@ -407,7 +407,7 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     assertTrue(hasMavenClasspathProvider(p01, "runtimeclasspath-configlistener01.launch"));
     assertTrue(hasMavenClasspathProvider(p02, "runtimeclasspath-configlistener02.launch"));
 
-    IProjectConfigurationManager configurationManager = MavenPlugin.getDefault().getProjectConfigurationManager();
+    IProjectConfigurationManager configurationManager = MavenPlugin.getProjectConfigurationManager();
 
     configurationManager.disableMavenNature(p01, monitor);
     waitForJobsToComplete();

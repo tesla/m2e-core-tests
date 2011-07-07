@@ -49,9 +49,9 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
 
   private IProgressMonitor monitor = new NullProgressMonitor();
 
-  private MavenImpl maven = (MavenImpl) MavenPlugin.getDefault().getMaven();
+  private MavenImpl maven = (MavenImpl) MavenPlugin.getMaven();
 
-  private IMavenConfiguration configuration = MavenPlugin.getDefault().getMavenConfiguration();
+  private IMavenConfiguration configuration = MavenPlugin.getMavenConfiguration();
 
   public void testGetMojoParameterValue() throws Exception {
     MavenExecutionRequest request = maven.createExecutionRequest(monitor);
@@ -213,7 +213,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
     FileUtils.deleteDirectory(new File(localRepository.getBasedir(), "junit/junit/3.8.2"));
 
     ILocalRepositoryListener listener = new ILocalRepositoryListener() {
-      public void artifactInstalled(File repositoryBasedir, ArtifactKey artifact, File artifactFile) {
+      public void artifactInstalled(File repositoryBasedir, ArtifactKey baseArtifact, ArtifactKey artifact, File artifactFile) {
         assertEquals(localRepository.getBasedir(), repositoryBasedir.getAbsolutePath());
 
         assertEquals("junit:junit:3.8.2::", artifact.toPortableString());
@@ -264,7 +264,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
           .getCanonicalPath());
       assertNotNull(maven.getSettings());
       assertNotNull(maven.getLocalRepository());
-      ((RepositoryRegistry) MavenPlugin.getDefault().getRepositoryRegistry()).updateRegistry(null);
+      ((RepositoryRegistry) MavenPlugin.getRepositoryRegistry()).updateRegistry(null);
     } finally {
       configuration.setUserSettingsFile(origSettings);
     }

@@ -12,6 +12,7 @@ import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.MojoExecution;
 
+import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.internal.MavenPluginActivator;
 import org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
@@ -28,7 +29,7 @@ public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
     IProject project = importProject("projects/getmojoexecution/pom.xml");
     assertNoErrors(project);
 
-    IMavenProjectFacade facade = plugin.getMavenProjectRegistry().create(project, monitor);
+    IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().create(project, monitor);
 
     MojoExecutionKey compileKey = null;
     for(MojoExecutionKey executionKey : facade.getMojoExecutionMapping().keySet()) {
@@ -41,11 +42,11 @@ public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
     assertNotNull(compileKey);
     MojoExecution compileMojo = facade.getMojoExecution(compileKey, monitor);
 
-    MavenExecutionRequest request = plugin.getMaven().createExecutionRequest(monitor);
-    MavenSession session = plugin.getMaven().createSession(request, facade.getMavenProject());
+    MavenExecutionRequest request = MavenPlugin.getMaven().createExecutionRequest(monitor);
+    MavenSession session = MavenPlugin.getMaven().createSession(request, facade.getMavenProject());
 
-    assertEquals("1.5", plugin.getMaven().getMojoParameterValue(session, compileMojo, "source", String.class));
-    assertEquals("1.6", plugin.getMaven().getMojoParameterValue(session, compileMojo, "target", String.class));
+    assertEquals("1.5", MavenPlugin.getMaven().getMojoParameterValue(session, compileMojo, "source", String.class));
+    assertEquals("1.6", MavenPlugin.getMaven().getMojoParameterValue(session, compileMojo, "target", String.class));
 
   }
 
@@ -53,7 +54,7 @@ public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
     IProject project = importProject("projects/getmojoexecution/pom.xml");
     assertNoErrors(project);
 
-    IMavenProjectFacade facade = plugin.getMavenProjectRegistry().create(project, monitor);
+    IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().create(project, monitor);
     deserialize(facade);
 
     MojoExecutionKey compileKey = null;
@@ -67,11 +68,11 @@ public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
     assertNotNull(compileKey);
     MojoExecution compileMojo = facade.getMojoExecution(compileKey, monitor);
 
-    MavenExecutionRequest request = plugin.getMaven().createExecutionRequest(monitor);
-    MavenSession session = plugin.getMaven().createSession(request, facade.getMavenProject());
+    MavenExecutionRequest request = MavenPlugin.getMaven().createExecutionRequest(monitor);
+    MavenSession session = MavenPlugin.getMaven().createSession(request, facade.getMavenProject());
 
-    assertEquals("1.5", plugin.getMaven().getMojoParameterValue(session, compileMojo, "source", String.class));
-    assertEquals("1.6", plugin.getMaven().getMojoParameterValue(session, compileMojo, "target", String.class));
+    assertEquals("1.5", MavenPlugin.getMaven().getMojoParameterValue(session, compileMojo, "source", String.class));
+    assertEquals("1.6", MavenPlugin.getMaven().getMojoParameterValue(session, compileMojo, "target", String.class));
 
   }
 
@@ -79,44 +80,48 @@ public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
     IProject project = importProject("projects/getmojoexecution/pom.xml");
     assertNoErrors(project);
 
-    IMavenProjectFacade facade = plugin.getMavenProjectRegistry().create(project, monitor);
+    IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().create(project, monitor);
 
     List<MojoExecution> executions = facade.getMojoExecutions("org.apache.maven.plugins", "maven-compiler-plugin",
         monitor, "compile");
     assertEquals(executions.toString(), 1, executions.size());
 
-    MavenExecutionRequest request = plugin.getMaven().createExecutionRequest(monitor);
-    MavenSession session = plugin.getMaven().createSession(request, facade.getMavenProject());
+    MavenExecutionRequest request = MavenPlugin.getMaven().createExecutionRequest(monitor);
+    MavenSession session = MavenPlugin.getMaven().createSession(request, facade.getMavenProject());
 
-    assertEquals("1.5", plugin.getMaven().getMojoParameterValue(session, executions.get(0), "source", String.class));
-    assertEquals("1.6", plugin.getMaven().getMojoParameterValue(session, executions.get(0), "target", String.class));
+    assertEquals("1.5", MavenPlugin.getMaven()
+        .getMojoParameterValue(session, executions.get(0), "source", String.class));
+    assertEquals("1.6", MavenPlugin.getMaven()
+        .getMojoParameterValue(session, executions.get(0), "target", String.class));
   }
 
   public void testGetMojoExecutionsAfterWorkspaceRestart() throws Exception {
     IProject project = importProject("projects/getmojoexecution/pom.xml");
     assertNoErrors(project);
 
-    IMavenProjectFacade facade = plugin.getMavenProjectRegistry().create(project, monitor);
+    IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().create(project, monitor);
     deserialize(facade);
 
     List<MojoExecution> executions = facade.getMojoExecutions("org.apache.maven.plugins", "maven-compiler-plugin",
         monitor, "compile");
     assertEquals(executions.toString(), 1, executions.size());
 
-    MavenExecutionRequest request = plugin.getMaven().createExecutionRequest(monitor);
-    MavenSession session = plugin.getMaven().createSession(request, facade.getMavenProject());
+    MavenExecutionRequest request = MavenPlugin.getMaven().createExecutionRequest(monitor);
+    MavenSession session = MavenPlugin.getMaven().createSession(request, facade.getMavenProject());
 
-    assertEquals("1.5", plugin.getMaven().getMojoParameterValue(session, executions.get(0), "source", String.class));
-    assertEquals("1.6", plugin.getMaven().getMojoParameterValue(session, executions.get(0), "target", String.class));
+    assertEquals("1.5", MavenPlugin.getMaven()
+        .getMojoParameterValue(session, executions.get(0), "source", String.class));
+    assertEquals("1.6", MavenPlugin.getMaven()
+        .getMojoParameterValue(session, executions.get(0), "target", String.class));
   }
 
   public void testGetProjectConfigurators() throws Exception {
     IProject project = importProject("projects/getmojoexecution/pom.xml");
     assertNoErrors(project);
 
-    IMavenProjectFacade facade = plugin.getMavenProjectRegistry().create(project, monitor);
+    IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().create(project, monitor);
     assertNotNull("Expected not null MavenProjectFacade", facade);
-    ILifecycleMapping lifecycleMapping = plugin.getProjectConfigurationManager().getLifecycleMapping(facade);
+    ILifecycleMapping lifecycleMapping = MavenPlugin.getProjectConfigurationManager().getLifecycleMapping(facade);
     assertNotNull("Expected not null LifecycleMapping", lifecycleMapping);
 
     List<AbstractProjectConfigurator> projectConfigurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
@@ -128,11 +133,11 @@ public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
     IProject project = importProject("projects/getmojoexecution/pom.xml");
     assertNoErrors(project);
 
-    IMavenProjectFacade facade = plugin.getMavenProjectRegistry().create(project, monitor);
+    IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().create(project, monitor);
     assertNotNull("Expected not null MavenProjectFacade", facade);
     deserialize(facade);
 
-    ILifecycleMapping lifecycleMapping = plugin.getProjectConfigurationManager().getLifecycleMapping(facade);
+    ILifecycleMapping lifecycleMapping = MavenPlugin.getProjectConfigurationManager().getLifecycleMapping(facade);
     assertNotNull("Expected not null LifecycleMapping", lifecycleMapping);
 
     List<AbstractProjectConfigurator> projectConfigurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
@@ -165,7 +170,7 @@ public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
   }
 
   private void testIsStale(IProject project, String filename) throws Exception {
-    IMavenProjectFacade projectFacade = plugin.getMavenProjectRegistry().create(project, monitor);
+    IMavenProjectFacade projectFacade = MavenPlugin.getMavenProjectRegistry().create(project, monitor);
     assertFalse("Expected not stale MavenProjectFacade before changing the " + filename + " file",
         projectFacade.isStale());
 
