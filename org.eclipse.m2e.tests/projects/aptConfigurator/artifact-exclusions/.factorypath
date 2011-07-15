@@ -1,0 +1,7 @@
+<factorypath>
+    <factorypathentry kind="EXTJAR" id="C:\Users\karldavis\.m2\repository\org\datanucleus\datanucleus-api-jdo\3.0.0-m3\datanucleus-api-jdo-3.0.0-m3.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="EXTJAR" id="C:\Users\karldavis\.m2\repository\org\datanucleus\datanucleus-core\3.0.0-m3\datanucleus-core-3.0.0-m3.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="EXTJAR" id="C:\Users\karldavis\.m2\repository\javax\transaction\transaction-api\1.1\transaction-api-1.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="EXTJAR" id="C:\Users\karldavis\.m2\repository\javax\jdo\jdo-api\3.0\jdo-api-3.0.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="EXTJAR" id="C:\Users\karldavis\.m2\repository\org\datanucleus\datanucleus-jdo-query\3.0.0-m1\datanucleus-jdo-query-3.0.0-m1.jar" enabled="true" runInBatchMode="false"/>
+</factorypath>

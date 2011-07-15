@@ -1,0 +1,6 @@
+<factorypath>
+    <factorypathentry kind="EXTJAR" id="C:\Users\karldavis\.m2\repository\junit\junit\4.1\junit-4.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="EXTJAR" id="C:\Users\karldavis\.m2\repository\log4j\log4j\1.2.13\log4j-1.2.13.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="EXTJAR" id="C:\Users\karldavis\.m2\repository\commons-collections\commons-collections\2.1\commons-collections-2.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="EXTJAR" id="C:\workspaces\m2eclipse\git\m2e-core-tests\org.eclipse.m2e.tests\projects\aptConfigurator\artifact-exclusions\artifact-exclusions-b\target\classes" enabled="true" runInBatchMode="false"/>
+</factorypath>
