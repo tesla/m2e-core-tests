@@ -7,11 +7,11 @@ import java.util.List;
 import org.eclipse.epp.usagedata.internal.gathering.events.UsageDataEvent;
 import org.eclipse.epp.usagedata.internal.gathering.services.UsageDataService;
 
+import org.eclipse.m2e.core.internal.MavenPluginActivator;
 import org.eclipse.m2e.internal.udc.MavenUsageDataCollectorActivator;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 
 
-@SuppressWarnings("restriction")
 public class M2EUsageDataCollectorTests extends AbstractMavenProjectTestCase {
 
   private TestUsageDataService usageDataService;
@@ -32,7 +32,8 @@ public class M2EUsageDataCollectorTests extends AbstractMavenProjectTestCase {
   public void testPackagingEvent() throws Exception {
     importProject("projects/usagedatacollection/simple/pom.xml");
     waitForJobsToComplete();
-    assertContains("Missing packaging type event", "pom", "m2e.packaging", "pom", "org.eclipse.m2e.core", "0.13.0");
+    assertContains("Missing packaging type event", "pom", "m2e.packaging", "pom", "org.eclipse.m2e.core",
+        MavenPluginActivator.getVersion());
   }
 
   public void testPluginEvent() throws Exception {
@@ -40,7 +41,7 @@ public class M2EUsageDataCollectorTests extends AbstractMavenProjectTestCase {
     waitForJobsToComplete();
 
     assertContains("Plugin Event", "clean:default-clean:clean", "m2e.plugins",
-        "org.apache.maven.plugins:maven-clean-plugin:2.4.1", "org.eclipse.m2e.core", "0.13.0");
+        "org.apache.maven.plugins:maven-clean-plugin:2.4.1", "org.eclipse.m2e.core", MavenPluginActivator.getVersion());
 
   }
 
@@ -62,7 +63,7 @@ public class M2EUsageDataCollectorTests extends AbstractMavenProjectTestCase {
         .append(',').append(event.bundleId).append(',').append(event.bundleVersion).toString();
   }
 
-  private static class TestUsageDataService extends UsageDataService {
+  protected static class TestUsageDataService extends UsageDataService {
     List<UsageDataEvent> events = new ArrayList<UsageDataEvent>();
 
     public void recordEvent(String what, String kind, String description, String bundleId) {
