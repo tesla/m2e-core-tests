@@ -13,8 +13,6 @@ package org.eclipse.m2e.tests;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -30,6 +28,7 @@ import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
@@ -311,5 +310,66 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     IProjectConfigurationManager manager = MavenPlugin.getProjectConfigurationManager();
     // make sure #updateProjectConfiguration(MavenUpdateRequest, IProgressMonitor) does not blow up
     manager.updateProjectConfiguration(new MavenUpdateRequest(project, true, false), monitor);
+  }
+
+  public void testConfigureProjectEncodingForBasicProject() throws Exception {
+    IProject project = importProject("projects/projectEncoding/p001/pom.xml");
+    WorkspaceHelpers.assertNoErrors(project);
+
+    String projectEncoding = project.getDefaultCharset();
+    assertEquals("Encoding configured through Maven property not set on project", "ISO-8859-1", projectEncoding);
+    String testfolderEncoding = project.getFolder(new Path("testfolder")).getDefaultCharset();
+    assertEquals("Encoding for folder should have been inherited from project", "ISO-8859-1", testfolderEncoding);
+
+    copyContent(project, new File("projects/projectEncoding/p001/pom2.xml"), "pom.xml");
+    
+    MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
+
+    String projectEncodingChanged = project.getDefaultCharset();
+    assertEquals("Encoding configured through Maven property not set on project", "UTF-16", projectEncodingChanged);
+    String testfolderEncodingChanged = project.getFolder(new Path("testfolder")).getDefaultCharset();
+    assertEquals("Encoding for folder should have been inherited from project", "UTF-16", testfolderEncodingChanged);
+  }
+
+  public void testRevertToContainerDefinedEncoding() throws Exception {
+    IProject project = importProject("projects/projectEncoding/p002/pom.xml");
+    WorkspaceHelpers.assertNoErrors(project);
+
+    String containerProjectEncoding = project.getDefaultCharset();
+    String containerTestfolderEncoding = project.getFolder(new Path("testfolder")).getDefaultCharset();
+    assertEquals("Encoding for folder should be the same as project encoding", containerProjectEncoding,
+        containerTestfolderEncoding);
+
+    if (!"ISO-8859-1".equals(containerProjectEncoding)) {
+      project.setDefaultCharset("ISO-8859-1", monitor);
+    } else {
+      project.setDefaultCharset("UTF-8", monitor);
+    }
+    assertEquals("Encoding for folder should be the same as project encoding", containerProjectEncoding,
+        containerTestfolderEncoding);
+    
+    MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
+
+    String projectEncodingReverted = project.getDefaultCharset();
+    assertEquals("Project encoding not reverted to container defined", containerProjectEncoding,
+        projectEncodingReverted);
+    String testfolderEncodingReverted = project.getFolder(new Path("testfolder")).getDefaultCharset();
+    assertEquals("Folder encoding not reverted to container defined", containerTestfolderEncoding,
+        testfolderEncodingReverted);
+  }
+
+  public void testKeepEncodingSetByUserForSubfoldersAndFiles() throws Exception {
+    IProject project = importProject("projects/projectEncoding/p003/pom.xml");
+    WorkspaceHelpers.assertNoErrors(project);
+
+    project.getFolder(new Path("testfolder")).setDefaultCharset("ISO-8859-1", monitor);
+    project.getFile(new Path("testfolder/testfile.txt")).setCharset("UTF-16", monitor);
+    
+    MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
+
+    String testfolderEncoding = project.getFolder(new Path("testfolder")).getDefaultCharset();
+    assertEquals("Folder encoding set by user not kept", "ISO-8859-1", testfolderEncoding);
+    String testfileEncoding = project.getFile(new Path("testfolder/testfile.txt")).getCharset();
+    assertEquals("File encoding set by user not kept", "UTF-16", testfileEncoding);
   }
 }
