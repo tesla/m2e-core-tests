@@ -13,8 +13,13 @@
 package org.eclipse.m2e.tests;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import junit.framework.TestCase;
 
@@ -96,31 +101,35 @@ public class LocalProjectScannerTest extends TestCase {
    * @throws Exception
    */
   public void testSkipNested() throws Exception {
-	    File baseDir = new File("projects/localprojectscanner/skip_nested").getCanonicalFile();
+    File baseDir = new File("projects/localprojectscanner/skip_nested").getCanonicalFile();
 
-	    LocalProjectScanner scanner = new LocalProjectScanner(baseDir, baseDir.getAbsolutePath(), false, modelManager);
-	    scanner.run(new NullProgressMonitor());
+    LocalProjectScanner scanner = new LocalProjectScanner(baseDir, baseDir.getAbsolutePath(), false, modelManager);
+    scanner.run(new NullProgressMonitor());
 
-	    List<MavenProjectInfo> projects = scanner.getProjects();
-	    assertEquals(1, projects.size()); //mkleint: here it's currently very error prone, depends on which folder comes first
+    Map<File, MavenProjectInfo> projects = toPathMap(scanner.getProjects());
+    assertEquals(3, projects.size());
 
-	    //the point of asserts here is to verify the to_skip/pom.xml ones didn't get in
-	    MavenProjectInfo parent = projects.get(0);
-	    assertEquals("/aparent/pom.xml", parent.getLabel());
-	    assertEquals(new File(baseDir, "aparent/pom.xml"), parent.getPomFile());
+    //the point of asserts here is to verify the to_skip/pom.xml ones didn't get in
+    assertTrue(projects.containsKey(new File(baseDir, "aparent/pom.xml")));
+    assertTrue(projects.containsKey(new File(baseDir, "module/pom.xml")));
+    assertTrue(projects.containsKey(new File(baseDir, "module/submodule/pom.xml")));
+  }
 
-	    List<MavenProjectInfo> modules = new ArrayList<MavenProjectInfo>(parent.getProjects());
-	    assertEquals(1, modules.size());
+  private Map<File, MavenProjectInfo> toPathMap(List<MavenProjectInfo> projects) throws IOException {
+    SortedMap<File, MavenProjectInfo> result = new TreeMap<File, MavenProjectInfo>();
+    addPathMap(result, projects);
+    return result;
+  }
 
-	    MavenProjectInfo module = modules.get(0);
-	    assertEquals("../module/pom.xml", module.getLabel());
-
-	    List<MavenProjectInfo> submodules = new ArrayList<MavenProjectInfo>(module.getProjects());
-	    assertEquals(1, submodules.size());
-
-	    MavenProjectInfo submodule = submodules.get(0);
-	    assertEquals("submodule/pom.xml", submodule.getLabel());
-	  }  
+  void addPathMap(Map<File, MavenProjectInfo> result, Collection<MavenProjectInfo> projects) throws IOException {
+    for(MavenProjectInfo project : projects) {
+      File canonicalPath = project.getPomFile().getCanonicalFile();
+      if(!result.containsKey(canonicalPath)) {
+        result.put(canonicalPath, project);
+        addPathMap(result, project.getProjects());
+      }
+    }
+  }
 
   public void testDeepNesting002() throws Exception {
     File baseDir = new File("projects/localprojectscanner/deepnesting/parent").getCanonicalFile();
