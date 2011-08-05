@@ -4,6 +4,7 @@
 		<artifactId>multi-parent</artifactId>
 		<groupId>org.eclipse.m2e.tests</groupId>
 		<version>1.0.0</version>
+		<relativePath>../parent</relativePath>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 

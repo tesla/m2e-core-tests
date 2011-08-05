@@ -4,6 +4,7 @@
 		<artifactId>parent-diff</artifactId>
 		<groupId>org.eclipse.m2e.tests.diff</groupId>
 		<version>1.0.0</version>
+		<relativePath>../parent</relativePath>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 

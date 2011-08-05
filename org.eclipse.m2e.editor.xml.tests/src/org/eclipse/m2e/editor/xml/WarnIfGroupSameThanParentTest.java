@@ -25,6 +25,7 @@ import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
  *
  */
 
+@SuppressWarnings( "restriction" )
 public class WarnIfGroupSameThanParentTest extends AbstractMavenProjectTestCase {
 
   public void testMNGEclipse2552() throws Exception {
@@ -32,7 +33,11 @@ public class WarnIfGroupSameThanParentTest extends AbstractMavenProjectTestCase 
         "child2552withDuplicateGroupAndVersion/pom.xml", 
         "child2552withDuplicateGroup/pom.xml",
         "child2552withDuplicateVersion/pom.xml", 
-        "parent2552/pom.xml"}, new ResolverConfiguration());
+        "parent2552/pom.xml",
+      },// 
+      new ResolverConfiguration(),//
+      true // skipeSanityCheck, some projects are expected to have errors after import
+    );
     waitForJobsToComplete();
 
     {
