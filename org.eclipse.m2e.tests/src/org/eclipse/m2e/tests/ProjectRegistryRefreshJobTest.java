@@ -8,6 +8,7 @@
  * Contributors:
  *      Sonatype, Inc. - initial API and implementation
  *******************************************************************************/
+
 package org.eclipse.m2e.tests;
 
 import java.io.File;
@@ -23,6 +24,12 @@ import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
 
+/**
+ * TODO this test assumes that Maven uses repository id only (i.e. without repository url) to determine if local
+ * artifact copy is up-to-date with remote contents. This cache behaviour is not documented and may change. This tests
+ * should be reworked to "deploy" new artifact versions to the "remote" repository, in order to properly
+ * simulate desired test scenario.
+ */
 public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase {
 
   private static final String SETTINGS_ONE = "settings_updateRepo.xml";
@@ -59,7 +66,7 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
     waitForJobsToComplete();
     WorkspaceHelpers.assertNoErrors(project);
 
-    assertEquals(338, LOCAL_ARTIFACT.length());
+    assertEquals(338, LOCAL_ARTIFACT.length()); // still from updateRepo1
   }
 
   public void testUpdateForced() throws Exception {
@@ -67,6 +74,7 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
     project = importProject("projects/updateProject/simple/pom.xml");
     waitForJobsToComplete();
     WorkspaceHelpers.assertNoErrors(project);
+    assertEquals(338, LOCAL_ARTIFACT.length()); // from updateRepo1
 
     mavenConfiguration.setUserSettingsFile(new File(SETTINGS_TWO).getAbsolutePath());
     waitForJobsToComplete();
@@ -75,7 +83,7 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
     waitForJobsToComplete();
     WorkspaceHelpers.assertNoErrors(project);
 
-    assertEquals(785, LOCAL_ARTIFACT.length());
+    assertEquals(785, LOCAL_ARTIFACT.length()); // from updateRepo2
   }
 
   /*
@@ -97,9 +105,6 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
     assertEquals(338, LOCAL_ARTIFACT.length());
   }
 
-  /*
-   * 
-   */
   public void testMultiProject() throws Exception {
     // import project
     IProject[] projects = importProjects("projects/updateProject/multiProject/", new String[] {"projectA/pom.xml",

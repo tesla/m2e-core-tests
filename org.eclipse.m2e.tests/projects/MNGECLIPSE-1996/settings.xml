@@ -7,7 +7,7 @@
         <repositories>
           <repository>
             <id>central</id>
-            <url>filex://localhost/remoterepo</url>
+            <url>filex://localhost/repositories/remoterepo</url>
             <snapshots>
               <enabled>true</enabled>
               <updatePolicy>always</updatePolicy>
@@ -19,7 +19,7 @@
         <pluginRepositories>
           <pluginRepository>
             <id>central</id>
-            <url>filex://localhost/remoterepo</url>
+            <url>filex://localhost/repositories/remoterepo</url>
             <snapshots>
               <enabled>true</enabled>
               <updatePolicy>always</updatePolicy>
