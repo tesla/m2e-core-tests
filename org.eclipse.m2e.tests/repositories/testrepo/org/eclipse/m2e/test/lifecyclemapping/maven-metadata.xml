@@ -6,5 +6,10 @@
       <prefix>test-lifecyclemapping</prefix>
       <artifactId>test-lifecyclemapping-plugin</artifactId>
     </plugin>
+    <plugin>
+      <name>test-buildhelper-plugin</name>
+      <prefix>test-buildhelper</prefix>
+      <artifactId>test-buildhelper-plugin</artifactId>
+    </plugin>
   </plugins>
 </metadata>
