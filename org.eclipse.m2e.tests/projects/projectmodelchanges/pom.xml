@@ -43,7 +43,7 @@
         </executions>
         <configuration>
           <sourceRoot>m2e-source-root</sourceRoot>
-          <testResource>m2e-test-source-root</testResource>
+          <testSourceRoot>m2e-test-source-root</testSourceRoot>
           <resource>
             <directory>m2e-resource</directory>
           </resource>

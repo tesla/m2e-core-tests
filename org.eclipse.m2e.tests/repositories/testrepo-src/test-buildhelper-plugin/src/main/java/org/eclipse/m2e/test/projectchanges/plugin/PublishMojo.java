@@ -37,10 +37,25 @@ public class PublishMojo
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
-        project.getCompileSourceRoots().add( sourceRoot );
-        project.getTestCompileSourceRoots().add( testSourceRoot );
-        project.getResources().add( resource );
-        project.getTestResources().add( testResource );
-        project.getProperties().put( propertyName, propertyValue );
+        if ( sourceRoot != null )
+        {
+            project.getCompileSourceRoots().add( sourceRoot );
+        }
+        if ( testSourceRoot != null )
+        {
+            project.getTestCompileSourceRoots().add( testSourceRoot );
+        }
+        if ( resource != null )
+        {
+            project.getResources().add( resource );
+        }
+        if ( testResource != null )
+        {
+            project.getTestResources().add( testResource );
+        }
+        if ( propertyName != null )
+        {
+            project.getProperties().put( propertyName, propertyValue );
+        }
     }
 }
