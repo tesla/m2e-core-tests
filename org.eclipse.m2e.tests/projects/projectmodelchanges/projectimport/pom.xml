@@ -1,8 +1,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.eclipse.m2e.tests</groupId>
-  <artifactId>projectmodelchanges</artifactId>
+  <groupId>org.eclipse.m2e.tests.projectmodelchanges</groupId>
+  <artifactId>projectimport</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>test-packaging-empty</packaging>
 
@@ -31,31 +31,35 @@
             <goals>
               <goal>publish</goal>
             </goals>
-            <phase>compile</phase>
-          </execution>
-          <execution>
-            <id>validate</id>
-            <goals>
-              <goal>validate</goal>
-            </goals>
-            <phase>compile</phase>
+            <phase>generate-sources</phase>
+            <configuration>
+              <sourceRoot>${project.basedir}/src/main/avaj</sourceRoot>
+              <propertyName>compile-includes</propertyName>
+              <propertyValue>**/*.avaj</propertyValue>
+            </configuration>
           </execution>
         </executions>
-        <configuration>
-          <sourceRoot>m2e-source-root</sourceRoot>
-          <testSourceRoot>m2e-test-source-root</testSourceRoot>
-          <resource>
-            <directory>m2e-resource</directory>
-          </resource>
-          <testResource>
-            <directory>m2e-test-resource</directory>
-          </testResource>
-          <propertyName>m2e-property</propertyName>
-          <propertyValue>m2e-value</propertyValue>
-        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>compile</id>
+            <goals>
+              <goal>compile</goal>
+            </goals>
+            <phase>compile</phase>
+            <configuration>
+              <includes>
+                <include>${compile-includes}</include>
+              </includes>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
-
 
     <pluginManagement>
       <plugins>
@@ -73,11 +77,10 @@
                     <versionRange>[1.0.0,)</versionRange>
                     <goals>
                       <goal>publish</goal>
-                      <goal>validate</goal>
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <execute/>
+                    <execute runOnIncremental="true"/>
                   </action>
                 </pluginExecution>
               </pluginExecutions>

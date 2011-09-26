@@ -18,6 +18,9 @@ import java.util.List;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Resource;
@@ -32,8 +35,25 @@ import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 
 public class MavenProjectMutableStateTest extends AbstractMavenProjectTestCase {
 
+  public void testImport() throws Exception {
+    IProject project = importProject("projects/projectmodelchanges/projectimport/pom.xml");
+    waitForJobsToComplete();
+    assertNoErrors(project);
+
+    IJavaProject javaProject = JavaCore.create(project);
+    IClasspathEntry[] cp = javaProject.getRawClasspath();
+
+    assertEquals(3, cp.length);
+
+    assertEquals(project.getFolder("src/main/avaj").getFullPath(), cp[0].getPath());
+    assertEquals(
+        "org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.4",
+        cp[1].getPath().toOSString());
+    assertEquals("org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER", cp[2].getPath().toOSString());
+  }
+
   public void testMavenBuilder() throws Exception {
-    IProject project = importProject("projects/projectmodelchanges/pom.xml");
+    IProject project = importProject("projects/projectmodelchanges/workspacebuild/pom.xml");
     waitForJobsToComplete();
     assertNoErrors(project);
 
@@ -54,7 +74,7 @@ public class MavenProjectMutableStateTest extends AbstractMavenProjectTestCase {
   }
 
   public void testExecuteMojo() throws Exception {
-    IProject project = importProject("projects/projectmodelchanges/pom.xml");
+    IProject project = importProject("projects/projectmodelchanges/workspacebuild/pom.xml");
     waitForJobsToComplete();
     assertNoErrors(project);
 
