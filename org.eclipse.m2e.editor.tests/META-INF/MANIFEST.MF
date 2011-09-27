@@ -24,7 +24,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.m2e.core.ui,
  org.junit;bundle-version="4.0.0"
 Bundle-Name: %Bundle-Name
-Bundle-Version: 1.0.100.qualifier
+Bundle-Version: 1.1.0.qualifier
 MavenArtifact-ArtifactId: org.eclipse.m2e.test
 Bundle-Vendor: %Bundle-Vendor
 Bundle-SymbolicName: org.eclipse.m2e.editor.tests;singleton:=true
