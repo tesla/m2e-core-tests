@@ -27,7 +27,7 @@
         <version>1.0.0</version>
         <executions>
           <execution>
-            <id>publish</id>
+            <id>add-source</id>
             <goals>
               <goal>publish</goal>
             </goals>
@@ -36,6 +36,29 @@
               <sourceRoot>${project.basedir}/src/main/avaj</sourceRoot>
               <propertyName>compile-includes</propertyName>
               <propertyValue>**/*.avaj</propertyValue>
+            </configuration>
+          </execution>
+          <execution>
+            <id>add-property</id>
+            <goals>
+              <goal>publish</goal>
+            </goals>
+            <phase>generate-sources</phase>
+            <configuration>
+              <propertyName>compile-includes</propertyName>
+              <propertyValue>**/*.avaj</propertyValue>
+            </configuration>
+          </execution>
+          <execution>
+            <id>add-resource</id>
+            <goals>
+              <goal>publish</goal>
+            </goals>
+            <phase>generate-sources</phase>
+            <configuration>
+              <resource>
+                <directory>${project.basedir}/src/main/secruoser</directory>
+              </resource>
             </configuration>
           </execution>
         </executions>

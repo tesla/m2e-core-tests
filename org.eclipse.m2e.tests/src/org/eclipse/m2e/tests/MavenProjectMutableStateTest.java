@@ -43,13 +43,12 @@ public class MavenProjectMutableStateTest extends AbstractMavenProjectTestCase {
     IJavaProject javaProject = JavaCore.create(project);
     IClasspathEntry[] cp = javaProject.getRawClasspath();
 
-    assertEquals(3, cp.length);
+    assertEquals(4, cp.length);
 
     assertEquals(project.getFolder("src/main/avaj").getFullPath(), cp[0].getPath());
-    assertEquals(
-        "org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.4",
-        cp[1].getPath().toOSString());
-    assertEquals("org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER", cp[2].getPath().toOSString());
+    assertEquals(project.getFolder("src/main/secruoser").getFullPath(), cp[1].getPath());
+    assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", cp[2].getPath().segment(0));
+    assertEquals("org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER", cp[3].getPath().toOSString());
   }
 
   public void testMavenBuilder() throws Exception {
