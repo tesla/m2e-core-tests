@@ -1,3 +1,6 @@
-/.project
-/.metadata
-/its
+.classpath
+.project
+.settings/
+target/
+bin/
+
