@@ -336,8 +336,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
       // cleanup
       deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t001/0.0.1/"));
       deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t002/0.0.1/"));
-      MavenPlugin.getMavenProjectRegistry()
-          .refresh(new MavenUpdateRequest(project, false /*offline*/, false));
+      MavenPlugin.getMavenProjectRegistry().refresh(new MavenUpdateRequest(project, false /*offline*/, false));
       waitForJobsToComplete();
     }
 
@@ -376,7 +375,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
   }
 
   private void deleteSourcesAndJavadoc(File basedir) {
-    if(!basedir.exists()){
+    if(!basedir.exists()) {
       return;
     }
     DirectoryScanner ds = new DirectoryScanner();
@@ -454,7 +453,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
 
   public void testDownloadSources_002_javadoconly() throws Exception {
     deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t003/0.0.1"));
-    
+
     IProject project = createExisting("downloadsources-p002", "projects/downloadsources/p002");
     waitForJobsToComplete();
 
@@ -564,8 +563,8 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     IMutableIndex localIndex = indexManager.getLocalIndex();
     localIndex.updateIndex(true, monitor);
 
-    for (IRepository repository : repositoryRegistry.getRepositories(IRepositoryRegistry.SCOPE_SETTINGS)) {
-      if ("file:repositories/remoterepo".equals(repository.getUrl())) {
+    for(IRepository repository : repositoryRegistry.getRepositories(IRepositoryRegistry.SCOPE_SETTINGS)) {
+      if("file:repositories/remoterepo".equals(repository.getUrl())) {
         NexusIndex remoteIndex = indexManager.getIndex(repository);
         remoteIndex.updateIndex(true, monitor); // actually scan the repo
       }
@@ -630,7 +629,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
       waitForJobsToComplete();
       container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
       cp = container.getClasspathEntries();
-  
+
       assertEquals(1, cp.length);
       assertEquals("downloadsources-t007-0.0.1-tests.jar", cp[0].getPath().lastSegment());
       assertNull(cp[0].getSourceAttachmentPath());
@@ -881,8 +880,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     }
   }
 
-  private IProject createSimpleProject(final String projectName, final IPath location)
-      throws CoreException {
+  private IProject createSimpleProject(final String projectName, final IPath location) throws CoreException {
     final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 
     workspace.run(new IWorkspaceRunnable() {
@@ -980,8 +978,8 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     final MavenPluginActivator plugin = MavenPluginActivator.getDefault();
 
     @SuppressWarnings("unchecked")
-    List<Archetype> archetypes = MavenPluginActivator.getDefault().getArchetypeManager().getArchetypeCatalogFactory("internal")
-        .getArchetypeCatalog().getArchetypes();
+    List<Archetype> archetypes = MavenPluginActivator.getDefault().getArchetypeManager()
+        .getArchetypeCatalogFactory("internal").getArchetypeCatalog().getArchetypes();
     for(Archetype archetype : archetypes) {
       if("org.apache.maven.archetypes".equals(archetype.getGroupId())
           && "maven-archetype-quickstart".equals(archetype.getArtifactId())) {
@@ -1111,11 +1109,22 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     // so it is good enough we don't fail with nasty exceptions 
     // ideally we need to add a warning marker on the offending pom.xml element
     // https://issues.sonatype.org/browse/MNGECLIPSE-2433
-    
+
     IJavaProject javaProject = JavaCore.create(projects[1]);
     IClasspathEntry[] cp = javaProject.getRawClasspath();
 
     assertEquals(2, cp.length);
   }
 
+  public void test359725_resourcesWorkspaceRoot() throws Exception {
+    // m2e does not support resources outside of project basedir.
+    // the point of this test is to verify m2e can import such unsupported projects
+
+    IProject project = importProject("projects/359725_resourcesWorkspaceRoot/pom.xml");
+    waitForJobsToComplete();
+
+    project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+
+    assertNoErrors(project);
+  }
 }
