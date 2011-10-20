@@ -32,13 +32,12 @@ public class CustomClasspathTest extends AbstractMavenProjectTestCase {
 
     IClasspathEntry[] cp = javaProject.getRawClasspath();
 
-    assertEquals(4, cp.length);
-    assertEquals("/customclasspath-p001/src/main/java", cp[0].getPath().toPortableString());
-    assertEquals("/customclasspath-p001/src/main/java2", cp[1].getPath().toPortableString());
-    assertEquals(
-        "org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.4",
-        cp[2].getPath().toPortableString());
-    assertEquals("org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER", cp[3].getPath().toPortableString());
+    assertEquals(5, cp.length);
+    assertEquals("/customclasspath-p001/src/main/java", cp[0].getPath().toPortableString()); // <= main sources
+    assertEquals("/customclasspath-p001/src/main/java2", cp[1].getPath().toPortableString()); // <= custom entry
+    assertEquals("/customclasspath-p001/src/test/java", cp[2].getPath().toPortableString()); // <= test sources
+    assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", cp[3].getPath().segment(0));
+    assertEquals("org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER", cp[4].getPath().segment(0));
   }
 
   public void testStaleDerivedEntries() throws Exception {
@@ -55,12 +54,15 @@ public class CustomClasspathTest extends AbstractMavenProjectTestCase {
 
     IClasspathEntry[] cp = javaProject.getRawClasspath();
 
-    assertEquals(4, cp.length);
-    assertEquals("/customclasspath-p001/src/main/java2", cp[0].getPath().toPortableString());
-    assertEquals("/customclasspath-p001/src/main/java3", cp[1].getPath().toPortableString());
-    assertEquals(
-        "org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.4",
-        cp[2].getPath().toPortableString());
-    assertEquals("org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER", cp[3].getPath().toPortableString());
+    assertEquals(5, cp.length);
+
+    // stale pom-derived classpath entries are removed after new entries have been added to the classpath
+    // this results in unexpected classpath order, i.e. compile sources appear *after* test sources in some cases
+
+    assertEquals("/customclasspath-p001/src/main/java2", cp[0].getPath().toPortableString()); // <= custom entry
+    assertEquals("/customclasspath-p001/src/test/java", cp[1].getPath().toPortableString()); // <= test sources
+    assertEquals("/customclasspath-p001/src/main/java3", cp[2].getPath().toPortableString()); // <= main sources
+    assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", cp[3].getPath().segment(0));
+    assertEquals("org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER", cp[4].getPath().segment(0));
   }
 }

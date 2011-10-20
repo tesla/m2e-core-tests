@@ -1113,7 +1113,11 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     IJavaProject javaProject = JavaCore.create(projects[1]);
     IClasspathEntry[] cp = javaProject.getRawClasspath();
 
-    assertEquals(2, cp.length);
+    assertEquals(4, cp.length);
+    assertEquals("/project02/src/main/java", cp[0].getPath().toPortableString());
+    assertEquals("/project02/src/test/java", cp[1].getPath().toPortableString());
+    assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", cp[2].getPath().segment(0));
+    assertEquals("org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER", cp[3].getPath().segment(0));
   }
 
   public void test359725_resourcesWorkspaceRoot() throws Exception {
