@@ -1,0 +1,10 @@
+<settings>
+  <profiles>
+   <profile>
+      <id>test</id>
+    </profile>
+   </profiles>
+    <activeProfiles>
+        <activeProfile>test</activeProfile>
+    </activeProfiles>
+</settings>

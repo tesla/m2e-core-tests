@@ -441,4 +441,22 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
     assertNotNull(request.getSystemProperties().getProperty("java.home"));
   }
 
+  public void test358620_reparse_changed_user_settings() throws Exception {
+    String origSettings = configuration.getUserSettingsFile();
+    try {
+      File settings = new File("target/358620_settings.xml").getCanonicalFile();
+
+      FileUtils.copyFile(new File("resources/358620_reparse_changed_user_settings/settings.xml"), settings);
+      configuration.setUserSettingsFile(settings.getCanonicalPath());
+
+      assertEquals(0, maven.getSettings().getActiveProfiles().size());
+
+      FileUtils.copyFile(new File("resources/358620_reparse_changed_user_settings/settings.xml-changed"), settings);
+
+      assertEquals(1, maven.getSettings().getActiveProfiles().size());
+    } finally {
+      configuration.setUserSettingsFile(origSettings);
+    }
+  }
+
 }

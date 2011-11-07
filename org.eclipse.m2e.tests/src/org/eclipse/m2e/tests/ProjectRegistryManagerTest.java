@@ -1082,4 +1082,8 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
       }
     }
   }
+
+  public void test358620_reparse_changed_user_settings() throws Exception {
+
+  }
 }
