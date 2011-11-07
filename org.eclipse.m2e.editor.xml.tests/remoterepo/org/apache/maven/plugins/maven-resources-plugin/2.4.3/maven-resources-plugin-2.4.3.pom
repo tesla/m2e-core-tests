@@ -28,44 +28,39 @@ under the License.
     <version>18</version>
   </parent>
 
-  <artifactId>maven-jar-plugin</artifactId>
-  <version>2.3.1</version>
+  <artifactId>maven-resources-plugin</artifactId>
+  <version>2.4.3</version>
   <packaging>maven-plugin</packaging>
 
-  <name>Maven JAR Plugin</name>
-  <description>Builds a Java Archive (JAR) file from the compiled project classes and resources.</description>
-
-  <contributors>
-    <contributor>
-      <name>Jerome Lacoste</name>
-      <email>jerome@coffeebreaks.org</email>
-      <organization>CoffeeBreaks</organization>
-      <organizationUrl>http://www.coffeebreaks.org</organizationUrl>
-      <timezone>+1</timezone>
-      <roles>
-        <role>Java Developer</role>
-      </roles>
-    </contributor>
-  </contributors>
+  <name>Maven Resources Plugin</name>
+  <description>
+    The Resources Plugin handles the copying of project resources to the output
+    directory. There are two different kinds of resources: main resources and test resources. The
+    difference is that the main resources are the resources associated to the main
+    source code while the test resources are associated to the test source code.
+    Thus, this allows the separation of resources for the main source code and its
+    unit tests.
+  </description>
+  <inceptionYear>2001</inceptionYear>
 
   <prerequisites>
     <maven>2.0.6</maven>
   </prerequisites>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/maven/plugins/tags/maven-jar-plugin-2.3.1</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/maven/plugins/tags/maven-jar-plugin-2.3.1</developerConnection>
-    <url>http://svn.apache.org/viewvc/maven/plugins/tags/maven-jar-plugin-2.3.1</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/maven/plugins/tags/maven-resources-plugin-2.4.3</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/maven/plugins/tags/maven-resources-plugin-2.4.3</developerConnection>
+    <url>http://svn.apache.org/viewvc/maven/plugins/tags/maven-resources-plugin-2.4.3</url>
   </scm>
   <issueManagement>
     <system>JIRA</system>
-    <url>http://jira.codehaus.org/browse/MJAR</url>
+    <url>http://jira.codehaus.org/browse/MRESOURCES</url>
   </issueManagement>
 
   <properties>
     <mavenVersion>2.0.6</mavenVersion>
   </properties>
-
+    
   <dependencies>
     <dependency>
       <groupId>org.apache.maven</groupId>
@@ -79,9 +74,8 @@ under the License.
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
-      <artifactId>maven-model</artifactId>
+      <artifactId>maven-core</artifactId>
       <version>${mavenVersion}</version>
-      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
@@ -90,44 +84,48 @@ under the License.
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
-      <artifactId>maven-archiver</artifactId>
-      <version>2.4.1</version>
+      <artifactId>maven-settings</artifactId>
+      <version>${mavenVersion}</version>
     </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-model</artifactId>
+      <version>${mavenVersion}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-monitor</artifactId>
+      <version>${mavenVersion}</version>
+    </dependency>
+
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
-      <artifactId>plexus-archiver</artifactId>
-      <version>1.0</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.codehaus.plexus</groupId>
-          <artifactId>plexus-container-default</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.codehaus.plexus</groupId>
-          <artifactId>plexus-component-api</artifactId>
-        </exclusion>
-      </exclusions>
+      <artifactId>plexus-container-default</artifactId>
+      <version>1.0-alpha-9-stable-1</version>
     </dependency>
-    <dependency>
-      <groupId>commons-lang</groupId>
-      <artifactId>commons-lang</artifactId>
-      <version>2.1</version>
-    </dependency>
+
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
       <artifactId>plexus-utils</artifactId>
       <version>2.0.5</version>
     </dependency>
+
     <dependency>
-      <groupId>org.apache.maven.plugin-testing</groupId>
-      <artifactId>maven-plugin-testing-harness</artifactId>
-      <version>1.2</version>
-      <scope>test</scope>
+      <groupId>org.apache.maven.shared</groupId>
+      <artifactId>maven-filtering</artifactId>
+      <version>1.0-beta-4</version>
     </dependency>
+
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.2</version>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-interpolation</artifactId>
+      <version>1.13</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.maven.shared</groupId>
+      <artifactId>maven-plugin-testing-harness</artifactId>
+      <version>1.0-beta-1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -140,21 +138,24 @@ under the License.
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-invoker-plugin</artifactId>
-            <version>1.4</version>
+            <version>1.5</version>
             <configuration>
+              <debug>true</debug>
               <projectsDirectory>src/it</projectsDirectory>
-              <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
               <pomIncludes>
-                <pomInclude>*/pom.xml</pomInclude>
+                <pomInclude>**/pom.xml</pomInclude>
               </pomIncludes>
               <postBuildHookScript>verify</postBuildHookScript>
               <localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath>
               <goals>
                 <goal>clean</goal>
-                <goal>package</goal>
+                <goal>process-test-resources</goal>
               </goals>
               <settingsFile>src/it/settings.xml</settingsFile>
-              <debug>true</debug>
+              <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
+              <properties>
+                <execProps>fromExecProps</execProps>
+              </properties>
             </configuration>
             <executions>
               <execution>
@@ -170,4 +171,5 @@ under the License.
       </build>
     </profile>
   </profiles>
+
 </project>
