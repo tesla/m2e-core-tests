@@ -1,7 +1,8 @@
 <settings>
+  <localRepository>target/localrepo</localRepository>
 
   <profiles>
-   <profile>
+    <profile>
       <id>development</id>
       <repositories>
         <repository>
@@ -48,9 +49,9 @@
         </pluginRepository>
       </pluginRepositories>
     </profile>
-   </profiles>
-    <activeProfiles>
-        <activeProfile>development</activeProfile>
-    </activeProfiles>
+  </profiles>
+  <activeProfiles>
+    <activeProfile>development</activeProfile>
+  </activeProfiles>
 </settings>
 

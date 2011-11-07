@@ -1,4 +1,5 @@
 <settings>
+  <localRepository>target/localrepo</localRepository>
   <servers>
     <server>
       <id>nexus</id>

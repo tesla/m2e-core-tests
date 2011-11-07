@@ -1,13 +1,14 @@
 <settings>
-<mirrors>
-  <mirror>
-    <id>nexus</id>
-    <mirrorOf>external:*,!jboss</mirrorOf>
-    <url>http://repository.sonatype.org/content/repositories/eclipse</url>
-  </mirror>
-</mirrors>
+  <localRepository>target/localrepo</localRepository>
+  <mirrors>
+    <mirror>
+      <id>nexus</id>
+      <mirrorOf>external:*,!jboss</mirrorOf>
+      <url>http://repository.sonatype.org/content/repositories/eclipse</url>
+    </mirror>
+  </mirrors>
   <profiles>
-   <profile>
+    <profile>
       <id>development</id>
       <repositories>
         <repository>
@@ -44,9 +45,9 @@
         </pluginRepository>
       </pluginRepositories>
     </profile>
-   </profiles>
-    <activeProfiles>
-        <activeProfile>development</activeProfile>
-    </activeProfiles>
+  </profiles>
+  <activeProfiles>
+    <activeProfile>development</activeProfile>
+  </activeProfiles>
 </settings>
 

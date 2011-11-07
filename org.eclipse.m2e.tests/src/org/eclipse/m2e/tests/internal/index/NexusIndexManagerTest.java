@@ -417,9 +417,8 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
 
       String repoUrl = "http://bad.host/repositories/remoterepo";
       updateIndex(repoUrl);
-      
-      IndexedArtifactGroup[] rootGroups = indexManager
-          .getRootIndexedArtifactGroups(getRepository(repoUrl));
+
+      IndexedArtifactGroup[] rootGroups = indexManager.getRootIndexedArtifactGroups(getRepository(repoUrl));
       assertTrue(rootGroups.length > 0);
     } finally {
       httpServer.stop();
@@ -427,6 +426,8 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
   }
 
   public void testMngEclipse1907() throws Exception {
+    mavenConfiguration.setUserSettingsFile(new File("settings.xml").getCanonicalPath());
+
     IProject project = importProject("projects/projectimport/p001/pom.xml", new ResolverConfiguration());
     waitForJobsToComplete();
 
