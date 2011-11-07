@@ -62,7 +62,7 @@ public class ManagedArtifactMarkerTest extends AbstractMavenProjectTestCase {
   //splitted the test in two as both projects failed to load together!!!! why? shall I bother?
   public void testMNGEclipse2559Second() throws Exception {
     ResolverConfiguration config = new ResolverConfiguration();
-    config.setActiveProfiles("plug,depend");
+    config.setSelectedProfiles("plug,depend");
     IProject[] projects = importProjects("projects/MNGECLIPSE-2559", new String[] {"withProfileActivated/pom.xml"},
         config);
     waitForJobsToComplete();

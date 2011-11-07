@@ -160,7 +160,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
 
     ResolverConfiguration configuration = new ResolverConfiguration();
     configuration.setResolveWorkspaceProjects(false);
-    configuration.setActiveProfiles("");
+    configuration.setSelectedProfiles("");
 
     importManager.enableMavenNature(project1, configuration, monitor);
     importManager.enableMavenNature(project2, configuration, monitor);
@@ -177,7 +177,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
 
     ResolverConfiguration configuration = new ResolverConfiguration();
     configuration.setResolveWorkspaceProjects(true);
-    configuration.setActiveProfiles("jaxb1");
+    configuration.setSelectedProfiles("jaxb1");
 
     IProject project = importProject("projects/MNGECLIPSE-353/pom.xml", configuration);
 
@@ -198,7 +198,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
 
     ResolverConfiguration configuration = new ResolverConfiguration();
     configuration.setResolveWorkspaceProjects(true);
-    configuration.setActiveProfiles("jaxb20");
+    configuration.setSelectedProfiles("jaxb20");
 
     IProject project = importProject("projects/MNGECLIPSE-353/pom.xml", configuration);
 
@@ -261,7 +261,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
 
     ResolverConfiguration configuration = new ResolverConfiguration();
     configuration.setResolveWorkspaceProjects(true);
-    configuration.setActiveProfiles("");
+    configuration.setSelectedProfiles("");
 
     IProject project1 = importProject("projects/dependencyorder/p1/pom.xml", configuration);
     IProject project2 = importProject("projects/dependencyorder/p2/pom.xml", configuration);
@@ -287,7 +287,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
 
     ResolverConfiguration configuration = new ResolverConfiguration();
     configuration.setResolveWorkspaceProjects(true);
-    configuration.setActiveProfiles("");
+    configuration.setSelectedProfiles("");
 
     IProject p3 = importProject("projects/dependencyorder/p3/pom.xml", configuration);
     p3.build(IncrementalProjectBuilder.FULL_BUILD, null);
