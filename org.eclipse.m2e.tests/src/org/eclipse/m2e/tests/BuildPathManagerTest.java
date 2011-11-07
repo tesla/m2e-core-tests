@@ -1131,4 +1131,16 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
 
     assertNoErrors(project);
   }
+
+  public void test360962_forbiddenReferencePreference() throws Exception {
+    IProject project = importProject("projects/360962_forbiddenReferencePreference/custom/pom.xml");
+    waitForJobsToComplete();
+    IJavaProject jproject = JavaCore.create(project);
+    assertEquals("error", jproject.getOption(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE, false));
+
+    project = importProject("projects/360962_forbiddenReferencePreference/default/pom.xml");
+    waitForJobsToComplete();
+    jproject = JavaCore.create(project);
+    assertEquals("warning", jproject.getOption(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE, false));
+  }
 }
