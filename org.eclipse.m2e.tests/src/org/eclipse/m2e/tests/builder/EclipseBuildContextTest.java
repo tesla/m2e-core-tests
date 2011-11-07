@@ -16,8 +16,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import org.codehaus.plexus.util.Scanner;
 import org.eclipse.core.resources.IProject;
+
+import org.codehaus.plexus.util.Scanner;
 
 import org.eclipse.m2e.core.internal.builder.EclipseBuildContext;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
@@ -46,6 +47,19 @@ public class EclipseBuildContextTest extends AbstractMavenProjectTestCase {
 
     List<String> included = Arrays.asList(scanner.getIncludedFiles());
     assertTrue(included.toString(), included.contains("sub" + File.separator + "dir" + File.separator + "file.txt"));
+  }
+
+  public void test361038_buildContext_scan_nonExistingFolder() throws Exception {
+    IProject project = importProject("projects/361038_buildContext_scan_nonExistingFolder/pom.xml");
+
+    EclipseBuildContext context = new EclipseBuildContext(project, new HashMap<String, Object>());
+
+    Scanner scanner = context.newScanner(new File(project.getLocation().toFile(), "doesnotexist"));
+
+    scanner.setIncludes(new String[] {"**/*"});
+    scanner.scan();
+
+    assertEquals(0, scanner.getIncludedFiles().length);
   }
 
 }
