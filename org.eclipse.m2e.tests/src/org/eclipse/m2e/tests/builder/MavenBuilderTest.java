@@ -40,6 +40,8 @@ public class MavenBuilderTest extends AbstractMavenProjectTestCase {
     deleteProject("resourcefiltering-p001");
     IProject project = createExisting("resourcefiltering-p001", "projects/resourcefiltering/p001");
     waitForJobsToComplete();
+    
+    assertNoErrors(project);
 
     IPath resourcesPath = project.getFolder("target/classes").getFullPath();
     IPath testResourcesPath = project.getFolder("target/test-classes").getFullPath();
