@@ -51,6 +51,7 @@ public class EclipseBuildContextTest extends AbstractMavenProjectTestCase {
 
   public void test361038_buildContext_scan_nonExistingFolder() throws Exception {
     IProject project = importProject("projects/361038_buildContext_scan_nonExistingFolder/pom.xml");
+    assertNoErrors(project);
 
     EclipseBuildContext context = new EclipseBuildContext(project, new HashMap<String, Object>());
 
