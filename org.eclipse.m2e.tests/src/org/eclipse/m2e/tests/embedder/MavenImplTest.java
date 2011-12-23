@@ -40,6 +40,7 @@ import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.ArtifactKey;
 import org.eclipse.m2e.core.embedder.ILocalRepositoryListener;
 import org.eclipse.m2e.core.embedder.IMavenConfiguration;
+import org.eclipse.m2e.core.internal.MavenPluginActivator;
 import org.eclipse.m2e.core.internal.embedder.MavenImpl;
 import org.eclipse.m2e.core.internal.repository.RepositoryRegistry;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
@@ -466,4 +467,48 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
     }
   }
 
+  public void test366839_userAgent() throws Exception {
+    HttpServer httpServer = new HttpServer();
+    httpServer.addResources("/", "");
+    httpServer.enableRecording(".*");
+    httpServer.start();
+
+    String origSettings = configuration.getUserSettingsFile();
+    try {
+      File settingsFile = new File("target/settings-366839.xml");
+      FileHelpers.filterXmlFile(new File("projects/366839_user_agent/settings-template.xml"), settingsFile,
+          Collections.singletonMap("@port.http@", Integer.toString(httpServer.getHttpPort())));
+      configuration.setUserSettingsFile(settingsFile.getCanonicalPath());
+
+      try {
+        FileHelpers.deleteDirectory(new File("target/localrepo/missing"));
+        maven.resolve("missing", "missing", "1", "jar", null, null, monitor);
+      } catch(CoreException ignored) {
+        // we only check http request headers
+      }
+
+      assertFalse(httpServer.getRecordedRequests().isEmpty());
+      for(String httpRequest : httpServer.getRecordedRequests()) {
+        String uri = httpRequest.split(" ")[1];
+        assertEquals(MavenPluginActivator.getUserAgent(), httpServer.getRecordedHeaders(uri).get("User-Agent"));
+      }
+
+      httpServer.resetRecording();
+
+      FileHelpers.deleteDirectory(new File("target/localrepo/missing"));
+      MavenExecutionRequest request = maven.createExecutionRequest(monitor);
+      request.setPom(new File("projects/366839_user_agent/pom.xml"));
+      maven.readProject(request, monitor);
+
+      assertFalse(httpServer.getRecordedRequests().isEmpty());
+      for(String httpRequest : httpServer.getRecordedRequests()) {
+        String uri = httpRequest.split(" ")[1];
+        assertEquals(MavenPluginActivator.getUserAgent(), httpServer.getRecordedHeaders(uri).get("User-Agent"));
+      }
+
+    } finally {
+      configuration.setUserSettingsFile(origSettings);
+      httpServer.stop();
+    }
+  }
 }
