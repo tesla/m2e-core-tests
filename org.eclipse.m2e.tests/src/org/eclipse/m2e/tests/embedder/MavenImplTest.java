@@ -19,6 +19,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.codehaus.plexus.util.FileUtils;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.execution.MavenExecutionRequest;
@@ -29,10 +35,7 @@ import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.wagon.proxy.ProxyInfo;
-import org.codehaus.plexus.util.FileUtils;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.ArtifactKey;
 import org.eclipse.m2e.core.embedder.ILocalRepositoryListener;
@@ -293,13 +296,14 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
   }
 
   public void testProxySupport() throws Exception {
-    FileHelpers.deleteDirectory(new File("target/localrepo/org/eclipse/m2e/tests/its/mngeclipse-2126"));
+    FileHelpers.deleteDirectory(new File("target/localrepo/org/eclipse/m2e/test/mngeclipse-2126"));
 
     HttpServer httpServer = new HttpServer();
     httpServer.addResources("/", "");
     httpServer.addSecuredRealm("/repositories/*", "auth");
     httpServer.addUser("testuser", "testpass", "auth");
     httpServer.setProxyAuth("proxyuser", "proxypass");
+    httpServer.enableRecording(".*mngeclipse-2126.*");
     httpServer.start();
 
     String origSettings = configuration.getUserSettingsFile();
@@ -313,6 +317,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
       request.getProjectBuildingRequest().setResolveDependencies(true);
       request.setPom(new File("projects/MNGECLIPSE-2126/pom.xml"));
       MavenExecutionResult result = maven.readProject(request, monitor);
+      assertFalse(httpServer.getRecordedRequests().isEmpty());
       assertFalse(result.getExceptions().toString(), result.hasExceptions());
       assertTrue(result.getDependencyResolutionResult().getUnresolvedDependencies().toString(), result
           .getDependencyResolutionResult().getUnresolvedDependencies().isEmpty());
@@ -332,7 +337,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
   }
 
   public void testSslWithMutualHandshake() throws Exception {
-    FileHelpers.deleteDirectory(new File("target/localrepo/org/eclipse/m2e/tests/its/mngeclipse-2149"));
+    FileHelpers.deleteDirectory(new File("target/localrepo/org/eclipse/m2e/its/mngeclipse-2149"));
 
     HttpServer httpServer = new HttpServer();
     httpServer.setHttpPort(-1);
@@ -341,6 +346,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
     httpServer.setKeyStore("resources/ssl/server-store", "server-pwd");
     httpServer.setTrustStore("resources/ssl/client-store", "client-pwd");
     httpServer.setNeedClientAuth(true);
+    httpServer.enableRecording(".*mngeclipse-2149.*");
     httpServer.start();
 
     String origSettings = configuration.getUserSettingsFile();
@@ -362,6 +368,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
       request.getProjectBuildingRequest().setResolveDependencies(true);
       request.setPom(new File("projects/MNGECLIPSE-2149/pom.xml"));
       MavenExecutionResult result = maven.readProject(request, monitor);
+      assertFalse(httpServer.getRecordedRequests().isEmpty());
       assertFalse(result.getExceptions().toString(), result.hasExceptions());
       assertTrue(result.getDependencyResolutionResult().getUnresolvedDependencies().toString(), result
           .getDependencyResolutionResult().getUnresolvedDependencies().isEmpty());
