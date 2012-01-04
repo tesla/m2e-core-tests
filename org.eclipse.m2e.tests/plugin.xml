@@ -268,4 +268,12 @@
             class="org.eclipse.m2e.tests.internal.index.filter.IndexFilterTest$TestIndexFilter">
       </artifactFilter>
    </extension>
+   <extension
+         point="org.eclipse.m2e.core.projectConversionParticipants">
+      <projectConversionParticipant
+            class="org.eclipse.m2e.tests.conversion.TestProjectConversionParticipant"
+            id="org.eclipse.m2e.tests.conversion.testProjectConversionParticipant"
+            name="Test project conversion participant" >
+      </projectConversionParticipant>   
+   </extension>   
 </plugin>
