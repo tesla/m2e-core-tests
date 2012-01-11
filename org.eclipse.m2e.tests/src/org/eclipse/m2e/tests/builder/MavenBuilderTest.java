@@ -18,6 +18,7 @@ import java.util.Properties;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.CoreException;
@@ -34,13 +35,14 @@ import org.eclipse.m2e.core.project.IMavenProjectRegistry;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 
+
 public class MavenBuilderTest extends AbstractMavenProjectTestCase {
 
   public void test001_standardLayout() throws Exception {
     deleteProject("resourcefiltering-p001");
     IProject project = createExisting("resourcefiltering-p001", "projects/resourcefiltering/p001");
     waitForJobsToComplete();
-    
+
     assertNoErrors(project);
 
     IPath resourcesPath = project.getFolder("target/classes").getFullPath();
@@ -183,19 +185,19 @@ public class MavenBuilderTest extends AbstractMavenProjectTestCase {
     project.build(IncrementalProjectBuilder.AUTO_BUILD, monitor);
     assertTrue(aFile.isAccessible());
   }
-  
+
   public void test010_properties() throws Exception {
     IProject project = createExisting("resourcefiltering-p010", "projects/resourcefiltering/p010");
     waitForJobsToComplete();
-    
+
     project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
     waitForJobsToComplete();
-    
+
     IFile aFile = project.getFile("target/test-classes/b.properties");
     assertTrue(aFile.exists());
     assertTrue(aFile.isAccessible());
   }
-  
+
   public void test_crossproject() throws Exception {
     IProject[] projects = importProjects("projects/resourcefiltering/crossproject", new String[] {"module-a/pom.xml",
         "module-b/pom.xml"}, new ResolverConfiguration());
@@ -273,4 +275,16 @@ public class MavenBuilderTest extends AbstractMavenProjectTestCase {
     }
   }
 
+  public void test368380_buildContextDeepRefreshFromLocal() throws Exception {
+    IProject project = importProject("projects/368380_buildContextDeepRefreshFromLocal/pom.xml");
+    waitForJobsToComplete();
+    assertNoErrors(project);
+
+    project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+    waitForJobsToComplete();
+
+    IFolder folder = project.getFolder("target/custom");
+    assertTrue(folder.exists());
+    assertTrue(folder.isSynchronized(IResource.DEPTH_INFINITE));
+  }
 }
