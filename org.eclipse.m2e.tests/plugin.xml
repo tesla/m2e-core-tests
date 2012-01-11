@@ -61,6 +61,10 @@
             name="TEST_SECONDARY2"
             secondaryTo="org.eclipse.m2e.configurator.test">
       </configurator>
+      <configurator
+            class="org.eclipse.m2e.tests.jdt.TestJavaCodeGenerationProjectConfigurator"
+            id="org.eclipse.m2e.tests.TestJavaCodeGenerationProjectConfigurator">
+      </configurator>
    </extension>
    
    <extension
