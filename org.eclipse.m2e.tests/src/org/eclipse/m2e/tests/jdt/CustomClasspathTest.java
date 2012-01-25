@@ -11,6 +11,8 @@
 
 package org.eclipse.m2e.tests.jdt;
 
+import org.junit.Assert;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -18,7 +20,10 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
+import org.eclipse.m2e.jdt.IClasspathManager;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
+
+import static org.eclipse.m2e.tests.common.ClasspathHelpers.*;
 
 
 public class CustomClasspathTest extends AbstractMavenProjectTestCase {
@@ -64,5 +69,26 @@ public class CustomClasspathTest extends AbstractMavenProjectTestCase {
     assertEquals("/customclasspath-p001/src/main/java3", cp[2].getPath().toPortableString()); // <= main sources
     assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", cp[3].getPath().segment(0));
     assertEquals("org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER", cp[4].getPath().segment(0));
+  }
+
+  public void testClasspathContainers() throws Exception {
+    IProject project = importProject("customclasspath-classpath-containers",
+        "projects/customclasspath/classpath-containers", new ResolverConfiguration());
+
+    IJavaProject javaProject = JavaCore.create(project);
+    IClasspathEntry[] cp = javaProject.getRawClasspath();
+
+    assertEquals(5, cp.length);
+
+    assertClasspath(new String[] {//
+        "container1",//
+            "/customclasspath-classpath-containers/src/main/java", //
+            "/customclasspath-classpath-containers/src/test/java", //
+            "org.eclipse.jdt.launching.JRE_CONTAINER/.*",//
+            "org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER"//
+        }, cp);
+
+    Assert
+        .assertNull(getClasspathAttribute(getClasspathEntry(cp, "container1"), IClasspathManager.POMDERIVED_ATTRIBUTE));
   }
 }
