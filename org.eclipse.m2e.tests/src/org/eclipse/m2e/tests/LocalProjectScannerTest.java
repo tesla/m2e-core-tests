@@ -256,5 +256,22 @@ public class LocalProjectScannerTest extends TestCase {
 
     assertEquals(1, projects.size());
   }
+  
+  public void testOutsideWorkspace() throws Exception {
+    
+    File baseDir = new File("projects/localprojectscanner/341038_projectsOutsideWorkspaceNotRenamed").getCanonicalFile();
+    
+    //the workspace folder is pointing on nothing because we don't want to have projectFolder equal to workspaceFolder 
+    File workspaceFolder = new File ("anywhere but not the same as project folder");
+  
+    LocalProjectScanner scanner = new LocalProjectScanner(workspaceFolder,
+        baseDir.getAbsolutePath(), true, modelManager);
+    scanner.run(new NullProgressMonitor());
+    
+    List<MavenProjectInfo> projects = scanner.getProjects();
+    MavenProjectInfo project = projects.get(0);
+
+    assertEquals(MavenProjectInfo.RENAME_REQUIRED, project.getBasedirRename());
+  }
 
 }
