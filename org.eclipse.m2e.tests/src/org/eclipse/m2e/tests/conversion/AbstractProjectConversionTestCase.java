@@ -35,7 +35,7 @@ import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
  *
  * @author Fred Bricon
  */
-public class AbstractProjectConversionTestCase extends AbstractMavenProjectTestCase {
+public abstract class AbstractProjectConversionTestCase extends AbstractMavenProjectTestCase {
   
   /**
    * Instanciates a new default Maven Model, using the projectName as groupId and artifactId,
