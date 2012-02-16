@@ -15,7 +15,7 @@
   <packaging>pom</packaging>
 
   <properties>
-    <tycho-version>0.12.0</tycho-version>
+    <tycho-version>0.14.0</tycho-version>
 
     <eclipse-repo.url>http://download.eclipse.org/releases/indigo</eclipse-repo.url>
     <m2e-core.url>https://repository.sonatype.org/content/repositories/forge-sites/m2e/1.1.0/N/LATEST/</m2e-core.url>
