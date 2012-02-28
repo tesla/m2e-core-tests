@@ -26,7 +26,7 @@ import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import static org.eclipse.m2e.tests.common.ClasspathHelpers.*;
 
 
-public class CustomClasspathTest extends AbstractMavenProjectTestCase {
+public class JavaClasspathTest extends AbstractMavenProjectTestCase {
 
   public void testImport() throws Exception {
     IProject project = importProject("customclasspath-p001", "projects/customclasspath/p001",
@@ -91,4 +91,31 @@ public class CustomClasspathTest extends AbstractMavenProjectTestCase {
     Assert
         .assertNull(getClasspathAttribute(getClasspathEntry(cp, "container1"), IClasspathManager.POMDERIVED_ATTRIBUTE));
   }
+  
+  public void test370685_PreserveResourcesOnUpdate() throws Exception {
+    IProject project = importProject("projects/370685_missingResources/pom.xml");
+    //assertNoErrors(project);
+
+    IJavaProject javaProject = JavaCore.create(project);
+    IClasspathEntry[] originalCp = javaProject.getRawClasspath();
+
+    assertEquals(5, originalCp.length);
+    assertEquals("/project/src/main/java", originalCp[0].getPath().toPortableString()); 
+    assertEquals("/project/src/main/resources", originalCp[1].getPath().toPortableString()); 
+    assertEquals("/project/src/test/java", originalCp[2].getPath().toPortableString()); 
+    assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", originalCp[3].getPath().segment(0));
+    assertEquals("org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER", originalCp[4].getPath().segment(0));
+    
+    MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
+    waitForJobsToComplete();
+    //assertNoErrors(project);
+    
+    javaProject = JavaCore.create(project);
+    IClasspathEntry[] updatedCp = javaProject.getRawClasspath();
+    assertEquals("classpath changed on update", originalCp.length, updatedCp.length);
+    for (int i=0; i < originalCp.length; i++) {
+      assertEquals("classpath entry changed", originalCp[i], updatedCp[i]); 
+    }
+  }
+  
 }
