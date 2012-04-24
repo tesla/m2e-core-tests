@@ -125,7 +125,7 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     waitForJobsToComplete();
     expectedErrorMessage = ThrowBuildExceptionProjectConfigurator.ERROR_MESSAGE;
     IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_BUILD_ID, expectedErrorMessage,
-        2 /*lineNumber*/, project);
+        56 /*lineNumber*/, project);
     assertTrue(marker.getAttribute(IMarker.MESSAGE).toString()
         .endsWith(" (org.apache.maven.plugins:maven-deploy-plugin:2.5:deploy:default-deploy:deploy)"));
 
@@ -133,7 +133,7 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
     waitForJobsToComplete();
     IMarker newMarker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_BUILD_ID, expectedErrorMessage,
-        2 /*lineNumber*/, project);
+        56 /*lineNumber*/, project);
     assertFalse(marker.getId() == newMarker.getId());
   }
 
