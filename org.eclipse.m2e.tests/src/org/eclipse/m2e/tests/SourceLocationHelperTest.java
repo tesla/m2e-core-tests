@@ -126,12 +126,12 @@ public class SourceLocationHelperTest extends AbstractMavenProjectTestCase {
     MojoExecutionKey mojoExecutionKey = getMojoExecutionKey("org.apache.maven.plugins", "maven-clean-plugin",
         ((MavenProjectFacade) facade).getMojoExecutions());
     SourceLocation sourceLocation = SourceLocationHelper.findLocation(parentMavenProject, mojoExecutionKey);
-    assertSourceLocation(new SourceLocation(7, 3, 13), sourceLocation);
+    assertSourceLocation(new SourceLocation(13, 3, 13), sourceLocation);
     // Plugin from current pom
     mojoExecutionKey = getMojoExecutionKey("org.apache.maven.plugins", "maven-install-plugin",
         ((MavenProjectFacade) facade).getMojoExecutions());
     sourceLocation = SourceLocationHelper.findLocation(parentMavenProject, mojoExecutionKey);
-    assertSourceLocation(new SourceLocation(11, 7, 14), sourceLocation);
+    assertSourceLocation(new SourceLocation(17, 7, 14), sourceLocation);
 
     facade = importMavenProject("projects/markers/SourceLocationHelperTest/testMojoExecutionLocation",
         "parent/child/pom.xml");
@@ -154,7 +154,7 @@ public class SourceLocationHelperTest extends AbstractMavenProjectTestCase {
         ((MavenProjectFacade) facade).getMojoExecutions());
     sourceLocation = SourceLocationHelper.findLocation(mavenProject, mojoExecutionKey);
     assertSourceLocation(new SourceLocation(5, 3, 10, new SourceLocation(
-        parentMavenProject.getFile().getAbsolutePath(), WorkspaceHelpers.getModelId(parentMavenProject), 11, 7, 14)),
+        parentMavenProject.getFile().getAbsolutePath(), WorkspaceHelpers.getModelId(parentMavenProject), 17, 7, 14)),
         sourceLocation);
   }
 
@@ -166,10 +166,10 @@ public class SourceLocationHelperTest extends AbstractMavenProjectTestCase {
     // Dependency from current pom
     Dependency dependency = getDependency("missing", "missing-parent1", parentMavenProject);
     SourceLocation sourceLocation = SourceLocationHelper.findLocation(parentMavenProject, dependency);
-    assertSourceLocation(new SourceLocation(10, 5, 16), sourceLocation);
+    assertSourceLocation(new SourceLocation(16, 5, 16), sourceLocation);
     dependency = getDependency("missing", "missing-parent2", parentMavenProject);
     sourceLocation = SourceLocationHelper.findLocation(parentMavenProject, dependency);
-    assertSourceLocation(new SourceLocation(15, 5, 16), sourceLocation);
+    assertSourceLocation(new SourceLocation(21, 5, 16), sourceLocation);
 
     facade = importMavenProject("projects/markers/SourceLocationHelperTest/testDependencyLocation",
         "parent/child/pom.xml");
@@ -186,7 +186,7 @@ public class SourceLocationHelperTest extends AbstractMavenProjectTestCase {
     dependency = getDependency("missing", "missing-parent1", mavenProject);
     sourceLocation = SourceLocationHelper.findLocation(mavenProject, dependency);
     SourceLocation cause = new SourceLocation(parentMavenProject.getFile().getAbsolutePath(),
-        WorkspaceHelpers.getModelId(parentMavenProject), 10, 5, 16);
+        WorkspaceHelpers.getModelId(parentMavenProject), 16, 5, 16);
     assertSourceLocation(new SourceLocation(5, 3, 10, cause), sourceLocation);
   }
 
