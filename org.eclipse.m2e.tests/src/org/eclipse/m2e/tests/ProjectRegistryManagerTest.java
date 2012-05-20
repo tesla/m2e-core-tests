@@ -355,7 +355,6 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertEquals("repository", f1.getMavenProject(monitor).getProperties().get("property"));
   }
 
-  
   public void test006_parentAvailableFromLocalRepoAndWorkspace01() throws Exception {
     boolean oldSuspended = Job.getJobManager().isSuspended();
 
@@ -476,7 +475,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     waitForJobsToComplete();
 
     boolean origSuspended = Job.getJobManager().isSuspended();
-    
+
     Job.getJobManager().suspend();
     try {
       // sanity check
@@ -930,8 +929,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     IProject[] projects = importProjects("projects/simple-pom", new String[] {"pom.xml"}, new ResolverConfiguration());
     assertEquals(1, projects.length);
     assertNotNull(projects[0]);
-    Artifact artifact = new DefaultArtifact("org.eclipse.m2e.projects", "simple-pom", "1.0.0", null, "pom", "",
-        null);
+    Artifact artifact = new DefaultArtifact("org.eclipse.m2e.projects", "simple-pom", "1.0.0", null, "pom", "", null);
     artifact = manager.getWorkspaceLocalRepository().find(artifact);
     assertTrue(artifact.isResolved());
     assertNotNull(artifact.getFile());
@@ -1044,7 +1042,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     a1 = new ArrayList<Artifact>(f1.getMavenProject(monitor).getArtifacts());
     assertEquals(1, a1.size());
     assertTrue(a1.get(0).isResolved());
-    
+
     f2 = manager.create(projects[1], monitor);
     a2 = new ArrayList<Artifact>(f2.getMavenProject(monitor).getArtifacts());
     assertEquals(1, a2.size());
@@ -1083,7 +1081,19 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     }
   }
 
-  public void test358620_reparse_changed_user_settings() throws Exception {
+  public void bug343568_malformedDependencyElement() throws Exception {
+    IProject p = importProject("projects/343568_missingAndAvailableDependencies/pom.xml");
+    waitForJobsToComplete();
+    MavenProjectFacade f = manager.create(p, monitor);
+    List<Artifact> a = new ArrayList<Artifact>(f.getMavenProject(monitor).getArtifacts());
+    assertEquals(1, a.size());
+    assertTrue(a.get(0).isResolved());
+    assertEquals("junit", a.get(0).getArtifactId());
 
+    String expectedErrorMessage = "Project build error: 'dependencies.dependency.version' for missing:missing:jar is missing.";
+    List<IMarker> markers = WorkspaceHelpers.findErrorMarkers(p);
+    assertEquals(WorkspaceHelpers.toString(markers), 1, markers.size());
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_POM_LOADING_ID, expectedErrorMessage, 21 /*lineNumber*/,
+        p);
   }
 }

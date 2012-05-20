@@ -215,8 +215,8 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
         null, null, "pom.xml", project);
 
     copyContent(project, new File("projects/staleconfiguration/missingextension/pom-changed.xml"), "pom.xml");
-    WorkspaceHelpers.assertMarker(IMavenConstants.MARKER_CONFIGURATION_ID, IMarker.SEVERITY_ERROR,
-        Messages.ProjectConfigurationUpdateRequired, null, null, project);
+    WorkspaceHelpers.assertNoErrors(project);
+    WorkspaceHelpers.assertNoWarnings(project);
 
     final IMavenProjectFacade projectFacade = MavenPlugin.getMavenProjectRegistry().create(project, monitor);
 
