@@ -34,6 +34,7 @@ import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.IMavenProjectRegistry;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
+import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
 
 public class MavenBuilderTest extends AbstractMavenProjectTestCase {
@@ -286,5 +287,19 @@ public class MavenBuilderTest extends AbstractMavenProjectTestCase {
     IFolder folder = project.getFolder("target/custom");
     assertTrue(folder.exists());
     assertTrue(folder.isSynchronized(IResource.DEPTH_INFINITE));
+  }
+
+  public void test380096_cleanProjectWithLifecycleMappingProblemsAfterWorkspaceRestart() throws Exception {
+    IProject project = importProject("projects/380096_cleanProjectWithLifecycleMappingProblemsAfterWorkspaceRestart/pom.xml");
+    waitForJobsToComplete();
+
+    String message = "Plugin execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-buildhelper-plugin:1.0.0:publish (execution: add-source, phase: generate-sources)";
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, message, 23, project);
+
+    deserializeFromWorkspaceState(MavenPlugin.getMavenProjectRegistry().create(project, monitor));
+
+    // this is supposed to succeed
+    project.build(IncrementalProjectBuilder.CLEAN_BUILD, monitor);
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, message, 23, project);
   }
 }
