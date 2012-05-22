@@ -17,6 +17,7 @@ import org.eclipse.m2e.tests.configurators.TestLifecycleMapping;
 
 
 public class LifecycleMappingMetadataPrioritiesTest extends AbstractLifecycleMappingTest {
+  
   // Tests lifecycle mapping declared in default lifecycle mapping metadata
   public void testDefaultMetadataSource() throws Exception {
     LifecycleMappingMetadataSource defaultMetadata = loadLifecycleMappingMetadataSource("projects/lifecyclemapping/lifecycleMappingMetadata/LifecycleMappingMetadataPrioritiesTest/defaultMetadata.xml");
@@ -133,4 +134,5 @@ public class LifecycleMappingMetadataPrioritiesTest extends AbstractLifecycleMap
     WorkspaceHelpers.assertLifecycleIdErrorMarkerAttributes(marker,
         "no such lifecycle mapping for test-packaging-a - override");
   }
+  
 }
