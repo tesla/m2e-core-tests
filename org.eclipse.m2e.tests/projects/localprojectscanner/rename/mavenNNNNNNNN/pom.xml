@@ -4,4 +4,7 @@
   <groupId>rename</groupId>
   <artifactId>maven-project</artifactId>
   <version>0.0.1-SNAPSHOT</version>
+  <modules>
+  	<module>384510_subNotRenamed</module>
+  </modules>
 </project>

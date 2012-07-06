@@ -23,6 +23,7 @@ import java.util.TreeMap;
 
 import junit.framework.TestCase;
 
+import org.eclipse.core.internal.resources.ProjectInfo;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.m2e.core.MavenPlugin;
@@ -244,6 +245,12 @@ public class LocalProjectScannerTest extends TestCase {
 
     MavenProjectInfo project = projects.get(0);
     assertEquals(MavenProjectInfo.RENAME_REQUIRED, project.getBasedirRename());
+    
+    //Non of the sub modules should be renamed
+    for(MavenProjectInfo subProject : project.getProjects()) {
+      assertEquals(MavenProjectInfo.RENAME_NO, subProject.getBasedirRename());  
+    }
+
   }
 
   public void testNoMetadata() throws Exception {
@@ -271,7 +278,14 @@ public class LocalProjectScannerTest extends TestCase {
     List<MavenProjectInfo> projects = scanner.getProjects();
     MavenProjectInfo project = projects.get(0);
 
+    //The base directory should be renamed
     assertEquals(MavenProjectInfo.RENAME_REQUIRED, project.getBasedirRename());
+    
+    //Non of the sub modules should be renamed
+    for(MavenProjectInfo subProject : project.getProjects()) {
+      assertEquals(MavenProjectInfo.RENAME_NO, subProject.getBasedirRename());  
+    }
+    
   }
 
 }
