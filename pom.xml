@@ -18,7 +18,9 @@
     <tycho-version>0.14.0</tycho-version>
 
     <eclipse-repo.url>http://download.eclipse.org/releases/indigo</eclipse-repo.url>
-    <m2e-core.url>https://repository.sonatype.org/content/repositories/forge-sites/m2e/1.1.0/N/LATEST/</m2e-core.url>
+    <m2e-core.url>https://repository.sonatype.org/content/repositories/forge-sites/m2e/1.2.0/N/LATEST/</m2e-core.url>
+    <tycho.test.jvmArgs>-Xmx800m -XX:MaxPermSize=256m</tycho.test.jvmArgs>
+    <tycho.surefire.timeout>600</tycho.surefire.timeout>
   </properties>
 
   <repositories>
@@ -63,7 +65,7 @@
           <configuration>
             <useUIHarness>true</useUIHarness>
             <!-- kill test JVM if tests take more than 10 minutes (600 seconds) to finish -->
-            <forkedProcessTimeoutInSeconds>600</forkedProcessTimeoutInSeconds>
+            <forkedProcessTimeoutInSeconds>${tycho.surefire.timeout}</forkedProcessTimeoutInSeconds>
             <argLine>${tycho.test.jvmArgs}</argLine>
             <includes>
               <include>**/*Test.class</include>
@@ -88,19 +90,6 @@
         <module>org.eclipse.m2e.editor.tests</module>
         <module>org.eclipse.m2e.editor.xml.tests</module>
       </modules>
-    </profile>
-
-    <profile>
-      <id>sun-jvm</id>
-      <activation>
-        <property>
-          <name>java.vendor.url</name>
-          <value>http://java.sun.com/</value>
-        </property>
-      </activation>
-      <properties>
-        <tycho.test.jvmArgs>-Xmx800m -XX:MaxPermSize=256m</tycho.test.jvmArgs>
-      </properties>
     </profile>
 
     <profile>
