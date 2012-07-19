@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src/main/resources">
+	</classpathentry>
+	<classpathentry kind="src" output="test-classes" path="src/test/java">
+	</classpathentry>
+	<classpathentry kind="src" path="src/main/java">
+	</classpathentry>
+	<classpathentry kind="src" path="src/main/optional">
+        <attributes>
+           <attribute name="optional" value="true"/>
+        </attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="test-classes" path="src/test/resources">
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
+	</classpathentry>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

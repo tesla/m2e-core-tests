@@ -29,7 +29,7 @@ import org.eclipse.m2e.tests.common.FileHelpers;
 public class ProjectConversionTest extends AbstractProjectConversionTestCase {
 
   public void testMavenLayoutProjectConversion() throws Exception {
-    //Checks a project with Maven layout don't create extra configuration 
+    //Checks a project with Maven layout doesn't create extra configuration 
     //for source and resource folders 
     testProjectConversion("maven-layout");
   }
@@ -52,6 +52,11 @@ public class ProjectConversionTest extends AbstractProjectConversionTestCase {
     testProjectConversion("multiple-sources");
   }
 
+  public void testOptionalSourceProjectConversion() throws Exception {
+    //Checks a project having optional and missing source directories doesn't crash
+    // during conversion
+    testProjectConversion("missing-source-folder");
+  }
 
   public void testProjectConversionWithSvn() throws Exception {
     //.svn folders are not copied with the default createExisting(...) method
