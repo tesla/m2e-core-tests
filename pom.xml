@@ -15,9 +15,9 @@
   <packaging>pom</packaging>
 
   <properties>
-    <tycho-version>0.14.0</tycho-version>
+    <tycho-version>0.15.0</tycho-version>
 
-    <eclipse-repo.url>http://download.eclipse.org/releases/indigo</eclipse-repo.url>
+    <eclipse-repo.url>http://download.eclipse.org/releases/juno</eclipse-repo.url>
     <m2e-core.url>https://repository.sonatype.org/content/repositories/forge-sites/m2e/1.2.0/N/LATEST/</m2e-core.url>
     <tycho.test.jvmArgs>-Xmx800m -XX:MaxPermSize=256m</tycho.test.jvmArgs>
     <tycho.surefire.timeout>600</tycho.surefire.timeout>
