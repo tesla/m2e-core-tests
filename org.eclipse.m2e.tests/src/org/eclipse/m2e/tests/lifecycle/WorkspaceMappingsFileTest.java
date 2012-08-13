@@ -50,7 +50,7 @@ public class WorkspaceMappingsFileTest extends AbstractLifecycleMappingTest {
     String origText =  mavenConfiguration.getWorkspaceMappings();
     String newText = "blah!";
     mavenConfiguration.setWorkspaceMappings(newText);
-    assertEquals(newText, mavenConfiguration.getWorkspaceMappings());
+    assertEquals(newText + "\n", mavenConfiguration.getWorkspaceMappings());
     mavenConfiguration.setWorkspaceMappings(origText);
     assertEquals(origText, mavenConfiguration.getWorkspaceMappings());
   }
