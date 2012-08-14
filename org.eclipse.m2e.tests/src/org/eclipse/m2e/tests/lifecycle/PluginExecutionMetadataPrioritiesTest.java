@@ -1,14 +1,19 @@
 
 package org.eclipse.m2e.tests.lifecycle;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.List;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 
+import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
+
 import org.eclipse.m2e.core.internal.IMavenConstants;
 import org.eclipse.m2e.core.internal.lifecyclemapping.LifecycleMappingFactory;
 import org.eclipse.m2e.core.internal.lifecyclemapping.model.LifecycleMappingMetadataSource;
+import org.eclipse.m2e.core.internal.lifecyclemapping.model.io.xpp3.LifecycleMappingMetadataSourceXpp3Reader;
 import org.eclipse.m2e.core.internal.markers.SourceLocation;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.configurator.ILifecycleMapping;
@@ -22,9 +27,9 @@ public class PluginExecutionMetadataPrioritiesTest extends AbstractLifecycleMapp
   protected void tearDown() throws Exception {
     super.tearDown();
     // ensure there is no workspace lifecycle mapping
-    setWorkspaceLifecycleMappingMetadataSource("");
+    LifecycleMappingFactory.writeWorkspaceMetadata(new LifecycleMappingMetadataSource());
   }
-  
+
   public void testDefaultMetadataSource() throws Exception {
     LifecycleMappingMetadataSource defaultMetadata = loadLifecycleMappingMetadataSource("projects/lifecyclemapping/lifecycleMappingMetadata/PluginExecutionMetadataPrioritiesTest/defaultMetadata.xml");
     LifecycleMappingFactory.setDefaultLifecycleMappingMetadataSource(defaultMetadata);
@@ -165,10 +170,10 @@ public class PluginExecutionMetadataPrioritiesTest extends AbstractLifecycleMapp
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
         null /*lineNumber*/, project);
   }
-  
+
   // Workspace mappings override plugin mappings
   public void testWorkspace() throws Exception {
-    
+
     // now set the lifecycle mapping in the workspace.
     setWorkspaceLifecycleMappingMetadataSource(
         "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + 
@@ -209,12 +214,13 @@ public class PluginExecutionMetadataPrioritiesTest extends AbstractLifecycleMapp
 
     // should not have any plugin execution errors
     expectedErrorMessage = "Project configurator \"missing default project configurator id for test-lifecyclemapping-plugin:test-goal-1\" is not available. To enable full functionality, install the project configurator and run Maven->Update Project Configuration.";
-    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID,
-        expectedErrorMessage, null /*lineNumber*/, project);
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
+        null /*lineNumber*/, project);
   }
+
   // Embedded metadata should override Workspace mappings
   public void testPomOverridesWorkspace() throws Exception {
-    
+
     // now set the lifecycle mapping in the workspace.
     setWorkspaceLifecycleMappingMetadataSource(
         "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + 
@@ -265,7 +271,7 @@ public class PluginExecutionMetadataPrioritiesTest extends AbstractLifecycleMapp
         null /*lineNumber*/, project);
     WorkspaceHelpers.assertMarkerLocation(new SourceLocation(5, 3, 10, causeLocation), marker);
   }
-  
+
   // metadata from workspace should override eclipse extension metadata
   public void testWorkspaceOverridesEclipseExtensions() throws Exception {
     // now set the lifecycle mapping in the workspace.
@@ -298,7 +304,7 @@ public class PluginExecutionMetadataPrioritiesTest extends AbstractLifecycleMapp
         "testEclipseExtension/pom.xml");
     assertNotNull("Expected not null MavenProjectFacade", facade);
     IProject project = facade.getProject();
-    
+
     // should have an error since workspace overrides with bad lifecycle data
     String expectedErrorMessage = "Plugin execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-for-eclipse-extension2 (execution: default-test-goal-for-eclipse-extension2, phase: compile)";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
@@ -308,8 +314,12 @@ public class PluginExecutionMetadataPrioritiesTest extends AbstractLifecycleMapp
     IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID,
         expectedErrorMessage, 11 /*lineNumber*/, project);
     WorkspaceHelpers
-        .assertConfiguratorErrorMarkerAttributes(
-            marker,
+        .assertConfiguratorErrorMarkerAttributes(marker,
             "no such project configurator id for test-lifecyclemapping-plugin:test-goal-for-eclipse-extension2 - workspace");
+  }
+
+  private void setWorkspaceLifecycleMappingMetadataSource(String xmlString) throws IOException, XmlPullParserException {
+    LifecycleMappingMetadataSourceXpp3Reader reader = new LifecycleMappingMetadataSourceXpp3Reader();
+    LifecycleMappingFactory.writeWorkspaceMetadata(reader.read(new StringReader(xmlString)));
   }
 }
