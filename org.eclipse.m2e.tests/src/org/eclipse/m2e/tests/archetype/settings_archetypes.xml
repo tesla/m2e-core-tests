@@ -1,0 +1,43 @@
+<settings>
+  <localRepository>target/localrepo-archetypes</localRepository>
+  <servers>
+    <server>
+      <id>my-archetype-repo</id>
+      <username>m2e</username>
+      <password>371775</password>
+    </server>
+  </servers>  
+  <profiles>
+    <profile>
+      <id>development</id>
+      <repositories>
+        <repository>
+          <id>central</id>
+          <url>file:repositories/remoterepo</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </repository>
+      </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>central</id>
+          <url>file:repositories/remoterepo</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </pluginRepository>
+      </pluginRepositories>
+    </profile>
+  </profiles>
+  <activeProfiles>
+    <activeProfile>development</activeProfile>
+  </activeProfiles>
+  
+</settings>

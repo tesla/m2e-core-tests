@@ -11,21 +11,27 @@
 
 package org.eclipse.m2e.tests.archetype;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.apache.maven.archetype.catalog.Archetype;
 import org.apache.maven.archetype.catalog.ArchetypeCatalog;
+import org.apache.maven.artifact.repository.ArtifactRepository;
 
+import org.eclipse.m2e.core.MavenPlugin;
+import org.eclipse.m2e.core.embedder.IMavenConfiguration;
 import org.eclipse.m2e.core.internal.MavenPluginActivator;
 import org.eclipse.m2e.core.internal.archetype.ArchetypeCatalogFactory;
-import org.eclipse.m2e.core.internal.archetype.ArchetypeManager;
 import org.eclipse.m2e.core.internal.archetype.ArchetypeCatalogFactory.DefaultLocalCatalogFactory;
 import org.eclipse.m2e.core.internal.archetype.ArchetypeCatalogFactory.InternalCatalogFactory;
 import org.eclipse.m2e.core.internal.archetype.ArchetypeCatalogFactory.LocalCatalogFactory;
 import org.eclipse.m2e.core.internal.archetype.ArchetypeCatalogFactory.NexusIndexerCatalogFactory;
 import org.eclipse.m2e.core.internal.archetype.ArchetypeCatalogFactory.RemoteCatalogFactory;
+import org.eclipse.m2e.core.internal.archetype.ArchetypeManager;
+import org.eclipse.m2e.tests.common.FileHelpers;
 import org.eclipse.m2e.tests.common.HttpServer;
 
 
@@ -33,6 +39,8 @@ import org.eclipse.m2e.tests.common.HttpServer;
  * @author Eugene Kuleshov
  */
 public class ArchetypeManagerTest extends TestCase {
+
+  private static final String ARCHETYPE_REPOS_SETTINGS = "src/org/eclipse/m2e/tests/archetype/settings_archetypes.xml";
 
   private ArchetypeManager archetypeManager;
 
@@ -127,6 +135,8 @@ public class ArchetypeManagerTest extends TestCase {
     assertEquals(catalogs.size(), archetypeManager.getArchetypeCatalogs().size());
     assertNull(archetypeManager.getArchetypeCatalogFactory(catalogFactory.getId()));
   }
+  
+  
 
   public void testAddRemoteCatalog() throws Exception {
     HttpServer httpServer = new HttpServer();
@@ -140,4 +150,66 @@ public class ArchetypeManagerTest extends TestCase {
       httpServer.stop();
     }
   }
+  
+  public void test371775_archetypeRepoAuthentication() throws Exception {
+    
+    IMavenConfiguration configuration = MavenPlugin.getMavenConfiguration();
+    
+    String userSettings = configuration.getUserSettingsFile();
+
+    ArtifactRepository repo; 
+    try {
+      
+      configuration.setUserSettingsFile(new File(ARCHETYPE_REPOS_SETTINGS).getCanonicalPath());
+      
+      Archetype archetype = new Archetype();
+      archetype.setRepository("http://localhost/");
+      archetype.setArtifactId("my-archetype");
+      repo = archetypeManager.getArchetypeRepository(archetype);
+      
+    } finally {
+      
+      configuration.setUserSettingsFile(userSettings);
+    }
+    assertEquals("my-archetype-repo", repo.getId());
+    assertNotNull("Repo Authentication is null!", repo.getAuthentication());
+    assertEquals("m2e", repo.getAuthentication().getUsername());
+    assertEquals("371775", repo.getAuthentication().getPassword());
+  }
+  
+  public void test359855_localArchetypeWithProperties() throws Exception {
+    File sourceFolder = new File("resources/359855_localArchetype/");
+    
+    File localRepo = new File("target/localrepo-archetypes");
+    
+    FileHelpers.deleteDirectory(localRepo);
+    
+    FileHelpers.copyDir(sourceFolder, localRepo );
+
+    Archetype archetype = new Archetype();
+    archetype.setGroupId("foo.bar");
+    archetype.setArtifactId("someproject-archetype");
+    archetype.setVersion("1.0-SNAPSHOT");
+    
+    IMavenConfiguration configuration = MavenPlugin.getMavenConfiguration();
+    
+    String userSettings = configuration.getUserSettingsFile();
+
+    try {
+      
+      configuration.setUserSettingsFile(new File(ARCHETYPE_REPOS_SETTINGS).getCanonicalPath());
+      
+      List<?> properties = archetypeManager.getRequiredProperties(archetype , null, null);
+      assertNotNull("Required Properties are null!", properties);
+      
+      assertEquals("Unexpected required properties "+ properties.toString(), 1, properties.size());
+      
+    } finally {
+      
+      configuration.setUserSettingsFile(userSettings);
+    }
+
+    
+  }
+  
 }
