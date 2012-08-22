@@ -176,6 +176,7 @@ public class ArchetypeManagerTest extends TestCase {
     assertEquals("m2e", repo.getAuthentication().getUsername());
     assertEquals("371775", repo.getAuthentication().getPassword());
   }
+
   
   public void test359855_localArchetypeWithProperties() throws Exception {
     File sourceFolder = new File("resources/359855_localArchetype/");
@@ -183,6 +184,7 @@ public class ArchetypeManagerTest extends TestCase {
     File localRepo = new File("target/localrepo-archetypes");
     
     FileHelpers.deleteDirectory(localRepo);
+    assertFalse(localRepo.exists());
     
     FileHelpers.copyDir(sourceFolder, localRepo );
 
@@ -208,7 +210,41 @@ public class ArchetypeManagerTest extends TestCase {
       
       configuration.setUserSettingsFile(userSettings);
     }
+    
+  }
 
+  public void test387784_remoteArchetypeWithProperties() throws Exception {
+    
+    File localRepo = new File("target/localrepo-archetypes");
+    
+    FileHelpers.deleteDirectory(localRepo);
+    assertFalse(localRepo.exists());
+    
+    Archetype archetype = new Archetype();
+    archetype.setGroupId("foo.bar");
+    archetype.setArtifactId("someproject-archetype");
+    archetype.setVersion("1.0");
+    archetype.setRepository("file:repositories/customrepo");
+    
+    IMavenConfiguration configuration = MavenPlugin.getMavenConfiguration();
+    
+    String userSettings = configuration.getUserSettingsFile();
+
+    try {
+      
+      configuration.setUserSettingsFile(new File(ARCHETYPE_REPOS_SETTINGS).getCanonicalPath());
+      
+      ArtifactRepository remoteArchetypeRepository = archetypeManager.getArchetypeRepository(archetype);
+      
+      List<?> properties = archetypeManager.getRequiredProperties(archetype , remoteArchetypeRepository, null);
+      assertNotNull("Required Properties are null!", properties);
+      
+      assertEquals("Unexpected required properties "+ properties.toString(), 1, properties.size());
+      
+    } finally {
+      
+      configuration.setUserSettingsFile(userSettings);
+    }
     
   }
   
