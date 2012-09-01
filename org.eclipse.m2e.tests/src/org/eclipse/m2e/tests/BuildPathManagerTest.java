@@ -64,6 +64,7 @@ import org.eclipse.m2e.core.repository.IRepositoryRegistry;
 import org.eclipse.m2e.jdt.MavenJdtPlugin;
 import org.eclipse.m2e.jdt.internal.BuildPathManager;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
+import org.eclipse.m2e.tests.common.ClasspathHelpers;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
 
@@ -1142,5 +1143,18 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     waitForJobsToComplete();
     jproject = JavaCore.create(project);
     assertEquals("warning", jproject.getOption(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE, false));
+  }
+
+  public void test388596_expandedSnapshotDependency() throws Exception {
+    IProject[] projects = importProjects("projects/388596_expandedSnapshotDependency", new String[] {"a/pom.xml",
+        "b/pom.xml"}, new ResolverConfiguration());
+    waitForJobsToComplete();
+
+    IJavaProject javaProject = JavaCore.create(projects[1]);
+    IClasspathContainer container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
+    IClasspathEntry[] cp = container.getClasspathEntries();
+
+    assertEquals(1, cp.length);
+    ClasspathHelpers.assertClasspathEntry(cp, projects[0].getFullPath());
   }
 }
