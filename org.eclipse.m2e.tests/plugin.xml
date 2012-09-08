@@ -275,6 +275,11 @@
             id="org.eclipse.m2e.tests.conversion.testProjectConversionParticipant"
             name="Test project conversion participant"
             nature="org.eclipse.jdt.core.javanature">
-      </projectConversionParticipant>   
+      </projectConversionParticipant> 
+        
+      <conversionParticipantConfiguration 
+      		conversionParticipantId="org.eclipse.m2e.jdt.javaProjectConversionParticipant"
+      		compatiblePackagings="foo" />   
+      
    </extension>   
 </plugin>

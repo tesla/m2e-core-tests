@@ -31,18 +31,53 @@ public class ProjectConversionManagerTest extends AbstractProjectConversionTestC
     IProject p1 = createExisting("custom-layout", "projects/conversion/custom-layout");
     IProject p2 = createExisting("project-needs-test-participant", "projects/conversion/project-needs-test-participant");
     IProject p3 = createExisting("no-java-nature", "projects/conversion/no-java-nature");
-
+    
     IProjectConversionManager manager = MavenPlugin.getProjectConversionManager();
     List<AbstractProjectConversionParticipant> participants;
 
-    participants = manager.getConversionParticipants(p1);
+    String packaging = "jar";
+    participants = manager.getConversionParticipants(p1, packaging);
     assertEquals("Participants found for " + p1.getName() + " : " + participants.toString(), 1, participants.size());
 
-    participants = manager.getConversionParticipants(p2);
+    participants = manager.getConversionParticipants(p2, packaging);
     assertEquals("Participants found for " + p2.getName() + " : " + participants.toString(), 2, participants.size());
 
-    participants = manager.getConversionParticipants(p3);
+    participants = manager.getConversionParticipants(p3, packaging);
     assertEquals("Participants found for " + p3.getName() + " : " + participants.toString(), 0, participants.size());
+    
+  }
+  
+  public void testRestrictedPackagings() throws Exception {
+    IProjectConversionManager manager = MavenPlugin.getProjectConversionManager();
+    String packaging = "eclipse-plugin";
+    List<AbstractProjectConversionParticipant> participants; 
+
+    //Check eclipse-plugin packaging is not supported by default
+    IProject pde = createExisting("pde", "projects/conversion/pde");
+    participants = manager.getConversionParticipants(pde, packaging);
+    checkJdtConverter(participants, false);
+
+    //Check foo packaging contributed by extension point is supported
+    IProject foo = createExisting("foo", "projects/conversion/foo");
+    packaging = "foo";
+    participants = manager.getConversionParticipants(foo, packaging);
+    checkJdtConverter(participants, true);
+  }
+
+  private void checkJdtConverter(List<AbstractProjectConversionParticipant> participants, boolean expectPresent) {
+    if (participants != null) {
+      for (AbstractProjectConversionParticipant p : participants) {
+        if ("org.eclipse.m2e.jdt.javaProjectConversionParticipant".equals(p.getId())){
+          if (expectPresent) {
+            return;
+          } 
+          fail("No JDT conversion participant should be found");
+        }
+      }
+    }
+    if (expectPresent) {
+      fail("JDT conversion participant is missing ");
+    }
   }
 
 }
