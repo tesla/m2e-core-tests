@@ -23,6 +23,7 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.apache.maven.execution.MavenExecutionRequest;
 
@@ -42,6 +43,7 @@ import org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager;
 import org.eclipse.m2e.core.lifecyclemapping.model.IPluginExecutionMetadata;
 import org.eclipse.m2e.core.lifecyclemapping.model.PluginExecutionAction;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
+import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.core.project.configurator.AbstractBuildParticipant;
 import org.eclipse.m2e.core.project.configurator.AbstractCustomizableLifecycleMapping;
 import org.eclipse.m2e.core.project.configurator.AbstractLifecycleMapping;
@@ -624,4 +626,47 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     // [0] CoreException: Could not calculate build plan: Plugin missing:missing:1.0.0 or one of its dependencies could not be resolved: Failed to read artifact descriptor for missing:missing:jar:1.0.0: ArtifactResolutionException: Failure to find missing:missing:pom:1.0.0 in file:repositories/testrepo was cached in the local repository, resolution will not be reattempted until the update interval of testrepo has elapsed or updates are forced
     // [1] Plugin execution not covered by lifecycle configuration: missing:missing:1.0.0:run (execution: test, phase: compile))
   }
+
+  public void testSetNoopMappingDuringImport() throws Exception {
+    ResolverConfiguration resolverConfig = new ResolverConfiguration();
+    resolverConfig.setLifecycleMappingId(NoopLifecycleMapping.LIFECYCLE_MAPPING_ID);
+    IProject project = importProject("projects/lifecyclemapping/default-jar/pom.xml", resolverConfig);
+
+    assertFalse(project.hasNature(JavaCore.NATURE_ID));
+
+    IMavenProjectFacade facade = mavenProjectManager.create(project, monitor);
+
+    assertEquals(NoopLifecycleMapping.LIFECYCLE_MAPPING_ID, facade.getLifecycleMappingId());
+
+    assertTrue(LifecycleMappingFactory.getLifecycleMapping(facade) instanceof NoopLifecycleMapping);
+    assertTrue(LifecycleMappingFactory.getProjectConfigurators(facade).isEmpty());
+
+    // force reload and check again
+    facade.setSessionProperty(MavenProjectFacade.PROP_LIFECYCLE_MAPPING, null);
+    facade.setSessionProperty(MavenProjectFacade.PROP_CONFIGURATORS, null);
+    assertTrue(LifecycleMappingFactory.getLifecycleMapping(facade) instanceof NoopLifecycleMapping);
+    assertTrue(LifecycleMappingFactory.getProjectConfigurators(facade).isEmpty());
+  }
+
+  public void testSetCustomizableMappingDuringImport() throws Exception {
+    ResolverConfiguration resolverConfig = new ResolverConfiguration();
+    resolverConfig.setLifecycleMappingId(TestLifecycleMapping.LIFECYCLE_MAPPING_ID);
+    IProject project = importProject("projects/lifecyclemapping/default-jar/pom.xml", resolverConfig);
+
+    assertTrue(project.hasNature(JavaCore.NATURE_ID));
+
+    IMavenProjectFacade facade = mavenProjectManager.create(project, monitor);
+
+    assertEquals(TestLifecycleMapping.LIFECYCLE_MAPPING_ID, facade.getLifecycleMappingId());
+
+    assertTrue(LifecycleMappingFactory.getLifecycleMapping(facade) instanceof TestLifecycleMapping);
+    assertFalse(LifecycleMappingFactory.getProjectConfigurators(facade).isEmpty());
+
+    // force reload and check again
+    facade.setSessionProperty(MavenProjectFacade.PROP_LIFECYCLE_MAPPING, null);
+    facade.setSessionProperty(MavenProjectFacade.PROP_CONFIGURATORS, null);
+    assertTrue(LifecycleMappingFactory.getLifecycleMapping(facade) instanceof TestLifecycleMapping);
+    assertFalse(LifecycleMappingFactory.getProjectConfigurators(facade).isEmpty());
+  }
+
 }

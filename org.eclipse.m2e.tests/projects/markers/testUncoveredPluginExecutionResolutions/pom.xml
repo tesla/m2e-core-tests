@@ -37,7 +37,7 @@
               <lifecycleMappings>
                 <lifecycleMapping>
                   <packagingType>test-packaging-empty</packagingType>
-                  <lifecycleMappingId>NULL</lifecycleMappingId>
+                  <lifecycleMappingId>TEST</lifecycleMappingId>
                 </lifecycleMapping>
               </lifecycleMappings>
             </lifecycleMappingMetadata>

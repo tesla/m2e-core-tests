@@ -4,4 +4,6 @@ import org.eclipse.m2e.core.project.configurator.AbstractCustomizableLifecycleMa
 
 public class TestLifecycleMapping extends AbstractCustomizableLifecycleMapping {
 
+  public static final String LIFECYCLE_MAPPING_ID = "TEST";
+
 }
