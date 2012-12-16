@@ -163,7 +163,7 @@ public class PluginExecutionMetadataPrioritiesTest extends AbstractLifecycleMapp
     assertNotNull(errorMarkers);
     assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
     expectedErrorMessage = "Plugin execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 (execution: default-test-goal-1, phase: process-resources)";
-    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
+    marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
         null /*lineNumber*/, project);
     WorkspaceHelpers.assertMarkerLocation(new SourceLocation(5, 3, 10), marker);
     expectedErrorMessage = "Project configurator \"no such project configurator id for test-lifecyclemapping-plugin:test-goal-1 - override\" is not available. To enable full functionality, install the project configurator and run Maven->Update Project Configuration.";
