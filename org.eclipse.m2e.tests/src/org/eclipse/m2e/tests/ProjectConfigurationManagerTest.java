@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.eclipse.core.externaltools.internal.model.BuilderCoreUtils;
@@ -36,18 +37,22 @@ import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.codehaus.plexus.util.FileUtils;
+
 import org.apache.maven.archetype.catalog.Archetype;
 
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.internal.IMavenConstants;
 import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.internal.project.registry.ProjectRegistryRefreshJob;
+import org.eclipse.m2e.core.lifecyclemapping.model.IPluginExecutionMetadata;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.IProjectConfigurationManager;
 import org.eclipse.m2e.core.project.MavenProjectInfo;
 import org.eclipse.m2e.core.project.MavenUpdateRequest;
 import org.eclipse.m2e.core.project.ProjectImportConfiguration;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
+import org.eclipse.m2e.core.project.configurator.MojoExecutionKey;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.m2e.tests.common.FilexWagon;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
@@ -179,8 +184,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
 
     workspace.run(new IWorkspaceRunnable() {
       public void run(IProgressMonitor monitor) throws CoreException {
-        MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(projectFacade.getProject(),
-            monitor);
+        MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(projectFacade.getProject(), monitor);
       }
     }, monitor);
     assertNoErrors(project);
@@ -200,8 +204,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
 
     workspace.run(new IWorkspaceRunnable() {
       public void run(IProgressMonitor monitor) throws CoreException {
-        MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(projectFacade.getProject(),
-            monitor);
+        MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(projectFacade.getProject(), monitor);
       }
     }, monitor);
     assertNoErrors(project);
@@ -210,9 +213,9 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
   public void testStaleProjectConfigurationMarkerAfterFixingMissingBuildExtension() throws Exception {
     IProject project = importProjects("projects/staleconfiguration/missingextension", new String[] {"pom.xml"},
         new ResolverConfiguration(), true)[0];
-    
-    WorkspaceHelpers.assertMarker(IMavenConstants.MARKER_POM_LOADING_ID, IMarker.SEVERITY_ERROR,
-        null, null, "pom.xml", project);
+
+    WorkspaceHelpers.assertMarker(IMavenConstants.MARKER_POM_LOADING_ID, IMarker.SEVERITY_ERROR, null, null, "pom.xml",
+        project);
 
     copyContent(project, new File("projects/staleconfiguration/missingextension/pom-changed.xml"), "pom.xml");
     WorkspaceHelpers.assertNoErrors(project);
@@ -222,13 +225,12 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
 
     workspace.run(new IWorkspaceRunnable() {
       public void run(IProgressMonitor monitor) throws CoreException {
-        MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(projectFacade.getProject(),
-            monitor);
+        MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(projectFacade.getProject(), monitor);
       }
     }, monitor);
     assertNoErrors(project);
   }
-  
+
   public void testImportJavaProjectWithUnknownPackaging() throws Exception {
     IProject project = importProject("projects/detectJavaProject/default/pom.xml");
     assertTrue("default compilerId", project.hasNature(JavaCore.NATURE_ID));
@@ -322,7 +324,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     assertEquals("Encoding for folder should have been inherited from project", "ISO-8859-1", testfolderEncoding);
 
     copyContent(project, new File("projects/projectEncoding/p001/pom2.xml"), "pom.xml");
-    
+
     MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
 
     String projectEncodingChanged = project.getDefaultCharset();
@@ -340,14 +342,14 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     assertEquals("Encoding for folder should be the same as project encoding", containerProjectEncoding,
         containerTestfolderEncoding);
 
-    if (!"ISO-8859-1".equals(containerProjectEncoding)) {
+    if(!"ISO-8859-1".equals(containerProjectEncoding)) {
       project.setDefaultCharset("ISO-8859-1", monitor);
     } else {
       project.setDefaultCharset("UTF-8", monitor);
     }
     assertEquals("Encoding for folder should be the same as project encoding", containerProjectEncoding,
         containerTestfolderEncoding);
-    
+
     MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
 
     String projectEncodingReverted = project.getDefaultCharset();
@@ -364,12 +366,48 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
 
     project.getFolder(new Path("testfolder")).setDefaultCharset("ISO-8859-1", monitor);
     project.getFile(new Path("testfolder/testfile.txt")).setCharset("UTF-16", monitor);
-    
+
     MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
 
     String testfolderEncoding = project.getFolder(new Path("testfolder")).getDefaultCharset();
     assertEquals("Folder encoding set by user not kept", "ISO-8859-1", testfolderEncoding);
     String testfileEncoding = project.getFile(new Path("testfolder/testfile.txt")).getCharset();
     assertEquals("File encoding set by user not kept", "UTF-16", testfileEncoding);
+  }
+
+  public void test397251_forcePluginResolutionUpdate() throws Exception {
+    FileUtils.deleteDirectory(new File("target/397251localrepo"));
+
+    MojoExecutionKey key = new MojoExecutionKey("org.apache.maven.plugins", "maven-compiler-plugin", "2.0.2",
+        "compile", "compile", "default-compile");
+
+    mavenConfiguration.setUserSettingsFile("projects/397251_forcePluginResolutionUpdate/settings.xml");
+    waitForJobsToComplete();
+
+    injectFilexWagon();
+    FilexWagon.setRequestFailPattern("org/apache/maven/plugins/maven-resources-plugin/.*");
+
+    try {
+      importProject("projects/397251_forcePluginResolutionUpdate/pom.xml");
+      fail();
+    } catch(CoreException e) {
+      // ignore
+    }
+    waitForJobsToComplete();
+
+    IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject("397251_forcePluginResolutionUpdate");
+
+    IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().create(project, monitor);
+    Map<MojoExecutionKey, List<IPluginExecutionMetadata>> mapping = facade.getMojoExecutionMapping();
+//    assertTrue(mapping.get(key).isEmpty());
+
+    FilexWagon.setRequestFailPattern(null);
+
+    MavenUpdateRequest request = new MavenUpdateRequest(false, true);
+    request.addPomFile(project);
+    MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(request, monitor);
+    facade = MavenPlugin.getMavenProjectRegistry().create(project, monitor);
+    mapping = facade.getMojoExecutionMapping();
+    assertFalse(mapping.get(key).isEmpty());
   }
 }
