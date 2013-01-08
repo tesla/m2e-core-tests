@@ -247,5 +247,31 @@ public class ArchetypeManagerTest extends TestCase {
     }
     
   }
+
+  public void test397443_FindParentCatalog() throws Exception {
+
+      HttpServer httpServer = new HttpServer();
+      httpServer.addResources("/", "");
+      httpServer.start();
+      String url = httpServer.getHttpUrl() + "/archetype-catalog.xml";
+      try {
+        RemoteCatalogFactory remoteFactory = new RemoteCatalogFactory(url , null, true);
+        archetypeManager.addArchetypeCatalogFactory(remoteFactory);
   
+        Archetype archetype = new Archetype();
+        archetype.setGroupId("org.appfuse.archetypes");
+        archetype.setArtifactId("appfuse-basic-jsf");
+        archetype.setVersion("2.0");
+        RemoteCatalogFactory parentFactory = archetypeManager.findParentCatalogFactory(archetype, RemoteCatalogFactory.class);
+        assertSame(remoteFactory, parentFactory);
+
+        archetype.setVersion("1.0");
+        parentFactory = archetypeManager.findParentCatalogFactory(archetype, RemoteCatalogFactory.class);
+        assertNull("Different archetype version shouldn't be found in parent factory", parentFactory);
+
+      } finally {
+        httpServer.stop();
+        archetypeManager.removeArchetypeCatalogFactory(url);
+      }
+    }
 }
