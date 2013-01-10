@@ -281,5 +281,36 @@
       		conversionParticipantId="org.eclipse.m2e.jdt.javaProjectConversionParticipant"
       		compatiblePackagings="foo" />   
       
+   </extension>
+   <extension
+         point="org.eclipse.m2e.core.conversionEnabler">
+      <enabler
+            class="org.eclipse.m2e.tests.conversion.ProjectConversionEnablerTest$FooEnabler30"
+            id="org.eclipse.m2e.tests.conversion.enabler.foo30"
+            weight="30">
+      </enabler>
+      <enabler
+            class="org.eclipse.m2e.tests.conversion.ProjectConversionEnablerTest$FooEnablerDefault"
+            id="org.eclipse.m2e.tests.conversion.enabler.foodefault">
+      </enabler>
+      <enabler
+            class="org.eclipse.m2e.tests.conversion.ProjectConversionEnablerTest$FooEnabler70"
+            id="org.eclipse.m2e.tests.conversion.enabler.foo70"
+            weight="70">
+      </enabler>
+      <enabler
+            class="org.eclipse.m2e.tests.conversion.ProjectConversionEnablerTest$MavenLayoutEnabler40"
+            id="org.eclipse.m2e.tests.conversion.enabler.mavenlayout40"
+            weight="40">
+      </enabler>
+      <enabler
+            class="org.eclipse.m2e.tests.conversion.ProjectConversionEnablerTest$MavenLayoutEnablerDefault"
+            id="org.eclipse.m2e.tests.conversion.enabler.mavenlayoutdefault">
+      </enabler>
+      <enabler
+            class="org.eclipse.m2e.tests.conversion.ProjectConversionEnablerTest$MavenLayoutEnabler60"
+            id="org.eclipse.m2e.tests.conversion.enabler.mavenlayout60"
+            weight="60">
+      </enabler>
    </extension>   
 </plugin>
