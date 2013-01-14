@@ -276,6 +276,29 @@
             name="Test project conversion participant"
             nature="org.eclipse.jdt.core.javanature">
       </projectConversionParticipant> 
+      <projectConversionParticipant
+            class="org.eclipse.m2e.tests.conversion.TestSortProjectConversionParticipant"
+            id="org.eclipse.m2e.tests.conversion.testProjectConversionParticipant2"
+            name="Test sort project conversion participant 2"
+            runsBefore="org.eclipse.m2e.jdt.javaProjectConversionParticipant"
+            nature="org.eclipse.jdt.core.javanature">
+      </projectConversionParticipant> 
+      <projectConversionParticipant
+            class="org.eclipse.m2e.tests.conversion.TestSortProjectConversionParticipant"
+            id="org.eclipse.m2e.tests.conversion.testProjectConversionParticipant3"
+            name="Test sort project conversion participant 3"
+            runsAfter="missingparticipant, org.eclipse.m2e.jdt.javaProjectConversionParticipant"
+            nature="org.eclipse.jdt.core.javanature">
+      </projectConversionParticipant> 
+      <projectConversionParticipant
+            class="org.eclipse.m2e.tests.conversion.TestSortProjectConversionParticipant"
+            id="org.eclipse.m2e.tests.conversion.testProjectConversionParticipant4"
+            runsAfter="org.eclipse.m2e.tests.conversion.testProjectConversionParticipant2"
+            runsBefore="org.eclipse.m2e.tests.conversion.testProjectConversionParticipant3,missingparticipant"
+            name="Test sort project conversion participant 4"
+            nature="org.eclipse.jdt.core.javanature">
+      </projectConversionParticipant> 
+
         
       <conversionParticipantConfiguration 
       		conversionParticipantId="org.eclipse.m2e.jdt.javaProjectConversionParticipant"

@@ -80,4 +80,22 @@ public class ProjectConversionManagerTest extends AbstractProjectConversionTestC
     }
   }
 
+  public void test393613_SortConversionParticipants() throws Exception {
+    IProject project = createExisting("project-needs-test-sort-participant", "projects/conversion/project-needs-test-sort-participant");
+    
+    IProjectConversionManager manager = MavenPlugin.getProjectConversionManager();
+    List<AbstractProjectConversionParticipant> participants;
+
+    String packaging = "jar";
+    participants = manager.getConversionParticipants(project, packaging);
+    assertEquals("Participants found for " + project.getName() + " : " + participants.toString(), 4, participants.size());
+    int i = 0;
+    String msg = "Participants found for " + project.getName() + " : " + participants.toString();
+    assertEquals(msg, "org.eclipse.m2e.tests.conversion.testProjectConversionParticipant2", participants.get(i++).getId());
+    assertEquals(msg,"org.eclipse.m2e.jdt.javaProjectConversionParticipant", participants.get(i++).getId());
+    assertEquals(msg,"org.eclipse.m2e.tests.conversion.testProjectConversionParticipant4", participants.get(i++).getId());
+    assertEquals(msg,"org.eclipse.m2e.tests.conversion.testProjectConversionParticipant3", participants.get(i++).getId());
+  }
+  
+  
 }
