@@ -313,4 +313,12 @@
             weight="60">
       </enabler>
    </extension>   
+   <extension
+         point="org.eclipse.m2e.jdt.classifierClasspathProviders">
+      <classifierClasspathProvider
+            class="org.eclipse.m2e.tests.TestFancyClassifierClasspathProvider"
+            id="org.eclipse.m2e.jdt.fancyClassifierClasspathProvider"
+            name="Fancy Classifier Classpath Provider">
+      </classifierClasspathProvider>
+   </extension>      
 </plugin>
