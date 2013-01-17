@@ -28,6 +28,16 @@ import org.eclipse.m2e.tests.common.FileHelpers;
  */
 public class ProjectConversionTest extends AbstractProjectConversionTestCase {
 
+  protected void setUp() throws Exception {
+    super.setUp();
+    System.setProperty("org.eclipse.m2e.jdt.conversion.compiler.version", "2.3.2");
+  }
+  
+  protected void tearDown() throws Exception {
+    System.clearProperty("org.eclipse.m2e.jdt.conversion.compiler.version");
+    super.tearDown();
+  }
+  
   public void testMavenLayoutProjectConversion() throws Exception {
     //Checks a project with Maven layout doesn't create extra configuration 
     //for source and resource folders 
