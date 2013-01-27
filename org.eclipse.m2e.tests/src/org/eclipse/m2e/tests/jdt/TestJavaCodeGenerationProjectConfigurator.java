@@ -24,10 +24,10 @@ import org.eclipse.m2e.core.lifecyclemapping.model.IPluginExecutionMetadata;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.configurator.AbstractBuildParticipant;
 import org.eclipse.m2e.core.project.configurator.ProjectConfigurationRequest;
-import org.eclipse.m2e.jdt.AbstractJavaProjectConfigurator;
+import org.eclipse.m2e.jdt.AbstractSourcesGenerationProjectConfigurator;
 
 
-public class TestJavaCodeGenerationProjectConfigurator extends AbstractJavaProjectConfigurator {
+public class TestJavaCodeGenerationProjectConfigurator extends AbstractSourcesGenerationProjectConfigurator {
 
   public AbstractBuildParticipant getBuildParticipant(IMavenProjectFacade projectFacade, MojoExecution execution,
       IPluginExecutionMetadata executionMetadata) {
@@ -42,7 +42,9 @@ public class TestJavaCodeGenerationProjectConfigurator extends AbstractJavaProje
     };
   }
 
-  protected File[] getSourceFolders(ProjectConfigurationRequest request, MojoExecution mojoExecution) {
+  @Override
+  protected File[] getSourceFolders(ProjectConfigurationRequest request, MojoExecution mojoExecution,
+      IProgressMonitor monitor) {
     return new File[] {new File(request.getMavenProject().getBuild().getDirectory(), "generated-sources/test")};
   }
 }

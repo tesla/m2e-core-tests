@@ -34,15 +34,17 @@ import org.codehaus.plexus.util.FileUtils;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
-import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.project.MavenProject;
 
 import org.sonatype.aether.repository.RepositoryPolicy;
 
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.ArtifactRef;
+import org.eclipse.m2e.core.embedder.ICallable;
+import org.eclipse.m2e.core.embedder.IMavenExecutionContext;
 import org.eclipse.m2e.core.internal.IMavenConstants;
 import org.eclipse.m2e.core.internal.MavenPluginActivator;
+import org.eclipse.m2e.core.internal.embedder.MavenExecutionContext;
 import org.eclipse.m2e.core.internal.preferences.MavenConfigurationImpl;
 import org.eclipse.m2e.core.internal.project.registry.MavenProjectFacade;
 import org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager;
@@ -233,6 +235,8 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
   }
 
   public void test001_missingParent() throws Exception {
+    FileUtils.deleteDirectory(new File(repo, "t001"));
+
     IProject p2 = createExisting("t001-p2");
     waitForJobsToComplete();
 
@@ -240,9 +244,11 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
 
     IMarker[] markers = p2.findMarkers(null, true, IResource.DEPTH_INFINITE);
     assertEquals(WorkspaceHelpers.toString(markers), 1, markers.length);
-    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_POM_LOADING_ID,
-        "Project build error: Non-resolvable parent POM: Failure to find t001:t001-p3:pom:0.0.1-SNAPSHOT",
-        6 /*lineNumber*/, p2);
+    WorkspaceHelpers
+        .assertErrorMarker(
+            IMavenConstants.MARKER_POM_LOADING_ID,
+            "Project build error: Non-resolvable parent POM: Could not find artifact t001:t001-p3:pom:0.0.1-SNAPSHOT in central (file:repositories/remoterepo) and 'parent.relativePath' points at wrong local POM",
+            6 /*lineNumber*/, p2);
 
     IProject p3 = createExisting("t001-p3");
     waitForJobsToComplete();
@@ -385,9 +391,14 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     }
   }
 
-  protected MavenProject getParentProject(IMavenProjectFacade f) throws CoreException {
-    MavenExecutionRequest r = manager.createExecutionRequest(f.getPom(), f.getResolverConfiguration(), monitor);
-    return MavenPlugin.getMaven().resolveParentProject(r, f.getMavenProject(monitor), monitor);
+  protected MavenProject getParentProject(final IMavenProjectFacade f) throws CoreException {
+    // create execution context with proper resolver configuration
+    MavenExecutionContext context = manager.createExecutionContext(f.getPom(), f.getResolverConfiguration());
+    return context.execute(f.getMavenProject(monitor), new ICallable<MavenProject>() {
+      public MavenProject call(IMavenExecutionContext context, IProgressMonitor monitor) throws CoreException {
+        return MavenPlugin.getMaven().resolveParentProject(f.getMavenProject(monitor), monitor);
+      }
+    }, monitor);
   }
 
   public void test007_staleDependencies() throws Exception {

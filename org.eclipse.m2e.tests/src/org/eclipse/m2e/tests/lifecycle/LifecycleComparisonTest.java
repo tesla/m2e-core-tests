@@ -1,12 +1,9 @@
 
 package org.eclipse.m2e.tests.lifecycle;
 
-import java.io.IOException;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.internal.lifecyclemapping.LifecycleMappingFactory;
 import org.eclipse.m2e.core.internal.lifecyclemapping.LifecycleMappingResult;
 import org.eclipse.m2e.core.internal.project.LifecycleMappingConfiguration;
@@ -49,10 +46,9 @@ public class LifecycleComparisonTest extends AbstractLifecycleMappingTest {
     assertTrue(LifecycleMappingFactory.isLifecycleMappingChanged(facadeB, facadeA, monitor));
   }
 
-  protected MavenProjectFacade newMavenProjectFacade(IProject project, String path) throws CoreException, IOException {
+  protected MavenProjectFacade newMavenProjectFacade(IProject project, String path) throws CoreException {
     MavenProjectFacade facade = super.newMavenProjectFacade(project.getFile(path));
-    LifecycleMappingResult mappingResult = LifecycleMappingFactory.calculateLifecycleMapping(MavenPlugin.getMaven()
-        .createExecutionRequest(monitor), facade, monitor);
+    LifecycleMappingResult mappingResult = calculateLifecycleMapping(facade);
     assertFalse(mappingResult.getProblems().toString(), mappingResult.hasProblems());
     facade.setLifecycleMappingId(mappingResult.getLifecycleMappingId());
     facade.setMojoExecutionMapping(mappingResult.getMojoExecutionMapping());

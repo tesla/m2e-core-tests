@@ -11,8 +11,10 @@ import org.eclipse.core.runtime.IPath;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.MojoExecution;
+import org.apache.maven.project.MavenProject;
 
 import org.eclipse.m2e.core.MavenPlugin;
+import org.eclipse.m2e.core.embedder.IMaven;
 import org.eclipse.m2e.core.internal.MavenPluginActivator;
 import org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
@@ -42,12 +44,11 @@ public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
     assertNotNull(compileKey);
     MojoExecution compileMojo = facade.getMojoExecution(compileKey, monitor);
 
-    MavenExecutionRequest request = MavenPlugin.getMaven().createExecutionRequest(monitor);
-    MavenSession session = MavenPlugin.getMaven().createSession(request, facade.getMavenProject());
+    final IMaven maven = MavenPlugin.getMaven();
+    final MavenProject mavenProject = facade.getMavenProject();
 
-    assertEquals("1.5", MavenPlugin.getMaven().getMojoParameterValue(session, compileMojo, "source", String.class));
-    assertEquals("1.6", MavenPlugin.getMaven().getMojoParameterValue(session, compileMojo, "target", String.class));
-
+    assertEquals("1.5", maven.getMojoParameterValue(mavenProject, compileMojo, "source", String.class, monitor));
+    assertEquals("1.6", maven.getMojoParameterValue(mavenProject, compileMojo, "target", String.class, monitor));
   }
 
   public void testGetMojoExecutionAfterWorkspaceRestart() throws Exception {
@@ -68,12 +69,11 @@ public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
     assertNotNull(compileKey);
     MojoExecution compileMojo = facade.getMojoExecution(compileKey, monitor);
 
-    MavenExecutionRequest request = MavenPlugin.getMaven().createExecutionRequest(monitor);
-    MavenSession session = MavenPlugin.getMaven().createSession(request, facade.getMavenProject());
+    final IMaven maven = MavenPlugin.getMaven();
+    final MavenProject mavenProject = facade.getMavenProject();
 
-    assertEquals("1.5", MavenPlugin.getMaven().getMojoParameterValue(session, compileMojo, "source", String.class));
-    assertEquals("1.6", MavenPlugin.getMaven().getMojoParameterValue(session, compileMojo, "target", String.class));
-
+    assertEquals("1.5", maven.getMojoParameterValue(mavenProject, compileMojo, "source", String.class, monitor));
+    assertEquals("1.6", maven.getMojoParameterValue(mavenProject, compileMojo, "target", String.class, monitor));
   }
 
   public void testGetMojoExecutions() throws Exception {
@@ -86,13 +86,11 @@ public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
         monitor, "compile");
     assertEquals(executions.toString(), 1, executions.size());
 
-    MavenExecutionRequest request = MavenPlugin.getMaven().createExecutionRequest(monitor);
-    MavenSession session = MavenPlugin.getMaven().createSession(request, facade.getMavenProject());
+    final IMaven maven = MavenPlugin.getMaven();
+    final MavenProject mavenProject = facade.getMavenProject();
 
-    assertEquals("1.5", MavenPlugin.getMaven()
-        .getMojoParameterValue(session, executions.get(0), "source", String.class));
-    assertEquals("1.6", MavenPlugin.getMaven()
-        .getMojoParameterValue(session, executions.get(0), "target", String.class));
+    assertEquals("1.5", maven.getMojoParameterValue(mavenProject, executions.get(0), "source", String.class, monitor));
+    assertEquals("1.6", maven.getMojoParameterValue(mavenProject, executions.get(0), "target", String.class, monitor));
   }
 
   public void testGetMojoExecutionsAfterWorkspaceRestart() throws Exception {
@@ -106,13 +104,11 @@ public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
         monitor, "compile");
     assertEquals(executions.toString(), 1, executions.size());
 
-    MavenExecutionRequest request = MavenPlugin.getMaven().createExecutionRequest(monitor);
-    MavenSession session = MavenPlugin.getMaven().createSession(request, facade.getMavenProject());
+    final IMaven maven = MavenPlugin.getMaven();
+    final MavenProject mavenProject = facade.getMavenProject();
 
-    assertEquals("1.5", MavenPlugin.getMaven()
-        .getMojoParameterValue(session, executions.get(0), "source", String.class));
-    assertEquals("1.6", MavenPlugin.getMaven()
-        .getMojoParameterValue(session, executions.get(0), "target", String.class));
+    assertEquals("1.5", maven.getMojoParameterValue(mavenProject, executions.get(0), "source", String.class, monitor));
+    assertEquals("1.6", maven.getMojoParameterValue(mavenProject, executions.get(0), "target", String.class, monitor));
   }
 
   public void testGetProjectConfigurators() throws Exception {

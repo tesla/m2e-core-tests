@@ -11,34 +11,46 @@
 
 package org.eclipse.m2e.editor.dialogs;
 
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.ARTIFACT_ID;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.DEPENDENCIES;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.DEPENDENCY;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.DEPENDENCY_MANAGEMENT;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.GROUP_ID;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.VERSION;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.childEquals;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.findChild;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.findChilds;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.getTextValue;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.Test;
 
-import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.*;
+import org.w3c.dom.Element;
 
-import org.apache.maven.execution.MavenExecutionRequest;
-import org.apache.maven.model.Dependency;
-import org.apache.maven.project.MavenProject;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.wst.sse.core.StructuredModelManager;
+import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
+import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
+
+import org.apache.maven.model.Dependency;
+import org.apache.maven.project.MavenProject;
+
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.IMaven;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.IMavenProjectRegistry;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits;
+import org.eclipse.m2e.core.ui.internal.editing.PomEdits.CompoundOperation;
 import org.eclipse.m2e.editor.AbstractMavenProjectTestJunit4;
-import org.eclipse.wst.sse.core.StructuredModelManager;
-import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
-import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
-import org.junit.Test;
-import org.w3c.dom.Element;
 
 
 @SuppressWarnings("restriction")
@@ -80,10 +92,8 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestJunit4
 
     IMaven maven = MavenPlugin.getMaven();
     maven.detachFromSession(project);
-    MavenExecutionRequest request = MavenPlugin.getMavenProjectRegistry()
-        .createExecutionRequest(facade, new NullProgressMonitor());
 
-    final MavenProject project2 = maven.resolveParentProject(request, project, new NullProgressMonitor());
+    final MavenProject project2 = maven.resolveParentProject(project, new NullProgressMonitor());
     assertNotNull(project2);
     assertEquals(project2.getArtifactId(), "forge-parent");
     assertEquals(project2.getGroupId(), "org.sonatype.forge");

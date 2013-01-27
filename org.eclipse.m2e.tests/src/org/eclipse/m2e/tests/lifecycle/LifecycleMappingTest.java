@@ -25,9 +25,6 @@ import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.apache.maven.execution.MavenExecutionRequest;
-
-import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.internal.IMavenConstants;
 import org.eclipse.m2e.core.internal.lifecyclemapping.DefaultLifecycleMapping;
 import org.eclipse.m2e.core.internal.lifecyclemapping.InvalidLifecycleMapping;
@@ -123,9 +120,8 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     IProject project = facade.getProject();
     WorkspaceHelpers.assertNoErrors(project);
 
-    MavenExecutionRequest request = mavenProjectManager.createExecutionRequest(facade, monitor);
     List<LifecycleMappingMetadataSource> metadataSources = LifecycleMappingFactory.getPomMappingMetadataSources(
-        facade.getMavenProject(), request, monitor);
+        facade.getMavenProject(), monitor);
     assertNotNull(metadataSources);
     assertEquals(1, metadataSources.size());
     LifecycleMappingMetadataSource metadataSource = metadataSources.get(0);
@@ -166,9 +162,8 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     IProject project = facade.getProject();
     WorkspaceHelpers.assertNoErrors(project);
 
-    MavenExecutionRequest request = mavenProjectManager.createExecutionRequest(facade, monitor);
     List<LifecycleMappingMetadataSource> metadata = LifecycleMappingFactory.getPomMappingMetadataSources(
-        facade.getMavenProject(), request, monitor);
+        facade.getMavenProject(), monitor);
     assertNotNull(metadata);
     assertEquals(2, metadata.size());
     assertEquals("testLifecycleMappingMetadata", metadata.get(0).getGroupId());
@@ -200,9 +195,8 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     IProject project = facade.getProject();
     WorkspaceHelpers.assertNoErrors(project);
 
-    MavenExecutionRequest request = mavenProjectManager.createExecutionRequest(facade, monitor);
     List<LifecycleMappingMetadataSource> metadata = LifecycleMappingFactory.getPomMappingMetadataSources(
-        facade.getMavenProject(), request, monitor);
+        facade.getMavenProject(), monitor);
     assertNotNull(metadata);
     assertEquals(2, metadata.size());
     assertEquals("testLifecycleMappingMetadata", metadata.get(0).getGroupId());
@@ -221,9 +215,8 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     IProject project = facade.getProject();
     WorkspaceHelpers.assertNoErrors(project);
 
-    MavenExecutionRequest request = mavenProjectManager.createExecutionRequest(facade, monitor);
     List<LifecycleMappingMetadataSource> metadata = LifecycleMappingFactory.getPomMappingMetadataSources(
-        facade.getMavenProject(), request, monitor);
+        facade.getMavenProject(), monitor);
     assertNotNull(metadata);
     assertEquals(2, metadata.size());
     assertEquals("testLifecycleMappingMetadata", metadata.get(0).getGroupId());
@@ -377,8 +370,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     MavenProjectFacade facade = newMavenProjectFacade(
         "projects/lifecyclemapping/lifecycleMappingMetadata/DuplicateMetadata/testDuplicatePackagingType", "pom.xml");
 
-    LifecycleMappingResult mappingResult = LifecycleMappingFactory.calculateLifecycleMapping(MavenPlugin.getMaven()
-        .createExecutionRequest(monitor), facade, monitor);
+    LifecycleMappingResult mappingResult = calculateLifecycleMapping(facade);
 
     List<MavenProblemInfo> problems = mappingResult.getProblems();
 
@@ -394,8 +386,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     MavenProjectFacade facade = newMavenProjectFacade(
         "projects/lifecyclemapping/lifecycleMappingMetadata/DuplicateMetadata/testDuplicatePluginExecution1", "pom.xml");
 
-    LifecycleMappingResult mappingResult = LifecycleMappingFactory.calculateLifecycleMapping(MavenPlugin.getMaven()
-        .createExecutionRequest(monitor), facade, monitor);
+    LifecycleMappingResult mappingResult = calculateLifecycleMapping(facade);
 
     List<MavenProblemInfo> problems = mappingResult.getProblems();
 
@@ -412,8 +403,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     MavenProjectFacade facade = newMavenProjectFacade(
         "projects/lifecyclemapping/lifecycleMappingMetadata/DuplicateMetadata/testDuplicatePluginExecution2", "pom.xml");
 
-    LifecycleMappingResult mappingResult = LifecycleMappingFactory.calculateLifecycleMapping(MavenPlugin.getMaven()
-        .createExecutionRequest(monitor), facade, monitor);
+    LifecycleMappingResult mappingResult = calculateLifecycleMapping(facade);
 
     List<MavenProblemInfo> problems = mappingResult.getProblems();
 
@@ -478,8 +468,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
 
     String expectedErrorMessage = "Incompatible lifecycle mapping plugin version 1000.0.0";
     IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID,
-        expectedErrorMessage,
-        null /*lineNumber*/, project);
+        expectedErrorMessage, null /*lineNumber*/, project);
     WorkspaceHelpers.assertMarkerLocation(new SourceLocation(14, 11, 19), marker);
 
     ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade);
@@ -565,7 +554,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertEquals(1, executionMapping.get(1).getValue().size()); // test-lifecyclemapping-plugin:test-goal-1
     assertEquals(0, executionMapping.get(2).getValue().size()); // maven-site-plugin
     assertEquals(1, executionMapping.get(3).getValue().size()); // test-lifecyclemapping-plugin:test-goal-2
-    
+
     ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade);
     assertNotNull("Expected not null lifecycle mapping", lifecycleMapping);
 
@@ -610,8 +599,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
         "testFailToGetPluginParameterValue/pom.xml");
     assertNotNull("Expected not null MavenProjectFacade", facade);
 
-    LifecycleMappingResult mappingResult = LifecycleMappingFactory.calculateLifecycleMapping(MavenPlugin.getMaven()
-        .createExecutionRequest(monitor), facade, monitor);
+    LifecycleMappingResult mappingResult = calculateLifecycleMapping(facade);
 
     List<MavenProblemInfo> problems = mappingResult.getProblems();
 

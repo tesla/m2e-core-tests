@@ -3,26 +3,13 @@ package org.eclipse.m2e.tests.project;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.List;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.IPath;
-
-import org.apache.maven.execution.MavenExecutionRequest;
-import org.apache.maven.execution.MavenSession;
-import org.apache.maven.plugin.MojoExecution;
-
-import org.eclipse.m2e.core.MavenPlugin;
-import org.eclipse.m2e.core.internal.MavenPluginActivator;
-import org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager;
-import org.eclipse.m2e.core.project.IMavenProjectFacade;
-import org.eclipse.m2e.core.project.MavenUpdateRequest;
-import org.eclipse.m2e.core.project.configurator.AbstractProjectConfigurator;
-import org.eclipse.m2e.core.project.configurator.ILifecycleMapping;
-import org.eclipse.m2e.core.project.configurator.MojoExecutionKey;
-import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+
+import org.eclipse.m2e.core.project.IMavenProjectFacade;
+import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 
 
 public class CompilerSynonymTest extends AbstractMavenProjectTestCase {

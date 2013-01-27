@@ -12,7 +12,9 @@
 package org.eclipse.m2e.tests.embedder;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
 
 import org.sonatype.aether.RepositorySystemSession;
@@ -38,7 +40,7 @@ public class MavenExecutionContextTest extends AbstractMavenProjectTestCase {
   public void testBasic() throws Exception {
     final MavenExecutionContext context = maven.createExecutionContext();
     context.execute(new ICallable<Void>() {
-      public Void call(IMavenExecutionContext context) throws CoreException {
+      public Void call(IMavenExecutionContext context, IProgressMonitor monitor) throws CoreException {
         assertNotNull(context.getLocalRepository());
         assertNotNull(context.getRepositorySession());
         assertNotNull(context.getSession());
@@ -53,7 +55,7 @@ public class MavenExecutionContextTest extends AbstractMavenProjectTestCase {
     final MavenExecutionContext outer = maven.createExecutionContext();
     outer.getExecutionRequest().getUserProperties().put(outerProperty, "true");
     outer.execute(new ICallable<Void>() {
-      public Void call(final IMavenExecutionContext outerParam) throws CoreException {
+      public Void call(final IMavenExecutionContext outerParam, IProgressMonitor monitor) throws CoreException {
         assertSame(outer, outerParam);
         assertTrue(outerParam.getSession().getUserProperties().containsKey(outerProperty));
         final MavenExecutionContext nested = maven.createExecutionContext();
@@ -62,7 +64,7 @@ public class MavenExecutionContextTest extends AbstractMavenProjectTestCase {
         nested.getExecutionRequest().getUserProperties().put(nestedProperty, "false");
         final MavenSession outerSession = outerParam.getSession();
         nested.execute(new ICallable<Void>() {
-          public Void call(final IMavenExecutionContext nestedParam) throws CoreException {
+          public Void call(final IMavenExecutionContext nestedParam, IProgressMonitor monitor) throws CoreException {
             assertSame(nested, nestedParam);
             assertNotSame(outerParam, nestedParam);
             assertNotSame(outerSession, nestedParam.getSession());
@@ -80,12 +82,12 @@ public class MavenExecutionContextTest extends AbstractMavenProjectTestCase {
   public void testRenterShortcut() throws Exception {
     final MavenExecutionContext context = maven.createExecutionContext();
     context.execute(new ICallable<Void>() {
-      public Void call(IMavenExecutionContext contextParam) throws CoreException {
+      public Void call(IMavenExecutionContext contextParam, IProgressMonitor monitor) throws CoreException {
         final MavenSession session1 = contextParam.getSession();
         final RepositorySystemSession repositorySession1 = contextParam.getRepositorySession();
         final TransferListener transferListener1 = context.getRepositorySession().getTransferListener();
         contextParam.execute(new ICallable<Void>() {
-          public Void call(IMavenExecutionContext contextParam2) throws CoreException {
+          public Void call(IMavenExecutionContext contextParam2, IProgressMonitor monitor) throws CoreException {
             assertSame(session1, contextParam2.getSession());
             assertSame(repositorySession1, contextParam2.getRepositorySession());
             assertNotSame(transferListener1, contextParam2.getRepositorySession().getTransferListener());
@@ -122,7 +124,7 @@ public class MavenExecutionContextTest extends AbstractMavenProjectTestCase {
 
     try {
       context.execute(new ICallable<Void>() {
-        public Void call(IMavenExecutionContext context) throws CoreException {
+        public Void call(IMavenExecutionContext context, IProgressMonitor monitor) throws CoreException {
           context.getExecutionRequest().addActiveProfile("profile");
           return null;
         }
@@ -130,6 +132,18 @@ public class MavenExecutionContextTest extends AbstractMavenProjectTestCase {
       fail();
     } catch(IllegalStateException expected) {
     }
+  }
 
+  public void testExecutionRequestContainsSystemProperties() throws Exception {
+    maven.execute(new ICallable<Void>() {
+      public Void call(IMavenExecutionContext context, IProgressMonitor monitor) throws CoreException {
+        MavenExecutionRequest request = context.getExecutionRequest();
+        assertNotNull(request);
+        assertNotNull(request.getSystemProperties());
+        assertNotNull(request.getSystemProperties().getProperty("java.version"));
+        assertNotNull(request.getSystemProperties().getProperty("java.home"));
+        return null;
+      }
+    }, monitor);
   }
 }

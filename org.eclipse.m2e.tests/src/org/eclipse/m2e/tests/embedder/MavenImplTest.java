@@ -27,19 +27,20 @@ import org.codehaus.plexus.util.FileUtils;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionResult;
-import org.apache.maven.execution.MavenSession;
 import org.apache.maven.lifecycle.MavenExecutionPlan;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.ArtifactKey;
+import org.eclipse.m2e.core.embedder.ICallable;
 import org.eclipse.m2e.core.embedder.ILocalRepositoryListener;
 import org.eclipse.m2e.core.embedder.IMavenConfiguration;
+import org.eclipse.m2e.core.embedder.IMavenExecutionContext;
 import org.eclipse.m2e.core.internal.MavenPluginActivator;
 import org.eclipse.m2e.core.internal.embedder.MavenImpl;
 import org.eclipse.m2e.core.internal.repository.RepositoryRegistry;
@@ -53,28 +54,23 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
 
   private IProgressMonitor monitor = new NullProgressMonitor();
 
-  private MavenImpl maven = (MavenImpl) MavenPlugin.getMaven();
+  MavenImpl maven = (MavenImpl) MavenPlugin.getMaven();
 
   private IMavenConfiguration configuration = MavenPlugin.getMavenConfiguration();
 
   public void testGetMojoParameterValue() throws Exception {
-    MavenExecutionRequest request = maven.createExecutionRequest(monitor);
-    request.setPom(new File("projects/mojoparametervalue/pom.xml"));
-
-    MavenExecutionResult result = maven.readProject(request, monitor);
+    MavenExecutionResult result = readMavenProject(new File("projects/mojoparametervalue/pom.xml"), false);
     assertFalse(result.hasExceptions());
     MavenProject project = result.getProject();
 
-    MavenSession session = maven.createSession(request, project);
-
-    MavenExecutionPlan executionPlan = maven.calculateExecutionPlan(session, project, Arrays.asList("compile"), true,
-        monitor);
+    MavenExecutionPlan executionPlan = maven.calculateExecutionPlan(project, Arrays.asList("compile"), true, monitor);
 
     MojoExecution execution = getExecution(executionPlan, "maven-compiler-plugin", "compile");
 
-    assertEquals("1.7", maven.getMojoParameterValue(session, execution, "source", String.class));
+    assertEquals("1.7", maven.getMojoParameterValue(project, execution, "source", String.class, monitor));
 
-    assertEquals(Arrays.asList("a", "b", "c"), maven.getMojoParameterValue(session, execution, "excludes", List.class));
+    assertEquals(Arrays.asList("a", "b", "c"),
+        maven.getMojoParameterValue(project, execution, "excludes", List.class, monitor));
   }
 
   private MojoExecution getExecution(MavenExecutionPlan executionPlan, String artifactId, String goal) {
@@ -280,10 +276,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
       configuration.setUserSettingsFile(new File("src/org/eclipse/m2e/tests/embedder/settings-mirror.xml")
           .getCanonicalPath());
       assertFalse(maven.getSettings().getMirrors().isEmpty());
-      MavenExecutionRequest request = maven.createExecutionRequest(monitor);
-      request.getProjectBuildingRequest().setResolveDependencies(true);
-      request.setPom(new File("projects/dependencies/pom.xml"));
-      MavenExecutionResult result = maven.readProject(request, monitor);
+      MavenExecutionResult result = readMavenProject(new File("projects/dependencies/pom.xml"), true);
       assertFalse(result.getExceptions().toString(), result.hasExceptions());
       assertTrue(result.getDependencyResolutionResult().getUnresolvedDependencies().toString(), result
           .getDependencyResolutionResult().getUnresolvedDependencies().isEmpty());
@@ -313,11 +306,9 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
       FileHelpers.filterXmlFile(new File("projects/MNGECLIPSE-2126/settings-template.xml"), settingsFile, Collections
           .singletonMap("@port.http@", Integer.toString(httpServer.getHttpPort())));
       configuration.setUserSettingsFile(settingsFile.getCanonicalPath());
+      
+      MavenExecutionResult result = readMavenProject(new File("projects/MNGECLIPSE-2126/pom.xml"), true);
 
-      MavenExecutionRequest request = maven.createExecutionRequest(monitor);
-      request.getProjectBuildingRequest().setResolveDependencies(true);
-      request.setPom(new File("projects/MNGECLIPSE-2126/pom.xml"));
-      MavenExecutionResult result = maven.readProject(request, monitor);
       assertFalse(httpServer.getRecordedRequests().isEmpty());
       assertFalse(result.getExceptions().toString(), result.hasExceptions());
       assertTrue(result.getDependencyResolutionResult().getUnresolvedDependencies().toString(), result
@@ -327,8 +318,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
       assertNotNull(result.getProject().getArtifacts());
       assertEquals(result.getProject().getArtifacts().toString(), 1, result.getProject().getArtifacts().size());
 
-      MavenSession session = maven.createSession(request, result.getProject());
-      MavenExecutionPlan plan = maven.calculateExecutionPlan(session, result.getProject(), Arrays.asList("verify"),
+      MavenExecutionPlan plan = maven.calculateExecutionPlan(result.getProject(), Arrays.asList("verify"),
           true, monitor);
       assertEquals(plan.getMojoExecutions().toString(), 2, plan.getMojoExecutions().size());
     } finally {
@@ -365,10 +355,8 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
           .singletonMap("@port.https@", Integer.toString(httpServer.getHttpsPort())));
       configuration.setUserSettingsFile(settingsFile.getCanonicalPath());
 
-      MavenExecutionRequest request = maven.createExecutionRequest(monitor);
-      request.getProjectBuildingRequest().setResolveDependencies(true);
-      request.setPom(new File("projects/MNGECLIPSE-2149/pom.xml"));
-      MavenExecutionResult result = maven.readProject(request, monitor);
+      MavenExecutionResult result = readMavenProject(new File("projects/MNGECLIPSE-2149/pom.xml"), true);
+
       assertFalse(httpServer.getRecordedRequests().isEmpty());
       assertFalse(result.getExceptions().toString(), result.hasExceptions());
       assertTrue(result.getDependencyResolutionResult().getUnresolvedDependencies().toString(), result
@@ -385,44 +373,29 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
   }
 
   public void testReadLocalParent() throws Exception {
-    MavenExecutionRequest request = maven.createExecutionRequest(monitor);
-    request.setPom(new File("projects/readparent/local/module01/pom.xml"));
-    request.setGoals(Arrays.asList("compile"));
-
-    MavenExecutionResult result = maven.readProject(request, monitor);
+    MavenExecutionResult result = readMavenProject(new File("projects/readparent/local/module01/pom.xml"), false);
     assertFalse(result.hasExceptions());
     MavenProject project = result.getProject();
 
-    request = maven.createExecutionRequest(monitor);
-    MavenProject parent = maven.resolveParentProject(request, project, monitor);
+    MavenProject parent = maven.resolveParentProject(project, monitor);
     assertEquals("local-parent", parent.getArtifactId());
   }
 
   public void testReadRemoteParent() throws Exception {
-    MavenExecutionRequest request = maven.createExecutionRequest(monitor);
-    request.setPom(new File("projects/readparent/remote/module02/pom.xml"));
-    request.setGoals(Arrays.asList("compile"));
-
-    MavenExecutionResult result = maven.readProject(request, monitor);
+    MavenExecutionResult result = readMavenProject(new File("projects/readparent/remote/module02/pom.xml"), false);
     assertFalse(result.hasExceptions());
     MavenProject project = result.getProject();
-   
-    request = maven.createExecutionRequest(monitor);
-    MavenProject parent = maven.resolveParentProject(request, project, monitor);
+
+    MavenProject parent = maven.resolveParentProject(project, monitor);
     assertEquals("remote-parent", parent.getArtifactId());
   }
 
   public void testReadNoParent() throws Exception {
-    MavenExecutionRequest request = maven.createExecutionRequest(monitor);
-    request.setPom(new File("projects/readparent/noparent/pom.xml"));
-    request.setGoals(Arrays.asList("compile"));
-
-    MavenExecutionResult result = maven.readProject(request, monitor);
+    MavenExecutionResult result = readMavenProject(new File("projects/readparent/noparent/pom.xml"), false);
     assertFalse(result.hasExceptions());
     MavenProject project = result.getProject();
-   
-    request = maven.createExecutionRequest(monitor);
-    MavenProject parent = maven.resolveParentProject(request, project, monitor);
+
+    MavenProject parent = maven.resolveParentProject(project, monitor);
     assertNull(parent);
   }
 
@@ -439,14 +412,6 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
     } finally {
       configuration.setUserSettingsFile(origSettings);
     }
-  }
-
-  public void testExecutionRequestContainsSystemProperties() throws Exception {
-    MavenExecutionRequest request = maven.createExecutionRequest(monitor);
-    assertNotNull(request);
-    assertNotNull(request.getSystemProperties());
-    assertNotNull(request.getSystemProperties().getProperty("java.version"));
-    assertNotNull(request.getSystemProperties().getProperty("java.home"));
   }
 
   public void test358620_reparse_changed_user_settings() throws Exception {
@@ -496,9 +461,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
       httpServer.resetRecording();
 
       FileHelpers.deleteDirectory(new File("target/localrepo/missing"));
-      MavenExecutionRequest request = maven.createExecutionRequest(monitor);
-      request.setPom(new File("projects/366839_user_agent/pom.xml"));
-      maven.readProject(request, monitor);
+      readMavenProject(new File("projects/366839_user_agent/pom.xml"), false);
 
       assertFalse(httpServer.getRecordedRequests().isEmpty());
       for(String httpRequest : httpServer.getRecordedRequests()) {
@@ -510,5 +473,16 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
       configuration.setUserSettingsFile(origSettings);
       httpServer.stop();
     }
+  }
+
+  private MavenExecutionResult readMavenProject(final File pomFile, final boolean resolveDependencies)
+      throws CoreException {
+    return maven.execute(new ICallable<MavenExecutionResult>() {
+      public MavenExecutionResult call(IMavenExecutionContext context, IProgressMonitor monitor) throws CoreException {
+        ProjectBuildingRequest configuration = context.newProjectBuildingRequest();
+        configuration.setResolveDependencies(resolveDependencies);
+        return maven.readMavenProject(pomFile, configuration);
+      }
+    }, monitor);
   }
 }

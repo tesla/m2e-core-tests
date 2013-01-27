@@ -18,8 +18,6 @@ import org.eclipse.core.resources.IProject;
 
 import org.apache.maven.artifact.Artifact;
 
-import org.eclipse.m2e.core.MavenPlugin;
-import org.eclipse.m2e.core.internal.lifecyclemapping.LifecycleMappingFactory;
 import org.eclipse.m2e.core.internal.lifecyclemapping.LifecycleMappingResult;
 import org.eclipse.m2e.core.internal.lifecyclemapping.model.LifecycleMappingMetadataSource;
 import org.eclipse.m2e.core.internal.lifecyclemapping.model.PluginExecutionMetadata;
@@ -49,8 +47,7 @@ public class MavenPluginMetadataSourceTest extends AbstractLifecycleMappingTest 
     ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade);
     assertNotNull(lifecycleMapping);
 
-    LifecycleMappingResult mappingResult = LifecycleMappingFactory.calculateLifecycleMapping(MavenPlugin.getMaven()
-        .createExecutionRequest(monitor), (MavenProjectFacade) facade, monitor);
+    LifecycleMappingResult mappingResult = calculateLifecycleMapping((MavenProjectFacade) facade);
     MojoExecutionKey executionKey = new MojoExecutionKey("org.eclipse.m2e.test.lifecyclemapping",
         "test-embeddedmapping-plugin", "1.0.0", "test-goal-1", "compile", "mapping-without-plugin-gav");
     List<IPluginExecutionMetadata> executionMapping = mappingResult.getMojoExecutionMapping().get(executionKey);
