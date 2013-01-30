@@ -44,9 +44,9 @@ public class JavaCodeGenerationProjectConfiguratorTest extends AbstractMavenProj
     ClasspathHelpers.assertClasspath(new String[] {//
         "/368333_missingGeneratedSourceFolders/src/main/java", //
             "/368333_missingGeneratedSourceFolders/src/test/java", //
-            "/368333_missingGeneratedSourceFolders/target/generated-sources/test", //
             "org.eclipse.jdt.launching.JRE_CONTAINER/.*", //
             "org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER", //
+            "/368333_missingGeneratedSourceFolders/target/generated-sources/test",//
         }, //
         javaProject.getRawClasspath());
   }
