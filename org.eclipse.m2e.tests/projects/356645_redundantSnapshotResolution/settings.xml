@@ -1,0 +1,30 @@
+<settings>
+  <localRepository>target/NNNNNNlocalrepo</localRepository>
+
+  <profiles>
+    <profile>
+      <id>localcentral</id>
+      <repositories>
+        <repository>
+          <id>central</id>
+          <url>filex://localhost/repositories/remoterepo</url>
+          <snapshots><enabled>true</enabled></snapshots>
+          <releases><enabled>true</enabled></releases>
+        </repository>
+      </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>central</id>
+          <url>filex://localhost/repositories/remoterepo</url>
+          <snapshots><enabled>true</enabled></snapshots>
+          <releases><enabled>true</enabled></releases>
+        </pluginRepository>
+      </pluginRepositories>
+    </profile>
+  </profiles>
+
+  <activeProfiles>
+    <activeProfile>localcentral</activeProfile>
+  </activeProfiles>
+
+</settings>

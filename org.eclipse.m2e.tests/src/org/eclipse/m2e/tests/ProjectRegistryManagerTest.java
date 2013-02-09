@@ -1096,4 +1096,24 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_POM_LOADING_ID, expectedErrorMessage, 21 /*lineNumber*/,
         p);
   }
+
+  public void test356645_redundantSnapshotResolution() throws Exception {
+    FileUtils.deleteDirectory(new File("target/356645localrepo"));
+
+    mavenConfiguration.setUserSettingsFile("projects/356645_redundantSnapshotResolution/settings.xml");
+    waitForJobsToComplete();
+    injectFilexWagon();
+
+    IProject[] projects = importProjects("projects/356645_redundantSnapshotResolution", new String[] {
+        "projectA/pom.xml", "projectB/pom.xml"}, new ResolverConfiguration());
+    waitForJobsToComplete();
+
+    FilexWagon.setRequestFilterPattern("missing/missing/.*", true);
+
+    MavenUpdateRequest request = new MavenUpdateRequest(projects, false, true);
+    manager.refresh(request, monitor);
+
+    assertEquals(3, FilexWagon.getRequests().size());
+  }
+
 }
