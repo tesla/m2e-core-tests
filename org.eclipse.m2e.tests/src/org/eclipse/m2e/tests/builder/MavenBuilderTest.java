@@ -302,4 +302,12 @@ public class MavenBuilderTest extends AbstractMavenProjectTestCase {
     project.build(IncrementalProjectBuilder.CLEAN_BUILD, monitor);
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, message, 23, project);
   }
+
+  public void test397251_malformedPom() throws Exception {
+    // validate build does not fail with exception for projects with malformed pom.xml files
+    IProject project = createExisting("397251_malformedPom", "resources/397251_malformedPom");
+    project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+    String message = "Project build error: Non-parseable POM";
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_POM_LOADING_ID, message, 1, project);
+  }
 }
