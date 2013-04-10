@@ -56,7 +56,7 @@ public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
     assertNoErrors(project);
 
     IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().create(project, monitor);
-    deserialize(facade);
+    deserializeFromWorkspaceState(facade);
 
     MojoExecutionKey compileKey = null;
     for(MojoExecutionKey executionKey : facade.getMojoExecutionMapping().keySet()) {
@@ -98,7 +98,7 @@ public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
     assertNoErrors(project);
 
     IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().create(project, monitor);
-    deserialize(facade);
+    deserializeFromWorkspaceState(facade);
 
     List<MojoExecution> executions = facade.getMojoExecutions("org.apache.maven.plugins", "maven-compiler-plugin",
         monitor, "compile");
@@ -131,7 +131,7 @@ public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
 
     IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().create(project, monitor);
     assertNotNull("Expected not null MavenProjectFacade", facade);
-    deserialize(facade);
+    deserializeFromWorkspaceState(facade);
 
     ILifecycleMapping lifecycleMapping = MavenPlugin.getProjectConfigurationManager().getLifecycleMapping(facade);
     assertNotNull("Expected not null LifecycleMapping", lifecycleMapping);
@@ -139,16 +139,6 @@ public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
     List<AbstractProjectConfigurator> projectConfigurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
     assertNotNull("Expected not null projectConfigurators", projectConfigurators);
     assertEquals(1, projectConfigurators.size());
-  }
-
-  private void deserialize(IMavenProjectFacade facade) throws IllegalArgumentException, IllegalAccessException {
-    // pretend it was deserialized from workspace state
-    for(Field field : facade.getClass().getDeclaredFields()) {
-      if(Modifier.isTransient(field.getModifiers())) {
-        field.setAccessible(true);
-        field.set(facade, null);
-      }
-    }
   }
 
   public void testIsStale() throws Exception {

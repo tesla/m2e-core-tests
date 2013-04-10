@@ -26,13 +26,4 @@ public class CompilerSynonymTest extends AbstractMavenProjectTestCase {
 
   }
 
-  private void deserialize(IMavenProjectFacade facade) throws IllegalArgumentException, IllegalAccessException {
-    // pretend it was deserialized from workspace state
-    for(Field field : facade.getClass().getDeclaredFields()) {
-      if(Modifier.isTransient(field.getModifiers())) {
-        field.setAccessible(true);
-        field.set(facade, null);
-      }
-    }
-  }
 }
