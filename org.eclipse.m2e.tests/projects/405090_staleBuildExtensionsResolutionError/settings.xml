@@ -1,0 +1,50 @@
+<settings>
+  <localRepository>target/405090localrepo</localRepository>
+
+  <profiles>
+    <profile>
+      <id>testrepo</id>
+      <repositories>
+        <repository>
+          <id>testrepo</id>
+          <url>filex://localhost/repositories/testrepo</url>
+          <snapshots><enabled>true</enabled></snapshots>
+          <releases><enabled>true</enabled></releases>
+        </repository>
+      </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>testrepo</id>
+          <url>filex://localhost/repositories/testrepo</url>
+          <snapshots><enabled>true</enabled></snapshots>
+          <releases><enabled>true</enabled></releases>
+        </pluginRepository>
+      </pluginRepositories>
+    </profile>
+    <profile>
+      <id>localcentral</id>
+      <repositories>
+        <repository>
+          <id>central</id>
+          <url>file:repositories/remoterepo</url>
+          <snapshots><enabled>true</enabled></snapshots>
+          <releases><enabled>true</enabled></releases>
+        </repository>
+      </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>central</id>
+          <url>file:repositories/remoterepo</url>
+          <snapshots><enabled>true</enabled></snapshots>
+          <releases><enabled>true</enabled></releases>
+        </pluginRepository>
+      </pluginRepositories>
+    </profile>
+  </profiles>
+
+  <activeProfiles>
+    <activeProfile>testrepo</activeProfile>
+    <activeProfile>localcentral</activeProfile>
+  </activeProfiles>
+
+</settings>

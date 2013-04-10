@@ -1127,4 +1127,28 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertEquals(3, FilexWagon.getRequests().size());
   }
 
+  public void test405090_staleBuildExtensionsResolutionError() throws Exception {
+    FileUtils.deleteDirectory(new File("target/405090localrepo"));
+
+    mavenConfiguration.setUserSettingsFile("projects/405090_staleBuildExtensionsResolutionError/settings.xml");
+    waitForJobsToComplete();
+    injectFilexWagon();
+
+    FilexWagon.setRequestFailPattern(".*/test-lifecyclemapping-plugin/.*");
+
+    IProject project = importProjects("projects/405090_staleBuildExtensionsResolutionError", new String[] {"/pom.xml"},
+        new ResolverConfiguration(), true)[0];
+    waitForJobsToComplete();
+
+    String expectedErrorMessage = "Project build error: Unresolveable build extension: Plugin org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0";
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_POM_LOADING_ID, expectedErrorMessage, 1 /*lineNumber*/,
+        project);
+
+    FilexWagon.setRequestFailPattern(null);
+
+    MavenUpdateRequest request = new MavenUpdateRequest(project, false, true);
+    manager.refresh(request, monitor);
+
+    assertNoErrors(project);
+  }
 }
