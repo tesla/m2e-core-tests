@@ -16,11 +16,13 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.core.ui.internal.actions.MavenPropertyTester;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
+import org.eclipse.m2e.tests.common.RequireMavenExecutionContext;
 
 public class MavenPropertyTesterTest extends AbstractMavenProjectTestCase {
 
   private static final String IS_BUILD_DIRECTORY = "isBuildDirectory"; //$NON-NLS-1$
 
+  @RequireMavenExecutionContext
   public void testIsBuildDirectory() throws Exception {
     IProject[] projects =  importProjects( "projects/385422_filterMavenBuildDir/",
                                             new String[] {

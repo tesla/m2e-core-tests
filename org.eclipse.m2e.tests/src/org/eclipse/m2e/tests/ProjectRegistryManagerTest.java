@@ -56,6 +56,7 @@ import org.eclipse.m2e.core.project.MavenUpdateRequest;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.m2e.tests.common.FilexWagon;
+import org.eclipse.m2e.tests.common.RequireMavenExecutionContext;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
 
@@ -209,6 +210,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     waitForJobsToComplete();
 
     IMavenProjectFacade oldFacade = manager.create(p1, monitor);
+    MavenProject oldMavenProject = oldFacade.getMavenProject(monitor);
 
     MavenProjectChangedEvent event;
 //    assertEquals(1, events.size());
@@ -223,7 +225,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     waitForJobsToComplete();
 
     IMavenProjectFacade newFacade = manager.create(p1, monitor);
-    assertNotSame(oldFacade.getMavenProject(monitor), newFacade.getMavenProject(monitor));
+    assertNotSame(oldMavenProject, newFacade.getMavenProject(monitor));
 
     assertEquals(1, events.size());
     event = events.get(0);
@@ -340,6 +342,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     }
   }
 
+  @RequireMavenExecutionContext
   public void test006_parentAvailableFromLocalRepoAndWorkspace() throws Exception {
     IProject p1 = createExisting("t006-p1");
     IProject p2 = createExisting("t006-p2");
@@ -696,6 +699,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
         project);
   }
 
+  @RequireMavenExecutionContext
   public void test015_refreshOffline() throws Exception {
     // XXX fix this test on Windows and remove this condition 
     if(System.getProperty("os.name", "").toLowerCase().indexOf("windows") > -1) {
@@ -739,7 +743,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
 
     IFile pom = p3.getFile("pom.xml");
 
-    MavenProject mavenProject = manager.create(pom, false, null).getMavenProject(monitor);
+    MavenProject mavenProject = manager.create(pom, false, monitor).getMavenProject(monitor);
     Artifact a = mavenProject.getArtifacts().iterator().next();
     assertTrue(a.isResolved());
     assertEquals(p4.getFile(IMavenConstants.POM_FILE_NAME).getLocation().toFile().getAbsoluteFile(), a.getFile()
@@ -956,6 +960,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertNotNull(projects[1]);
   }
 
+  @RequireMavenExecutionContext
   public void test021_dependencyVersionRange() throws Exception {
     IProject p1 = importProject("resources/t021_dependencyVersionRange/t021-p1/pom.xml");
     waitForJobsToComplete();

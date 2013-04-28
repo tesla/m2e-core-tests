@@ -121,7 +121,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     WorkspaceHelpers.assertNoErrors(project);
 
     List<LifecycleMappingMetadataSource> metadataSources = LifecycleMappingFactory.getPomMappingMetadataSources(
-        facade.getMavenProject(), monitor);
+        facade.getMavenProject(monitor), monitor);
     assertNotNull(metadataSources);
     assertEquals(1, metadataSources.size());
     LifecycleMappingMetadataSource metadataSource = metadataSources.get(0);
@@ -163,7 +163,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     WorkspaceHelpers.assertNoErrors(project);
 
     List<LifecycleMappingMetadataSource> metadata = LifecycleMappingFactory.getPomMappingMetadataSources(
-        facade.getMavenProject(), monitor);
+        facade.getMavenProject(monitor), monitor);
     assertNotNull(metadata);
     assertEquals(2, metadata.size());
     assertEquals("testLifecycleMappingMetadata", metadata.get(0).getGroupId());
@@ -196,7 +196,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     WorkspaceHelpers.assertNoErrors(project);
 
     List<LifecycleMappingMetadataSource> metadata = LifecycleMappingFactory.getPomMappingMetadataSources(
-        facade.getMavenProject(), monitor);
+        facade.getMavenProject(monitor), monitor);
     assertNotNull(metadata);
     assertEquals(2, metadata.size());
     assertEquals("testLifecycleMappingMetadata", metadata.get(0).getGroupId());
@@ -216,7 +216,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     WorkspaceHelpers.assertNoErrors(project);
 
     List<LifecycleMappingMetadataSource> metadata = LifecycleMappingFactory.getPomMappingMetadataSources(
-        facade.getMavenProject(), monitor);
+        facade.getMavenProject(monitor), monitor);
     assertNotNull(metadata);
     assertEquals(2, metadata.size());
     assertEquals("testLifecycleMappingMetadata", metadata.get(0).getGroupId());

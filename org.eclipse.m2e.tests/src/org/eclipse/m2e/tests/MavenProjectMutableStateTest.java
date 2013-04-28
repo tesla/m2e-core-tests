@@ -18,17 +18,19 @@ import java.util.List;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.project.MavenProject;
 
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.IMaven;
+import org.eclipse.m2e.core.embedder.IMavenExecutionContext;
+import org.eclipse.m2e.core.internal.embedder.AbstractRunnable;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 
@@ -75,20 +77,23 @@ public class MavenProjectMutableStateTest extends AbstractMavenProjectTestCase {
   }
 
   public void testExecuteMojo() throws Exception {
-    IProject project = importProject("projects/projectmodelchanges/workspacebuild/pom.xml");
+    final IProject project = importProject("projects/projectmodelchanges/workspacebuild/pom.xml");
     waitForJobsToComplete();
     assertNoErrors(project);
 
-    IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().create(project, monitor);
-    MavenProject mavenProject = facade.getMavenProject(monitor);
+    final IMaven maven = MavenPlugin.getMaven();
 
-    IMaven maven = MavenPlugin.getMaven();
+    maven.createExecutionContext().execute(new AbstractRunnable() {
+      public void run(IMavenExecutionContext context, IProgressMonitor monitor) throws CoreException {
+        IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().create(project, monitor);
+        MavenProject mavenProject = facade.getMavenProject(monitor);
+        MojoExecution execution = facade.getMojoExecutions("org.eclipse.m2e.test.lifecyclemapping",
+            "test-buildhelper-plugin", monitor, "publish").get(0);
+        maven.execute(mavenProject, execution, monitor);
 
-    MojoExecution execution = facade.getMojoExecutions("org.eclipse.m2e.test.lifecyclemapping",
-        "test-buildhelper-plugin", monitor, "publish").get(0);
-    maven.execute(mavenProject, execution, monitor);
-
-    assertMutableState(project);
+        assertMutableState(project);
+      }
+    }, monitor);
   }
 
   private String location(IProject project, String relpath) {

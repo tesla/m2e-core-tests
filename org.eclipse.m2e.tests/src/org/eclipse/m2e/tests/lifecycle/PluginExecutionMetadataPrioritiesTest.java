@@ -146,8 +146,8 @@ public class PluginExecutionMetadataPrioritiesTest extends AbstractLifecycleMapp
     String expectedErrorMessage = "Plugin execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 (execution: default-test-goal-1, phase: process-resources)";
     IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID,
         expectedErrorMessage, null /*lineNumber*/, project);
-    SourceLocation causeLocation = new SourceLocation(parentFacade.getMavenProject().getFile().getAbsolutePath(),
-        WorkspaceHelpers.getModelId(parentFacade.getMavenProject()), 11, 7, 14);
+    SourceLocation causeLocation = new SourceLocation(parentFacade.getMavenProject(monitor).getFile().getAbsolutePath(),
+        WorkspaceHelpers.getModelId(parentFacade.getMavenProject(monitor)), 11, 7, 14);
     WorkspaceHelpers.assertMarkerLocation(new SourceLocation(5, 3, 10, causeLocation), marker);
     expectedErrorMessage = "Project configurator \"no such project configurator id for test-lifecyclemapping-plugin:test-goal-1 - parent\" is not available. To enable full functionality, install the project configurator and run Maven->Update Project Configuration.";
     marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
@@ -263,8 +263,8 @@ public class PluginExecutionMetadataPrioritiesTest extends AbstractLifecycleMapp
     String expectedErrorMessage = "Plugin execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 (execution: default-test-goal-1, phase: process-resources)";
     IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID,
         expectedErrorMessage, null /*lineNumber*/, project);
-    SourceLocation causeLocation = new SourceLocation(parentFacade.getMavenProject().getFile().getAbsolutePath(),
-        WorkspaceHelpers.getModelId(parentFacade.getMavenProject()), 11, 7, 14);
+    SourceLocation causeLocation = new SourceLocation(parentFacade.getMavenProject(monitor).getFile().getAbsolutePath(),
+        WorkspaceHelpers.getModelId(parentFacade.getMavenProject(monitor)), 11, 7, 14);
     WorkspaceHelpers.assertMarkerLocation(new SourceLocation(5, 3, 10, causeLocation), marker);
     expectedErrorMessage = "Project configurator \"no such project configurator id for test-lifecyclemapping-plugin:test-goal-1 - parent\" is not available. To enable full functionality, install the project configurator and run Maven->Update Project Configuration.";
     marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
