@@ -84,7 +84,7 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     assertEquals(WorkspaceHelpers.toString(markers), 2, markers.size());
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_DEPENDENCY_ID, expectedErrorMessage, 9 /*lineNumber*/,
         project);
-
+    
     // Building the project should not remove the marker
     project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
     waitForJobsToComplete();
@@ -436,7 +436,29 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
 	  mmm.addMarker(p, IMavenConstants.MARKER_CONFIGURATION_ID, Messages.ProjectConfigurationUpdateRequired, -1, IMarker.SEVERITY_ERROR);
 	  assertEquals(1, p.findMarkers( IMavenConstants.MARKER_CONFIGURATION_ID, false /*includeSubtypes*/, IResource.DEPTH_ZERO).length);
   }
-  
+
+  public void test361445_missingArtifactMarkerAttributes() throws Exception {
+    IProject project = importProject("projects/markers/testArtifactNotFoundMarkerAttributes/pom.xml");
+    waitForJobsToComplete();
+    List<IMarker> markers = WorkspaceHelpers.findErrorMarkers(project);
+    // (jdt) The container 'Maven Dependencies' references non existing library ...missing/missing/0.0.0/missing-0.0.0.jar'
+    // (maven) Missing artifact missing:missing:jar:0.0.0
+    assertEquals(WorkspaceHelpers.toString(markers), 3, markers.size());
+    
+    IMarker marker = markers.get(1);
+    assertEquals("missing", marker.getAttribute(IMavenConstants.MARKER_ATTR_GROUP_ID));
+    assertEquals("missing", marker.getAttribute(IMavenConstants.MARKER_ATTR_ARTIFACT_ID));
+    assertEquals("0.0.0", marker.getAttribute(IMavenConstants.MARKER_ATTR_VERSION));
+    assertEquals("", marker.getAttribute(IMavenConstants.MARKER_ATTR_CLASSIFIER));
+
+    marker = markers.get(2);
+    assertEquals("another-missing", marker.getAttribute(IMavenConstants.MARKER_ATTR_GROUP_ID));
+    assertEquals("another-missing", marker.getAttribute(IMavenConstants.MARKER_ATTR_ARTIFACT_ID));
+    assertEquals("1.0.0", marker.getAttribute(IMavenConstants.MARKER_ATTR_VERSION));
+    assertEquals("test", marker.getAttribute(IMavenConstants.MARKER_ATTR_CLASSIFIER));
+
+  }
+
   private IMarkerResolution getResolution(IMarkerResolution[] resolutions, Class<? extends IMarkerResolution> type) {
     if(resolutions == null) {
       return null;
