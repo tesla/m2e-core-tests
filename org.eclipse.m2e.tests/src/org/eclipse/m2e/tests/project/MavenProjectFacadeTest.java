@@ -90,6 +90,21 @@ public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
     assertEquals("1.6", maven.getMojoParameterValue(mavenProject, executions.get(0), "target", String.class, monitor));
   }
 
+  @RequireMavenExecutionContext(require=false)
+  public void testGetMojoExecutionsWithoutMavenExecutionContext() throws Exception {
+    IProject project = importProject("projects/getmojoexecution/pom.xml");
+    assertNoErrors(project);
+
+    IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().create(project, monitor);
+
+    List<MojoExecution> executions = facade.getMojoExecutions("org.apache.maven.plugins", "maven-compiler-plugin",
+        monitor, "compile");
+    assertEquals(executions.toString(), 1, executions.size());
+
+    // in backward compat mode MavenProject is not disposed
+    assertSame(facade.getMavenProject(monitor),facade.getMavenProject(monitor));
+  }
+
   public void testGetMojoExecutionsAfterWorkspaceRestart() throws Exception {
     IProject project = importProject("projects/getmojoexecution/pom.xml");
     assertNoErrors(project);
