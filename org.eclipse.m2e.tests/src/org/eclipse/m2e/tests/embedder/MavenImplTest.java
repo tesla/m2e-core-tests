@@ -388,6 +388,8 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
 
     MavenProject parent = maven.resolveParentProject(project, monitor);
     assertEquals("remote-parent", parent.getArtifactId());
+    assertNotNull("remote-parent.file", parent.getFile());
+    assertNotNull("remote-parent.artifact.file", parent.getArtifact().getFile());
   }
 
   public void testReadNoParent() throws Exception {
@@ -474,7 +476,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
       httpServer.stop();
     }
   }
-
+  
   private MavenExecutionResult readMavenProject(final File pomFile, final boolean resolveDependencies)
       throws CoreException {
     return maven.execute(new ICallable<MavenExecutionResult>() {
