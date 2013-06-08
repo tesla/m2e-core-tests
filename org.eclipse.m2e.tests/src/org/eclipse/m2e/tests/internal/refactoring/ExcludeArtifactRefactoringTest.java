@@ -12,6 +12,7 @@ import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.findChild;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.performOnDOMDocument;
 
 import java.util.HashMap;
+import java.util.List;
 
 import org.junit.AfterClass;
 
@@ -50,6 +51,7 @@ import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits.Operation;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits.OperationTuple;
 import org.eclipse.m2e.core.ui.internal.util.ParentGatherer;
+import org.eclipse.m2e.core.ui.internal.util.ParentHierarchyEntry;
 import org.eclipse.m2e.editor.pom.MavenPomEditor;
 import org.eclipse.m2e.model.edit.pom.Dependency;
 import org.eclipse.m2e.model.edit.pom.Exclusion;
@@ -373,14 +375,26 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 	}
 
 	private static ExcludeArtifactRefactoring createRefactoring(IFile pomFile, ArtifactKey[] keys, IFile exclusionPoint) throws CoreException {
-		ExcludeArtifactRefactoring refactoring = new ExcludeArtifactRefactoring(pomFile, keys);
+		ExcludeArtifactRefactoring refactoring = new ExcludeArtifactRefactoring(keys);
 		IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().create(pomFile, true, monitor);
-		ParentGatherer g = new ParentGatherer(facade.getMavenProject(monitor), facade);
-		refactoring.setHierarchy(g.getParentHierarchy(monitor));
+		ParentGatherer g = new ParentGatherer(facade);
+		List<ParentHierarchyEntry> hierarchy = g.getParentHierarchy(monitor);
+    refactoring.setHierarchy(hierarchy);
+    
+    ParentHierarchyEntry exclusionModel = null;
+    for (ParentHierarchyEntry model : hierarchy) {
+      if (exclusionPoint.equals(model.getResource())) {
+        exclusionModel = model;
+        break;
+      }
+    }
 
-		IMavenProjectFacade excFacade = MavenPlugin.getMavenProjectRegistry().create(exclusionPoint, true, monitor);
-		refactoring.setExclusionPoint(excFacade.getMavenProject(monitor));
-		return refactoring;
+    if (exclusionModel == null) {
+      fail("Exclusion point is not present in project parent hierarchy");
+    }
+
+    refactoring.setExclusionPoint(exclusionModel);
+    return refactoring;
 	}
 
 	private class FindEditorRunnable implements Runnable {
