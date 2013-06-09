@@ -18,7 +18,7 @@
     <tycho-version>0.15.0</tycho-version>
 
     <eclipse-repo.url>http://download.eclipse.org/releases/juno</eclipse-repo.url>
-    <m2e-core.url>http://nexus.tesla.io:8081/nexus/content/sites/m2e.extras/m2e/1.4.0/N/LATEST/</m2e-core.url>
+    <m2e-core.url>http://nexus.tesla.io:8081/nexus/content/sites/m2e.extras/m2e/1.5.0/N/LATEST/</m2e-core.url>
     <tycho.test.jvmArgs>-Xmx800m -XX:MaxPermSize=256m</tycho.test.jvmArgs>
     <tycho.surefire.timeout>600</tycho.surefire.timeout>
   </properties>
