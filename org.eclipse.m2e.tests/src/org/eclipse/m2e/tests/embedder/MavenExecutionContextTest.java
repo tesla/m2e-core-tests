@@ -79,13 +79,14 @@ public class MavenExecutionContextTest extends AbstractMavenProjectTestCase {
     }, monitor);
   }
 
-  public void testRenterShortcut() throws Exception {
+  public void testReenterShortcut() throws Exception {
     final MavenExecutionContext context = maven.createExecutionContext();
     context.execute(new ICallable<Void>() {
       public Void call(IMavenExecutionContext contextParam, IProgressMonitor monitor) throws CoreException {
         final MavenSession session1 = contextParam.getSession();
         final RepositorySystemSession repositorySession1 = contextParam.getRepositorySession();
-        final TransferListener transferListener1 = context.getRepositorySession().getTransferListener();
+        final TransferListener transferListener1 = ((IMavenExecutionContext) context).getRepositorySession()
+            .getTransferListener();
         contextParam.execute(new ICallable<Void>() {
           public Void call(IMavenExecutionContext contextParam2, IProgressMonitor monitor) throws CoreException {
             assertSame(session1, contextParam2.getSession());
