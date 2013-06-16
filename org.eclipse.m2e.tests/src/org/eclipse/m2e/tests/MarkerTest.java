@@ -11,16 +11,20 @@
 
 package org.eclipse.m2e.tests;
 
+import java.io.File;
 import java.util.List;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.ui.IMarkerResolution;
 import org.eclipse.ui.ide.IDE;
+
+import org.codehaus.plexus.util.FileUtils;
 
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.internal.IMavenConstants;
@@ -36,7 +40,6 @@ import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
 
 public class MarkerTest extends AbstractMavenProjectTestCase {
-  @SuppressWarnings("restriction")
   public void test() throws Exception {
     // Import a project with bad pom.xml
     IProject project = createExisting("markerTest", "projects/markers/testWorkflow");
@@ -314,102 +317,6 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     assertFalse(warningMarker1.getId() == newWarningMarker1.getId());
   }
 
-//  public void testSearchMarkers() throws Exception {
-//    IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/lifecycleMappingMetadata",
-//        "testLifecycleMappingSpecifiedInMetadata/pom.xml");
-//    assertNotNull("Expected not null MavenProjectFacade", facade);
-//    IProject project = facade.getProject();
-//    WorkspaceHelpers.assertNoErrors(project);
-//    IResource resource = facade.getPom();
-//
-//    int totalMarkers = 100;
-//    int percentForFind = 10;
-//    List<String> idsToFind = new ArrayList<String>();
-//    long start = System.currentTimeMillis();
-//    String markerType = IMavenConstants.MARKER_CONFIGURATION_ID;
-//    for(int i = 0; i < totalMarkers; i++ ) {
-//      IMarker marker = resource.createMarker(markerType);
-//      marker.setAttribute(IMarker.MESSAGE, "Some reasonably error message here. Or maybe a little bit longer.");
-//      marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
-//      marker.setAttribute(IMarker.TRANSIENT, true);
-//      String id = "org.apache.maven.plugins:maven-compiler-plugin:2.0.1:testCompile:standard:org.eclipse.m2e.jdt.internal.JavaProjectConfigurator"
-//          + System.currentTimeMillis() + System.nanoTime();
-//      marker.setAttribute("buildParticipant", id);
-//      if(i % percentForFind == 0) {
-//        idsToFind.add(id);
-//      }
-//    }
-//    System.err.println("Time to create " + totalMarkers + " markers: " + (System.currentTimeMillis() - start) + "ms");
-//    IMarker[] allMarkers = resource
-//        .findMarkers(markerType, false /*includeSubtypes*/, 0 /*depth*/);
-//    assertEquals(totalMarkers, allMarkers.length);
-//
-//    start = System.currentTimeMillis();
-//    for(String idToFind : idsToFind) {
-//      int found = 0;
-//      allMarkers = resource
-//          .findMarkers(markerType, false /*includeSubtypes*/, 0 /*depth*/);
-//      for(IMarker marker : allMarkers) {
-//        String id = marker.getAttribute("buildParticipant", null);
-//        if(idToFind.equals(id)) {
-//          found++ ;
-//        }
-//      }
-//      assertEquals(1, found);
-//    }
-//    long elapsed = (System.currentTimeMillis() - start);
-//    System.err.println("Time to find " + idsToFind.size() + " markers: " + elapsed + "ms");
-//    System.err.println("Average time to find 1 marker: " + (elapsed / idsToFind.size()) + "ms");
-//  }
-//
-//  public void testSearchMarkers1() throws Exception {
-//    IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/lifecycleMappingMetadata",
-//        "testLifecycleMappingSpecifiedInMetadata/pom.xml");
-//    assertNotNull("Expected not null MavenProjectFacade", facade);
-//    IProject project = facade.getProject();
-//    WorkspaceHelpers.assertNoErrors(project);
-//    IResource resource = facade.getPom();
-//
-//    int totalMarkers = 10000;
-//    int percentForFind = 10;
-//    List<String> idsToFind = new ArrayList<String>();
-//    long start = System.currentTimeMillis();
-//    String markerType = IMavenConstants.MARKER_CONFIGURATION_ID;
-//    for(int i = 0; i < totalMarkers; i++ ) {
-//      String id = "org.apache.maven.plugins:maven-compiler-plugin:2.0.1:testCompile:standard:org.eclipse.m2e.jdt.internal.JavaProjectConfigurator"
-//          + System.currentTimeMillis() + System.nanoTime();
-//      IMarker marker = resource.createMarker(markerType + "." + id);
-//      marker.setAttribute(IMarker.MESSAGE, "Some reasonably error message here. Or maybe a little bit longer.");
-//      marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
-//      marker.setAttribute(IMarker.TRANSIENT, true);
-//      if(i % percentForFind == 0) {
-//        idsToFind.add(id);
-//      }
-//    }
-//    System.err.println("Time to create " + totalMarkers + " markers: " + (System.currentTimeMillis() - start) + "ms");
-////    IMarker[] allMarkers = resource.findMarkers(markerType, true /*includeSubtypes*/, 0 /*depth*/);
-////    assertEquals(totalMarkers, allMarkers.length);
-//
-//    start = System.currentTimeMillis();
-//    for(String idToFind : idsToFind) {
-//      IMarker[] allMarkers = resource
-//          .findMarkers(markerType + "." + idToFind, false /*includeSubtypes*/, 0 /*depth*/);
-//      assertEquals(1, allMarkers.length);
-//    }
-//    long elapsed = (System.currentTimeMillis() - start);
-//    System.err.println("Time to find " + idsToFind.size() + " markers: " + elapsed + "ms");
-//    System.err.println("Average time to find 1 marker: " + (elapsed / idsToFind.size()) + "ms");
-//  }
-//
-//  protected IMavenProjectFacade importMavenProject(String basedir, String pomName) throws Exception {
-//    ResolverConfiguration configuration = new ResolverConfiguration();
-//    IProject[] project = importProjects(basedir, new String[] {pomName}, configuration);
-//    waitForJobsToComplete();
-//
-//    MavenProjectManager mavenProjectManager = MavenPlugin.getMavenProjectManager();
-//    return mavenProjectManager.create(project[0], monitor);
-//  }
-
   public void testMarkerResolutions() throws Exception {
     IProject project = importProject("projects/markers/testUncoveredPluginExecutionResolutions/pom.xml");
     waitForJobsToComplete();
@@ -456,7 +363,35 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     assertEquals("another-missing", marker.getAttribute(IMavenConstants.MARKER_ATTR_ARTIFACT_ID));
     assertEquals("1.0.0", marker.getAttribute(IMavenConstants.MARKER_ATTR_VERSION));
     assertEquals("test", marker.getAttribute(IMavenConstants.MARKER_ATTR_CLASSIFIER));
+  }
 
+  public void testBuildCantReadPom() throws Exception {
+    IWorkspaceDescription description = workspace.getDescription();
+    description.setAutoBuilding(true);
+    workspace.setDescription(description);
+
+    IProject project = importProject("projects/markers/testBuildCantReadPom/pom.xml");
+    waitForJobsToComplete();
+    WorkspaceHelpers.assertNoErrors(project);
+
+    // pom.xml got garbled using regular workspace APIs
+    copyContent(project, "pom_bad.xml", "pom.xml");
+    List<IMarker> markers = WorkspaceHelpers.findErrorMarkers(project);
+    assertEquals(WorkspaceHelpers.toString(markers), 1, markers.size());
+
+    copyContent(project, "pom_good.xml", "pom.xml");
+    WorkspaceHelpers.assertNoErrors(project);
+
+    // pom.xml got garbled while eclipse was not running
+    deserializeFromWorkspaceState(MavenPlugin.getMavenProjectRegistry().create(project, monitor));
+    File basedir = project.getLocation().toFile();
+    FileUtils.copyFile(new File(basedir, "pom_bad.xml"),  new File(basedir, "pom.xml"));
+    project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+    markers = WorkspaceHelpers.findErrorMarkers(project);
+    assertEquals(WorkspaceHelpers.toString(markers), 1, markers.size());
+
+    copyContent(project, "pom_good.xml", "pom.xml");
+    WorkspaceHelpers.assertNoErrors(project);
   }
 
   private IMarkerResolution getResolution(IMarkerResolution[] resolutions, Class<? extends IMarkerResolution> type) {
