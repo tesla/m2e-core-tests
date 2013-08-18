@@ -934,7 +934,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertNotNull(projects[0]);
     IMavenProjectFacade facade = manager.getProject(projects[0]);
     assertNotNull(facade);
-    MavenProject project = facade.getMavenProject();
+    MavenProject project = facade.getMavenProject(monitor);
     assertNotNull(project);
     File file = project.getArtifacts().iterator().next().getFile();
     assertTrue(file.toString(), file.isFile());
