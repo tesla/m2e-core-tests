@@ -13,6 +13,7 @@ package org.eclipse.m2e.editor.xml;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
@@ -48,12 +49,12 @@ public class HyperlinkTest extends AbstractPOMEditorTestCase {
     
   }
   
-  public void testHasLink() throws BadLocationException {
+  public void testHasLink() throws Exception {
     //Locate the area where we want to detect the link
     IRegion region = new Region(sourceViewer.getDocument().getLineOffset(12) + 17, 10);
     IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().getProject(projects[1]);
     assertNotNull(facade);
-    assertNotNull(facade.getMavenProject());
+    assertNotNull(facade.getMavenProject(monitor));
     sourceViewer.setMavenProject(facade.getMavenProject());
     
     IHyperlink[] links = new PomHyperlinkDetector().detectHyperlinks(sourceViewer, region, true);

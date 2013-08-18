@@ -28,13 +28,13 @@ import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
 import org.eclipse.wst.sse.ui.internal.StructuredTextViewer;
 import org.eclipse.wst.xml.ui.StructuredTextViewerConfigurationXML;
-
 import org.apache.maven.project.MavenProject;
-
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
+import org.eclipse.m2e.tests.common.RequireMavenExecutionContext;
 
 
 @SuppressWarnings("restriction")
+@RequireMavenExecutionContext
 public abstract class AbstractPOMEditorTestCase extends AbstractMavenProjectTestCase {
   protected DummyStructuredTextViewer sourceViewer;
 

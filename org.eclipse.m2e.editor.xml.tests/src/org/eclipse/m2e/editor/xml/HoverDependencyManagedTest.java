@@ -13,6 +13,7 @@ package org.eclipse.m2e.editor.xml;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
@@ -39,12 +40,12 @@ public class HoverDependencyManagedTest extends AbstractPOMEditorTestCase {
     
   }
   
-  public void testHasHover() {
+  public void testHasHover() throws CoreException {
     //Locate the area where we want to detect the hover
     String docString = sourceViewer.getDocument().get();
     IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().getProject(projects[1]);
     assertNotNull(facade);
-    assertNotNull(facade.getMavenProject());
+    assertNotNull(facade.getMavenProject(monitor));
     sourceViewer.setMavenProject(facade.getMavenProject());
     
     

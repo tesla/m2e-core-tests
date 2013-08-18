@@ -33,6 +33,7 @@ import org.w3c.dom.Element;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
@@ -51,6 +52,7 @@ import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits.CompoundOperation;
 import org.eclipse.m2e.editor.AbstractMavenProjectTestJunit4;
+import org.eclipse.m2e.tests.common.RequireMavenExecutionContext;
 
 
 @SuppressWarnings("restriction")
@@ -75,7 +77,7 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestJunit4
     //    assertEquals(model.getArtifactId(), "child");
     
     IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().getMavenProject(TEST_GROUP_ID, "child", TEST_VERSION);
-    final MavenProject project = facade.getMavenProject();
+    final MavenProject project = facade.getMavenProject(monitor);
     assertEquals(project.getArtifactId(), "child");
 
     final ManageDependenciesDialog.DepLabelProvider provider = new ManageDependenciesDialog.DepLabelProvider();
@@ -114,7 +116,7 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestJunit4
     
     assertNotNull(model);
     IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().getMavenProject(TEST_GROUP_ID+".same", "child", TEST_VERSION);
-    MavenProject project = facade.getMavenProject();
+    MavenProject project = facade.getMavenProject(monitor);
     assertEquals(project.getArtifactId(), "child");
 
     LinkedList<MavenProject> hierarchy = new LinkedList<MavenProject>();
@@ -224,7 +226,7 @@ private IDOMModel createTempModel(IStructuredModel model) {
     IStructuredModel model = loadModels("projects/dep_exists", new String[] { "project/pom.xml" }).get("dep_exists");
     
     IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().getMavenProject(TEST_GROUP_ID, "dep_exists", TEST_VERSION);
-    MavenProject project = facade.getMavenProject();
+    MavenProject project = facade.getMavenProject(monitor);
     
     LinkedList<MavenProject> hierarchy = new LinkedList<MavenProject>();
     hierarchy.add(project);
@@ -270,7 +272,7 @@ private IDOMModel createTempModel(IStructuredModel model) {
     IStructuredModel model = loadModels("projects/dep_exists_diff_version", new String[] { "project/pom.xml" }).get("dep_exists_diff_version");
     
     IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().getMavenProject(TEST_GROUP_ID, "dep_exists_diff_version", TEST_VERSION);
-    MavenProject project = facade.getMavenProject();
+    MavenProject project = facade.getMavenProject(monitor);
     
     LinkedList<MavenProject> hierarchy = new LinkedList<MavenProject>();
     hierarchy.add(project);
@@ -473,14 +475,14 @@ private IDOMModel createTempModel(IStructuredModel model) {
   
 
   
-  protected MavenProject getMavenProject(String groupID, String artifactID, String version) {
+  protected MavenProject getMavenProject(String groupID, String artifactID, String version) throws CoreException {
     IMavenProjectRegistry mavenProjectManager = MavenPlugin.getMavenProjectRegistry();
     assertNotNull(mavenProjectManager);
 
     IMavenProjectFacade facade = mavenProjectManager.getMavenProject(groupID, artifactID, version);
     assertNotNull(facade);
 
-    MavenProject project = facade.getMavenProject();
+    MavenProject project = facade.getMavenProject(monitor);
     assertNotNull(project);
 
     return project;

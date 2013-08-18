@@ -47,7 +47,7 @@ public class PropertyCompletionTest extends AbstractCompletionTest {
     String docString = sourceViewer.getDocument().get();
     IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().getProject(projects[1]);
     assertNotNull(facade);
-    assertNotNull(facade.getMavenProject());
+    assertNotNull(facade.getMavenProject(monitor));
     sourceViewer.setMavenProject(facade.getMavenProject());
     
     
