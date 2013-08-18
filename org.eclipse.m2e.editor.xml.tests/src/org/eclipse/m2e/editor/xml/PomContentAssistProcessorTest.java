@@ -33,12 +33,13 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
+
+
 /**
- * Hello fellow tester:
- * everytime this test finds a regression add an 'x' here:
- * everytime you do mindless test update add an 'y' here:
+ * Hello fellow tester: everytime this test finds a regression add an 'x' here: everytime you do mindless test update
+ * add an 'y' here:
+ * 
  * @author mkleint
- *
  */
 
 public class PomContentAssistProcessorTest extends TestCase {

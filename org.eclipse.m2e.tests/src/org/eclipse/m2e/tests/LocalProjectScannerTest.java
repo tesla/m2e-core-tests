@@ -9,7 +9,6 @@
  *      Sonatype, Inc. - initial API and implementation
  *******************************************************************************/
 
-
 package org.eclipse.m2e.tests;
 
 import java.io.File;
@@ -69,36 +68,39 @@ public class LocalProjectScannerTest extends TestCase {
     assertEquals("submodule/pom.xml", submodule.getLabel());
     assertEquals(new File(baseDir, "module/submodule/pom.xml"), submodule.getPomFile());
   }
-  
+
   /**
    * the modules can be referenced either by <module>path</module> or by <module>path/pom.xml</module>
+   * 
    * @throws Exception
    */
   public void testModuleReferencedByFile() throws Exception {
-	    File baseDir = new File("projects/localprojectscanner/module_referenced_by_file/parent").getCanonicalFile();
+    File baseDir = new File("projects/localprojectscanner/module_referenced_by_file/parent").getCanonicalFile();
 
-	    LocalProjectScanner scanner = new LocalProjectScanner(baseDir, baseDir.getAbsolutePath(), false, modelManager);
-	    scanner.run(new NullProgressMonitor());
+    LocalProjectScanner scanner = new LocalProjectScanner(baseDir, baseDir.getAbsolutePath(), false, modelManager);
+    scanner.run(new NullProgressMonitor());
 
-	    List<MavenProjectInfo> projects = scanner.getProjects();
-	    assertEquals(1, projects.size());
+    List<MavenProjectInfo> projects = scanner.getProjects();
+    assertEquals(1, projects.size());
 
-	    MavenProjectInfo parent = projects.get(0);
-	    assertEquals("/pom.xml", parent.getLabel());
-	    assertEquals(new File(baseDir, "pom.xml"), parent.getPomFile());
+    MavenProjectInfo parent = projects.get(0);
+    assertEquals("/pom.xml", parent.getLabel());
+    assertEquals(new File(baseDir, "pom.xml"), parent.getPomFile());
 
-	    List<MavenProjectInfo> modules = new ArrayList<MavenProjectInfo>(parent.getProjects());
-	    assertEquals(1, modules.size());
+    List<MavenProjectInfo> modules = new ArrayList<MavenProjectInfo>(parent.getProjects());
+    assertEquals(1, modules.size());
 
-	    MavenProjectInfo module = modules.get(0);
-	    assertEquals("module/pom.xml", module.getLabel());
-	    assertEquals(new File(baseDir, "module/pom.xml"), module.getPomFile());
+    MavenProjectInfo module = modules.get(0);
+    assertEquals("module/pom.xml", module.getLabel());
+    assertEquals(new File(baseDir, "module/pom.xml"), module.getPomFile());
 
-	  }  
-  
+  }
+
   /**
    * when scanning a directory without a pom file, iterate the children recursively to find poms, but never include
-   * projects inside projects if not referenced via <modules>. Preventive measure against including test poms and traversing the tree very deep. 
+   * projects inside projects if not referenced via <modules>. Preventive measure against including test poms and
+   * traversing the tree very deep.
+   * 
    * @throws Exception
    */
   public void testSkipNested() throws Exception {
@@ -245,10 +247,10 @@ public class LocalProjectScannerTest extends TestCase {
 
     MavenProjectInfo project = projects.get(0);
     assertEquals(MavenProjectInfo.RENAME_REQUIRED, project.getBasedirRename());
-    
+
     //Non of the sub modules should be renamed
     for(MavenProjectInfo subProject : project.getProjects()) {
-      assertEquals(MavenProjectInfo.RENAME_NO, subProject.getBasedirRename());  
+      assertEquals(MavenProjectInfo.RENAME_NO, subProject.getBasedirRename());
     }
 
   }
@@ -263,29 +265,30 @@ public class LocalProjectScannerTest extends TestCase {
 
     assertEquals(1, projects.size());
   }
-  
+
   public void testOutsideWorkspace() throws Exception {
-    
-    File baseDir = new File("projects/localprojectscanner/341038_projectsOutsideWorkspaceNotRenamed").getCanonicalFile();
-    
+
+    File baseDir = new File("projects/localprojectscanner/341038_projectsOutsideWorkspaceNotRenamed")
+        .getCanonicalFile();
+
     //the workspace folder is pointing on nothing because we don't want to have projectFolder equal to workspaceFolder 
-    File workspaceFolder = new File ("anywhere but not the same as project folder");
-  
-    LocalProjectScanner scanner = new LocalProjectScanner(workspaceFolder,
-        baseDir.getAbsolutePath(), true, modelManager);
+    File workspaceFolder = new File("anywhere but not the same as project folder");
+
+    LocalProjectScanner scanner = new LocalProjectScanner(workspaceFolder, baseDir.getAbsolutePath(), true,
+        modelManager);
     scanner.run(new NullProgressMonitor());
-    
+
     List<MavenProjectInfo> projects = scanner.getProjects();
     MavenProjectInfo project = projects.get(0);
 
     //The base directory should be renamed
     assertEquals(MavenProjectInfo.RENAME_REQUIRED, project.getBasedirRename());
-    
+
     //Non of the sub modules should be renamed
     for(MavenProjectInfo subProject : project.getProjects()) {
-      assertEquals(MavenProjectInfo.RENAME_NO, subProject.getBasedirRename());  
+      assertEquals(MavenProjectInfo.RENAME_NO, subProject.getBasedirRename());
     }
-    
+
   }
 
 }

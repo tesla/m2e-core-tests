@@ -32,23 +32,24 @@ import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.MavenModelManager;
 import org.eclipse.m2e.model.edit.pom.util.PomResourceImpl;
 
+
 /**
  * @author Eugene Kuleshov
  */
 public class MavenModelManagerTest extends TestCase {
 
   private static final String TEST_PROJECT_NAME = "editor-tests";
-  
+
   private IProject project;
 
   private PomResourceImpl resource = null;
 
   protected void setUp() throws Exception {
     super.setUp();
-    
+
     IWorkspace workspace = ResourcesPlugin.getWorkspace();
     IWorkspaceRoot root = workspace.getRoot();
-    
+
     project = root.getProject(TEST_PROJECT_NAME);
     if(!project.exists()) {
       project.create(new NullProgressMonitor());
@@ -57,7 +58,7 @@ public class MavenModelManagerTest extends TestCase {
       project.open(new NullProgressMonitor());
     }
   }
-  
+
   protected void tearDown() throws Exception {
     try {
       if(resource != null) {
@@ -67,8 +68,7 @@ public class MavenModelManagerTest extends TestCase {
       super.tearDown();
     }
   }
-  
-  
+
   public void testCreateMavenModel() throws Exception {
 
     testCreateMavenModel("<project xmlns=\"http://maven.apache.org/POM/4.0.0\" " + //
@@ -91,9 +91,9 @@ public class MavenModelManagerTest extends TestCase {
 
   private void testCreateMavenModel(String pom, String pomFileName) throws Exception {
     MavenModelManager modelManager = MavenPlugin.getMavenModelManager();
-    
+
     Model model = modelManager.readMavenModel(new ByteArrayInputStream(pom.getBytes("UTF-8")));
-    
+
     IFile pomFile = project.getFile(pomFileName);
     modelManager.createMavenModel(pomFile, model);
 
@@ -117,7 +117,6 @@ public class MavenModelManagerTest extends TestCase {
         sw.toString().replaceAll("\r\n", "\n"));
   }
 
-  
 //private XMLResource getResource(String pom) throws IOException {
 //  // register PomPackage in standalone environment 
 //  PomPackage.eINSTANCE.getEFactoryInstance();
@@ -161,6 +160,4 @@ public class MavenModelManagerTest extends TestCase {
 //  return resource;
 //}
 
-  
 }
-

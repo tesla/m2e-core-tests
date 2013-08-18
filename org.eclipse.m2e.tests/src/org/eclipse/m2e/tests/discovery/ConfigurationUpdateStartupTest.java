@@ -25,85 +25,78 @@ import org.eclipse.m2e.internal.discovery.DiscoveryActivator;
 import org.eclipse.m2e.internal.discovery.startup.UpdateConfigurationStartup;
 import org.eclipse.m2e.tests.common.AbstractLifecycleMappingTest;
 
-public class ConfigurationUpdateStartupTest extends
-		AbstractLifecycleMappingTest {
-	
-	private static final String BASE_DIR = "projects/updateConfigurationStartupTest/";
 
-	public void setUp() throws Exception {
-		super.setUp();
-		UpdateConfigurationStartup.enableStartup();
-		UpdateConfigurationStartup.clearSavedProjects();
-	}
+public class ConfigurationUpdateStartupTest extends AbstractLifecycleMappingTest {
 
-	public void tearDown() throws Exception {
-		super.tearDown();
-		UpdateConfigurationStartup.clearSavedProjects();
-		UpdateConfigurationStartup.enableStartup();
-	}
+  private static final String BASE_DIR = "projects/updateConfigurationStartupTest/";
 
-	@Test
-	public void testEmptyWorkspace() {
-		assertEquals("Expected no projects", 0,
-				UpdateConfigurationStartup.getSavedProjects().length);
-		UpdateConfigurationStartup.saveMarkedProjects();
-		assertEquals("Expected no projects", 0,
-				UpdateConfigurationStartup.getSavedProjects().length);
-	}
+  public void setUp() throws Exception {
+    super.setUp();
+    UpdateConfigurationStartup.enableStartup();
+    UpdateConfigurationStartup.clearSavedProjects();
+  }
 
-	@Test
-	public void testNoMavenProjects() throws Exception {
-		// Java errors (not selected)
-		importProject("javaError", BASE_DIR);
-		// Java no error
-		importProject("javaNoError", BASE_DIR);
-		waitForJobsToComplete();
+  public void tearDown() throws Exception {
+    super.tearDown();
+    UpdateConfigurationStartup.clearSavedProjects();
+    UpdateConfigurationStartup.enableStartup();
+  }
 
-		assertEquals("Expected no projects", 0,
-				UpdateConfigurationStartup.getSavedProjects().length);
-		UpdateConfigurationStartup.saveMarkedProjects();
-		assertEquals("Expected no projects", 0,
-				UpdateConfigurationStartup.getSavedProjects().length);
-	}
+  @Test
+  public void testEmptyWorkspace() {
+    assertEquals("Expected no projects", 0, UpdateConfigurationStartup.getSavedProjects().length);
+    UpdateConfigurationStartup.saveMarkedProjects();
+    assertEquals("Expected no projects", 0, UpdateConfigurationStartup.getSavedProjects().length);
+  }
 
-	@Test
-	public void testMavenProjectsNoErrors() throws Exception {
-		// Simple maven
-		importMavenProject(BASE_DIR, "simple-pom/pom.xml");
-		// Java errors (not selected)
-		importProject("javaError", BASE_DIR);
-		// Java no error
-		importProject("javaNoError", BASE_DIR);
-		waitForJobsToComplete();
+  @Test
+  public void testNoMavenProjects() throws Exception {
+    // Java errors (not selected)
+    importProject("javaError", BASE_DIR);
+    // Java no error
+    importProject("javaNoError", BASE_DIR);
+    waitForJobsToComplete();
 
-		assertEquals("Expected no projects", 0,
-				UpdateConfigurationStartup.getSavedProjects().length);
-		UpdateConfigurationStartup.saveMarkedProjects();
-		assertEquals("Expected no projects", 0,
-				UpdateConfigurationStartup.getSavedProjects().length);
-	}
+    assertEquals("Expected no projects", 0, UpdateConfigurationStartup.getSavedProjects().length);
+    UpdateConfigurationStartup.saveMarkedProjects();
+    assertEquals("Expected no projects", 0, UpdateConfigurationStartup.getSavedProjects().length);
+  }
 
-	@Test
-	public void testMavenProjectsErrors() throws Exception {
-		assertEquals("Expected no projects", 0,
-				UpdateConfigurationStartup.getSavedProjects().length);
+  @Test
+  public void testMavenProjectsNoErrors() throws Exception {
+    // Simple maven
+    importMavenProject(BASE_DIR, "simple-pom/pom.xml");
+    // Java errors (not selected)
+    importProject("javaError", BASE_DIR);
+    // Java no error
+    importProject("javaNoError", BASE_DIR);
+    waitForJobsToComplete();
 
-		// Simple maven
-		importMavenProject(BASE_DIR, "simple-pom/pom.xml");
-		// Configuration Errors
-		importMavenProject(BASE_DIR, "notCoveredMojoExecutions/pom.xml");
-		// Other Maven errors (not selected)
-		importMavenProject(BASE_DIR, "buildError/pom.xml");
+    assertEquals("Expected no projects", 0, UpdateConfigurationStartup.getSavedProjects().length);
+    UpdateConfigurationStartup.saveMarkedProjects();
+    assertEquals("Expected no projects", 0, UpdateConfigurationStartup.getSavedProjects().length);
+  }
 
-		// Java errors (not selected)
-		importProject("javaError", BASE_DIR);
-		// Java (not selected)
-		importProject("javaNoError", BASE_DIR);
-		waitForJobsToComplete();
+  @Test
+  public void testMavenProjectsErrors() throws Exception {
+    assertEquals("Expected no projects", 0, UpdateConfigurationStartup.getSavedProjects().length);
 
-		UpdateConfigurationStartup.saveMarkedProjects();
+    // Simple maven
+    importMavenProject(BASE_DIR, "simple-pom/pom.xml");
+    // Configuration Errors
+    importMavenProject(BASE_DIR, "notCoveredMojoExecutions/pom.xml");
+    // Other Maven errors (not selected)
+    importMavenProject(BASE_DIR, "buildError/pom.xml");
+
+    // Java errors (not selected)
+    importProject("javaError", BASE_DIR);
+    // Java (not selected)
+    importProject("javaNoError", BASE_DIR);
+    waitForJobsToComplete();
+
+    UpdateConfigurationStartup.saveMarkedProjects();
     assertEquals("Expected no projects", 1, UpdateConfigurationStartup.getSavedProjects().length);
-	}
+  }
 
   @Test
   public void testConfigureSpecifiedProjects() throws Exception {
@@ -120,14 +113,14 @@ public class ConfigurationUpdateStartupTest extends
     }
   }
 
-	@Test
-	public void testToggleEarlyStartup() {
-		assertFalse("Plugin Disabled", pluginDisabled());
-		UpdateConfigurationStartup.disableStartup();
-		assertTrue("Plugin Enabled", pluginDisabled());
-		UpdateConfigurationStartup.enableStartup();
-		assertFalse("Plugin Disabled", pluginDisabled());
-	}
+  @Test
+  public void testToggleEarlyStartup() {
+    assertFalse("Plugin Disabled", pluginDisabled());
+    UpdateConfigurationStartup.disableStartup();
+    assertTrue("Plugin Enabled", pluginDisabled());
+    UpdateConfigurationStartup.enableStartup();
+    assertFalse("Plugin Disabled", pluginDisabled());
+  }
 
   private static boolean hasProject(IProject[] projects, String name) {
     for(IProject project : projects) {
@@ -138,29 +131,27 @@ public class ConfigurationUpdateStartupTest extends
     return false;
   }
 
-	private static void importProject(String name, String base)
-			throws Exception {
-		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-		// copy
-		File src = new File(base);
-		File dst = new File(root.getLocation().toFile(), name);
-		copyDir(src, dst);
+  private static void importProject(String name, String base) throws Exception {
+    IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+    // copy
+    File src = new File(base);
+    File dst = new File(root.getLocation().toFile(), name);
+    copyDir(src, dst);
 
-		IProject project = root.getProject(name);
-		project.create(monitor);
+    IProject project = root.getProject(name);
+    project.create(monitor);
 
-		if (!project.isOpen()) {
-			project.open(monitor);
-		}
-	}
+    if(!project.isOpen()) {
+      project.open(monitor);
+    }
+  }
 
-	private static boolean pluginDisabled() {
-		for (String disabled : Workbench.getInstance()
-				.getDisabledEarlyActivatedPlugins()) {
-			if (DiscoveryActivator.PLUGIN_ID.equals(disabled)) {
-				return true;
-			}
-		}
-		return false;
-	}
+  private static boolean pluginDisabled() {
+    for(String disabled : Workbench.getInstance().getDisabledEarlyActivatedPlugins()) {
+      if(DiscoveryActivator.PLUGIN_ID.equals(disabled)) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

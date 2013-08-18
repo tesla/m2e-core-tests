@@ -17,6 +17,7 @@ import junit.framework.TestCase;
 
 import org.eclipse.m2e.core.project.MavenProjectInfo;
 
+
 public class MavenProjectInfoTest extends TestCase {
   public void testTwoChildProjectInfosWithSameLabel() throws Exception {
     File baseDir = new File("projects/mavenprojectinfo/twochildrensamelabel");

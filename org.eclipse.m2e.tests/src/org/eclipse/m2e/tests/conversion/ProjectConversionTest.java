@@ -8,6 +8,7 @@
  * Contributors:
  *      Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
+
 package org.eclipse.m2e.tests.conversion;
 
 import java.io.File;
@@ -23,7 +24,7 @@ import org.eclipse.m2e.tests.common.FileHelpers;
 
 /**
  * ProjectConversionTest
- *
+ * 
  * @author Fred Bricon
  */
 public class ProjectConversionTest extends AbstractProjectConversionTestCase {
@@ -32,12 +33,12 @@ public class ProjectConversionTest extends AbstractProjectConversionTestCase {
     super.setUp();
     System.setProperty("org.eclipse.m2e.jdt.conversion.compiler.version", "2.3.2");
   }
-  
+
   protected void tearDown() throws Exception {
     System.clearProperty("org.eclipse.m2e.jdt.conversion.compiler.version");
     super.tearDown();
   }
-  
+
   public void testMavenLayoutProjectConversion() throws Exception {
     //Checks a project with Maven layout doesn't create extra configuration 
     //for source and resource folders 
@@ -49,12 +50,12 @@ public class ProjectConversionTest extends AbstractProjectConversionTestCase {
     // generates a resource
     testProjectConversion("mixed-resources");
   }
-  
+
   public void testNoCustomizationNeededProjectConversion() throws Exception {
     //Checks a project with maven layout and Java 1.5 produces a minimal pom.xml
     testProjectConversion("no-customization-needed");
   }
-  
+
   public void testMultipleSourcesProjectConversion() throws Exception {
     //Checks a project having multiple source directories (main and test) 
     // only configures the first one (because the maven model, by default can only support
@@ -73,37 +74,34 @@ public class ProjectConversionTest extends AbstractProjectConversionTestCase {
     //so we add some extra boilerplate to check .svn folders are ignored during conversion
     //and we don't end up with mixed Java / Resource folders
     String projectName = "custom-layout";
-    deleteProject(projectName );
-    String srcDir = "projects/conversion/"+projectName;
+    deleteProject(projectName);
+    String srcDir = "projects/conversion/" + projectName;
     IProject project = createExisting(projectName, srcDir);
     assertTrue(projectName + " was not created!", project.exists());
     assertNoErrors(project);
     String svnDir = "JavaSource/foo/.svn";
-    FileHelpers.copyDir(new File(srcDir, svnDir), 
-                        project.getFolder(svnDir).getLocation().toFile(), 
-                        new FileFilter() {
-                        public boolean accept(File pathname) {
-                          return true;
-                        }
-                      });
+    FileHelpers.copyDir(new File(srcDir, svnDir), project.getFolder(svnDir).getLocation().toFile(), new FileFilter() {
+      public boolean accept(File pathname) {
+        return true;
+      }
+    });
     project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
     waitForJobsToComplete();
     assertTrue(project.getFolder(svnDir).getFile("hidden/index.properties").exists());
     assertConvertsAndBuilds(project);
   }
 
-  
   public IProject testProjectConversion(String projectName) throws Exception {
     deleteProject(projectName);
-    
+
     //Import existing regular Eclipse project
-    IProject project = createExisting(projectName, "projects/conversion/"+projectName);
+    IProject project = createExisting(projectName, "projects/conversion/" + projectName);
     assertTrue(projectName + " was not created!", project.exists());
     assertNoErrors(project);
-    
+
     //Check the project converts and builds correctly
     assertConvertsAndBuilds(project);
-    
+
     return project;
   }
 
@@ -116,10 +114,10 @@ public class ProjectConversionTest extends AbstractProjectConversionTestCase {
   protected void assertConvertsAndBuilds(IProject project) throws CoreException, InterruptedException, Exception {
     //Convert the project to a Maven project (generates pom.xml, enables Maven nature)
     convert(project);
-    
+
     //Checks the generated pom.xml is identical to /<projectName>/expectedPom.xml
     verifyGeneratedPom(project);
-    
+
     //Checks the Maven project builds without errors
     project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
     waitForJobsToComplete();

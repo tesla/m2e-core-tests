@@ -8,6 +8,7 @@
  * Contributors:
  *      Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
+
 package org.eclipse.m2e.tests.conversion;
 
 import java.io.IOException;
@@ -30,16 +31,17 @@ import org.eclipse.m2e.core.internal.IMavenConstants;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 
+
 /**
  * AbstractProjectConversionTestCase
- *
+ * 
  * @author Fred Bricon
  */
 public abstract class AbstractProjectConversionTestCase extends AbstractMavenProjectTestCase {
-  
+
   /**
-   * Instanciates a new default Maven Model, using the projectName as groupId and artifactId,
-   * having a default version of 0.0.1-SNAPSHOT.
+   * Instanciates a new default Maven Model, using the projectName as groupId and artifactId, having a default version
+   * of 0.0.1-SNAPSHOT.
    */
   protected Model initDefaultModel(String projectName) {
     Model model = new Model();
@@ -49,9 +51,9 @@ public abstract class AbstractProjectConversionTestCase extends AbstractMavenPro
     model.setVersion("0.0.1-SNAPSHOT");//$NON-NLS-1$
     return model;
   }
-  
+
   /**
-   * Converts an Eclipse project to a Maven project (generates a pom.xm and enables the Maven nature) 
+   * Converts an Eclipse project to a Maven project (generates a pom.xm and enables the Maven nature)
    */
   protected void convert(IProject project) throws CoreException, InterruptedException {
     Model model = initDefaultModel(project.getName());
@@ -63,17 +65,16 @@ public abstract class AbstractProjectConversionTestCase extends AbstractMavenPro
     MavenPlugin.getProjectConversionManager().convert(project, model, monitor);
     createPomXml(project, model);
     ResolverConfiguration configuration = new ResolverConfiguration();
-    MavenPlugin.getProjectConfigurationManager().enableMavenNature(project, configuration , monitor);
+    MavenPlugin.getProjectConfigurationManager().enableMavenNature(project, configuration, monitor);
     waitForJobsToComplete(monitor);
   }
 
-  
   /**
    * Serializes the maven model to &lt;project&gt;/pom.xml
    */
   protected void createPomXml(IProject project, Model model) throws CoreException {
     MavenModelManager mavenModelManager = MavenPlugin.getMavenModelManager();
-    mavenModelManager.createMavenModel(project.getFile(IMavenConstants.POM_FILE_NAME), model);  
+    mavenModelManager.createMavenModel(project.getFile(IMavenConstants.POM_FILE_NAME), model);
   }
 
   /**
@@ -87,12 +88,10 @@ public abstract class AbstractProjectConversionTestCase extends AbstractMavenPro
    * Asserts the generated pom.xml is identical to &lt;project&gt;/expectedPom.xml
    */
   protected void verifyGeneratedPom(IProject project) throws Exception {
-    assertEquals("pom.xml comparison failed", project.getFile("expectedPom.xml"), 
-                                              project.getFile(IMavenConstants.POM_FILE_NAME));
+    assertEquals("pom.xml comparison failed", project.getFile("expectedPom.xml"),
+        project.getFile(IMavenConstants.POM_FILE_NAME));
   }
-  
 
-  
   protected String getAsString(IFile file) throws IOException, CoreException {
     StringWriter sw = new StringWriter();
     InputStream is = null;
@@ -104,5 +103,5 @@ public abstract class AbstractProjectConversionTestCase extends AbstractMavenPro
     }
     return sw.toString().replaceAll("\r\n", "\n");
   }
-  
+
 }

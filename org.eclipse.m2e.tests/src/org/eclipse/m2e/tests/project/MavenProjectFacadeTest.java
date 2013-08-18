@@ -21,6 +21,7 @@ import org.eclipse.m2e.core.project.configurator.MojoExecutionKey;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.m2e.tests.common.RequireMavenExecutionContext;
 
+
 @RequireMavenExecutionContext
 public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
 
@@ -90,7 +91,7 @@ public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
     assertEquals("1.6", maven.getMojoParameterValue(mavenProject, executions.get(0), "target", String.class, monitor));
   }
 
-  @RequireMavenExecutionContext(require=false)
+  @RequireMavenExecutionContext(require = false)
   public void testGetMojoExecutionsWithoutMavenExecutionContext() throws Exception {
     IProject project = importProject("projects/getmojoexecution/pom.xml");
     assertNoErrors(project);
@@ -102,7 +103,7 @@ public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
     assertEquals(executions.toString(), 1, executions.size());
 
     // in backward compat mode MavenProject is not disposed
-    assertSame(facade.getMavenProject(monitor),facade.getMavenProject(monitor));
+    assertSame(facade.getMavenProject(monitor), facade.getMavenProject(monitor));
   }
 
   public void testGetMojoExecutionsAfterWorkspaceRestart() throws Exception {

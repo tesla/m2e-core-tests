@@ -33,15 +33,15 @@ import org.eclipse.m2e.model.edit.pom.util.PomResourceImpl;
 public class MavenModelEditTest extends TestCase {
 
   private static final String TEST_PROJECT_NAME = "editor-tests";
-  
+
   private IProject project;
 
   protected void setUp() throws Exception {
     super.setUp();
-    
+
     IWorkspace workspace = ResourcesPlugin.getWorkspace();
     IWorkspaceRoot root = workspace.getRoot();
-    
+
     project = root.getProject(TEST_PROJECT_NAME);
     if(!project.exists()) {
       project.create(new NullProgressMonitor());
@@ -50,7 +50,7 @@ public class MavenModelEditTest extends TestCase {
       project.open(new NullProgressMonitor());
     }
   }
-  
+
   public void testAttributeRoundtrip() throws Exception {
     PomResourceImpl resource = loadModel("attr.xml");
     assertEquals(loadFile("attr.xml"), MavenModelUtil.toString(resource));
@@ -59,11 +59,11 @@ public class MavenModelEditTest extends TestCase {
 
   public void testAttributeRemove() throws Exception {
     PomResourceImpl resource = loadModel("attr.xml");
-    
+
     Model model = resource.getModel();
     // model.eUnset(model.eClass().getEStructuralFeature(PomPackage.MODEL__VERSION));
     model.setVersion(null);
-    
+
     assertEquals(loadFile("attr_remove.xml"), MavenModelUtil.toString(resource));
     resource.unload();
   }
@@ -72,7 +72,7 @@ public class MavenModelEditTest extends TestCase {
     PomResourceImpl resource = loadModel("attr.xml");
     Model model = resource.getModel();
     model.setDescription("description");
-    
+
     assertEquals(loadFile("attr_add.xml"), MavenModelUtil.toString(resource));
     resource.unload();
   }
@@ -94,9 +94,9 @@ public class MavenModelEditTest extends TestCase {
   public void testOneRemove() throws Exception {
     PomResourceImpl resource = loadModel("one.xml");
     Model model = resource.getModel();
-    
+
     model.setParent(null);
-    
+
     assertEquals(loadFile("one_remove.xml"), MavenModelUtil.toString(resource));
     resource.unload();
   }
@@ -107,7 +107,7 @@ public class MavenModelEditTest extends TestCase {
 
     Parent parent = model.getParent();
     parent.setArtifactId("tttt");
-    
+
     assertEquals(loadFile("one_replace.xml"), MavenModelUtil.toString(resource));
     resource.unload();
   }
@@ -136,7 +136,7 @@ public class MavenModelEditTest extends TestCase {
     // Dependency dependency = model.getDependencies().getDependencyArray(0);
     Dependency dependency = model.getDependencies().get(0);
     dependency.setArtifactId("changed-maven-lifecycle");
-    
+
     assertEquals(loadFile("many_change.xml"), MavenModelUtil.toString(resource));
     resource.unload();
   }
@@ -148,7 +148,7 @@ public class MavenModelEditTest extends TestCase {
     Dependency dependency = PomFactory.eINSTANCE.createDependency();
     dependency.setGroupId("added-groupId");
     dependency.setArtifactId("added-artifactId");
-    
+
     EList<Dependency> dependencies = model.getDependencies();
     dependencies.add(dependency);
 
@@ -265,5 +265,5 @@ public class MavenModelEditTest extends TestCase {
 //  
 //    return new String(os.toByteArray(), "UTF-8").replaceAll("\r\n", "\n");
 //  }
-  
+
 }

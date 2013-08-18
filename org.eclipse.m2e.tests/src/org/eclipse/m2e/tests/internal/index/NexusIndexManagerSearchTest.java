@@ -119,15 +119,16 @@ public class NexusIndexManagerSearchTest extends AbstractNexusIndexManagerTest {
     }
     assertTrue(hasVersion);
 
-    search = indexManager.search(new UserInputSearchExpression("junit"), IIndex.SEARCH_ARTIFACT, IIndex.SEARCH_JAVADOCS);
-      assertTrue(search.size() > 0);
+    search = indexManager
+        .search(new UserInputSearchExpression("junit"), IIndex.SEARCH_ARTIFACT, IIndex.SEARCH_JAVADOCS);
+    assertTrue(search.size() > 0);
     search = indexManager.search(new UserInputSearchExpression("junit"), IIndex.SEARCH_ARTIFACT, IIndex.SEARCH_SOURCES);
     assertTrue(search.size() > 0);
     search = indexManager.search(new UserInputSearchExpression("junit"), IIndex.SEARCH_ARTIFACT, IIndex.SEARCH_TESTS);
     assertTrue(search.size() > 0);
 
-    Map<String, IndexedArtifact> noResultsSearch = indexManager.search(new UserInputSearchExpression("beepbeep-nothing"),
-        IIndex.SEARCH_ARTIFACT);
+    Map<String, IndexedArtifact> noResultsSearch = indexManager.search(
+        new UserInputSearchExpression("beepbeep-nothing"), IIndex.SEARCH_ARTIFACT);
     assertTrue(noResultsSearch.size() == 0);
   }
 
@@ -173,13 +174,14 @@ public class NexusIndexManagerSearchTest extends AbstractNexusIndexManagerTest {
         new UserInputSearchExpression("org.ju"), null, null, null);
     assertTrue(String.format("Wrong result set returned! (size=%s)", new Object[] {result.size()}), result.size() > 0);
   }
-  
+
   public void testSorting() throws CoreException {
-    Collection<IndexedArtifact> result = indexManager.getIndex((IProject) null).find(new UserInputSearchExpression("junit"), null, null, null);
+    Collection<IndexedArtifact> result = indexManager.getIndex((IProject) null).find(
+        new UserInputSearchExpression("junit"), null, null, null);
     assertTrue(result.size() > 1);
-    
+
     Iterator<IndexedArtifact> iterator = result.iterator();
-    IndexedArtifact previous =  iterator.next();
+    IndexedArtifact previous = iterator.next();
     while(iterator.hasNext()) {
       IndexedArtifact indexedArtifact = iterator.next();
       assertTrue(previous.compareTo(indexedArtifact) < 0);

@@ -8,6 +8,7 @@
  * Contributors:
  *      Sonatype, Inc. - initial API and implementation
  *******************************************************************************/
+
 package org.eclipse.m2e.tests.ui.editing;
 
 import java.util.Collections;
@@ -24,66 +25,70 @@ import org.eclipse.m2e.core.ui.internal.editing.AddDependencyOperation;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits.OperationTuple;
 
+
 @SuppressWarnings("restriction")
 public class AddDependencyOperationTest extends AbstractOperationTest {
-	private IDOMModel tempModel;
-	private Dependency d;
-	private IStructuredDocument document;
+  private IDOMModel tempModel;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see junit.framework.TestCase#setUp()
-	 */
-	@Override
-	protected void setUp() throws Exception {
-		tempModel = (IDOMModel) StructuredModelManager.getModelManager().createUnManagedStructuredModelFor("org.eclipse.m2e.core.pomFile");
-		document = tempModel.getStructuredDocument();
-		d = new Dependency();
-		d.setArtifactId("BBBB");
-		d.setGroupId("AAA");
-		d.setVersion("1.0");
-	}
+  private Dependency d;
 
-	public void testNoDependenciesElement() throws Exception {
-		document.setText(StructuredModelManager.getModelManager(), //
-				"<project></project>");
-		PomEdits.performOnDOMDocument(new OperationTuple(tempModel, new AddDependencyOperation(d)));
-		assertEquals("Expected dependency: " + d.toString() + "\n" + document.getText(), 1, dependencyCount(tempModel, d));
+  private IStructuredDocument document;
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see junit.framework.TestCase#setUp()
+   */
+  @Override
+  protected void setUp() throws Exception {
+    tempModel = (IDOMModel) StructuredModelManager.getModelManager().createUnManagedStructuredModelFor(
+        "org.eclipse.m2e.core.pomFile");
+    document = tempModel.getStructuredDocument();
+    d = new Dependency();
+    d.setArtifactId("BBBB");
+    d.setGroupId("AAA");
+    d.setVersion("1.0");
+  }
+
+  public void testNoDependenciesElement() throws Exception {
+    document.setText(StructuredModelManager.getModelManager(), //
+        "<project></project>");
+    PomEdits.performOnDOMDocument(new OperationTuple(tempModel, new AddDependencyOperation(d)));
+    assertEquals("Expected dependency: " + d.toString() + "\n" + document.getText(), 1, dependencyCount(tempModel, d));
     assertEquals("Dependency Count: \n" + document.getText(), 1, getDependencyCount(tempModel));
-	}
+  }
 
-	public void testEmptyDependenciesElement() throws Exception {
-		document.setText(StructuredModelManager.getModelManager(), //
-				"<project><dependencies>" + //
-						"</dependencies></project>");
-		PomEdits.performOnDOMDocument(new OperationTuple(tempModel, new AddDependencyOperation(d)));
-		assertEquals("Expected dependency: " + d.toString() + "\n" + document.getText(), 1, dependencyCount(tempModel, d));
+  public void testEmptyDependenciesElement() throws Exception {
+    document.setText(StructuredModelManager.getModelManager(), //
+        "<project><dependencies>" + //
+            "</dependencies></project>");
+    PomEdits.performOnDOMDocument(new OperationTuple(tempModel, new AddDependencyOperation(d)));
+    assertEquals("Expected dependency: " + d.toString() + "\n" + document.getText(), 1, dependencyCount(tempModel, d));
     assertEquals("Dependency Count: \n" + document.getText(), 1, getDependencyCount(tempModel));
-	}
+  }
 
-	public void testWithDependencies() throws Exception {
-		document.setText(StructuredModelManager.getModelManager(), //
-				"<project><dependencies>" + //
-						"<dependency><groupId>AAA</groupId><artifactId>BBB</artifactId><version>1.0</version></dependency>" + //
-						"<dependency><groupId>AAAB</groupId><artifactId>BBB</artifactId><version>1.0</version></dependency>" + //
-						"</dependencies></project>");
-		PomEdits.performOnDOMDocument(new OperationTuple(tempModel, new AddDependencyOperation(d)));
-		assertEquals("Expected dependency: " + d.toString() + "\n" + document.getText(), 1, dependencyCount(tempModel, d));
+  public void testWithDependencies() throws Exception {
+    document.setText(StructuredModelManager.getModelManager(), //
+        "<project><dependencies>" + //
+            "<dependency><groupId>AAA</groupId><artifactId>BBB</artifactId><version>1.0</version></dependency>" + //
+            "<dependency><groupId>AAAB</groupId><artifactId>BBB</artifactId><version>1.0</version></dependency>" + //
+            "</dependencies></project>");
+    PomEdits.performOnDOMDocument(new OperationTuple(tempModel, new AddDependencyOperation(d)));
+    assertEquals("Expected dependency: " + d.toString() + "\n" + document.getText(), 1, dependencyCount(tempModel, d));
     assertEquals("Dependency Count: \n" + document.getText(), 3, getDependencyCount(tempModel));
-	}
+  }
 
-	public void testDuplicatedDependency() throws Exception {
-		document.setText(StructuredModelManager.getModelManager(), //
-				"<project><dependencies>" + //
-						"<dependency><groupId>AAA</groupId><artifactId>BBB</artifactId><version>1.0</version></dependency>" + //
-						"<dependency><groupId>AAAB</groupId><artifactId>BBB</artifactId><version>1.0</version></dependency>" + //
-						"<dependency><groupId>AAA</groupId><artifactId>BBBB</artifactId><version>1.0</version></dependency>" + //
-						"</dependencies></project>");
-		PomEdits.performOnDOMDocument(new OperationTuple(tempModel, new AddDependencyOperation(d)));
-		assertEquals("Expected dependency: " + d.toString() + "\n" + document.getText(), 1, dependencyCount(tempModel, d));
+  public void testDuplicatedDependency() throws Exception {
+    document.setText(StructuredModelManager.getModelManager(), //
+        "<project><dependencies>" + //
+            "<dependency><groupId>AAA</groupId><artifactId>BBB</artifactId><version>1.0</version></dependency>" + //
+            "<dependency><groupId>AAAB</groupId><artifactId>BBB</artifactId><version>1.0</version></dependency>" + //
+            "<dependency><groupId>AAA</groupId><artifactId>BBBB</artifactId><version>1.0</version></dependency>" + //
+            "</dependencies></project>");
+    PomEdits.performOnDOMDocument(new OperationTuple(tempModel, new AddDependencyOperation(d)));
+    assertEquals("Expected dependency: " + d.toString() + "\n" + document.getText(), 1, dependencyCount(tempModel, d));
     assertEquals("Dependency Count: \n" + document.getText(), 3, getDependencyCount(tempModel));
-	}
+  }
 
   public void testExclusionsAdded() throws Exception {
     Exclusion e = new Exclusion();

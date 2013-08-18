@@ -29,8 +29,8 @@ public class TestScmHandler extends ScmHandler {
     return null;
   }
 
-  public void checkoutProject(MavenProjectScmInfo info, File dest, IProgressMonitor monitor)
-      throws CoreException, InterruptedException {
+  public void checkoutProject(MavenProjectScmInfo info, File dest, IProgressMonitor monitor) throws CoreException,
+      InterruptedException {
   }
 
 }

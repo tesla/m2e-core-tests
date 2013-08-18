@@ -9,7 +9,6 @@
  *      Sonatype, Inc. - initial API and implementation
  *******************************************************************************/
 
-
 package org.eclipse.m2e.tests.internal.project;
 
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
@@ -19,11 +18,11 @@ public class MavenProjectChangedListenerExtensionTest extends AbstractMavenProje
   public void testExtension() throws Exception {
     TestMavenProjectChangedListener.events.clear();
     TestMavenProjectChangedListener.record = true;
-    
+
     try {
       importProject("projects/projectimport/p001/pom.xml");
       waitForJobsToComplete();
-  
+
       assertFalse(TestMavenProjectChangedListener.events.isEmpty());
     } finally {
       TestMavenProjectChangedListener.record = false;

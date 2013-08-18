@@ -15,30 +15,27 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 
+
 /**
- * Hello fellow tester:
- * everytime this test finds a regression add an 'x' here: x
- * everytime you do mindless test update add an 'y' here: 
+ * Hello fellow tester: everytime this test finds a regression add an 'x' here: x everytime you do mindless test update
+ * add an 'y' here:
+ * 
  * @author mkleint
- *
  */
 
 public class RelativePath3Test extends AbstractCompletionTest {
-  
-  
+
   protected IFile loadProjectsAndFiles() throws Exception {
-    //Create the projects
-    IProject[] projects = importProjects("projects/MNGECLIPSE-2601", 
-        new String[] {
-        "parent2601/pom.xml",
-        "child1/child3/pom.xml"
-        }, new ResolverConfiguration());
+    // Create the projects
+    IProject[] projects = importProjects("projects/MNGECLIPSE-2601", new String[] {"parent2601/pom.xml",
+        "child1/child3/pom.xml"}, new ResolverConfiguration());
     waitForJobsToComplete();
     return (IFile) projects[1].findMember("pom.xml");
   }
 
   public void testRelativePath() throws Exception {
-    assertEquals("../../parent2601/pom.xml", PomContentAssistProcessor.findRelativePath(sourceViewer, "org.eclipse.m2e", "parent2601", "0.0.1-SNAPSHOT"));
+    assertEquals("../../parent2601/pom.xml",
+        PomContentAssistProcessor.findRelativePath(sourceViewer, "org.eclipse.m2e", "parent2601", "0.0.1-SNAPSHOT"));
   }
 
 }

@@ -74,10 +74,10 @@ public class MavenDiscoveryTest extends TestCase implements IShellProvider {
     configuration.setShowTagFilter(true);
     configuration.setSelectedTags(Collections.singletonList(MavenDiscovery.APPLICABLE_TAG));
     configuration.setShowInstalledFilter(false);
-    configuration.setSelectedPackagingTypes(Collections.<String>emptyList());
-    configuration.setSelectedMojos(Collections.<MojoExecutionKey>emptyList());
-    configuration.setSelectedLifecycleIds(Collections.<String>emptyList());
-    configuration.setSelectedConfigurators(Collections.<String>emptyList());
+    configuration.setSelectedPackagingTypes(Collections.<String> emptyList());
+    configuration.setSelectedMojos(Collections.<MojoExecutionKey> emptyList());
+    configuration.setSelectedLifecycleIds(Collections.<String> emptyList());
+    configuration.setSelectedConfigurators(Collections.<String> emptyList());
 
     shell = new Shell(Workbench.getInstance().getDisplay());
   }

@@ -21,32 +21,25 @@ import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
 import org.w3c.dom.Element;
 
-@SuppressWarnings( "restriction" )
-public class PomEditsTest
-    extends AbstractMavenProjectTestCase
-{
-    public void test371438_insertAt_insideEmptyElement()
-        throws Exception
-    {
-        IProject project = importProject( "projects/insertat_insideemptyelement/pom.xml" );
 
-        IDOMModel model =
-            (IDOMModel) StructuredModelManager.getModelManager().getModelForRead( project.getFile( "pom.xml" ) );
-        try
-        {
-            IDOMDocument doc = model.getDocument();
+@SuppressWarnings("restriction")
+public class PomEditsTest extends AbstractMavenProjectTestCase {
+  public void test371438_insertAt_insideEmptyElement() throws Exception {
+    IProject project = importProject("projects/insertat_insideemptyelement/pom.xml");
 
-            Element parent = XmlUtils.findChild( doc.getDocumentElement(), "dependencies" );
-            Element element = doc.createElement( "dependency" );
+    IDOMModel model = (IDOMModel) StructuredModelManager.getModelManager().getModelForRead(project.getFile("pom.xml"));
+    try {
+      IDOMDocument doc = model.getDocument();
 
-            int offset = ( (IndexedRegion) parent ).getStartOffset() + parent.getNodeName().length() + 2;
-            Element result = PomEdits.insertAt( element, offset );
+      Element parent = XmlUtils.findChild(doc.getDocumentElement(), "dependencies");
+      Element element = doc.createElement("dependency");
 
-            assertEquals( parent, result.getParentNode() );
-        }
-        finally
-        {
-            model.releaseFromRead();
-        }
+      int offset = ((IndexedRegion) parent).getStartOffset() + parent.getNodeName().length() + 2;
+      Element result = PomEdits.insertAt(element, offset);
+
+      assertEquals(parent, result.getParentNode());
+    } finally {
+      model.releaseFromRead();
     }
+  }
 }

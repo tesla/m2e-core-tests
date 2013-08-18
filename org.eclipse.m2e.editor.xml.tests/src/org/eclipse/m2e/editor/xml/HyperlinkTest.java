@@ -26,46 +26,46 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.internal.UIPlugin;
 
+
 /**
- * Hello fellow tester:
- * everytime this test finds a regression add an 'x' here:
- * everytime you do mindless test update add an 'y' here: yy
+ * Hello fellow tester: everytime this test finds a regression add an 'x' here: everytime you do mindless test update
+ * add an 'y' here: yy
+ * 
  * @author mkleint
- *
  */
 public class HyperlinkTest extends AbstractPOMEditorTestCase {
   private IFile parentPom;
+
   IProject[] projects;
+
   public IFile loadProjectsAndFiles() throws Exception {
-    projects = importProjects("projects/Hyperlink", new String[] {
-        "hyperlinkParent/pom.xml",
-        "hyperlinkChild/pom.xml"
-        }, new ResolverConfiguration());
+    projects = importProjects("projects/Hyperlink", new String[] {"hyperlinkParent/pom.xml", "hyperlinkChild/pom.xml"},
+        new ResolverConfiguration());
     waitForJobsToComplete();
-    
+
     parentPom = (IFile) projects[0].findMember("pom.xml");
     System.out.println(parentPom.exists());
     return (IFile) projects[1].findMember("pom.xml");
-    
+
   }
-  
+
   public void testHasLink() throws Exception {
-    //Locate the area where we want to detect the link
+    // Locate the area where we want to detect the link
     IRegion region = new Region(sourceViewer.getDocument().getLineOffset(12) + 17, 10);
     IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().getProject(projects[1]);
     assertNotNull(facade);
     assertNotNull(facade.getMavenProject(monitor));
     sourceViewer.setMavenProject(facade.getMavenProject());
-    
+
     IHyperlink[] links = new PomHyperlinkDetector().detectHyperlinks(sourceViewer, region, true);
     assertNotNull(links);
     assertEquals(1, links.length);
     assertNotNull(links[0].getHyperlinkText());
     assertTrue(links[0].getHyperlinkText().contains("aProperty"));
-    
-    //test opening the link
+
+    // test opening the link
     links[0].open();
-    IWorkbench wbch  = UIPlugin.getDefault().getWorkbench();
+    IWorkbench wbch = UIPlugin.getDefault().getWorkbench();
     IEditorPart editor = wbch.getWorkbenchWindows()[0].getActivePage().getActiveEditor();
     assertTrue(editor instanceof MavenPomEditor);
     assertEquals(parentPom, ((MavenPomEditor) editor).getPomFile());

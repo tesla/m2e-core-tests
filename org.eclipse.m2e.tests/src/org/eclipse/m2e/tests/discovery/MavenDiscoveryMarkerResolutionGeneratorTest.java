@@ -1,3 +1,4 @@
+
 package org.eclipse.m2e.tests.discovery;
 
 import java.util.ArrayList;
@@ -55,7 +56,6 @@ public class MavenDiscoveryMarkerResolutionGeneratorTest extends AbstractLifecyc
     assertEquals(1, resolutions.length);
   }
 
-
   @Test
   public void testCanResolveLifecycleIdMarker() throws Exception {
     LifecycleMappingMetadataSource defaultMetadata = loadLifecycleMappingMetadataSource("projects/discovery/defaultMetadata.xml");
@@ -69,8 +69,8 @@ public class MavenDiscoveryMarkerResolutionGeneratorTest extends AbstractLifecyc
     assertEquals("Error markers", 1, errorMarkers.size());
 
     String expectedErrorMessage = "Lifecycle mapping \"lifecycleId\" is not available. To enable full functionality, install the lifecycle mapping and run Maven->Update Project Configuration.";
-    IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
-        null /*lineNumber*/, project);
+    IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID,
+        expectedErrorMessage, null /*lineNumber*/, project);
     WorkspaceHelpers.assertLifecycleIdErrorMarkerAttributes(marker, "lifecycleId");
     assertTrue("Resolve packaging marker", generator.hasResolutions(marker));
   }
@@ -87,8 +87,8 @@ public class MavenDiscoveryMarkerResolutionGeneratorTest extends AbstractLifecyc
     List<MojoExecutionKey> notCoveredMojoExecutions = getNotCoveredMojoExecutions(facade);
 
     String expectedErrorMessage = "Plugin execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 (execution: default-test-goal-1, phase: process-resources)";
-    IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
-        null /*lineNumber*/, project);
+    IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID,
+        expectedErrorMessage, null /*lineNumber*/, project);
     WorkspaceHelpers.assertErrorMarkerAttributes(marker, notCoveredMojoExecutions.get(0));
     assertTrue("Resolve MojoExecution marker", generator.hasResolutions(marker));
   }

@@ -9,7 +9,6 @@
  *      Sonatype, Inc. - initial API and implementation
  *******************************************************************************/
 
-
 package org.eclipse.m2e.tests.embedder;
 
 import java.io.File;
@@ -88,7 +87,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
     try {
       configuration.setUserSettingsFile(new File("settingsWithCustomRepo.xml").getCanonicalPath());
       List<ArtifactRepository> repositories;
-      
+
       // artifact repositories
       repositories = maven.getArtifactRepositories(false);
       assertEquals(3, repositories.size());
@@ -100,7 +99,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
       repositories = maven.getPluginArtifactRepositories(false);
       assertEquals(2, repositories.size());
       assertEquals("http://central", repositories.get(0).getUrl());
-      assertEquals("http:customrepo", repositories.get(1).getUrl());      
+      assertEquals("http:customrepo", repositories.get(1).getUrl());
     } finally {
       configuration.setUserSettingsFile(origSettings);
     }
@@ -111,7 +110,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
     try {
       configuration.setUserSettingsFile(new File("settingsWithCustomRepo.xml").getCanonicalPath());
       List<ArtifactRepository> repositories;
-      
+
       // artifact repositories
       repositories = maven.getArtifactRepositories(true);
       assertEquals(2, repositories.size());
@@ -122,7 +121,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
       configuration.setUserSettingsFile(origSettings);
     }
   }
-  
+
   public void testGetDefaultRepositories() throws Exception {
     String origSettings = configuration.getUserSettingsFile();
     try {
@@ -148,14 +147,14 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
   public void testGlobalSettings() throws Exception {
     String userSettings = configuration.getUserSettingsFile();
     String globalSettings = configuration.getGlobalSettingsFile();
-    
+
     try {
       configuration.setUserSettingsFile(new File("settings_empty.xml").getCanonicalPath());
       configuration.setGlobalSettingsFile(new File("settings_empty.xml").getCanonicalPath());
 
       // sanity check
       assertEquals("http://repo.maven.apache.org/maven2", maven.getArtifactRepositories().get(0).getUrl());
-      
+
       configuration.setGlobalSettingsFile(new File("settingsWithCustomRepo.xml").getCanonicalPath());
       assertEquals("file:repositories/remoterepo", maven.getArtifactRepositories().get(0).getUrl());
     } finally {
@@ -174,35 +173,42 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
     FileUtils.deleteDirectory(localPath);
 
     // no remote repositories
-    assertTrue(maven.isUnavailable(a.getGroupId(), a.getArtifactId(), a.getBaseVersion(), a.getType(), a.getClassifier(), null));
+    assertTrue(maven.isUnavailable(a.getGroupId(), a.getArtifactId(), a.getBaseVersion(), a.getType(),
+        a.getClassifier(), null));
 
     ArrayList<ArtifactRepository> repositories = new ArrayList<ArtifactRepository>();
     repositories.add(repositorySystem.createDefaultRemoteRepository());
 
     // don't know yet if the artifact is available from defaultRepository
-    assertFalse(maven.isUnavailable(a.getGroupId(), a.getArtifactId(), a.getBaseVersion(), a.getType(), a.getClassifier(), repositories));
+    assertFalse(maven.isUnavailable(a.getGroupId(), a.getArtifactId(), a.getBaseVersion(), a.getType(),
+        a.getClassifier(), repositories));
 
     // attempt resolve from default repository and verify unresolved
     try {
-      maven.resolve(a.getGroupId(), a.getArtifactId(), a.getBaseVersion(), a.getType(), a.getClassifier(), repositories, monitor);
+      maven.resolve(a.getGroupId(), a.getArtifactId(), a.getBaseVersion(), a.getType(), a.getClassifier(),
+          repositories, monitor);
       fail();
-    } catch (CoreException e) {
+    } catch(CoreException e) {
       // expected
     }
 
     // the artifact is known to be UNavailable from default remote repository
-    assertTrue(maven.isUnavailable(a.getGroupId(), a.getArtifactId(), a.getBaseVersion(), a.getType(), a.getClassifier(), repositories));
+    assertTrue(maven.isUnavailable(a.getGroupId(), a.getArtifactId(), a.getBaseVersion(), a.getType(),
+        a.getClassifier(), repositories));
 
     // now lets try with custom repository
     repositories.add(repositorySystem.createArtifactRepository("foo", "bar", null, null, null));
-    assertFalse(maven.isUnavailable(a.getGroupId(), a.getArtifactId(), a.getBaseVersion(), a.getType(), a.getClassifier(), repositories));
+    assertFalse(maven.isUnavailable(a.getGroupId(), a.getArtifactId(), a.getBaseVersion(), a.getType(),
+        a.getClassifier(), repositories));
     try {
-      maven.resolve(a.getGroupId(), a.getArtifactId(), a.getBaseVersion(), a.getType(), a.getClassifier(), repositories, monitor);
+      maven.resolve(a.getGroupId(), a.getArtifactId(), a.getBaseVersion(), a.getType(), a.getClassifier(),
+          repositories, monitor);
       fail();
-    } catch (CoreException e) {
+    } catch(CoreException e) {
       // expected
     }
-    assertTrue(maven.isUnavailable(a.getGroupId(), a.getArtifactId(), a.getBaseVersion(), a.getType(), a.getClassifier(), repositories));
+    assertTrue(maven.isUnavailable(a.getGroupId(), a.getArtifactId(), a.getBaseVersion(), a.getType(),
+        a.getClassifier(), repositories));
 
   }
 
@@ -213,12 +219,14 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
     FileUtils.deleteDirectory(new File(localRepository.getBasedir(), "junit/junit/3.8.2"));
 
     ILocalRepositoryListener listener = new ILocalRepositoryListener() {
-      public void artifactInstalled(File repositoryBasedir, ArtifactKey baseArtifact, ArtifactKey artifact, File artifactFile) {
+      public void artifactInstalled(File repositoryBasedir, ArtifactKey baseArtifact, ArtifactKey artifact,
+          File artifactFile) {
         assertEquals(localRepository.getBasedir(), repositoryBasedir.getAbsolutePath());
 
         assertEquals("junit:junit:3.8.2::", artifact.toPortableString());
-        
-        assertEquals(new File(localRepository.getBasedir(), "junit/junit/3.8.2/junit-3.8.2.jar"), artifactFile.getAbsoluteFile());
+
+        assertEquals(new File(localRepository.getBasedir(), "junit/junit/3.8.2/junit-3.8.2.jar"),
+            artifactFile.getAbsoluteFile());
       }
     };
 
@@ -228,14 +236,14 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
     } finally {
       maven.removeLocalRepositoryListener(listener);
     }
-  
+
   }
 
   public void testMissingArtifact() throws Exception {
     try {
       maven.resolve("missing", "missing", "0", "unknown", null, null, monitor);
       fail();
-    } catch (CoreException e) {
+    } catch(CoreException e) {
       assertFalse(e.getStatus().isOK());
     }
   }
@@ -303,10 +311,10 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
     String origSettings = configuration.getUserSettingsFile();
     try {
       File settingsFile = new File("target/settings-mngeclipse-2126.xml");
-      FileHelpers.filterXmlFile(new File("projects/MNGECLIPSE-2126/settings-template.xml"), settingsFile, Collections
-          .singletonMap("@port.http@", Integer.toString(httpServer.getHttpPort())));
+      FileHelpers.filterXmlFile(new File("projects/MNGECLIPSE-2126/settings-template.xml"), settingsFile,
+          Collections.singletonMap("@port.http@", Integer.toString(httpServer.getHttpPort())));
       configuration.setUserSettingsFile(settingsFile.getCanonicalPath());
-      
+
       MavenExecutionResult result = readMavenProject(new File("projects/MNGECLIPSE-2126/pom.xml"), true);
 
       assertFalse(httpServer.getRecordedRequests().isEmpty());
@@ -318,8 +326,8 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
       assertNotNull(result.getProject().getArtifacts());
       assertEquals(result.getProject().getArtifacts().toString(), 1, result.getProject().getArtifacts().size());
 
-      MavenExecutionPlan plan = maven.calculateExecutionPlan(result.getProject(), Arrays.asList("verify"),
-          true, monitor);
+      MavenExecutionPlan plan = maven.calculateExecutionPlan(result.getProject(), Arrays.asList("verify"), true,
+          monitor);
       assertEquals(plan.getMojoExecutions().toString(), 2, plan.getMojoExecutions().size());
     } finally {
       configuration.setUserSettingsFile(origSettings);
@@ -351,8 +359,8 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
       System.setProperty("javax.net.ssl.trustStoreType", "jks");
 
       File settingsFile = new File("target/settings-mngeclipse-2149.xml");
-      FileHelpers.filterXmlFile(new File("projects/MNGECLIPSE-2149/settings-template.xml"), settingsFile, Collections
-          .singletonMap("@port.https@", Integer.toString(httpServer.getHttpsPort())));
+      FileHelpers.filterXmlFile(new File("projects/MNGECLIPSE-2149/settings-template.xml"), settingsFile,
+          Collections.singletonMap("@port.https@", Integer.toString(httpServer.getHttpsPort())));
       configuration.setUserSettingsFile(settingsFile.getCanonicalPath());
 
       MavenExecutionResult result = readMavenProject(new File("projects/MNGECLIPSE-2149/pom.xml"), true);
@@ -404,13 +412,14 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
   public void testMNGECLIPSE2556_settingsSystemPropertiesSubstiution() throws Exception {
     String origSettings = configuration.getUserSettingsFile();
     try {
-      configuration.setUserSettingsFile(new File("resources/settings/settingsWithSystemPropertySubstitution.xml").getCanonicalPath());
-      
+      configuration.setUserSettingsFile(new File("resources/settings/settingsWithSystemPropertySubstitution.xml")
+          .getCanonicalPath());
+
       ArtifactRepository repository = maven.getLocalRepository();
-      
+
       File location = new File(System.getProperty("user.home"), ".m2/repository-my-project").getCanonicalFile();
-      
-      assertEquals( location, new File(repository.getBasedir()).getCanonicalFile());
+
+      assertEquals(location, new File(repository.getBasedir()).getCanonicalFile());
     } finally {
       configuration.setUserSettingsFile(origSettings);
     }
@@ -476,7 +485,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
       httpServer.stop();
     }
   }
-  
+
   private MavenExecutionResult readMavenProject(final File pomFile, final boolean resolveDependencies)
       throws CoreException {
     return maven.execute(new ICallable<MavenExecutionResult>() {

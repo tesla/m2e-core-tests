@@ -1,3 +1,4 @@
+
 package org.eclipse.m2e.tests.discovery;
 
 import java.lang.reflect.InvocationTargetException;
@@ -19,56 +20,60 @@ import org.eclipse.m2e.internal.discovery.wizards.MavenCatalogViewer;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.internal.Workbench;
 
+
 public abstract class AbstractDiscoveryTest extends TestCase implements IShellProvider {
 
-	protected Catalog catalog;
-	protected MavenCatalogConfiguration configuration;
-	private Shell shell;
+  protected Catalog catalog;
 
-	@Override
-	public void setUp() throws Exception {
-		catalog = new Catalog();
-		catalog.setEnvironment(DiscoveryCore.createEnvironment());
-		catalog.setVerifyUpdateSiteAvailability(false);
-		catalog.getDiscoveryStrategies().add(new TestM2EBundleStrategy());
+  protected MavenCatalogConfiguration configuration;
 
-		// Build the list of tags to show in the Wizard header
-		catalog.setTags(Collections.singletonList(MavenDiscovery.APPLICABLE_TAG));
+  private Shell shell;
 
-		// Create configuration for the catalog
-		configuration = new MavenCatalogConfiguration();
-		configuration.setShowTagFilter(true);
-		configuration.setSelectedTags(Collections.singletonList(MavenDiscovery.APPLICABLE_TAG));
-		configuration.setShowInstalledFilter(false);
-    configuration.setSelectedPackagingTypes(Collections.<String>emptyList());
-    configuration.setSelectedMojos(Collections.<MojoExecutionKey>emptyList());
-    configuration.setSelectedLifecycleIds(Collections.<String>emptyList());
-    configuration.setSelectedConfigurators(Collections.<String>emptyList());
+  @Override
+  public void setUp() throws Exception {
+    catalog = new Catalog();
+    catalog.setEnvironment(DiscoveryCore.createEnvironment());
+    catalog.setVerifyUpdateSiteAvailability(false);
+    catalog.getDiscoveryStrategies().add(new TestM2EBundleStrategy());
 
-		shell = new Shell(Workbench.getInstance().getDisplay());
-	}
+    // Build the list of tags to show in the Wizard header
+    catalog.setTags(Collections.singletonList(MavenDiscovery.APPLICABLE_TAG));
 
-	public void tearDown() throws Exception {
-		shell.dispose();
-		shell = null;
-	}
+    // Create configuration for the catalog
+    configuration = new MavenCatalogConfiguration();
+    configuration.setShowTagFilter(true);
+    configuration.setSelectedTags(Collections.singletonList(MavenDiscovery.APPLICABLE_TAG));
+    configuration.setShowInstalledFilter(false);
+    configuration.setSelectedPackagingTypes(Collections.<String> emptyList());
+    configuration.setSelectedMojos(Collections.<MojoExecutionKey> emptyList());
+    configuration.setSelectedLifecycleIds(Collections.<String> emptyList());
+    configuration.setSelectedConfigurators(Collections.<String> emptyList());
 
-	protected void updateMavenCatalog() {
-		MavenCatalogViewer mcv = new MavenCatalogViewer(catalog, this, new RunnableContext(), configuration);
-		mcv.createControl(shell);
-		mcv.updateCatalog();
-	}
+    shell = new Shell(Workbench.getInstance().getDisplay());
+  }
 
-	private static class RunnableContext implements IRunnableContext {
-		public RunnableContext() {
-		}
+  public void tearDown() throws Exception {
+    shell.dispose();
+    shell = null;
+  }
 
-		public void run(boolean fork, boolean cancelable, IRunnableWithProgress runnable) throws InvocationTargetException, InterruptedException {
-			runnable.run(new NullProgressMonitor());
-		}
-	}
+  protected void updateMavenCatalog() {
+    MavenCatalogViewer mcv = new MavenCatalogViewer(catalog, this, new RunnableContext(), configuration);
+    mcv.createControl(shell);
+    mcv.updateCatalog();
+  }
 
-	public Shell getShell() {
-		return shell;
-	}
+  private static class RunnableContext implements IRunnableContext {
+    public RunnableContext() {
+    }
+
+    public void run(boolean fork, boolean cancelable, IRunnableWithProgress runnable) throws InvocationTargetException,
+        InterruptedException {
+      runnable.run(new NullProgressMonitor());
+    }
+  }
+
+  public Shell getShell() {
+    return shell;
+  }
 }

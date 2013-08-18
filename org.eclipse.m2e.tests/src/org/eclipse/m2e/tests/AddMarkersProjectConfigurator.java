@@ -38,8 +38,8 @@ public class AddMarkersProjectConfigurator extends AbstractProjectConfigurator {
   }
 
   @Override
-  public AbstractBuildParticipant getBuildParticipant(IMavenProjectFacade projectFacade, final MojoExecution mojoExecution,
-                                                      IPluginExecutionMetadata executionMetadata) {
+  public AbstractBuildParticipant getBuildParticipant(IMavenProjectFacade projectFacade,
+      final MojoExecution mojoExecution, IPluginExecutionMetadata executionMetadata) {
     return new AbstractBuildParticipant() {
       public Set<IProject> build(int kind, IProgressMonitor monitor) throws Exception {
         String mojoExecutionKey = new MojoExecutionKey(mojoExecution).getKeyString();

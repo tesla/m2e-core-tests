@@ -15,6 +15,7 @@ import junit.framework.TestCase;
 
 import org.eclipse.m2e.core.ui.internal.wizards.MavenProjectWizardArchetypeParametersPage;
 
+
 /**
  * @author @author Eugene Kuleshov
  */
@@ -23,7 +24,8 @@ public class JavaUtilTest extends TestCase {
   public void testGetDefaultJavaPackage() {
     assertEquals("foo", MavenProjectWizardArchetypeParametersPage.getDefaultJavaPackage("", ""));
     assertEquals("aaa.bbb", MavenProjectWizardArchetypeParametersPage.getDefaultJavaPackage("aaa", "bbb"));
-    assertEquals("aaa.bbb.ccc.ddd", MavenProjectWizardArchetypeParametersPage.getDefaultJavaPackage("aaa.bbb.ccc", "ddd"));
+    assertEquals("aaa.bbb.ccc.ddd",
+        MavenProjectWizardArchetypeParametersPage.getDefaultJavaPackage("aaa.bbb.ccc", "ddd"));
     assertEquals("aaa.bbb1", MavenProjectWizardArchetypeParametersPage.getDefaultJavaPackage("aaa", "bbb1"));
     assertEquals("aaa.bbb", MavenProjectWizardArchetypeParametersPage.getDefaultJavaPackage("aaa", "1bbb"));
     assertEquals("aaa.a_b", MavenProjectWizardArchetypeParametersPage.getDefaultJavaPackage("aaa", "a-b"));

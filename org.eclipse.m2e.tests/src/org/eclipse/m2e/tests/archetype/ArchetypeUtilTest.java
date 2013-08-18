@@ -8,6 +8,7 @@
  * Contributors:
  *      Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
+
 package org.eclipse.m2e.tests.archetype;
 
 import junit.framework.TestCase;
@@ -16,18 +17,19 @@ import org.apache.maven.archetype.catalog.Archetype;
 
 import org.eclipse.m2e.core.archetype.ArchetypeUtil;
 
+
 /**
  * ArchetypeUtil Test
- *
+ * 
  * @author Fred Bricon
  */
 public class ArchetypeUtilTest extends TestCase {
-  
-  public void testAreEqual()  {
-    
+
+  public void testAreEqual() {
+
     Archetype one = null, another = null;
     assertTrue(ArchetypeUtil.areEqual(one, another));
-    one = new Archetype(); 
+    one = new Archetype();
     assertFalse(ArchetypeUtil.areEqual(one, another));
     another = one;
     assertTrue(ArchetypeUtil.areEqual(one, another));
@@ -36,10 +38,10 @@ public class ArchetypeUtilTest extends TestCase {
     another = createArchetype();
     another.setDescription("something");
     assertTrue(ArchetypeUtil.areEqual(one, another));
-    
+
     another.setVersion("2");
     assertFalse(ArchetypeUtil.areEqual(one, another));
-    
+
   }
 
   private Archetype createArchetype() {
@@ -50,17 +52,17 @@ public class ArchetypeUtilTest extends TestCase {
     a.setDescription("description");
     return a;
   }
-  
+
   public void testGetHashCode() {
     assertEquals(-1, ArchetypeUtil.getHashCode(null));
-    
+
     Archetype one = createArchetype();
     Archetype another = createArchetype();
     assertEquals(ArchetypeUtil.getHashCode(one), ArchetypeUtil.getHashCode(another));
-    
+
     another.setDescription("another");
     assertEquals(ArchetypeUtil.getHashCode(one), ArchetypeUtil.getHashCode(another));
-    
+
     another.setVersion("2");
     assertFalse(ArchetypeUtil.getHashCode(one) == ArchetypeUtil.getHashCode(another));
   }

@@ -31,12 +31,13 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.m2e.model.edit.pom.util.PomResourceFactoryImpl;
 import org.eclipse.m2e.model.edit.pom.util.PomResourceImpl;
 
+
 public class MavenModelUtil {
 
   // XXX find if there is a way around this without creating resources in workspace
   public static PomResourceImpl createResource(IProject project, String pomFileName, String content) throws Exception {
     IProgressMonitor monitor = new NullProgressMonitor();
-    
+
     ByteArrayInputStream is = new ByteArrayInputStream(content.getBytes("UTF-8"));
     IFile pomFile = project.getFile(pomFileName);
     if(!pomFile.exists()) {
@@ -44,29 +45,29 @@ public class MavenModelUtil {
     } else {
       pomFile.setContents(is, true, false, monitor);
     }
-    
+
     // ProjectResourceSet 
-    
+
     String path = pomFile.getFullPath().toOSString();
     URI uri = URI.createPlatformResourceURI(path, true);
-    
+
     PomResourceFactoryImpl factory = new PomResourceFactoryImpl();
     PomResourceImpl resource = (PomResourceImpl) factory.createResource(uri);
-    
+
     resource.load(Collections.EMPTY_MAP);
-    
+
     return resource;
   }
 
   public static String toString(Resource resource) throws IOException, Exception {
     resource.save(Collections.EMPTY_MAP);
-    
+
     URI uri = resource.getURI();
 
     IWorkspace workspace = ResourcesPlugin.getWorkspace();
     IWorkspaceRoot root = workspace.getRoot();
     IFile file = root.getFile(new Path(uri.toPlatformString(true)));
-    
+
     StringWriter sw = new StringWriter();
 
     InputStream is = file.getContents(true);
@@ -79,6 +80,5 @@ public class MavenModelUtil {
     // XXX fix hack with tabs
     return sw.toString().replaceAll("\r\n", "\n").replaceAll("\t", "  ");
   }
-
 
 }

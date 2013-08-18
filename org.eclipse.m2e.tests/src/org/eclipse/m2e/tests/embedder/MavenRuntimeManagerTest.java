@@ -115,18 +115,20 @@ public class MavenRuntimeManagerTest extends TestCase {
     assertTrue(runtime.equals(runtime));
     assertFalse(runtime.equals(null));
     assertFalse(runtime.equals(runtimeManager.getDefaultRuntime()));
-    assertTrue(runtime.hashCode()!=0);
+    assertTrue(runtime.hashCode() != 0);
     assertTrue(runtime.toString().startsWith("External"));
   }
 
   static class DummyLauncherConfig implements IMavenLauncherConfiguration {
-    
+
     public String mainType;
+
     public String mainRealm;
 
     public LinkedHashMap<String, List<String>> realms = new LinkedHashMap<String, List<String>>();
+
     public ArrayList<String> curRealm;
-    
+
     public void addArchiveEntry(String entry) throws CoreException {
       curRealm.add(entry);
     }

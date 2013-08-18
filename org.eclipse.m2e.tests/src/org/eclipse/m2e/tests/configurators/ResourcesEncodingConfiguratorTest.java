@@ -22,9 +22,10 @@ import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
+
 /**
- * Tests of settings file encoding for Maven project resource folders based on encoding
- * configuration of maven-resources-plugin.
+ * Tests of settings file encoding for Maven project resource folders based on encoding configuration of
+ * maven-resources-plugin.
  */
 public class ResourcesEncodingConfiguratorTest extends AbstractMavenProjectTestCase {
 
@@ -33,18 +34,22 @@ public class ResourcesEncodingConfiguratorTest extends AbstractMavenProjectTestC
     IJavaProject javaProject = JavaCore.create(project);
     WorkspaceHelpers.assertNoErrors(project);
 
-    String mainResourceEncoding = javaProject.getProject().getFolder(new Path("src/main/resources")).getDefaultCharset();
+    String mainResourceEncoding = javaProject.getProject().getFolder(new Path("src/main/resources"))
+        .getDefaultCharset();
     assertEquals("Encoding configured for plugin not set on folder", "ISO-8859-1", mainResourceEncoding);
-    String testResourceEncoding = javaProject.getProject().getFolder(new Path("src/test/resources")).getDefaultCharset();
+    String testResourceEncoding = javaProject.getProject().getFolder(new Path("src/test/resources"))
+        .getDefaultCharset();
     assertEquals("Encoding configured for plugin not set on folder", "ISO-8859-1", testResourceEncoding);
 
     copyContent(project, new File("projects/resourcesEncoding/p001/pom2.xml"), "pom.xml");
-    
+
     MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
 
-    String mainResourceEncodingChanged = javaProject.getProject().getFolder(new Path("src/main/resources")).getDefaultCharset();
+    String mainResourceEncodingChanged = javaProject.getProject().getFolder(new Path("src/main/resources"))
+        .getDefaultCharset();
     assertEquals("Encoding configured for plugin not set on folder", "UTF-16", mainResourceEncodingChanged);
-    String testResourceEncodingChanged = javaProject.getProject().getFolder(new Path("src/test/resources")).getDefaultCharset();
+    String testResourceEncodingChanged = javaProject.getProject().getFolder(new Path("src/test/resources"))
+        .getDefaultCharset();
     assertEquals("Encoding configured for plugin not set on folder", "UTF-16", testResourceEncodingChanged);
   }
 
@@ -53,53 +58,68 @@ public class ResourcesEncodingConfiguratorTest extends AbstractMavenProjectTestC
     IJavaProject javaProject = JavaCore.create(project);
     WorkspaceHelpers.assertNoErrors(project);
 
-    String mainResource1Encoding = javaProject.getProject().getFolder(new Path("src/main/resources")).getDefaultCharset();
+    String mainResource1Encoding = javaProject.getProject().getFolder(new Path("src/main/resources"))
+        .getDefaultCharset();
     assertEquals("Encoding configured for plugin not set on folder", "ISO-8859-1", mainResource1Encoding);
     String mainResource2Encoding = javaProject.getProject().getFolder(new Path("extra-resources")).getDefaultCharset();
     assertEquals("Encoding configured for plugin not set on folder", "ISO-8859-1", mainResource2Encoding);
-    String testResource1Encoding = javaProject.getProject().getFolder(new Path("src/test/resources")).getDefaultCharset();
+    String testResource1Encoding = javaProject.getProject().getFolder(new Path("src/test/resources"))
+        .getDefaultCharset();
     assertEquals("Encoding configured for plugin not set on folder", "ISO-8859-1", testResource1Encoding);
-    String testResource2Encoding = javaProject.getProject().getFolder(new Path("extra-test-resources")).getDefaultCharset();
+    String testResource2Encoding = javaProject.getProject().getFolder(new Path("extra-test-resources"))
+        .getDefaultCharset();
     assertEquals("Encoding configured for plugin not set on folder", "ISO-8859-1", testResource2Encoding);
 
     copyContent(project, new File("projects/resourcesEncoding/p002/pom2.xml"), "pom.xml");
-    
+
     MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
 
-    String mainResource1EncodingChanged = javaProject.getProject().getFolder(new Path("src/main/resources")).getDefaultCharset();
+    String mainResource1EncodingChanged = javaProject.getProject().getFolder(new Path("src/main/resources"))
+        .getDefaultCharset();
     assertEquals("Encoding configured for plugin not set on folder", "UTF-16", mainResource1EncodingChanged);
-    String mainResource2EncodingChanged = javaProject.getProject().getFolder(new Path("extra-resources")).getDefaultCharset();
+    String mainResource2EncodingChanged = javaProject.getProject().getFolder(new Path("extra-resources"))
+        .getDefaultCharset();
     assertEquals("Encoding configured for plugin not set on folder", "UTF-16", mainResource2EncodingChanged);
-    String testResource1EncodingChanged = javaProject.getProject().getFolder(new Path("src/test/resources")).getDefaultCharset();
+    String testResource1EncodingChanged = javaProject.getProject().getFolder(new Path("src/test/resources"))
+        .getDefaultCharset();
     assertEquals("Encoding configured for plugin not set on folder", "UTF-16", testResource1EncodingChanged);
-    String testResource2EncodingChanged = javaProject.getProject().getFolder(new Path("extra-test-resources")).getDefaultCharset();
+    String testResource2EncodingChanged = javaProject.getProject().getFolder(new Path("extra-test-resources"))
+        .getDefaultCharset();
     assertEquals("Encoding configured for plugin not set on folder", "UTF-16", testResource2EncodingChanged);
   }
-  
+
   public void test003_shouldResetToContainerDefinedEncoding() throws Exception {
     IProject project = importProject("projects/resourcesEncoding/p003/pom.xml");
     IJavaProject javaProject = JavaCore.create(project);
     WorkspaceHelpers.assertNoErrors(project);
 
-    String containerMainResourceEncoding = javaProject.getProject().getFolder(new Path("src/main/resources")).getDefaultCharset();
-    String containerTestResourceEncoding = javaProject.getProject().getFolder(new Path("src/test/resources")).getDefaultCharset();
+    String containerMainResourceEncoding = javaProject.getProject().getFolder(new Path("src/main/resources"))
+        .getDefaultCharset();
+    String containerTestResourceEncoding = javaProject.getProject().getFolder(new Path("src/test/resources"))
+        .getDefaultCharset();
 
     copyContent(project, new File("projects/resourcesEncoding/p003/pom2.xml"), "pom.xml");
-    
+
     MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
 
-    String mainResourceEncodingChanged = javaProject.getProject().getFolder(new Path("src/main/resources")).getDefaultCharset();
+    String mainResourceEncodingChanged = javaProject.getProject().getFolder(new Path("src/main/resources"))
+        .getDefaultCharset();
     assertEquals("Encoding configured for plugin not set on folder", "ISO-8859-1", mainResourceEncodingChanged);
-    String testResourceEncodingChanged = javaProject.getProject().getFolder(new Path("src/test/resources")).getDefaultCharset();
+    String testResourceEncodingChanged = javaProject.getProject().getFolder(new Path("src/test/resources"))
+        .getDefaultCharset();
     assertEquals("Encoding configured for plugin not set on folder", "UTF-16", testResourceEncodingChanged);
 
     copyContent(project, new File("projects/resourcesEncoding/p003/pom.xml"), "pom.xml");
-    
+
     MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
 
-    String mainResourceEncodingReverted = javaProject.getProject().getFolder(new Path("src/main/resources")).getDefaultCharset();
-    assertEquals("Folder encoding not reverted to container defined", containerMainResourceEncoding, mainResourceEncodingReverted);
-    String testResourceEncodingReverted = javaProject.getProject().getFolder(new Path("src/test/resources")).getDefaultCharset();
-    assertEquals("Folder encoding not reverted to container defined", containerTestResourceEncoding, testResourceEncodingReverted);
+    String mainResourceEncodingReverted = javaProject.getProject().getFolder(new Path("src/main/resources"))
+        .getDefaultCharset();
+    assertEquals("Folder encoding not reverted to container defined", containerMainResourceEncoding,
+        mainResourceEncodingReverted);
+    String testResourceEncodingReverted = javaProject.getProject().getFolder(new Path("src/test/resources"))
+        .getDefaultCharset();
+    assertEquals("Folder encoding not reverted to container defined", containerTestResourceEncoding,
+        testResourceEncodingReverted);
   }
 }

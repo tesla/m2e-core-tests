@@ -9,7 +9,6 @@
  *      Sonatype, Inc. - initial API and implementation
  *******************************************************************************/
 
-
 package org.eclipse.m2e.tests.configurators;
 
 import org.eclipse.core.resources.IProject;

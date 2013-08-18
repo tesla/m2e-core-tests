@@ -86,7 +86,7 @@ public class MavenModuleSelectionDialogTest extends AbstractMavenProjectTestJuni
         for(TreeItem item : items) {
           Object data = item.getData();
           assertTrue("Tree element data is IResource", data instanceof IResource);
-          
+
           assertEquals("Tree element data is disabled if found in the known project list",
               excludedProjects.contains(((IResource) data).getLocation()),
               disabledColor.equals(((IColorProvider) viewer.getLabelProvider()).getForeground(data)));

@@ -40,6 +40,7 @@ import org.eclipse.m2e.jdt.internal.launch.MavenSourcePathProvider;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
+
 public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
 
   public void test() throws Exception {
@@ -51,12 +52,13 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
 
     WorkspaceHelpers.assertNoErrors(cptest);
-    
-    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(cptest.getFile("TestApp.launch"));
+
+    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager()
+        .getLaunchConfiguration(cptest.getFile("TestApp.launch"));
 
     MavenRuntimeClasspathProvider classpathProvider = new MavenRuntimeClasspathProvider();
     IRuntimeClasspathEntry[] unresolvedClasspath = classpathProvider.computeUnresolvedClasspath(configuration);
-    
+
     assertEquals(Arrays.asList(unresolvedClasspath).toString(), 3, unresolvedClasspath.length);
 
     IRuntimeClasspathEntry[] resolvedClasspath = classpathProvider.resolveClasspath(unresolvedClasspath, configuration);
@@ -77,7 +79,8 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
 
     workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
 
-    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(cptest.getFile("TestApp.launch"));
+    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager()
+        .getLaunchConfiguration(cptest.getFile("TestApp.launch"));
     MavenSourcePathProvider classpathProvider = new MavenSourcePathProvider();
     IRuntimeClasspathEntry[] unresolvedClasspath = classpathProvider.computeUnresolvedClasspath(configuration);
 
@@ -99,7 +102,7 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
   IRuntimeClasspathEntry[] getUserClasspathEntries(IRuntimeClasspathEntry[] entries) {
     ArrayList<IRuntimeClasspathEntry> result = new ArrayList<IRuntimeClasspathEntry>();
     for(IRuntimeClasspathEntry entry : entries) {
-      if (IRuntimeClasspathEntry.USER_CLASSES == entry.getClasspathProperty()) {
+      if(IRuntimeClasspathEntry.USER_CLASSES == entry.getClasspathProperty()) {
         result.add(entry);
       }
     }
@@ -107,10 +110,12 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
   }
 
   public void testNoFilterResources() throws Exception {
-    IProject cptest = createExisting("runtimeclasspath-nofilterresources", "projects/runtimeclasspath/nofilterresources");
+    IProject cptest = createExisting("runtimeclasspath-nofilterresources",
+        "projects/runtimeclasspath/nofilterresources");
     waitForJobsToComplete();
 
-    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(cptest.getFile("runtimeclasspath-nofilterresources.launch"));
+    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager()
+        .getLaunchConfiguration(cptest.getFile("runtimeclasspath-nofilterresources.launch"));
 
     MavenRuntimeClasspathProvider classpathProvider = new MavenRuntimeClasspathProvider();
     IRuntimeClasspathEntry[] unresolvedClasspath = classpathProvider.computeUnresolvedClasspath(configuration);
@@ -125,7 +130,8 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     IProject project = createExisting("runtimeclasspath-notmaven", "projects/runtimeclasspath/notmaven");
     waitForJobsToComplete();
 
-    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(project.getFile("notmaven.launch"));
+    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager()
+        .getLaunchConfiguration(project.getFile("notmaven.launch"));
 
     MavenRuntimeClasspathProvider classpathProvider = new MavenRuntimeClasspathProvider();
     IRuntimeClasspathEntry[] unresolvedClasspath = classpathProvider.computeUnresolvedClasspath(configuration);
@@ -141,7 +147,8 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
 
     workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
 
-    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(cptest.getFile("runtimeclasspath-junit.launch"));
+    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager()
+        .getLaunchConfiguration(cptest.getFile("runtimeclasspath-junit.launch"));
 
     MavenRuntimeClasspathProvider classpathProvider = new MavenRuntimeClasspathProvider();
     IRuntimeClasspathEntry[] unresolvedClasspath = classpathProvider.computeUnresolvedClasspath(configuration);
@@ -180,7 +187,8 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     IProject project = createExisting("runtimeclasspath-providedscope", "projects/runtimeclasspath/providedscope");
     waitForJobsToComplete();
 
-    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(project.getFile("App.launch"));
+    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager()
+        .getLaunchConfiguration(project.getFile("App.launch"));
 
     MavenRuntimeClasspathProvider classpathProvider = new MavenRuntimeClasspathProvider();
     IRuntimeClasspathEntry[] unresolvedClasspath = classpathProvider.computeUnresolvedClasspath(configuration);
@@ -196,7 +204,8 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     IProject project = createExisting("runtimeclasspath-providedscope", "projects/runtimeclasspath/providedscope");
     waitForJobsToComplete();
 
-    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(project.getFile("TestApp.launch"));
+    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager()
+        .getLaunchConfiguration(project.getFile("TestApp.launch"));
 
     MavenRuntimeClasspathProvider classpathProvider = new MavenRuntimeClasspathProvider();
     IRuntimeClasspathEntry[] unresolvedClasspath = classpathProvider.computeUnresolvedClasspath(configuration);
@@ -209,12 +218,12 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     assertEquals("junit-3.8.1.jar", userClasspath[2].getPath().lastSegment());
   }
 
-
   public void testProvidedScopeAppTest() throws Exception {
     IProject project = createExisting("runtimeclasspath-providedscope", "projects/runtimeclasspath/providedscope");
     waitForJobsToComplete();
 
-    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(project.getFile("AppTest.launch"));
+    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager()
+        .getLaunchConfiguration(project.getFile("AppTest.launch"));
 
     MavenRuntimeClasspathProvider classpathProvider = new MavenRuntimeClasspathProvider();
     IRuntimeClasspathEntry[] unresolvedClasspath = classpathProvider.computeUnresolvedClasspath(configuration);
@@ -229,7 +238,7 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
 
   public void testSystemScope() throws Exception {
     IProject project = createExisting("runtimeclasspath-systemscope", "projects/runtimeclasspath/systemscope");
-    
+
     MavenXpp3Reader reader = new MavenXpp3Reader();
     InputStream is = project.getFile("pom-orig.xml").getContents();
     Model model;
@@ -238,23 +247,24 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     } finally {
       is.close();
     }
-    
+
     Dependency d = model.getDependencies().get(0);
     d.setSystemPath(new File("repositories/remoterepo/log4j/log4j/1.2.13/log4j-1.2.13.jar").getCanonicalPath());
 
     MavenXpp3Writer writer = new MavenXpp3Writer();
-    
+
     ByteArrayOutputStream buf = new ByteArrayOutputStream();
     OutputStreamWriter out = new OutputStreamWriter(buf);
     writer.write(out, model);
-    
+
     project.getFile("pom.xml").create(new ByteArrayInputStream(buf.toByteArray()), true, null);
-    
+
     waitForJobsToComplete();
 
     workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
 
-    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(project.getFile("SystemScope.launch"));
+    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager()
+        .getLaunchConfiguration(project.getFile("SystemScope.launch"));
 
     MavenRuntimeClasspathProvider classpathProvider = new MavenRuntimeClasspathProvider();
     IRuntimeClasspathEntry[] unresolvedClasspath = classpathProvider.computeUnresolvedClasspath(configuration);
@@ -270,7 +280,8 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     IProject project = createExisting("runtimeclasspath-customentries", "projects/runtimeclasspath/customentries");
     waitForJobsToComplete();
 
-    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(project.getFile("runtimeclasspath-customentries.launch"));
+    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager()
+        .getLaunchConfiguration(project.getFile("runtimeclasspath-customentries.launch"));
 
     MavenRuntimeClasspathProvider classpathProvider = new MavenRuntimeClasspathProvider();
     IRuntimeClasspathEntry[] unresolvedClasspath = classpathProvider.computeUnresolvedClasspath(configuration);
@@ -286,7 +297,8 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     IProject javaproject = createExisting("runtimeclasspath-javaproject", "projects/runtimeclasspath/javaproject");
     waitForJobsToComplete();
 
-    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(project.getFile("runtimeclasspath-javaproject.launch"));
+    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager()
+        .getLaunchConfiguration(project.getFile("runtimeclasspath-javaproject.launch"));
 
     MavenRuntimeClasspathProvider classpathProvider = new MavenRuntimeClasspathProvider();
     IRuntimeClasspathEntry[] unresolvedClasspath = classpathProvider.computeUnresolvedClasspath(configuration);
@@ -303,8 +315,9 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     waitForJobsToComplete();
 
     workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
-    
-    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(project.getFile("runtimeclasspath-custombuildpath.launch"));
+
+    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager()
+        .getLaunchConfiguration(project.getFile("runtimeclasspath-custombuildpath.launch"));
 
     MavenRuntimeClasspathProvider classpathProvider = new MavenRuntimeClasspathProvider();
     IRuntimeClasspathEntry[] unresolvedClasspath = classpathProvider.computeUnresolvedClasspath(configuration);
@@ -324,7 +337,8 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
 
     workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
 
-    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(p02.getFile("T02.launch"));
+    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager()
+        .getLaunchConfiguration(p02.getFile("T02.launch"));
 
     MavenRuntimeClasspathProvider classpathProvider = new MavenRuntimeClasspathProvider();
     IRuntimeClasspathEntry[] unresolvedClasspath = classpathProvider.computeUnresolvedClasspath(configuration);
@@ -344,7 +358,8 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
 
     workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
 
-    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(p03.getFile("T03.launch"));
+    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager()
+        .getLaunchConfiguration(p03.getFile("T03.launch"));
 
     MavenRuntimeClasspathProvider classpathProvider = new MavenRuntimeClasspathProvider();
     IRuntimeClasspathEntry[] unresolvedClasspath = classpathProvider.computeUnresolvedClasspath(configuration);
@@ -357,7 +372,6 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     assertEquals(new Path("/runtimeclasspath-testscope01/target/test-classes"), userClasspath[2].getPath());
   }
 
-  
   public void testTestClassesDefaultAndTestsClassifier() throws Exception {
     createExisting("runtimeclasspath-testscope01", "projects/runtimeclasspath/testscope01");
     IProject p04 = createExisting("runtimeclasspath-testscope04", "projects/runtimeclasspath/testscope04");
@@ -365,7 +379,8 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
 
     workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
 
-    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(p04.getFile("T04.launch"));
+    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager()
+        .getLaunchConfiguration(p04.getFile("T04.launch"));
 
     MavenRuntimeClasspathProvider classpathProvider = new MavenRuntimeClasspathProvider();
     IRuntimeClasspathEntry[] unresolvedClasspath = classpathProvider.computeUnresolvedClasspath(configuration);
@@ -386,7 +401,8 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
 
     workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
 
-    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(p05.getFile("T05.launch"));
+    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager()
+        .getLaunchConfiguration(p05.getFile("T05.launch"));
 
     MavenRuntimeClasspathProvider classpathProvider = new MavenRuntimeClasspathProvider();
     IRuntimeClasspathEntry[] unresolvedClasspath = classpathProvider.computeUnresolvedClasspath(configuration);
@@ -399,7 +415,7 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     assertEquals(new Path("/runtimeclasspath-testscope01/target/classes"), userClasspath[2].getPath());
     assertEquals(new Path("/runtimeclasspath-testscope01/target/test-classes"), userClasspath[3].getPath());
   }
-  
+
   public void testLaunchConfigListener() throws Exception {
     IProject p01 = createExisting("runtimeclasspath-configlistener01", "projects/runtimeclasspath/configlistener01");
     IProject p02 = createExisting("runtimeclasspath-configlistener02", "projects/runtimeclasspath/configlistener02");
@@ -432,11 +448,11 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
   private static boolean hasMavenClasspathProvider(IProject project, String file) throws CoreException {
     ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
     ILaunchConfiguration configuration = launchManager.getLaunchConfiguration(project.getFile(file));
-    
-    String provider = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH_PROVIDER, (String) null);
+
+    String provider = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH_PROVIDER,
+        (String) null);
     return MavenRuntimeClasspathProvider.MAVEN_CLASSPATH_PROVIDER.equals(provider);
   }
-  
 
   public void test368230_FancyClassifier() throws Exception {
     createExisting("runtimeclasspath-testscope01", "projects/runtimeclasspath/testscope01");
@@ -446,33 +462,36 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
 
     MavenRuntimeClasspathProvider classpathProvider = new MavenRuntimeClasspathProvider();
-    
+
     /* check runtime classpath */{
-      ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(p06.getFile("T06-runtime.launch"));
+      ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager()
+          .getLaunchConfiguration(p06.getFile("T06-runtime.launch"));
       IRuntimeClasspathEntry[] unresolvedClasspath = classpathProvider.computeUnresolvedClasspath(configuration);
-      IRuntimeClasspathEntry[] resolvedClasspath = classpathProvider.resolveClasspath(unresolvedClasspath, configuration);
+      IRuntimeClasspathEntry[] resolvedClasspath = classpathProvider.resolveClasspath(unresolvedClasspath,
+          configuration);
       IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
-  
-      assertEquals("Invalid runtime classpath :"+Arrays.asList(userClasspath).toString(), 3, userClasspath.length);
+
+      assertEquals("Invalid runtime classpath :" + Arrays.asList(userClasspath).toString(), 3, userClasspath.length);
       assertEquals(new Path("/runtimeclasspath-testscope06/target/classes"), userClasspath[0].getPath());
       assertEquals(new Path("/runtimeclasspath-testscope01/src/main/java"), userClasspath[1].getPath());
       assertEquals(new Path("/runtimeclasspath-testscope01/src/main/resources"), userClasspath[2].getPath());
     }
-    
+
     /*check test classpath*/{
-      ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(p06.getFile("T06-test.launch"));
+      ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager()
+          .getLaunchConfiguration(p06.getFile("T06-test.launch"));
       IRuntimeClasspathEntry[] unresolvedClasspath = classpathProvider.computeUnresolvedClasspath(configuration);
-      IRuntimeClasspathEntry[] resolvedClasspath = classpathProvider.resolveClasspath(unresolvedClasspath, configuration);
+      IRuntimeClasspathEntry[] resolvedClasspath = classpathProvider.resolveClasspath(unresolvedClasspath,
+          configuration);
       IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
-  
-      assertEquals("Invalid test classpath :"+ Arrays.asList(userClasspath).toString(), 4, userClasspath.length);
+
+      assertEquals("Invalid test classpath :" + Arrays.asList(userClasspath).toString(), 4, userClasspath.length);
       assertEquals(new Path("/runtimeclasspath-testscope06/target/test-classes"), userClasspath[0].getPath());
       assertEquals(new Path("/runtimeclasspath-testscope06/target/classes"), userClasspath[1].getPath());
       assertEquals(new Path("/runtimeclasspath-testscope01/src/test/java"), userClasspath[2].getPath());
       assertEquals(new Path("/runtimeclasspath-testscope01/src/test/resources"), userClasspath[3].getPath());
     }
   }
-
 
   public void test368230_unknownClassifier() throws Exception {
     createExisting("runtimeclasspath-testscope01", "projects/runtimeclasspath/testscope01");
@@ -482,28 +501,31 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
 
     MavenRuntimeClasspathProvider classpathProvider = new MavenRuntimeClasspathProvider();
-    
+
     /* check runtime classpath */{
-      ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(p07.getFile("T07-runtime.launch"));
+      ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager()
+          .getLaunchConfiguration(p07.getFile("T07-runtime.launch"));
       IRuntimeClasspathEntry[] unresolvedClasspath = classpathProvider.computeUnresolvedClasspath(configuration);
-      IRuntimeClasspathEntry[] resolvedClasspath = classpathProvider.resolveClasspath(unresolvedClasspath, configuration);
+      IRuntimeClasspathEntry[] resolvedClasspath = classpathProvider.resolveClasspath(unresolvedClasspath,
+          configuration);
       IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
-  
-      assertEquals("Invalid runtime classpath :"+Arrays.asList(userClasspath).toString(), 1, userClasspath.length);
+
+      assertEquals("Invalid runtime classpath :" + Arrays.asList(userClasspath).toString(), 1, userClasspath.length);
       assertEquals(new Path("/runtimeclasspath-testscope07/target/classes"), userClasspath[0].getPath());
     }
-    
+
     /*check test classpath*/{
-      ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(p07.getFile("T07-test.launch"));
+      ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager()
+          .getLaunchConfiguration(p07.getFile("T07-test.launch"));
       IRuntimeClasspathEntry[] unresolvedClasspath = classpathProvider.computeUnresolvedClasspath(configuration);
-      IRuntimeClasspathEntry[] resolvedClasspath = classpathProvider.resolveClasspath(unresolvedClasspath, configuration);
+      IRuntimeClasspathEntry[] resolvedClasspath = classpathProvider.resolveClasspath(unresolvedClasspath,
+          configuration);
       IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
-  
-      assertEquals("Invalid test classpath :"+ Arrays.asList(userClasspath).toString(), 2, userClasspath.length);
+
+      assertEquals("Invalid test classpath :" + Arrays.asList(userClasspath).toString(), 2, userClasspath.length);
       assertEquals(new Path("/runtimeclasspath-testscope07/target/test-classes"), userClasspath[0].getPath());
       assertEquals(new Path("/runtimeclasspath-testscope07/target/classes"), userClasspath[1].getPath());
     }
   }
 
-  
 }

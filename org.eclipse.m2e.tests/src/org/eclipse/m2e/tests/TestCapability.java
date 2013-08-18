@@ -9,7 +9,6 @@
  *      Sonatype, Inc. - initial API and implementation
  *******************************************************************************/
 
-
 package org.eclipse.m2e.tests;
 
 import org.eclipse.m2e.core.internal.project.registry.Capability;

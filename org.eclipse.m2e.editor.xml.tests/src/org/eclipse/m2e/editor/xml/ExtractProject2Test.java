@@ -23,37 +23,33 @@ import org.eclipse.m2e.editor.xml.internal.XmlUtils;
 
 
 /**
- * Hello fellow tester:
- * everytime this test finds a regression add an 'x' here:
- * everytime you do mindless test update add an 'y' here: 
+ * Hello fellow tester: everytime this test finds a regression add an 'x' here: everytime you do mindless test update
+ * add an 'y' here:
+ * 
  * @author mkleint
- *
  */
 
 public class ExtractProject2Test extends AbstractCompletionTest {
-  
+
   private IProject[] projects;
-  
+
   protected IFile loadProjectsAndFiles() throws Exception {
-    //Create the projects
-    projects = importProjects("projects/extractProject", 
-        new String[] {
-        "parent/pom.xml",
-        "parent/Anested1/pom.xml",
+    // Create the projects
+    projects = importProjects("projects/extractProject", new String[] {"parent/pom.xml", "parent/Anested1/pom.xml",
         "parent/Znested2/pom.xml"
-        //there is also Xnested3 but we don't open that one..
+    // there is also Xnested3 but we don't open that one..
         }, new ResolverConfiguration());
     waitForJobsToComplete();
     return (IFile) projects[2].findMember("pom.xml");
   }
 
-  //NOTE: this test is no extensive and doesn't cover scenario when the project is located outside of the workspace
+  // NOTE: this test is no extensive and doesn't cover scenario when the project is located outside of the workspace
   public void testExtractProject() throws Exception {
     IProject prj = XmlUtils.extractProject(sourceViewer);
     assertNotNull(prj);
     assertEquals(projects[2], prj);
     Job job = new Job("XXX") {
-      
+
       protected IStatus run(IProgressMonitor monitor) {
         try {
           projects[2].delete(false, true, monitor);

@@ -81,7 +81,7 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     assertEquals(5, cp.length);
 
     assertClasspath(new String[] {//
-            "org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER",//
+        "org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER",//
             "container1",//
             "/customclasspath-classpath-containers/src/main/java", //
             "/customclasspath-classpath-containers/src/test/java", //
@@ -91,7 +91,7 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     Assert
         .assertNull(getClasspathAttribute(getClasspathEntry(cp, "container1"), IClasspathManager.POMDERIVED_ATTRIBUTE));
   }
-  
+
   public void test370685_PreserveResourcesOnUpdate() throws Exception {
     IProject project = importProject("projects/370685_missingResources/pom.xml");
     //assertNoErrors(project);
@@ -100,27 +100,27 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     IClasspathEntry[] originalCp = javaProject.getRawClasspath();
 
     assertEquals(5, originalCp.length);
-    assertEquals("/project/src/main/java", originalCp[0].getPath().toPortableString()); 
-    assertEquals("/project/src/main/resources", originalCp[1].getPath().toPortableString()); 
-    assertEquals("/project/src/test/java", originalCp[2].getPath().toPortableString()); 
+    assertEquals("/project/src/main/java", originalCp[0].getPath().toPortableString());
+    assertEquals("/project/src/main/resources", originalCp[1].getPath().toPortableString());
+    assertEquals("/project/src/test/java", originalCp[2].getPath().toPortableString());
     assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", originalCp[3].getPath().segment(0));
     assertEquals("org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER", originalCp[4].getPath().segment(0));
-    
+
     MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
     waitForJobsToComplete();
     //assertNoErrors(project);
-    
+
     javaProject = JavaCore.create(project);
     IClasspathEntry[] updatedCp = javaProject.getRawClasspath();
     assertEquals("classpath changed on update", originalCp.length, updatedCp.length);
-    for (int i=0; i < originalCp.length; i++) {
-      assertEquals("classpath entry changed", originalCp[i], updatedCp[i]); 
+    for(int i = 0; i < originalCp.length; i++ ) {
+      assertEquals("classpath entry changed", originalCp[i], updatedCp[i]);
     }
   }
-  
+
   public void test398121_PreserveOrderOfClasspathContainersOnUpdate() throws Exception {
-    IProject project = importProject("orderOf-classpath-containers",
-        "projects/customclasspath/classpath-containers", new ResolverConfiguration());
+    IProject project = importProject("orderOf-classpath-containers", "projects/customclasspath/classpath-containers",
+        new ResolverConfiguration());
 
     IJavaProject javaProject = JavaCore.create(project);
     IClasspathEntry[] cp = javaProject.getRawClasspath();
@@ -128,58 +128,57 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     assertEquals(5, cp.length);
 
     assertClasspath(new String[] {//
-            "org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER",//
+        "org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER",//
             "container1",//
             "/orderOf-classpath-containers/src/main/java", //
             "/orderOf-classpath-containers/src/test/java", //
             "org.eclipse.jdt.launching.JRE_CONTAINER/.*"//            
         }, cp);
-    
+
     // Simulate user changes the order or the classpath entries. The order should be preserved during update if nothing changes in the pom.xml
-    
+
     IClasspathEntry[] newOrder = new IClasspathEntry[] {cp[2], cp[3], cp[1], cp[0], cp[4]};
-    
+
     javaProject.setRawClasspath(newOrder, null);
-    
+
     // Update the project
     MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
     waitForJobsToComplete();
-    
+
     cp = javaProject.getRawClasspath();
 
     assertEquals(5, cp.length);
-    
+
     assertClasspath(new String[] {//
         "/orderOf-classpath-containers/src/main/java", //
-        "/orderOf-classpath-containers/src/test/java", //
-        "container1",//
-        "org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER",//               
-        "org.eclipse.jdt.launching.JRE_CONTAINER/.*"//            
-    }, cp);
-
+            "/orderOf-classpath-containers/src/test/java", //
+            "container1",//
+            "org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER",//               
+            "org.eclipse.jdt.launching.JRE_CONTAINER/.*"//            
+        }, cp);
 
     // Simulate another change to the classpath
-    
+
     newOrder = new IClasspathEntry[] {cp[0], cp[1], cp[3], cp[2], cp[4]};
-    
+
     javaProject.setRawClasspath(newOrder, null);
-    
+
     // Update the project
     MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
     waitForJobsToComplete();
-    
+
     cp = javaProject.getRawClasspath();
 
     assertEquals(5, cp.length);
-    
+
     assertClasspath(new String[] {//
         "/orderOf-classpath-containers/src/main/java", //
-        "/orderOf-classpath-containers/src/test/java", //
-        "org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER",//
-        "container1",//
-        "org.eclipse.jdt.launching.JRE_CONTAINER/.*"//            
-    }, cp);  
-    
+            "/orderOf-classpath-containers/src/test/java", //
+            "org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER",//
+            "container1",//
+            "org.eclipse.jdt.launching.JRE_CONTAINER/.*"//            
+        }, cp);
+
   }
-  
+
 }

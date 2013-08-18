@@ -9,7 +9,6 @@
  *      Sonatype, Inc. - initial API and implementation
  *******************************************************************************/
 
-
 package org.eclipse.m2e.tests.internal.project;
 
 import java.util.ArrayList;
@@ -28,7 +27,7 @@ public class TestMavenProjectChangedListener implements IMavenProjectChangedList
   public final static List<MavenProjectChangedEvent> events = new ArrayList<MavenProjectChangedEvent>();
 
   public void mavenProjectChanged(MavenProjectChangedEvent[] events, IProgressMonitor monitor) {
-    if (record) {
+    if(record) {
       TestMavenProjectChangedListener.events.addAll(Arrays.asList(events));
     }
   }

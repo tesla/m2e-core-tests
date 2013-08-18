@@ -27,8 +27,8 @@ import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 /**
  * TODO this test assumes that Maven uses repository id only (i.e. without repository url) to determine if local
  * artifact copy is up-to-date with remote contents. This cache behaviour is not documented and may change. This tests
- * should be reworked to "deploy" new artifact versions to the "remote" repository, in order to properly
- * simulate desired test scenario.
+ * should be reworked to "deploy" new artifact versions to the "remote" repository, in order to properly simulate
+ * desired test scenario.
  */
 public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase {
 

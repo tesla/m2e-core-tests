@@ -43,14 +43,14 @@ public class ProjectConversionParticipantSorterTest extends TestCase {
     AbstractProjectConversionParticipant c2 = new MockConverter("c2", "c999");
     AbstractProjectConversionParticipant c3 = new MockConverter("c3", "c2");
     AbstractProjectConversionParticipant c4 = new MockConverter("c4");
-    
+
     List<AbstractProjectConversionParticipant> converters = Arrays.asList(c0, c1, c2, c3, c4);
     ProjectConversionParticipantSorter sorter = new ProjectConversionParticipantSorter(converters);
     List<AbstractProjectConversionParticipant> sortedConverters = sorter.getSortedConverters();
-    
+
     assertNotNull(sortedConverters);
     assertEquals(converters.size(), sortedConverters.size());
-    String msg = "invalid converter position in "+sortedConverters.toString();
+    String msg = "invalid converter position in " + sortedConverters.toString();
     assertSame(msg, c2, sortedConverters.get(0));
     assertSame(msg, c3, sortedConverters.get(1));
     assertSame(msg, c1, sortedConverters.get(2));
@@ -63,47 +63,44 @@ public class ProjectConversionParticipantSorterTest extends TestCase {
     AbstractProjectConversionParticipant c0 = new MockConverter("c0", "c2, c1, c2");
     AbstractProjectConversionParticipant c1 = new MockConverter("c1");
     AbstractProjectConversionParticipant c2 = new MockConverter("c2");
-    
+
     List<AbstractProjectConversionParticipant> converters = Arrays.asList(c0, c1, c2);
     ProjectConversionParticipantSorter sorter = new ProjectConversionParticipantSorter(converters);
     List<AbstractProjectConversionParticipant> sortedConverters = sorter.getSortedConverters();
-    
+
     assertNotNull(sortedConverters);
     assertEquals(converters.size(), sortedConverters.size());
-    String msg = "invalid converter position in "+sortedConverters.toString();
+    String msg = "invalid converter position in " + sortedConverters.toString();
     assertSame(msg, c2, sortedConverters.get(0));
     assertSame(msg, c1, sortedConverters.get(1));
     assertSame(msg, c0, sortedConverters.get(2));
   }
-
 
   public void testSortConverters_AfterBefore() throws Exception {
     AbstractProjectConversionParticipant c0 = new MockConverter("c0", "c1, c2", "c3");
     AbstractProjectConversionParticipant c1 = new MockConverter("c1", " ", " ");
     AbstractProjectConversionParticipant c2 = new MockConverter("c2", null, "c1");
     AbstractProjectConversionParticipant c3 = new MockConverter("c3", "c2");
-    
+
     List<AbstractProjectConversionParticipant> converters = Arrays.asList(c0, c1, c2, c3);
     ProjectConversionParticipantSorter sorter = new ProjectConversionParticipantSorter(converters);
     List<AbstractProjectConversionParticipant> sortedConverters = sorter.getSortedConverters();
-    
+
     assertNotNull(sortedConverters);
     assertEquals(converters.size(), sortedConverters.size());
-    String msg = "invalid converter position in "+sortedConverters.toString();
+    String msg = "invalid converter position in " + sortedConverters.toString();
     assertSame(msg, c2, sortedConverters.get(0));
     assertSame(msg, c1, sortedConverters.get(1));
     assertSame(msg, c0, sortedConverters.get(2));
     assertSame(msg, c3, sortedConverters.get(3));
   }
 
-
-  
   public void testSortConverters_Cycle_After() throws Exception {
-    
+
     AbstractProjectConversionParticipant c0 = new MockConverter("c0", "c1, c2");
     AbstractProjectConversionParticipant c1 = new MockConverter("c1");
     AbstractProjectConversionParticipant c2 = new MockConverter("c2", "c0");
-    
+
     try {
       new ProjectConversionParticipantSorter(Arrays.asList(c0, c1, c2));
       fail("A cycle should have been detected");
@@ -111,13 +108,12 @@ public class ProjectConversionParticipantSorterTest extends TestCase {
       //expected
     }
   }
-  
 
   public void testSortConverters_Cycle_Before() throws Exception {
-    
+
     AbstractProjectConversionParticipant c0 = new MockConverter("c0", null, "c1");
     AbstractProjectConversionParticipant c1 = new MockConverter("c1", null, "c0");
-    
+
     try {
       new ProjectConversionParticipantSorter(Arrays.asList(c0, c1));
       fail("A cycle should have been detected");
@@ -125,12 +121,12 @@ public class ProjectConversionParticipantSorterTest extends TestCase {
       //expected
     }
   }
-  
+
   public void testSortConverters_DuplicateConverters() throws Exception {
-    
+
     AbstractProjectConversionParticipant c0 = new MockConverter("c0");
     AbstractProjectConversionParticipant c1 = new MockConverter(c0.getId());
-    
+
     try {
       new ProjectConversionParticipantSorter(Arrays.asList(c0, c1));
       fail("Duplicate ConversionParticipant should have been detected");
@@ -138,7 +134,7 @@ public class ProjectConversionParticipantSorterTest extends TestCase {
       //expected
     }
   }
-  
+
   private static class MockConverter extends AbstractProjectConversionParticipant {
 
     private String id;
@@ -182,7 +178,7 @@ public class ProjectConversionParticipantSorterTest extends TestCase {
     public String[] getSucceedingConverterIds() {
       return split(before);
     }
-    
+
     public String toString() {
       return getId();
     }

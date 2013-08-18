@@ -8,6 +8,7 @@
  * Contributors:
  *      Sonatype, Inc. - initial API and implementation
  *******************************************************************************/
+
 package org.eclipse.m2e.editor.xml;
 
 import org.eclipse.core.resources.IFile;
@@ -18,7 +19,7 @@ import org.eclipse.wst.xml.ui.internal.contentassist.XMLContentAssistProcessor;
 @SuppressWarnings("restriction")
 public abstract class AbstractCompletionTest extends AbstractPOMEditorTestCase {
   protected XMLContentAssistProcessor xmlContentAssistProcessor = null;
-  
+
   protected IFile loadProjectsAndFiles() throws Exception {
     return null;
   }
@@ -27,7 +28,6 @@ public abstract class AbstractCompletionTest extends AbstractPOMEditorTestCase {
     super.setUp();
     xmlContentAssistProcessor = new PomContentAssistProcessor(sourceViewer);
   }
-  
 
   protected void tearDown() throws Exception {
     try {

@@ -11,7 +11,6 @@
 
 package org.eclipse.m2e.editor.xml;
 
-
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.eclipse.jface.text.templates.Template;
@@ -20,12 +19,12 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;
 
+
 /**
- * Hello fellow tester:
- * everytime this test finds a regression add an 'x' here:
- * everytime you do mindless test update add an 'y' here:
+ * Hello fellow tester: everytime this test finds a regression add an 'x' here: everytime you do mindless test update
+ * add an 'y' here:
+ * 
  * @author mkleint
- *
  */
 
 public class PomTemplateContextTest extends AbstractMavenProjectTestCase {
@@ -170,7 +169,7 @@ public class PomTemplateContextTest extends AbstractMavenProjectTestCase {
   // Missing groupId should default to org.apache.maven.plugins
   public void testGetTemplatesArtifactId_WithoutGroupId() throws Exception {
     Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
-    //String groupId = "testGetTemplatesArtifactId_WithGroupId";
+    // String groupId = "testGetTemplatesArtifactId_WithGroupId";
     String artifactId = "testGetTemplatesArtifactId_WithoutGroupId_artifact";
     Element plugin = doc.createElement("plugin");
     addNode(plugin, "groupId");

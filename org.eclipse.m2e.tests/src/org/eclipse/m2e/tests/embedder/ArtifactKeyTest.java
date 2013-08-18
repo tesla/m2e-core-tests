@@ -15,6 +15,7 @@ import junit.framework.TestCase;
 
 import org.eclipse.m2e.core.embedder.ArtifactKey;
 
+
 public class ArtifactKeyTest extends TestCase {
 
   public void testPortableString() {
@@ -23,7 +24,7 @@ public class ArtifactKeyTest extends TestCase {
 
     ArtifactKey k2 = new ArtifactKey("g", "a", null, null);
     assertEquals(k2, ArtifactKey.fromPortableString(k2.toPortableString()));
-  
+
     ArtifactKey k3 = new ArtifactKey("g", null, null, "c");
     assertEquals(k3, ArtifactKey.fromPortableString(k3.toPortableString()));
   }

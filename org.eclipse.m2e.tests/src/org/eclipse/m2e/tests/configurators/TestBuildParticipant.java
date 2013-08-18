@@ -1,3 +1,4 @@
+
 package org.eclipse.m2e.tests.configurators;
 
 import java.util.Set;

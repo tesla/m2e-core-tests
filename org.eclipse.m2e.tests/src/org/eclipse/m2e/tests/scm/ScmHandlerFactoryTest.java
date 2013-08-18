@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.m2e.scm.internal.ScmHandlerFactory;
 import org.eclipse.m2e.scm.spi.ScmHandler;
 
+
 /**
  * @author Eugene Kuleshov
  */

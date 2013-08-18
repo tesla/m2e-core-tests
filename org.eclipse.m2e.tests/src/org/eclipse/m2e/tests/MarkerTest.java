@@ -45,7 +45,8 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     IProject project = createExisting("markerTest", "projects/markers/testWorkflow");
     waitForJobsToComplete();
     assertNotNull("Expected not null project", project);
-    IMavenProjectFacade facade = MavenPluginActivator.getDefault().getMavenProjectManagerImpl().create(project, monitor);
+    IMavenProjectFacade facade = MavenPluginActivator.getDefault().getMavenProjectManagerImpl()
+        .create(project, monitor);
     assertNull("Expected null MavenProjectFacade", facade);
     String expectedErrorMessage = "Project build error: Non-readable POM ";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_POM_LOADING_ID, expectedErrorMessage, 1 /*lineNumber*/,
@@ -60,7 +61,8 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     expectedErrorMessage = "Lifecycle mapping \"no such lifecycle mapping for test-packaging-empty\" is not available. To enable full functionality, install the lifecycle mapping and run Maven->Update Project Configuration.";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
         7 /*lineNumber of <packaging> element*/, project);
-    WorkspaceHelpers.assertLifecycleIdErrorMarkerAttributes(project, "no such lifecycle mapping for test-packaging-empty");
+    WorkspaceHelpers.assertLifecycleIdErrorMarkerAttributes(project,
+        "no such lifecycle mapping for test-packaging-empty");
 
     // Building the project should not remove the marker
     project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
@@ -87,7 +89,7 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     assertEquals(WorkspaceHelpers.toString(markers), 2, markers.size());
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_DEPENDENCY_ID, expectedErrorMessage, 9 /*lineNumber*/,
         project);
-    
+
     // Building the project should not remove the marker
     project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
     waitForJobsToComplete();
@@ -145,7 +147,8 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     IProject project = createExisting("markerTest", "projects/markers/testBuildContextWithOneProjectConfigurator");
     waitForJobsToComplete();
     assertNotNull("Expected not null project", project);
-    IMavenProjectFacade facade = MavenPluginActivator.getDefault().getMavenProjectManagerImpl().create(project, monitor);
+    IMavenProjectFacade facade = MavenPluginActivator.getDefault().getMavenProjectManagerImpl()
+        .create(project, monitor);
     assertNotNull("Expected not null MavenProjectFacade", facade);
     WorkspaceHelpers.assertNoErrors(project);
 
@@ -215,7 +218,8 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     IProject project = createExisting("markerTest", "projects/markers/testBuildContextWithTwoProjectConfigurators");
     waitForJobsToComplete();
     assertNotNull("Expected not null project", project);
-    IMavenProjectFacade facade = MavenPluginActivator.getDefault().getMavenProjectManagerImpl().create(project, monitor);
+    IMavenProjectFacade facade = MavenPluginActivator.getDefault().getMavenProjectManagerImpl()
+        .create(project, monitor);
     assertNotNull("Expected not null MavenProjectFacade", facade);
     WorkspaceHelpers.assertNoErrors(project);
 
@@ -261,7 +265,8 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     IProject project = createExisting("markerTest", "projects/markers/testBuildContextWithSameProjectConfiguratorTwice");
     waitForJobsToComplete();
     assertNotNull("Expected not null project", project);
-    IMavenProjectFacade facade = MavenPluginActivator.getDefault().getMavenProjectManagerImpl().create(project, monitor);
+    IMavenProjectFacade facade = MavenPluginActivator.getDefault().getMavenProjectManagerImpl()
+        .create(project, monitor);
     assertNotNull("Expected not null MavenProjectFacade", facade);
     WorkspaceHelpers.assertNoErrors(project);
 
@@ -333,15 +338,19 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
   }
 
   public void testNoDuplicateMarker() throws CoreException {
-	  final IProject p = workspace.getRoot().getProject(getName());
-	  p.create(new NullProgressMonitor());
-	  p.open(new NullProgressMonitor());
-	  MavenMarkerManager mmm = new MavenMarkerManager(null);
-	  mmm.addMarker(p, IMavenConstants.MARKER_CONFIGURATION_ID, Messages.ProjectConfigurationUpdateRequired, -1, IMarker.SEVERITY_ERROR);
-	  assertEquals(1, p.findMarkers( IMavenConstants.MARKER_CONFIGURATION_ID, false /*includeSubtypes*/, IResource.DEPTH_ZERO).length);
-	  
-	  mmm.addMarker(p, IMavenConstants.MARKER_CONFIGURATION_ID, Messages.ProjectConfigurationUpdateRequired, -1, IMarker.SEVERITY_ERROR);
-	  assertEquals(1, p.findMarkers( IMavenConstants.MARKER_CONFIGURATION_ID, false /*includeSubtypes*/, IResource.DEPTH_ZERO).length);
+    final IProject p = workspace.getRoot().getProject(getName());
+    p.create(new NullProgressMonitor());
+    p.open(new NullProgressMonitor());
+    MavenMarkerManager mmm = new MavenMarkerManager(null);
+    mmm.addMarker(p, IMavenConstants.MARKER_CONFIGURATION_ID, Messages.ProjectConfigurationUpdateRequired, -1,
+        IMarker.SEVERITY_ERROR);
+    assertEquals(1,
+        p.findMarkers(IMavenConstants.MARKER_CONFIGURATION_ID, false /*includeSubtypes*/, IResource.DEPTH_ZERO).length);
+
+    mmm.addMarker(p, IMavenConstants.MARKER_CONFIGURATION_ID, Messages.ProjectConfigurationUpdateRequired, -1,
+        IMarker.SEVERITY_ERROR);
+    assertEquals(1,
+        p.findMarkers(IMavenConstants.MARKER_CONFIGURATION_ID, false /*includeSubtypes*/, IResource.DEPTH_ZERO).length);
   }
 
   public void test361445_missingArtifactMarkerAttributes() throws Exception {
@@ -351,7 +360,7 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     // (jdt) The container 'Maven Dependencies' references non existing library ...missing/missing/0.0.0/missing-0.0.0.jar'
     // (maven) Missing artifact missing:missing:jar:0.0.0
     assertEquals(WorkspaceHelpers.toString(markers), 3, markers.size());
-    
+
     IMarker marker = markers.get(1);
     assertEquals("missing", marker.getAttribute(IMavenConstants.MARKER_ATTR_GROUP_ID));
     assertEquals("missing", marker.getAttribute(IMavenConstants.MARKER_ATTR_ARTIFACT_ID));
@@ -385,7 +394,7 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     // pom.xml got garbled while eclipse was not running
     deserializeFromWorkspaceState(MavenPlugin.getMavenProjectRegistry().create(project, monitor));
     File basedir = project.getLocation().toFile();
-    FileUtils.copyFile(new File(basedir, "pom_bad.xml"),  new File(basedir, "pom.xml"));
+    FileUtils.copyFile(new File(basedir, "pom_bad.xml"), new File(basedir, "pom.xml"));
     project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
     markers = WorkspaceHelpers.findErrorMarkers(project);
     assertEquals(WorkspaceHelpers.toString(markers), 1, markers.size());
@@ -405,6 +414,5 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     }
     return null;
   }
-  
-  
+
 }

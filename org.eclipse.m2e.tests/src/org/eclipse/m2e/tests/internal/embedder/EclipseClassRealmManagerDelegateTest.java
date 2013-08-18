@@ -34,8 +34,8 @@ public class EclipseClassRealmManagerDelegateTest extends TestCase {
   protected void setUp() throws Exception {
     super.setUp();
 
-    delegate = (EclipseClassRealmManagerDelegate) ((MavenImpl) MavenPlugin.getMaven())
-        .getPlexusContainer().lookup(ClassRealmManagerDelegate.class);
+    delegate = (EclipseClassRealmManagerDelegate) ((MavenImpl) MavenPlugin.getMaven()).getPlexusContainer().lookup(
+        ClassRealmManagerDelegate.class);
   }
 
   public void testRealmSetup() throws Exception {
@@ -61,15 +61,15 @@ public class EclipseClassRealmManagerDelegateTest extends TestCase {
         return RealmType.Plugin;
       }
 
-	public Map<String, ClassLoader> getForeignImports() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+      public Map<String, ClassLoader> getForeignImports() {
+        // TODO Auto-generated method stub
+        return null;
+      }
 
-	public List<String> getParentImports() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+      public List<String> getParentImports() {
+        // TODO Auto-generated method stub
+        return null;
+      }
 
     };
 

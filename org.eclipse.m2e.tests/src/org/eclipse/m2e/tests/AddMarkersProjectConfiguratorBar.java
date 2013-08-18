@@ -1,3 +1,4 @@
+
 package org.eclipse.m2e.tests;
 
 import java.io.File;
@@ -39,7 +40,7 @@ public class AddMarkersProjectConfiguratorBar extends AbstractProjectConfigurato
 
   @Override
   public AbstractBuildParticipant getBuildParticipant(IMavenProjectFacade projectFacade, MojoExecution execution,
-                                                      IPluginExecutionMetadata executionMetadata) {
+      IPluginExecutionMetadata executionMetadata) {
     return new AbstractBuildParticipant() {
       public Set<IProject> build(int kind, IProgressMonitor monitor) throws Exception {
         Exception error = doBuild(FILE_NAME);

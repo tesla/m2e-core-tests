@@ -89,7 +89,7 @@ public abstract class AbstractPOMEditorTestCase extends AbstractMavenProjectTest
 
     configureSourceViewer();
   }
-  
+
   class DummyStructuredTextViewer extends StructuredTextViewer implements IAdaptable {
 
     private MavenProject mavenProject;
@@ -98,13 +98,13 @@ public abstract class AbstractPOMEditorTestCase extends AbstractMavenProjectTest
         boolean showAnnotationsOverview, int styles) {
       super(parent, verticalRuler, overviewRuler, showAnnotationsOverview, styles);
     }
-    
+
     public void setMavenProject(MavenProject mp) {
       this.mavenProject = mp;
     }
 
     public Object getAdapter(Class adapter) {
-      if (MavenProject.class.equals(adapter)) {
+      if(MavenProject.class.equals(adapter)) {
         return mavenProject;
       }
       return null;

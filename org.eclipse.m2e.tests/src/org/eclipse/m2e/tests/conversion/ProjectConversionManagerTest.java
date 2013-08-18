@@ -31,7 +31,7 @@ public class ProjectConversionManagerTest extends AbstractProjectConversionTestC
     IProject p1 = createExisting("custom-layout", "projects/conversion/custom-layout");
     IProject p2 = createExisting("project-needs-test-participant", "projects/conversion/project-needs-test-participant");
     IProject p3 = createExisting("no-java-nature", "projects/conversion/no-java-nature");
-    
+
     IProjectConversionManager manager = MavenPlugin.getProjectConversionManager();
     List<AbstractProjectConversionParticipant> participants;
 
@@ -44,13 +44,13 @@ public class ProjectConversionManagerTest extends AbstractProjectConversionTestC
 
     participants = manager.getConversionParticipants(p3, packaging);
     assertEquals("Participants found for " + p3.getName() + " : " + participants.toString(), 0, participants.size());
-    
+
   }
-  
+
   public void testRestrictedPackagings() throws Exception {
     IProjectConversionManager manager = MavenPlugin.getProjectConversionManager();
     String packaging = "eclipse-plugin";
-    List<AbstractProjectConversionParticipant> participants; 
+    List<AbstractProjectConversionParticipant> participants;
 
     //Check eclipse-plugin packaging is not supported by default
     IProject pde = createExisting("pde", "projects/conversion/pde");
@@ -65,37 +65,41 @@ public class ProjectConversionManagerTest extends AbstractProjectConversionTestC
   }
 
   private void checkJdtConverter(List<AbstractProjectConversionParticipant> participants, boolean expectPresent) {
-    if (participants != null) {
-      for (AbstractProjectConversionParticipant p : participants) {
-        if ("org.eclipse.m2e.jdt.javaProjectConversionParticipant".equals(p.getId())){
-          if (expectPresent) {
+    if(participants != null) {
+      for(AbstractProjectConversionParticipant p : participants) {
+        if("org.eclipse.m2e.jdt.javaProjectConversionParticipant".equals(p.getId())) {
+          if(expectPresent) {
             return;
-          } 
+          }
           fail("No JDT conversion participant should be found");
         }
       }
     }
-    if (expectPresent) {
+    if(expectPresent) {
       fail("JDT conversion participant is missing ");
     }
   }
 
   public void test393613_SortConversionParticipants() throws Exception {
-    IProject project = createExisting("project-needs-test-sort-participant", "projects/conversion/project-needs-test-sort-participant");
-    
+    IProject project = createExisting("project-needs-test-sort-participant",
+        "projects/conversion/project-needs-test-sort-participant");
+
     IProjectConversionManager manager = MavenPlugin.getProjectConversionManager();
     List<AbstractProjectConversionParticipant> participants;
 
     String packaging = "jar";
     participants = manager.getConversionParticipants(project, packaging);
-    assertEquals("Participants found for " + project.getName() + " : " + participants.toString(), 4, participants.size());
+    assertEquals("Participants found for " + project.getName() + " : " + participants.toString(), 4,
+        participants.size());
     int i = 0;
     String msg = "Participants found for " + project.getName() + " : " + participants.toString();
-    assertEquals(msg, "org.eclipse.m2e.tests.conversion.testProjectConversionParticipant2", participants.get(i++).getId());
-    assertEquals(msg,"org.eclipse.m2e.jdt.javaProjectConversionParticipant", participants.get(i++).getId());
-    assertEquals(msg,"org.eclipse.m2e.tests.conversion.testProjectConversionParticipant4", participants.get(i++).getId());
-    assertEquals(msg,"org.eclipse.m2e.tests.conversion.testProjectConversionParticipant3", participants.get(i++).getId());
+    assertEquals(msg, "org.eclipse.m2e.tests.conversion.testProjectConversionParticipant2", participants.get(i++ )
+        .getId());
+    assertEquals(msg, "org.eclipse.m2e.jdt.javaProjectConversionParticipant", participants.get(i++ ).getId());
+    assertEquals(msg, "org.eclipse.m2e.tests.conversion.testProjectConversionParticipant4", participants.get(i++ )
+        .getId());
+    assertEquals(msg, "org.eclipse.m2e.tests.conversion.testProjectConversionParticipant3", participants.get(i++ )
+        .getId());
   }
-  
-  
+
 }

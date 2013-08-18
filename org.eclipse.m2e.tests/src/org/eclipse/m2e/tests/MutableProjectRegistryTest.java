@@ -31,6 +31,7 @@ import org.eclipse.m2e.core.internal.project.registry.ProjectRegistryReader;
 import org.eclipse.m2e.core.project.MavenProjectChangedEvent;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 
+
 @SuppressWarnings("restriction")
 public class MutableProjectRegistryTest extends AbstractMavenProjectTestCase {
 
@@ -138,7 +139,7 @@ public class MutableProjectRegistryTest extends AbstractMavenProjectTestCase {
     MavenProjectFacade f1 = newProjectFacade(project.getFile("p1.xml"));
 
     delta.removeProject(f1.getPom(), f1.getArtifactKey());
-    
+
     assertNull(delta.getProjectFacade(f1.getPom()));
     assertEquals(0, delta.getProjects().length);
 
@@ -158,7 +159,7 @@ public class MutableProjectRegistryTest extends AbstractMavenProjectTestCase {
     try {
       state.apply(delta);
       fail("IllegalStateException is expected");
-    } catch (IllegalStateException expected) {
+    } catch(IllegalStateException expected) {
       //
     }
   }

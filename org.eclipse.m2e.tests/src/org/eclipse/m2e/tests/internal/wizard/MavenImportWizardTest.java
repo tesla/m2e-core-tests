@@ -24,11 +24,12 @@ import org.eclipse.m2e.core.project.ProjectImportConfiguration;
 import org.eclipse.m2e.core.ui.internal.wizards.MavenImportWizard;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 
+
 public class MavenImportWizardTest extends AbstractMavenProjectTestCase {
 
   /**
    * When importing a project using MavenImportWizard we should never not the directory we're importing from by default.
-   *
+   * 
    * @throws Exception
    */
   public void testNoRenameOnMavenImport() throws Exception {
@@ -55,9 +56,9 @@ public class MavenImportWizardTest extends AbstractMavenProjectTestCase {
   }
 
   /**
-   * When importing a project located in the workspace root using MavenImportWizard the directory shouldn't be renamed by default.
-   * Instead the project should be renamed to match the directory.
-   *
+   * When importing a project located in the workspace root using MavenImportWizard the directory shouldn't be renamed
+   * by default. Instead the project should be renamed to match the directory.
+   * 
    * @throws Exception
    */
   public void testNoRenameOnMavenImportInWorkspaceRoot() throws Exception {
@@ -84,8 +85,9 @@ public class MavenImportWizardTest extends AbstractMavenProjectTestCase {
   }
 
   /**
-   * When importing a maven project with rename required set to 'true'.  Ensure the folder is renamed to match the artifact-id.
-   *
+   * When importing a maven project with rename required set to 'true'. Ensure the folder is renamed to match the
+   * artifact-id.
+   * 
    * @throws Exception
    */
   public void testRenameOnMavenImport() throws Exception {
@@ -98,7 +100,7 @@ public class MavenImportWizardTest extends AbstractMavenProjectTestCase {
     MavenImportWizard wizard = new MavenImportWizard(new ProjectImportConfiguration(), Collections.singletonList(dst
         .getAbsolutePath()));
     wizard.setBasedirRemameRequired(true);
-    
+
     Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
     WizardDialog dialog = new WizardDialog(shell, wizard);
     dialog.setBlockOnOpen(false);

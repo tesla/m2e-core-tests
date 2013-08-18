@@ -33,7 +33,7 @@ import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 
 
 public class ResourceChangeListenerTest extends AbstractMavenProjectTestCase {
-  
+
   IProject project;
 
   protected void setUp() throws Exception {
@@ -45,7 +45,7 @@ public class ResourceChangeListenerTest extends AbstractMavenProjectTestCase {
     ResolverConfiguration configuration = new ResolverConfiguration();
     configurationManager.enableMavenNature(project, configuration, monitor);
     configurationManager.updateProjectConfiguration(project, monitor);
-    
+
     waitForJobsToComplete();
   }
 

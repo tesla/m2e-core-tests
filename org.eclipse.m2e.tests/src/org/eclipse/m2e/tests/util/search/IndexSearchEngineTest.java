@@ -1,3 +1,4 @@
+
 package org.eclipse.m2e.tests.util.search;
 
 import java.io.File;
@@ -16,6 +17,7 @@ import org.eclipse.m2e.core.ui.internal.search.util.IndexSearchEngine;
 import org.eclipse.m2e.core.ui.internal.search.util.Packaging;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 
+
 public class IndexSearchEngineTest extends AbstractMavenProjectTestCase {
 
   public void testGroupIDProposal() throws Exception {
@@ -25,13 +27,9 @@ public class IndexSearchEngineTest extends AbstractMavenProjectTestCase {
     assertTrue(results.contains("groupSomething"));
     assertFalse(results.contains("grouoo"));
   }
-  
+
   private static class TestIndex implements IIndex {
-    String[] entries = new String[] {
-        "group",
-        "groupSomething",
-        "grouoo"
-    };
+    String[] entries = new String[] {"group", "groupSomething", "grouoo"};
 
     public TestIndex() {
     }
@@ -44,11 +42,11 @@ public class IndexSearchEngineTest extends AbstractMavenProjectTestCase {
       return null;
     }
 
-    public Collection<IndexedArtifact> find(SearchExpression groupId, SearchExpression artifactId, SearchExpression version, SearchExpression packaging)
-        throws CoreException {
+    public Collection<IndexedArtifact> find(SearchExpression groupId, SearchExpression artifactId,
+        SearchExpression version, SearchExpression packaging) throws CoreException {
       Set<IndexedArtifact> results = new HashSet<IndexedArtifact>();
-      for (String entry : entries) {
-        if (entry.startsWith(groupId.getStringValue())) {
+      for(String entry : entries) {
+        if(entry.startsWith(groupId.getStringValue())) {
           IndexedArtifact artifact = new IndexedArtifact(entry, null, null, null, null);
           results.add(artifact);
         }
@@ -73,6 +71,6 @@ public class IndexSearchEngineTest extends AbstractMavenProjectTestCase {
       // TODO Auto-generated method stub
       return null;
     }
-    
+
   }
 }

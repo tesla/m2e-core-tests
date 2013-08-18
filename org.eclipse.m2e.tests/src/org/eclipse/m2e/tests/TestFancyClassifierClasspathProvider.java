@@ -40,7 +40,7 @@ public class TestFancyClassifierClasspathProvider extends AbstractClassifierClas
     Set<IPath> folders = new LinkedHashSet<IPath>();
     folders.add(new Path("src/main/java"));
     folders.add(new Path("src/main/resources"));
-    addFolders(runtimeClasspath, mavenProjectFacade.getProject(), folders );
+    addFolders(runtimeClasspath, mavenProjectFacade.getProject(), folders);
   }
 
   @Override
@@ -49,7 +49,7 @@ public class TestFancyClassifierClasspathProvider extends AbstractClassifierClas
     Set<IPath> folders = new LinkedHashSet<IPath>();
     folders.add(new Path("src/test/java"));
     folders.add(new Path("src/test/resources"));
-    addFolders(testClasspath, mavenProjectFacade.getProject(), folders );
+    addFolders(testClasspath, mavenProjectFacade.getProject(), folders);
   }
 
 }

@@ -1,3 +1,4 @@
+
 package org.eclipse.m2e.editor.xml;
 
 import java.util.ArrayList;
@@ -8,6 +9,7 @@ import java.util.Set;
 import org.eclipse.m2e.core.ui.internal.search.util.ArtifactInfo;
 import org.eclipse.m2e.core.ui.internal.search.util.Packaging;
 import org.eclipse.m2e.core.ui.internal.search.util.SearchEngine;
+
 
 class SearchEngineMock implements SearchEngine {
   private Set<ArtifactInfo> artifacts = new LinkedHashSet<ArtifactInfo>();
@@ -32,8 +34,7 @@ class SearchEngineMock implements SearchEngine {
     return result;
   }
 
-  public Collection<String> findVersions(String groupId, String artifactId, String searchExpression,
-      Packaging packaging) {
+  public Collection<String> findVersions(String groupId, String artifactId, String searchExpression, Packaging packaging) {
     Collection<String> result = new ArrayList<String>();
     for(ArtifactInfo artifact : artifacts) {
       if(artifact.getGroupId().equals(groupId) && artifact.getArtifactId().equals(artifactId)
