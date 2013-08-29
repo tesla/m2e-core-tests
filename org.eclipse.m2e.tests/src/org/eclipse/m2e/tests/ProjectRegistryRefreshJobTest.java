@@ -13,8 +13,14 @@ package org.eclipse.m2e.tests;
 
 import java.io.File;
 
+import org.eclipse.core.internal.events.ResourceChangeEvent;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IWorkspaceDescription;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 
 import org.eclipse.m2e.core.internal.MavenPluginActivator;
 import org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager;
@@ -22,6 +28,7 @@ import org.eclipse.m2e.core.project.MavenUpdateRequest;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
+import org.eclipse.m2e.tests.mocks.ResourceDeltaStub;
 
 
 /**
@@ -147,6 +154,32 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
     assertNotNull(manager.getProject(p1));
   }
 
+
+  public void test416050_ignoreNonMavenProjectChanges() throws Exception {
+    // import project
+    project = createExisting("416050_ignoreNonMavenProjectChanges", "projects/416050_ignoreNonMavenProjectChanges");
+    waitForJobsToComplete();
+    WorkspaceHelpers.assertNoErrors(project);
+
+    ResourceDeltaStub delta = new ResourceDeltaStub(workspace.getRoot());
+    ResourceDeltaStub child = delta.addChild(new ResourceDeltaStub(project));
+    IFile changedFile = project.getFile(".project");
+    child.addChild(new ResourceDeltaStub(changedFile));
+    IResourceChangeEvent event;
+
+    event = new ResourceChangeEvent(changedFile, IResourceChangeEvent.POST_CHANGE, IncrementalProjectBuilder.AUTO_BUILD, delta);
+    projectRefreshJob.resourceChanged(event );
+    assertTrue(projectRefreshJob.isEmpty()); 
+    
+    event = new ResourceChangeEvent(project, IResourceChangeEvent.PRE_CLOSE, IncrementalProjectBuilder.FULL_BUILD, delta) {
+      public IResource getResource() {
+        return project;
+      }
+    };
+    projectRefreshJob.resourceChanged(event );
+    assertTrue(projectRefreshJob.isEmpty()); 
+  }
+
   private static void delete(File file) {
     if(file.isDirectory()) {
       for(File child : file.listFiles()) {
@@ -155,4 +188,6 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
     }
     file.delete();
   }
+  
+  
 }

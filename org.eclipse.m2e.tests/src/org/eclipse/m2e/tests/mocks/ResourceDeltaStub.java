@@ -9,7 +9,7 @@
  *      Sonatype, Inc. - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.m2e.tests.builder;
+package org.eclipse.m2e.tests.mocks;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +24,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.PlatformObject;
 
 
-class ResourceDeltaStub extends PlatformObject implements IResourceDelta {
+public class ResourceDeltaStub extends PlatformObject implements IResourceDelta {
 
   private IResource resource;
 

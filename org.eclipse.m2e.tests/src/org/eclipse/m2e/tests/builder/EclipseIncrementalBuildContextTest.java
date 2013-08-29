@@ -16,11 +16,13 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import org.codehaus.plexus.util.Scanner;
 import org.eclipse.core.resources.IProject;
+
+import org.codehaus.plexus.util.Scanner;
 
 import org.eclipse.m2e.core.internal.builder.EclipseIncrementalBuildContext;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
+import org.eclipse.m2e.tests.mocks.ResourceDeltaStub;
 
 
 @SuppressWarnings("restriction")
