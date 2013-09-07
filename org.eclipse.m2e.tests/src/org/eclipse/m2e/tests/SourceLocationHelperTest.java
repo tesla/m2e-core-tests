@@ -3,15 +3,14 @@ package org.eclipse.m2e.tests;
 
 import java.util.List;
 
+import org.eclipse.aether.graph.Dependency;
+import org.eclipse.aether.util.artifact.DefaultArtifactTypeRegistry;
 import org.eclipse.core.resources.IProject;
 
 import org.apache.maven.RepositoryUtils;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.project.MavenProject;
-
-import org.sonatype.aether.graph.Dependency;
-import org.sonatype.aether.util.artifact.DefaultArtifactTypeRegistry;
 
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.internal.markers.SourceLocation;
