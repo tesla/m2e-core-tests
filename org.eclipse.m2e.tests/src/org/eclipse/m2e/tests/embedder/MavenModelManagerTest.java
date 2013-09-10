@@ -14,9 +14,12 @@ package org.eclipse.m2e.tests.embedder;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.util.List;
 
-import junit.framework.TestCase;
-
+import org.eclipse.aether.graph.DependencyNode;
+import org.eclipse.aether.util.artifact.JavaScopes;
+import org.eclipse.aether.util.graph.manager.DependencyManagerUtils;
+import org.eclipse.aether.util.graph.transformer.ConflictResolver;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
@@ -27,18 +30,25 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.codehaus.plexus.util.IOUtil;
 
 import org.apache.maven.model.Model;
+import org.apache.maven.project.MavenProject;
 
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.MavenModelManager;
+import org.eclipse.m2e.core.project.IMavenProjectFacade;
+import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.model.edit.pom.util.PomResourceImpl;
+import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
+import org.eclipse.m2e.tests.common.RequireMavenExecutionContext;
 
 
 /**
  * @author Eugene Kuleshov
  */
-public class MavenModelManagerTest extends TestCase {
+public class MavenModelManagerTest extends AbstractMavenProjectTestCase {
 
   private static final String TEST_PROJECT_NAME = "editor-tests";
+
+  private MavenModelManager modelManager = MavenPlugin.getMavenModelManager();
 
   private IProject project;
 
@@ -70,7 +80,6 @@ public class MavenModelManagerTest extends TestCase {
   }
 
   public void testCreateMavenModel() throws Exception {
-
     testCreateMavenModel("<project xmlns=\"http://maven.apache.org/POM/4.0.0\" " + //
         "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " + // 
         "xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" + // 
@@ -90,8 +99,6 @@ public class MavenModelManagerTest extends TestCase {
   }
 
   private void testCreateMavenModel(String pom, String pomFileName) throws Exception {
-    MavenModelManager modelManager = MavenPlugin.getMavenModelManager();
-
     Model model = modelManager.readMavenModel(new ByteArrayInputStream(pom.getBytes("UTF-8")));
 
     IFile pomFile = project.getFile(pomFileName);
@@ -117,47 +124,45 @@ public class MavenModelManagerTest extends TestCase {
         sw.toString().replaceAll("\r\n", "\n"));
   }
 
-//private XMLResource getResource(String pom) throws IOException {
-//  // register PomPackage in standalone environment 
-//  PomPackage.eINSTANCE.getEFactoryInstance();
-//
-//  ReadableInputStream is = new URIConverter.ReadableInputStream(new StringReader(pom), "UTF-8");
-//  
-////  ResourceSet resourceSet = new ResourceSetImpl();
-////  XMLResource resource = (XMLResource) resourceSet.MavenModelUtil.createResource(project, URI.createURI("*.xml"));
-//
-//  // mainResource.setURI(uri);
-////  resource.load(is, resourceSet.getLoadOptions());    
-//  
-//  
-////  // String path = pomFile.getFullPath().toOSString();
-//  URI uri = URI.createPlatformResourceURI("/", true);
-//
-//  Map<Object, Object> loadOptions = new HashMap<Object, Object>();
-//  loadOptions.put(XMLResource.XML_NS, "http://maven.apache.org/POM/4.0.0");
-//  loadOptions.put(XMLResource.XML_SCHEMA_URI, "http://maven.apache.org/xsd/maven-4.0.0.xsd");
-//  
-//  ExtendedMetaData extendedMetaData = new BasicExtendedMetaData();
-//  extendedMetaData.setDocumentRoot(PomPackage.eINSTANCE.getDocumentRoot());
-//  extendedMetaData.setNamespace(PomPackage.eINSTANCE, null);
-//  
-//  EStructuralFeature f;
-//  
-//  loadOptions.put(XMLResource.OPTION_EXTENDED_META_DATA, extendedMetaData);
-//  
-//  XMLOptions xmlOptions = new XMLOptionsImpl();
-//  // xmlOptions.setProcessAnyXML(true);
-//  xmlOptions.setProcessSchemaLocations(true);
-//  
-//  xmlOptions.setExternalSchemaLocations(Collections.singletonMap("http://maven.apache.org/POM/4.0.0", URI.createURI("http://maven.apache.org/xsd/maven-4.0.0.xsd")));
-//  
-//  loadOptions.put(XMLResource.OPTION_XML_OPTIONS, xmlOptions);    
-//  
-//  PomResourceFactoryImpl factory = new PomResourceFactoryImpl();
-//  PomResourceImpl resource = (PomResourceImpl) factory.MavenModelUtil.createResource(project, uri);
-//  resource.load(is, loadOptions);
-//  
-//  return resource;
-//}
+  @RequireMavenExecutionContext
+  public void test416882_dependencyTree() throws Exception {
+    IProject[] projects = importProjects("projects/416882_dependencyTree", new String[] {"pom.xml",
+        "direct-depA/pom.xml", "direct-depB/pom.xml"}, new ResolverConfiguration());
 
+    IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().create(projects[0], monitor);
+    MavenProject mavenProject = facade.getMavenProject(monitor);
+
+    DependencyNode root = modelManager.readDependencyTree(null /*context*/, mavenProject, JavaScopes.TEST, monitor);
+
+    List<DependencyNode> children = root.getChildren();
+    assertEquals(2, children.size());
+
+    DependencyNode depA = children.get(0);
+    assertEquals("direct-depA", depA.getArtifact().getArtifactId());
+    assertEquals(2, depA.getChildren().size());
+
+    DependencyNode plexusUtilsA = depA.getChildren().get(0);
+    assertEquals("plexus-utils", plexusUtilsA.getArtifact().getArtifactId());
+    assertEquals("2.0.5", plexusUtilsA.getArtifact().getVersion());
+    assertEquals(JavaScopes.COMPILE, plexusUtilsA.getDependency().getScope());
+
+    DependencyNode junitA = depA.getChildren().get(1);
+    assertEquals("junit", junitA.getArtifact().getArtifactId());
+    assertEquals("3.8.2", junitA.getArtifact().getVersion());
+    assertEquals(JavaScopes.TEST, junitA.getDependency().getScope());
+    assertEquals(DependencyNode.MANAGED_SCOPE, junitA.getManagedBits() & DependencyNode.MANAGED_SCOPE);
+    assertEquals(JavaScopes.COMPILE, DependencyManagerUtils.getPremanagedScope(junitA));
+    assertEquals(DependencyNode.MANAGED_VERSION, junitA.getManagedBits() & DependencyNode.MANAGED_VERSION);
+    assertEquals("3.8.1", DependencyManagerUtils.getPremanagedVersion(junitA));
+
+    DependencyNode depB = children.get(1);
+    assertEquals("direct-depB", depB.getArtifact().getArtifactId());
+    assertEquals(1, depB.getChildren().size());
+
+    DependencyNode plexusUtilsB = depB.getChildren().get(0);
+    assertEquals("plexus-utils", plexusUtilsB.getArtifact().getArtifactId());
+    assertEquals("3.0", plexusUtilsB.getArtifact().getVersion());
+    assertEquals(plexusUtilsA.getArtifact(),
+        ((DependencyNode) plexusUtilsB.getData().get(ConflictResolver.NODE_DATA_WINNER)).getArtifact());
+  }
 }
