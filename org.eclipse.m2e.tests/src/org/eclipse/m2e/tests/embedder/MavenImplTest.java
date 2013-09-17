@@ -17,6 +17,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -488,6 +490,11 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
 
   private MavenExecutionResult readMavenProject(final File pomFile, final boolean resolveDependencies)
       throws CoreException {
+    return readMavenProject(pomFile, resolveDependencies, monitor);
+  }
+
+  private MavenExecutionResult readMavenProject(final File pomFile, final boolean resolveDependencies,
+      IProgressMonitor monitor) throws CoreException {
     return maven.execute(new ICallable<MavenExecutionResult>() {
       public MavenExecutionResult call(IMavenExecutionContext context, IProgressMonitor monitor) throws CoreException {
         ProjectBuildingRequest configuration = context.newProjectBuildingRequest();
@@ -495,5 +502,33 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
         return maven.readMavenProject(pomFile, configuration);
       }
     }, monitor);
+  }
+
+  public void test386196_ParallelDownloads() throws Exception {
+    IProgressMonitor monitor = new NullProgressMonitor() {
+
+      private Pattern pattern = Pattern.compile("(\\d*)%");
+
+      public void subTask(String name) {
+        Matcher m = pattern.matcher(name);
+        if(m.find()) {
+          String progress = m.group(1);
+          assertFalse("Unexpected progress value :" + name, Integer.parseInt(progress) > 100);
+        }
+      }
+    };
+
+    String origSettings = configuration.getUserSettingsFile();
+    try {
+      configuration.setUserSettingsFile(new File("src/org/eclipse/m2e/tests/embedder/settings-emptylocal.xml")
+          .getCanonicalPath());
+
+      FileHelpers.deleteDirectory(new File("target/emptylocalrepo/"));
+
+      readMavenProject(new File("projects/386196-parallel-downloads/pom.xml"), true, monitor);
+
+    } finally {
+      configuration.setUserSettingsFile(origSettings);
+    }
   }
 }
