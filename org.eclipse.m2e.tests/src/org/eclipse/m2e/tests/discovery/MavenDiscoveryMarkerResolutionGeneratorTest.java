@@ -66,7 +66,7 @@ public class MavenDiscoveryMarkerResolutionGeneratorTest extends AbstractLifecyc
     IProject project = facade.getProject();
 
     List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
-    assertEquals("Error markers", 1, errorMarkers.size());
+    assertEquals("Error markers :" + toString(errorMarkers), 1, errorMarkers.size());
 
     String expectedErrorMessage = "Lifecycle mapping \"lifecycleId\" is not available. To enable full functionality, install the lifecycle mapping and run Maven->Update Project Configuration.";
     IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID,

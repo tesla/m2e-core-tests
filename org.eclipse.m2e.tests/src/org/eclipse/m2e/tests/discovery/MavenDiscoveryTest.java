@@ -203,14 +203,14 @@ public class MavenDiscoveryTest extends TestCase implements IShellProvider {
   }
 
   private void assertSelected(String catalogId) {
-    assertTrue("CatalogItem should be selected", getCatalogItem(catalogId).isSelected());
-    assertTrue("CatalogItem should be tagged Applicable",
+    assertTrue("CatalogItem " + catalogId + "should be selected", getCatalogItem(catalogId).isSelected());
+    assertTrue("CatalogItem " + catalogId + "should be tagged Applicable",
         getCatalogItem(catalogId).hasTag(MavenDiscovery.APPLICABLE_TAG));
   }
 
   private void assertNotSelected(String catalogId) {
-    assertFalse("CatalogItem should not be selected", getCatalogItem(catalogId).isSelected());
-    assertFalse("CatalogItem should not be tagged Applicable",
+    assertFalse("CatalogItem " + catalogId + " should not be selected", getCatalogItem(catalogId).isSelected());
+    assertFalse("CatalogItem " + catalogId + "  should not be tagged Applicable",
         getCatalogItem(catalogId).hasTag(MavenDiscovery.APPLICABLE_TAG));
   }
 
