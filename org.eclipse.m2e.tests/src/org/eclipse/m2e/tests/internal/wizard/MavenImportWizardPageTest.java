@@ -15,12 +15,14 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.m2e.core.project.ProjectImportConfiguration;
+import org.eclipse.m2e.core.ui.internal.WorkingSets;
 import org.eclipse.m2e.core.ui.internal.wizards.MavenImportWizardPage;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 
@@ -77,5 +79,13 @@ public class MavenImportWizardPageTest extends AbstractMavenProjectTestCase {
     scanProjects("projects/408042_importWorkingSet");
     assertFalse(page.shouldCreateWorkingSet());
     assertEquals("", page.getWorkingSetName());
+  }
+
+  public void test408042_nestedproject() throws Exception {
+    IProject outer = importProject("projects/408042_importWorkingSet/nestedproject/pom.xml");
+    WorkingSets.addToWorkingSet(new IProject[] {outer}, "testworkingset");
+    scanProjects(outer.getLocation().append("inner").toOSString());
+    assertTrue(page.shouldCreateWorkingSet());
+    assertEquals("testworkingset", page.getWorkingSetName());
   }
 }
