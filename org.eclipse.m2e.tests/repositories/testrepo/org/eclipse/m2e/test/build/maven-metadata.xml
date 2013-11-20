@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <plugins>
+    <plugin>
+      <name>422106_legacyPlexusUtils-plugin</name>
+      <prefix>422106_legacyPlexusUtils</prefix>
+      <artifactId>422106_legacyPlexusUtils-plugin</artifactId>
+    </plugin>
+  </plugins>
+</metadata>

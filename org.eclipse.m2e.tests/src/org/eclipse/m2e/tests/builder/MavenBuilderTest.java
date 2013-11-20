@@ -310,4 +310,12 @@ public class MavenBuilderTest extends AbstractMavenProjectTestCase {
     String message = "Project build error: Non-parseable POM";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_POM_LOADING_ID, message, 1, project);
   }
+
+  public void test422106_legacyPlexusUtils() throws Exception {
+    // validate build does not fail with exception for projects that use plexus-utils 2.x
+    IProject project = importProject("projects/422106_legacyPlexusUtils/pom.xml");
+    waitForJobsToComplete();
+    project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+    assertNoErrors(project);
+  }
 }
