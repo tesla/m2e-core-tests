@@ -59,4 +59,15 @@ public class MavenPluginMetadataSourceTest extends AbstractLifecycleMappingTest 
     assertEquals(executionKey.getArtifactId(), artifact.getArtifactId());
     assertEquals(executionKey.getVersion(), artifact.getVersion());
   }
+
+  public void test422135_mavenPluginSourceWorkspaceResolution() throws Exception {
+    // the point of this test is to assert that workspace projects are not used as maven plugin metadata source
+    // 'plugin' project shadows test-embeddedmapping-plugin plugin available from repositories
+    // 'project' uses the plugin and gets an error marker if workspace project is used as metadats source
+    importMavenProject(
+        "projects/lifecyclemapping/mavenpluginsource/422135_mavenPluginSourceWorkspaceResolution/plugin", "pom.xml");
+    IMavenProjectFacade project = importMavenProject(
+        "projects/lifecyclemapping/mavenpluginsource/422135_mavenPluginSourceWorkspaceResolution/project", "pom.xml");
+    assertNoErrors(project.getProject());
+  }
 }

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.eclipse.m2e.test</groupId>
+    <artifactId>m2e-test-parent</artifactId>
+    <version>1.0.0</version>
+  </parent>
+
+  <groupId>mavenpluginsource</groupId>
+  <artifactId>422135_mavenPluginSourceWorkspaceResolution-project</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <packaging>test-packaging-empty</packaging>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.eclipse.m2e.test.lifecyclemapping</groupId>
+        <artifactId>test-lifecyclemapping-plugin</artifactId>
+        <version>1.0.0</version>
+        <extensions>true</extensions>
+      </plugin>
+      <plugin>
+        <groupId>org.eclipse.m2e.test.lifecyclemapping</groupId>
+        <artifactId>test-embeddedmapping-plugin</artifactId>
+        <version>1.0.0</version>
+        <executions>
+          <execution>
+            <id>test-goal-1</id>
+            <goals>
+              <goal>test-goal-1</goal>
+            </goals>
+            <phase>compile</phase>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
