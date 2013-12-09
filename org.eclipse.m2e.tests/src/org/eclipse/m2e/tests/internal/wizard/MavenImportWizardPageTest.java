@@ -88,4 +88,16 @@ public class MavenImportWizardPageTest extends AbstractMavenProjectTestCase {
     assertTrue(page.shouldCreateWorkingSet());
     assertEquals("testworkingset", page.getWorkingSetName());
   }
+
+  public void test422008_preselectedWorkingSet() throws Exception {
+    String workingSetName = "preselected";
+    WorkingSets.getOrCreateWorkingSet(workingSetName);
+    IProject project = importProject("projects/408042_importWorkingSet/simple/pom.xml");
+    page.setWorkingSetName(workingSetName);
+    page.setLocations(Arrays.asList(project.getLocation().toOSString()));
+    dialog.open();
+    page.scanProjects();
+    assertTrue(page.shouldCreateWorkingSet());
+    assertEquals(workingSetName, page.getWorkingSetName());
+  }
 }
