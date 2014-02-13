@@ -18,7 +18,7 @@ Require-Bundle: org.eclipse.core.externaltools,
  org.eclipse.m2e.model.edit,
  org.eclipse.m2e.archetype.common,
  org.eclipse.m2e.jdt,
- org.junit,
+ org.junit;bundle-version="4.11.0",
  org.eclipse.m2e.launching,
  org.eclipse.m2e.maven.indexer,
  org.eclipse.m2e.tests.common,
@@ -32,7 +32,8 @@ Require-Bundle: org.eclipse.core.externaltools,
  org.eclipse.jface.text,
  org.eclipse.m2e.editor.xml,
  org.eclipse.jdt.junit,
- org.eclipse.core.expressions
+ org.eclipse.core.expressions,
+ org.eclipse.m2e.profiles.core
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6,
  JavaSE-1.7
