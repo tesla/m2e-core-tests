@@ -84,7 +84,7 @@ public class ArchetypeManagerTest extends TestCase {
     }
 
     Collection<ArchetypeCatalogFactory> catalogs = archetypeManager.getArchetypeCatalogs();
-    assertEquals("" + catalogs.toString(), 6, catalogs.size());
+    assertEquals("" + catalogs.toString(), 5, catalogs.size());
   }
 
   public void testLocalArchetypeCatalogFactory() throws Exception {
