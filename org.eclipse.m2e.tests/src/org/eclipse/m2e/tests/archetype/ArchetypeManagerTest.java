@@ -84,14 +84,14 @@ public class ArchetypeManagerTest extends TestCase {
     }
 
     Collection<ArchetypeCatalogFactory> catalogs = archetypeManager.getArchetypeCatalogs();
-    assertEquals("" + catalogs.toString(), 5, catalogs.size());
+    assertEquals("" + catalogs.toString(), 6, catalogs.size());
   }
 
   public void testLocalArchetypeCatalogFactory() throws Exception {
     LocalCatalogFactory catalogFactory = new LocalCatalogFactory("archetype-catalog.xml", "local", true);
     ArchetypeCatalog catalog = catalogFactory.getArchetypeCatalog();
     assertNotNull(catalog);
-    assertEquals(1, catalog.getArchetypes().size());
+    assertEquals(2, catalog.getArchetypes().size());
   }
 
   public void testRemoteArchetypeCatalogFactory() throws Exception {
@@ -146,7 +146,7 @@ public class ArchetypeManagerTest extends TestCase {
       final RemoteCatalogFactory factory = new RemoteCatalogFactory(httpServer.getHttpUrl() + "/archetype-catalog.xml",
           null, true);
       ArchetypeCatalog catalog = factory.getArchetypeCatalog();
-      assertEquals(1, catalog.getArchetypes().size());
+      assertEquals(2, catalog.getArchetypes().size());
     } finally {
       httpServer.stop();
     }
@@ -248,7 +248,7 @@ public class ArchetypeManagerTest extends TestCase {
 
   }
 
-  public void test397443_FindParentCatalog() throws Exception {
+  public void testRepositoryUrlFromRemoteArchetypeCatalogs() throws Exception {
 
     HttpServer httpServer = new HttpServer();
     httpServer.addResources("/", "");
@@ -258,17 +258,15 @@ public class ArchetypeManagerTest extends TestCase {
       RemoteCatalogFactory remoteFactory = new RemoteCatalogFactory(url, null, true);
       archetypeManager.addArchetypeCatalogFactory(remoteFactory);
 
-      Archetype archetype = new Archetype();
-      archetype.setGroupId("org.appfuse.archetypes");
-      archetype.setArtifactId("appfuse-basic-jsf");
-      archetype.setVersion("2.0");
-      RemoteCatalogFactory parentFactory = archetypeManager.findParentCatalogFactory(archetype,
-          RemoteCatalogFactory.class);
-      assertSame(remoteFactory, parentFactory);
+      List<Archetype> archetypes = (List<Archetype>) remoteFactory.getArchetypeCatalog().getArchetypes();
+      assertEquals(2, archetypes.size());
+      Archetype appfuse = archetypes.get(0);
+      assertEquals("appfuse-basic-jsf", appfuse.getArtifactId());
+      assertEquals("http://repo1.maven.org/maven2/", appfuse.getRepository());
 
-      archetype.setVersion("1.0");
-      parentFactory = archetypeManager.findParentCatalogFactory(archetype, RemoteCatalogFactory.class);
-      assertNull("Different archetype version shouldn't be found in parent factory", parentFactory);
+      Archetype someArchetype = archetypes.get(1);
+      assertEquals("some-archetype", someArchetype.getArtifactId());
+      assertEquals(httpServer.getHttpUrl(), someArchetype.getRepository());
 
     } finally {
       httpServer.stop();

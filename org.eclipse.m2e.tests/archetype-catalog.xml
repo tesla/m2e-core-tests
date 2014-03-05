@@ -9,5 +9,9 @@
       <repository>http://repo1.maven.org/maven2/</repository>
       <description>AppFuse archetype for creating a web application with Hibernate, Spring and JSF</description>
     </archetype>
-  </archetypes>
+    <archetype>
+      <groupId>org.eclipse.m2e.test.archetypes</groupId>
+      <artifactId>some-archetype</artifactId>
+      <version>1.0</version>
+    </archetype>  </archetypes>
 </archetype-catalog>
