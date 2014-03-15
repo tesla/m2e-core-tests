@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>LifecycleMappingTest</groupId>
+  <artifactId>testFailToGetPluginParameterValue</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <packaging>test-packaging-empty</packaging>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.eclipse.m2e.test.lifecyclemapping</groupId>
+        <artifactId>test-lifecyclemapping-plugin</artifactId>
+        <version>1.0.0</version>
+        <extensions>true</extensions>
+      </plugin>
+      <plugin>
+        <groupId>missing</groupId>
+        <artifactId>missing</artifactId>
+        <version>1.0.0</version>
+        <executions>
+          <execution>
+            <id>test</id>
+            <phase>compile</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <lifecycleMappings>
+                <lifecycleMapping>
+                  <packagingType>test-packaging-empty</packagingType>
+                  <lifecycleMappingId>TEST</lifecycleMappingId>
+                </lifecycleMapping>
+              </lifecycleMappings>
+              <pluginExecutions>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>missing</groupId>
+                    <artifactId>missing</artifactId>
+		    <!-- versionRange missing -->
+                    <goals>
+                      <goal>run</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <execute/>
+                  </action>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>

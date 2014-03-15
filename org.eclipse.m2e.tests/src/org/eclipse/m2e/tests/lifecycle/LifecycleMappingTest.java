@@ -657,4 +657,14 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertFalse(LifecycleMappingFactory.getProjectConfigurators(facade).isEmpty());
   }
 
+  public void testMissingVersionRangeInPluginExecutionFilter() throws Exception {
+    try{
+	MavenProjectFacade facade = (MavenProjectFacade) importMavenProject("projects/lifecyclemapping",
+	    "testMissingVersionRangeInPluginExecutionFilter/pom.xml");
+	fail("Expected exception not thrown.");
+    } catch (IllegalArgumentException e){
+	assertTrue(e.getMessage().contains("Missing parameter for pluginExecutionFilter"));
+    }
+  }
+
 }
