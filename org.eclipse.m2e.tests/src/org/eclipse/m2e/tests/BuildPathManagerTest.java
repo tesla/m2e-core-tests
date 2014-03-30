@@ -763,6 +763,19 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertTrue(workspace.getRoot().getProject("projectimport.p003-2.0").exists());
   }
 
+  public void testProjectNameTemplateWithProperties() throws Exception {
+    deleteProject("project..import.p004.-2.0-");
+
+    ResolverConfiguration configuration = new ResolverConfiguration();
+    ProjectImportConfiguration projectImportConfiguration = new ProjectImportConfiguration(configuration);
+    projectImportConfiguration.setProjectNameTemplate("[groupId].[artifactId]-[version]");
+    importProject("project..import.p004.-2.0-", "projects/projectimport/p004", projectImportConfiguration);
+
+    waitForJobsToComplete();
+
+    assertTrue(workspace.getRoot().getProject("project..import.p004.-2.0-").exists());
+  }
+
   public void testCompilerSettingsJsr14() throws Exception {
     deleteProject("compilerSettingsJsr14");
 
