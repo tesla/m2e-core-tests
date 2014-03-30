@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?><project>
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.eclipse.m2e.test</groupId>
+    <artifactId>m2e-test-parent</artifactId>
+    <version>1.0.0</version>
+  </parent>
+  <groupId>project.${groupId.property}.import</groupId>
+  <artifactId>p004.${artifactId.property}</artifactId>
+  <version>2.0-${version.property}</version>
+  <properties>
+  	<groupId.property>123</groupId.property>
+  	<artifactId.property>asd</artifactId.property>
+  	<version.property>fgh</version.property>
+  </properties>
+</project>
