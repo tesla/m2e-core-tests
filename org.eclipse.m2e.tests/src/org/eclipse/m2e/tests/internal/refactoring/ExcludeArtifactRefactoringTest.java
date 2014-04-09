@@ -61,7 +61,6 @@ import org.eclipse.m2e.model.edit.pom.util.PomResourceFactoryImpl;
 import org.eclipse.m2e.model.edit.pom.util.PomResourceImpl;
 import org.eclipse.m2e.refactoring.exclude.ExcludeArtifactRefactoring;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
-import org.eclipse.m2e.tests.common.RequireMavenExecutionContext;
 
 
 public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase {
@@ -120,6 +119,33 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
    */
   public void testSingleArtifactNoParent() throws Exception {
     IProject project = importProjects(EXCLUDE_PATH, new String[] {"noParent/pom.xml"}, new ResolverConfiguration())[0];
+    waitForJobsToComplete();
+
+    new FindEditorRunnable(project.getFile("pom.xml")).open();
+    ExcludeArtifactRefactoring refactoring = createRefactoring(project.getFile("pom.xml"), new ArtifactKey[] {VALID});
+    RefactoringStatus status = refactoring.checkInitialConditions(monitor);
+    assertTrue("Expected OK status from checkInitialConditions: " + status.toString(), status.isOK());
+
+    status = refactoring.checkFinalConditions(monitor);
+    assertTrue("Expected OK status from checkFinalConditions: " + status.toString(), status.isOK());
+
+    Change change = refactoring.createChange(monitor);
+    assertTrue(change.isEnabled());
+
+    assertTrue("Expected change to affect pom.xml", isAffected(project.getFile("pom.xml"), change));
+    Change undo = change.perform(monitor);
+    assertTrue("Editor is dirty", editor.isDirty());
+    assertNotNull("Undo Operation", undo);
+
+    assertTrue("pom has exclusion set", hasExclusionSet(editor, ROOT, VALID));
+  }
+
+  /*
+   * A pom without a parent and a valid exclusion, but with inconsistent whitespace formatting
+   */
+  public void testSingleArtifactNoParentBadFormat() throws Exception {
+    IProject project = importProjects(EXCLUDE_PATH, new String[] {"noParentBadFormat/pom.xml"},
+        new ResolverConfiguration())[0];
     waitForJobsToComplete();
 
     new FindEditorRunnable(project.getFile("pom.xml")).open();
