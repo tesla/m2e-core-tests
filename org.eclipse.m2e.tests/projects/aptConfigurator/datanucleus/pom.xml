@@ -1,0 +1,66 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>aptConfigurator</groupId>
+	<artifactId>datanucleus</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<packaging>jar</packaging>
+
+	<properties>
+		<dependency.jdo-api.version>3.0</dependency.jdo-api.version>
+		<dependency.datanucleus.version>3.0.0-m3</dependency.datanucleus.version>
+	</properties>
+
+	<dependencies>
+		<!-- DataNucleus (http://www.datanucleus.org/) is the Apache-licensed reference 
+			implementation of the JDO standard. The datanucleus-jdo-query library contains 
+			a Java 6 annotation processor that will be automagically run by maven-compiler-plugin. -->
+		<dependency>
+			<groupId>org.datanucleus</groupId>
+			<artifactId>datanucleus-jdo-query</artifactId>
+			<version>3.0.0-m1</version>
+		</dependency>
+
+		<!-- The datanucleus-jdo-query POM uses version ranges. To ensure test 
+			stability, we're "locking in" those versions here. -->
+		<dependency>
+			<groupId>javax.jdo</groupId>
+			<artifactId>jdo-api</artifactId>
+			<version>${dependency.jdo-api.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.datanucleus</groupId>
+			<artifactId>datanucleus-core</artifactId>
+			<version>${dependency.datanucleus.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.datanucleus</groupId>
+			<artifactId>datanucleus-api-jdo</artifactId>
+			<version>${dependency.datanucleus.version}</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<!-- Specifying plugin versions known to be in repositories/remoterepo. -->
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
+			</plugin>
+			<plugin>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.2</version>
+			</plugin>
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>2.4.1</version>
+			</plugin>
+			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.4.3</version>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
