@@ -24,7 +24,7 @@ import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.IMavenLauncherConfiguration;
 import org.eclipse.m2e.core.embedder.MavenRuntime;
 import org.eclipse.m2e.core.embedder.MavenRuntimeManager;
-import org.eclipse.m2e.core.internal.embedder.MavenEmbeddedRuntime;
+import org.eclipse.m2e.core.internal.launch.MavenEmbeddedRuntime;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 
 
