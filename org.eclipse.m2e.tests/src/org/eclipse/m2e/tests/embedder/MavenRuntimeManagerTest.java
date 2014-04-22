@@ -74,7 +74,6 @@ public class MavenRuntimeManagerTest extends TestCase {
     assertTrue(runtime.equals(runtime));
     assertFalse(runtime.equals(null));
     assertTrue(runtime.hashCode() != 0);
-    assertTrue(runtime.toString().startsWith("Embedded"));
 
     DummyLauncherConfig m2conf = new DummyLauncherConfig();
     runtime.createLauncherConfiguration(m2conf, null);
@@ -116,7 +115,6 @@ public class MavenRuntimeManagerTest extends TestCase {
     assertFalse(runtime.equals(null));
     assertFalse(runtime.equals(runtimeManager.getDefaultRuntime()));
     assertTrue(runtime.hashCode() != 0);
-    assertTrue(runtime.toString().startsWith("External"));
   }
 
   static class DummyLauncherConfig implements IMavenLauncherConfiguration {
