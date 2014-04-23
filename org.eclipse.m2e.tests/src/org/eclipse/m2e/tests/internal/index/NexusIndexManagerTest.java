@@ -12,7 +12,6 @@
 package org.eclipse.m2e.tests.internal.index;
 
 import java.io.File;
-import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -39,7 +38,6 @@ import org.eclipse.m2e.core.internal.index.UserInputSearchExpression;
 import org.eclipse.m2e.core.internal.index.nexus.IndexedArtifactGroup;
 import org.eclipse.m2e.core.internal.index.nexus.NexusIndex;
 import org.eclipse.m2e.core.internal.index.nexus.NexusIndexManager;
-import org.eclipse.m2e.core.internal.project.registry.MavenProjectFacade;
 import org.eclipse.m2e.core.internal.repository.RepositoryInfo;
 import org.eclipse.m2e.core.internal.repository.RepositoryRegistry;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
@@ -465,6 +463,21 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
     } finally {
       httpServer.stop();
     }
+  }
+
+  public void testProjectHasIndexedRemoteRepos() throws Exception {
+
+    IProject project = importProject("projects/projectimport/p002/pom.xml", new ResolverConfiguration());
+    waitForJobsToComplete();
+
+    IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().getProject(project);
+
+    assertFalse(indexManager.hasIndexedRemoteRepos(facade, monitor));
+
+    updateIndex(REPO_URL_ECLIPSE);
+
+    assertTrue(indexManager.hasIndexedRemoteRepos(facade, monitor));
+
   }
 
 }
