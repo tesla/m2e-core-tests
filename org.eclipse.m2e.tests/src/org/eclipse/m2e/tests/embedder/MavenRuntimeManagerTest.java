@@ -18,58 +18,58 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.IMavenLauncherConfiguration;
-import org.eclipse.m2e.core.embedder.MavenRuntime;
-import org.eclipse.m2e.core.embedder.MavenRuntimeManager;
+import org.eclipse.m2e.core.internal.MavenPluginActivator;
+import org.eclipse.m2e.core.internal.launch.AbstractMavenRuntime;
 import org.eclipse.m2e.core.internal.launch.MavenEmbeddedRuntime;
+import org.eclipse.m2e.core.internal.launch.MavenExternalRuntime;
+import org.eclipse.m2e.core.internal.launch.MavenRuntimeManagerImpl;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 
 
 /**
  * @author Eugene Kuleshov
  */
-@SuppressWarnings("restriction")
+@SuppressWarnings("deprecation")
 public class MavenRuntimeManagerTest extends TestCase {
 
-  private MavenRuntimeManager runtimeManager;
+  private MavenRuntimeManagerImpl runtimeManager;
 
   protected void setUp() throws Exception {
     super.setUp();
-    runtimeManager = MavenPlugin.getMavenRuntimeManager();
+    runtimeManager = MavenPluginActivator.getDefault().getMavenRuntimeManager();
     runtimeManager.reset();
   }
 
   public void testGetRuntime() throws Exception {
-    assertEquals(MavenRuntimeManager.EMBEDDED, runtimeManager.getRuntime(null).getLocation());
-    assertEquals(MavenRuntimeManager.EMBEDDED, runtimeManager.getRuntime("").getLocation());
-    assertEquals(MavenRuntimeManager.EMBEDDED, runtimeManager.getRuntime(MavenRuntimeManager.DEFAULT).getLocation());
+    assertEquals(MavenRuntimeManagerImpl.EMBEDDED, runtimeManager.getRuntime(null).getName());
+    assertEquals(MavenRuntimeManagerImpl.EMBEDDED, runtimeManager.getRuntime("").getName());
+    assertEquals(MavenRuntimeManagerImpl.EMBEDDED, runtimeManager.getRuntime(MavenRuntimeManagerImpl.DEFAULT).getName());
 
-    assertEquals(MavenRuntimeManager.EMBEDDED, runtimeManager.getRuntime(MavenRuntimeManager.EMBEDDED).getLocation());
+    assertEquals(MavenRuntimeManagerImpl.EMBEDDED, runtimeManager.getRuntime(MavenRuntimeManagerImpl.EMBEDDED)
+        .getLocation());
 
-    assertEquals(MavenRuntimeManager.WORKSPACE, runtimeManager.getRuntime(MavenRuntimeManager.WORKSPACE).getLocation());
+    assertEquals(MavenRuntimeManagerImpl.WORKSPACE, runtimeManager.getRuntime(MavenRuntimeManagerImpl.WORKSPACE)
+        .getLocation());
   }
 
   public void testSetDefaultRuntime() throws Exception {
-    assertEquals(MavenRuntimeManager.EMBEDDED, runtimeManager.getDefaultRuntime().getLocation());
+    assertEquals(MavenRuntimeManagerImpl.EMBEDDED, runtimeManager.getRuntime(MavenRuntimeManagerImpl.DEFAULT).getName());
 
     runtimeManager.setDefaultRuntime(null);
-    assertEquals(MavenRuntimeManager.EMBEDDED, runtimeManager.getDefaultRuntime().getLocation());
+    assertEquals(MavenRuntimeManagerImpl.EMBEDDED, runtimeManager.getRuntime(MavenRuntimeManagerImpl.DEFAULT).getName());
 
-    runtimeManager.setDefaultRuntime(runtimeManager.getRuntime(MavenRuntimeManager.WORKSPACE));
-    assertEquals(MavenRuntimeManager.EMBEDDED, runtimeManager.getDefaultRuntime().getLocation());
+    runtimeManager.setDefaultRuntime(runtimeManager.getRuntime(MavenRuntimeManagerImpl.WORKSPACE));
+    assertEquals(MavenRuntimeManagerImpl.EMBEDDED, runtimeManager.getRuntime(MavenRuntimeManagerImpl.DEFAULT).getName());
 
     assertFalse(runtimeManager.getMavenRuntimes().isEmpty());
   }
 
   public void testDefaultRuntime() throws Exception {
-    MavenRuntime runtime = runtimeManager.getDefaultRuntime();
+    AbstractMavenRuntime runtime = runtimeManager.getRuntime(MavenRuntimeManagerImpl.DEFAULT);
     assertFalse(runtime.isEditable());
     assertTrue(runtime.isAvailable());
-    assertEquals(MavenRuntimeManager.EMBEDDED, runtime.getLocation());
-    assertNull(runtime.getSettings());
+    assertEquals(MavenRuntimeManagerImpl.EMBEDDED, runtime.getLocation());
 
     assertTrue(runtime.equals(runtime));
     assertFalse(runtime.equals(null));
@@ -97,11 +97,10 @@ public class MavenRuntimeManagerTest extends TestCase {
 
   public void testExternalRuntime() throws Exception {
     String location = new File("resources/testRuntime").getCanonicalPath();
-    MavenRuntime runtime = MavenRuntimeManager.createExternalRuntime(location);
+    AbstractMavenRuntime runtime = new MavenExternalRuntime(location);
     assertTrue(runtime.isEditable());
     assertFalse(runtime.isAvailable()); // runtime from non-existing folder
     assertEquals(location, runtime.getLocation());
-    assertNotNull(runtime.getSettings());
 
     DummyLauncherConfig m2conf = new DummyLauncherConfig();
     runtime.createLauncherConfiguration(m2conf, null);
@@ -113,7 +112,7 @@ public class MavenRuntimeManagerTest extends TestCase {
 
     assertTrue(runtime.equals(runtime));
     assertFalse(runtime.equals(null));
-    assertFalse(runtime.equals(runtimeManager.getDefaultRuntime()));
+    assertFalse(runtime.equals(runtimeManager.getRuntime(MavenRuntimeManagerImpl.DEFAULT)));
     assertTrue(runtime.hashCode() != 0);
   }
 
@@ -127,7 +126,7 @@ public class MavenRuntimeManagerTest extends TestCase {
 
     public ArrayList<String> curRealm;
 
-    public void addArchiveEntry(String entry) throws CoreException {
+    public void addArchiveEntry(String entry) {
       curRealm.add(entry);
     }
 
