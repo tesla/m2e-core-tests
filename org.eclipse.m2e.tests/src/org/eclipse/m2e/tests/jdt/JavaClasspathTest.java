@@ -11,6 +11,10 @@
 
 package org.eclipse.m2e.tests.jdt;
 
+import static org.eclipse.m2e.tests.common.ClasspathHelpers.assertClasspath;
+import static org.eclipse.m2e.tests.common.ClasspathHelpers.getClasspathAttribute;
+import static org.eclipse.m2e.tests.common.ClasspathHelpers.getClasspathEntry;
+
 import org.junit.Assert;
 
 import org.eclipse.core.resources.IProject;
@@ -22,8 +26,6 @@ import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.jdt.IClasspathManager;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
-
-import static org.eclipse.m2e.tests.common.ClasspathHelpers.*;
 
 
 public class JavaClasspathTest extends AbstractMavenProjectTestCase {
@@ -179,6 +181,37 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
             "org.eclipse.jdt.launching.JRE_CONTAINER/.*"//            
         }, cp);
 
+  }
+
+  public void test394042_ClasspathEntry4() throws Exception {
+    IProject project = importProject("projects/394042_ClasspathEntry4/pom.xml");
+    assertNoErrors(project);
+
+    IJavaProject javaProject = JavaCore.create(project);
+
+    IClasspathEntry[] cp = javaProject.getRawClasspath();
+
+    assertEquals(cp.toString(), 5, cp.length);
+
+    assertClasspath(new String[] {//
+        "M2_REPO/junit/junit/3.8.1/junit-3.8.1.jar",//
+            "org.eclipse.jdt.launching.JRE_CONTAINER/.*",//
+            "/394042_ClasspathEntry4/src/main/java", //
+            "/394042_ClasspathEntry4/src/test/java", //
+            "org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER",//
+        }, cp);
+
+    //Check Variable classpath entry attributes/accessrules are preserved
+    IClasspathEntry junit = cp[0];
+
+    assertEquals("/foo/bar/sources.jar", junit.getSourceAttachmentPath().toPortableString());
+
+    assertEquals(2, junit.getExtraAttributes().length);
+    assertEquals("file:/foo/bar/javadoc/", getClasspathAttribute(junit, "javadoc_location").getValue());
+    assertEquals("UTF-8", getClasspathAttribute(junit, "source_encoding").getValue());
+
+    assertEquals(1, junit.getAccessRules().length);
+    assertEquals("foo/bar/**", junit.getAccessRules()[0].getPattern().toPortableString());
   }
 
 }
