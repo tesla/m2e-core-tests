@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008-2010 Sonatype, Inc.
+ * Copyright (c) 2008-2014 Sonatype, Inc. and others
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,6 +44,8 @@ import org.apache.maven.archetype.catalog.Archetype;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.internal.IMavenConstants;
 import org.eclipse.m2e.core.internal.Messages;
+import org.eclipse.m2e.core.internal.preferences.MavenConfigurationImpl;
+import org.eclipse.m2e.core.internal.preferences.ProblemSeverity;
 import org.eclipse.m2e.core.internal.project.registry.ProjectRegistryRefreshJob;
 import org.eclipse.m2e.core.lifecyclemapping.model.IPluginExecutionMetadata;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
@@ -410,4 +412,40 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     mapping = facade.getMojoExecutionMapping();
     assertFalse(mapping.get(key).isEmpty());
   }
+
+  public void testStaleProjectConfigurationWarningMarker() throws Exception {
+    testStaleProjectConfigurationMarker(ProblemSeverity.warning);
+  }
+
+  public void testIgnoreStaleProjectConfiguration() throws Exception {
+    testStaleProjectConfigurationMarker(ProblemSeverity.ignore);
+  }
+
+  protected void testStaleProjectConfigurationMarker(ProblemSeverity problemSeverity) throws Exception {
+    IProject project = importProject("projects/staleconfiguration/basic/pom.xml");
+    assertNoErrors(project);
+
+    final IMavenProjectFacade projectFacade = MavenPlugin.getMavenProjectRegistry().create(project, monitor);
+
+    String oldSeverity = mavenConfiguration.getOutOfDateProjectSeverity();
+    try {
+      ((MavenConfigurationImpl) mavenConfiguration).setOutOfDateProjectSeverity(problemSeverity.toString());
+      copyContent(project, new File("projects/staleconfiguration/basic/pom-changed.xml"), "pom.xml");
+      if(problemSeverity.getSeverity() > -1) {
+        WorkspaceHelpers.assertMarker(IMavenConstants.MARKER_CONFIGURATION_ID, problemSeverity.getSeverity(),
+            Messages.ProjectConfigurationUpdateRequired, null, null, project);
+
+        workspace.run(new IWorkspaceRunnable() {
+          public void run(IProgressMonitor monitor) throws CoreException {
+            MavenPlugin.getProjectConfigurationManager()
+                .updateProjectConfiguration(projectFacade.getProject(), monitor);
+          }
+        }, monitor);
+      }
+      assertNoErrors(project);
+    } finally {
+      ((MavenConfigurationImpl) mavenConfiguration).setOutOfDateProjectSeverity(oldSeverity);
+    }
+  }
+
 }
