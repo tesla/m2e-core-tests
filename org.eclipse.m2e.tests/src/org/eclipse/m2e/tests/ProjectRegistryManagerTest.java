@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008-2010 Sonatype, Inc.
+ * Copyright (c) 2008-2014 Sonatype, Inc. and others
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,6 +35,7 @@ import org.codehaus.plexus.util.FileUtils;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
+import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
 import org.apache.maven.project.MavenProject;
 
 import org.eclipse.m2e.core.MavenPlugin;
@@ -1154,5 +1155,64 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     manager.refresh(request, monitor);
 
     assertNoErrors(project);
+  }
+
+  public void test418674_ChecksumPolicyFail() throws Exception {
+    // clean local repo
+    FileUtils.deleteDirectory(new File(repo, "org/eclipse/m2e/test/bad-checksum"));
+
+    // import two projects with the same missing dependency
+
+    String originalPolicy = mavenConfiguration.getGlobalChecksumPolicy();
+    try {
+      setChecksumPolicy(ArtifactRepositoryPolicy.CHECKSUM_POLICY_FAIL);
+      IProject project = importProject("projects/418674_ChecksumPolicy/checksum-test/pom.xml");
+      List<IMarker> errors = findErrorMarkers(project);
+      assertEquals(toString(errors), 1, errors.size());
+      assertTrue(errors.get(0).getAttribute(IMarker.MESSAGE, null).contains("Checksum validation failed"));
+
+      setChecksumPolicy(ArtifactRepositoryPolicy.CHECKSUM_POLICY_WARN);
+
+      MavenUpdateRequest request = new MavenUpdateRequest(new IProject[] {project}, false, true);
+      manager.refresh(request, monitor);
+
+      waitForJobsToComplete();
+      assertNoErrors(project);
+
+    } finally {
+      ((MavenConfigurationImpl) mavenConfiguration).setGlobalChecksumPolicy(originalPolicy);
+    }
+  }
+
+  public void test418674_ChecksumPolicyWarn() throws Exception {
+    // clean local repo
+    FileUtils.deleteDirectory(new File(repo, "org/eclipse/m2e/test/bad-checksum"));
+
+    // import two projects with the same missing dependency
+
+    String originalPolicy = mavenConfiguration.getGlobalChecksumPolicy();
+    try {
+      //repo is configured to fail if checksums don't match
+      IProject project = importProject("projects/418674_ChecksumPolicy/checksum-test2/pom.xml");
+      List<IMarker> errors = findErrorMarkers(project);
+      assertEquals(toString(errors), 1, errors.size());
+      assertTrue(errors.get(0).getAttribute(IMarker.MESSAGE, null).contains("Checksum validation failed"));
+
+      //Override specific repo config
+      setChecksumPolicy(ArtifactRepositoryPolicy.CHECKSUM_POLICY_WARN);
+
+      MavenUpdateRequest request = new MavenUpdateRequest(new IProject[] {project}, false, true);
+      manager.refresh(request, monitor);
+
+      waitForJobsToComplete();
+      assertNoErrors(project);
+
+    } finally {
+      ((MavenConfigurationImpl) mavenConfiguration).setGlobalChecksumPolicy(originalPolicy);
+    }
+  }
+
+  private void setChecksumPolicy(String value) {
+    ((MavenConfigurationImpl) mavenConfiguration).setGlobalChecksumPolicy(value);
   }
 }

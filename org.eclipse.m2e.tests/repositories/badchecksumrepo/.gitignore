@@ -1,0 +1,8 @@
+/target
+/workspaceState.ser
+/bin
+!.project
+!.classpath
+!.settings/
+!*.md5
+!*.sha1
