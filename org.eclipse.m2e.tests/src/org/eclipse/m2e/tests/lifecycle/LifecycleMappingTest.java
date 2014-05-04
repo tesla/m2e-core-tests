@@ -35,6 +35,8 @@ import org.eclipse.m2e.core.internal.lifecyclemapping.model.LifecycleMappingMeta
 import org.eclipse.m2e.core.internal.lifecyclemapping.model.PluginExecutionMetadata;
 import org.eclipse.m2e.core.internal.markers.MavenProblemInfo;
 import org.eclipse.m2e.core.internal.markers.SourceLocation;
+import org.eclipse.m2e.core.internal.preferences.MavenConfigurationImpl;
+import org.eclipse.m2e.core.internal.preferences.ProblemSeverity;
 import org.eclipse.m2e.core.internal.project.registry.MavenProjectFacade;
 import org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager;
 import org.eclipse.m2e.core.lifecyclemapping.model.IPluginExecutionMetadata;
@@ -665,6 +667,60 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     } catch(IllegalArgumentException e) {
       assertTrue(e.getMessage().contains("Missing parameter for pluginExecutionFilter"));
     }
+  }
+
+  public void testNotCoveredMojoExecutionWarnings() throws Exception {
+    String originalSeverity = mavenConfiguration.getNotCoveredMojoExecutionSeverity();
+    try {
+      ((MavenConfigurationImpl) mavenConfiguration).setNotCoveredMojoExecutionSeverity(ProblemSeverity.warning
+          .toString());
+      IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping", "notCoveredMojoExecutions/pom.xml");
+      assertNotNull("Expected not null MavenProjectFacade", facade);
+      IProject project = facade.getProject();
+      assertNotNull("Expected not null project", project);
+      assertNoErrors(project);
+
+      // Also verify that we get the expected markers
+      List<IMarker> errorMarkers = WorkspaceHelpers.findMarkers(project, IMarker.SEVERITY_WARNING);
+      assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
+
+      List<MojoExecutionKey> notCoveredMojoExecutions = getNotCoveredMojoExecutions(facade);
+      assertEquals(notCoveredMojoExecutions.toString(), 2, notCoveredMojoExecutions.size());
+
+      String expectedErrorMessage = "Plugin execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 (execution: default-test-goal-1, phase: process-resources)";
+      IMarker marker = WorkspaceHelpers.assertWarningMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID,
+          expectedErrorMessage, 11 /*lineNumber <plugin> of plugin def*/, project);
+      WorkspaceHelpers.assertErrorMarkerAttributes(marker, notCoveredMojoExecutions.get(0));
+
+      expectedErrorMessage = "Plugin execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-2 (execution: default-test-goal-2, phase: compile)";
+      marker = WorkspaceHelpers.assertWarningMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
+          11 /*lineNumber <plugin> of plugin def*/, project);
+      WorkspaceHelpers.assertErrorMarkerAttributes(marker, notCoveredMojoExecutions.get(1));
+
+    } finally {
+      ((MavenConfigurationImpl) mavenConfiguration).setNotCoveredMojoExecutionSeverity(originalSeverity);
+    }
+  }
+
+  public void testNotCoveredMojoExecutionIgnored() throws Exception {
+    String originalSeverity = mavenConfiguration.getNotCoveredMojoExecutionSeverity();
+    try {
+      ((MavenConfigurationImpl) mavenConfiguration).setNotCoveredMojoExecutionSeverity(ProblemSeverity.ignore
+          .toString());
+      IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping", "notCoveredMojoExecutions/pom.xml");
+      assertNotNull("Expected not null MavenProjectFacade", facade);
+      IProject project = facade.getProject();
+      assertNotNull("Expected not null project", project);
+      assertNoErrors(project);
+
+      // verify we have no warning markers either
+      List<IMarker> errorMarkers = WorkspaceHelpers.findMarkers(project, IMarker.SEVERITY_WARNING);
+      assertEquals(WorkspaceHelpers.toString(errorMarkers), 0, errorMarkers.size());
+
+    } finally {
+      ((MavenConfigurationImpl) mavenConfiguration).setNotCoveredMojoExecutionSeverity(originalSeverity);
+    }
+
   }
 
 }
