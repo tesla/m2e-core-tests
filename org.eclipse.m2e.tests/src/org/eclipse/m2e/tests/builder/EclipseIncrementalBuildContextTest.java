@@ -39,7 +39,7 @@ public class EclipseIncrementalBuildContextTest extends AbstractMavenProjectTest
     child = child.addChild(new ResourceDeltaStub(project.getFolder("src/main/resources/sub/dir")));
     child = child.addChild(new ResourceDeltaStub(project.getFile("src/main/resources/sub/dir/file.txt")));
 
-    EclipseIncrementalBuildContext context = new EclipseIncrementalBuildContext(delta, new HashMap<String, Object>());
+    EclipseIncrementalBuildContext context = newBuildContext(delta);
     Scanner scanner;
 
     scanner = context.newScanner(new File(project.getLocation().toFile(), "src/main/resources"), true);
@@ -47,6 +47,10 @@ public class EclipseIncrementalBuildContextTest extends AbstractMavenProjectTest
 
     scanner = context.newScanner(new File(project.getLocation().toFile(), "src/main/resources"), false);
     checkScanner(scanner);
+  }
+
+  private EclipseIncrementalBuildContext newBuildContext(ResourceDeltaStub delta) {
+    return new EclipseIncrementalBuildContext(delta, new HashMap<String, Object>(), new DummyBuildResultCollector());
   }
 
   private void checkScanner(Scanner scanner) {

@@ -30,7 +30,7 @@ public class EclipseBuildContextTest extends AbstractMavenProjectTestCase {
   public void testScanner() throws Exception {
     IProject project = importProject("projects/MNGECLIPSE-2144/pom.xml");
 
-    EclipseBuildContext context = new EclipseBuildContext(project, new HashMap<String, Object>());
+    EclipseBuildContext context = newBuildContext(project);
     Scanner scanner;
 
     scanner = context.newScanner(new File(project.getLocation().toFile(), "src/main/resources"), true);
@@ -38,6 +38,10 @@ public class EclipseBuildContextTest extends AbstractMavenProjectTestCase {
 
     scanner = context.newScanner(new File(project.getLocation().toFile(), "src/main/resources"), false);
     checkScanner(scanner);
+  }
+
+  private EclipseBuildContext newBuildContext(IProject project) {
+    return new EclipseBuildContext(project, new HashMap<String, Object>(), new DummyBuildResultCollector());
   }
 
   private void checkScanner(Scanner scanner) {
@@ -53,7 +57,7 @@ public class EclipseBuildContextTest extends AbstractMavenProjectTestCase {
     IProject project = importProject("projects/361038_buildContext_scan_nonExistingFolder/pom.xml");
     assertNoErrors(project);
 
-    EclipseBuildContext context = new EclipseBuildContext(project, new HashMap<String, Object>());
+    EclipseBuildContext context = newBuildContext(project);
 
     Scanner scanner = context.newScanner(new File(project.getLocation().toFile(), "doesnotexist"));
 
