@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.eclipse.m2e.tests;singleton:=true
-Bundle-Version: 1.5.0.qualifier
+Bundle-Version: 1.6.0.qualifier
 Require-Bundle: org.eclipse.core.externaltools,
  org.eclipse.core.runtime,
  org.eclipse.core.resources,
@@ -35,18 +35,18 @@ Require-Bundle: org.eclipse.core.externaltools,
  org.eclipse.core.expressions,
  org.eclipse.m2e.profiles.core
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6,
- JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7,
+ JavaSE-1.8
 Bundle-ClassPath: .
 Bundle-Vendor: %Bundle-Vendor
 MavenArtifact-GroupId: org.eclipse.m2e
 MavenArtifact-ArtifactId: org.eclipse.m2e.test
-Export-Package: org.eclipse.m2e.tests.configurators,
+Export-Package: org.eclipse.m2e.tests,
+ org.eclipse.m2e.tests.archetype,
+ org.eclipse.m2e.tests.configurators,
  org.eclipse.m2e.tests.embedder,
  org.eclipse.m2e.tests.internal.index,
- org.eclipse.m2e.tests.scm,
- org.eclipse.m2e.tests,
- org.eclipse.m2e.tests.archetype
+ org.eclipse.m2e.tests.scm
 Import-Package: org.eclipse.equinox.p2.metadata,
  org.eclipse.ltk.core.refactoring,
  org.eclipse.m2e.editor.composites,
