@@ -460,6 +460,8 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     // p1 depends on p2
     IProject p1 = createExisting("t007-p1");
     IProject p2 = createExisting("t007-p2");
+    // p3 depends on p2 but on a different version and should not be affected by changes in p2
+    createExisting("t007-p3");
     waitForJobsToComplete();
 
     IMavenProjectFacade f1 = manager.create(p1, monitor);
