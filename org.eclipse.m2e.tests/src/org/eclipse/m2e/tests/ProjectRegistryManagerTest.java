@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -1214,5 +1215,73 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
 
   private void setChecksumPolicy(String value) {
     ((MavenConfigurationImpl) mavenConfiguration).setGlobalChecksumPolicy(value);
+  }
+
+  public void test435692_affected_changes() throws Exception {
+
+    // parent 1.0
+    IProject parent = importProject("projects/435692_affected_changes/parent/pom.xml");
+
+    // p1:1.0
+    IProject p1 = importProject("projects/435692_affected_changes/p1/pom.xml");
+
+    // depends on p1:1.0 (from workspace), parent 1.0 (workspace)
+    IProject p2 = importProject("projects/435692_affected_changes/p2/pom.xml");
+
+    // depends on p1:1.1 (from repo), parent, parent 1.0 (workspace)
+    IProject p3 = importProject("projects/435692_affected_changes/p3/pom.xml");
+
+    // depends on p1:2.0 (missing), parent 2.0 (repo)
+    IProject p4 = importProject("projects/435692_affected_changes/p4/pom.xml");
+
+    waitForJobsToComplete();
+
+    // 1. update p1 to have new dependency on junit
+    events.clear();
+    copyContent(p1, "pom_newDependency.xml", "pom.xml");
+
+    assertEventsFromProjects(events, p1 /* self */, p2 /* 1.0 */, p4 /* 2.0 (unresolved) */);
+
+    // 2. update p1's parent to a new version (should behave same as with dependency change)
+    events.clear();
+    copyContent(p1, "pom_changedParent.xml", "pom.xml"); // parent 1.0->2.0
+
+    assertEventsFromProjects(events, p1 /* self */, p2, p4);
+
+    // 3. update p1 to a new version (should rebuild all versionless dependents)
+    events.clear();
+    copyContent(p1, "pom_changedVersion.xml", "pom.xml"); // 1.0->2.0
+
+    assertEventsFromProjects(events, p1 /* self */, p2, p3, p4);
+    waitForJobsToComplete();
+
+    // 4. add new dependency to parent (similar to [1])
+    events.clear();
+    copyContent(parent, "pom_newDependency.xml", "pom.xml");
+    // p1 at this point references parent 2.0 (from repo), same with p4
+    assertEventsFromProjects(events, parent /* self */, p2, p3);
+
+    // 5. update parent to new version (similar to [3])
+    events.clear();
+    copyContent(parent, "pom_changedVersion.xml", "pom.xml"); // 1.0 -> 3.0
+
+    assertEventsFromProjects(events, parent /* self */, p1, p2, p3, p4);
+
+  }
+
+  private static void assertEventsFromProjects(List<MavenProjectChangedEvent> events, IProject... projects) {
+
+    Set<IFile> actualPoms = new HashSet<IFile>();
+    Set<IFile> expectedPoms = new HashSet<IFile>();
+
+    for(MavenProjectChangedEvent event : events) {
+      actualPoms.add(event.getSource());
+    }
+
+    for(IProject project : projects) {
+      expectedPoms.add(project.getFile(IMavenConstants.POM_FILE_NAME));
+    }
+
+    assertEquals(expectedPoms, actualPoms);
   }
 }
