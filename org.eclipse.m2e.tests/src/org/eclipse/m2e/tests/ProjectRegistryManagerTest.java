@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -460,8 +461,6 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     // p1 depends on p2
     IProject p1 = createExisting("t007-p1");
     IProject p2 = createExisting("t007-p2");
-    // p3 depends on p2 but on a different version and should not be affected by changes in p2
-    createExisting("t007-p3");
     waitForJobsToComplete();
 
     IMavenProjectFacade f1 = manager.create(p1, monitor);
@@ -1216,5 +1215,80 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
 
   private void setChecksumPolicy(String value) {
     ((MavenConfigurationImpl) mavenConfiguration).setGlobalChecksumPolicy(value);
+  }
+
+  public void test435692_affected_changes() throws Exception {
+    // parent 1.0
+    IProject parent = importProject("projects/435692_affected_changes/parent/pom.xml");
+    // parent 2.0 
+    IProject parent2 = importProject("projects/435692_affected_changes/parent2/pom.xml");
+    // workaround to allow the same artifact be imported with different versions
+    copyContent(parent2, "pom_replace.xml", "pom.xml");
+
+    // p1:1.0
+    IProject p1 = importProject("projects/435692_affected_changes/p1/pom.xml");
+
+    // p1:1.1
+    IProject p1_1 = importProject("projects/435692_affected_changes/p1-1/pom.xml");
+    // workaround to allow the same artifact be imported with different versions
+    copyContent(p1_1, "pom_replace.xml", "pom.xml");
+
+    // depends on p1:1.0
+    IProject p2 = importProject("projects/435692_affected_changes/p2/pom.xml");
+
+    // depends on p1:1.1
+    IProject p3 = importProject("projects/435692_affected_changes/p3/pom.xml");
+
+    // depends on p1:2.0
+    IProject p4 = importProject("projects/435692_affected_changes/p4/pom.xml");
+
+    // depends on p1:3.0
+    IProject p5 = importProject("projects/435692_affected_changes/p5/pom.xml");
+
+    // does not depend on anything
+    importProject("projects/435692_affected_changes/p6/pom.xml");
+
+    waitForJobsToComplete();
+
+    // update p1 to have new dependency on junit
+    events.clear();
+    copyContent(p1, "pom_newDependency.xml", "pom.xml");
+
+    assertEventsFromProjects(events, p1, p2 /* 1.0 */, p4 /* 2.0 (unresolved) */, p5 /* 3.0 (unresolved) */);
+
+    // update p1's parent to a new version (should behave same as with dependency change)
+    events.clear();
+    copyContent(p1, "pom_changedParent.xml", "pom.xml"); // parent 1.0->2.0
+
+    assertEventsFromProjects(events, p1, p2, p4, p5);
+
+    // update p1 to a new version (should rebuild all versionless dependents)
+    events.clear();
+    copyContent(p1, "pom_changedVersion.xml", "pom.xml"); // 1.0->2.0
+
+    assertEventsFromProjects(events, p1, p2, p3, p4, p5);
+
+    // update parent to new version
+    events.clear();
+    copyContent(parent, "pom_changedVersion.xml", "pom.xml"); // 1.0 -> 3.0
+
+    assertEventsFromProjects(events, parent, p1, p1_1, p2, p3, p4, p5);
+
+  }
+
+  private static void assertEventsFromProjects(List<MavenProjectChangedEvent> events, IProject... projects) {
+
+    Set<IFile> actualPoms = new HashSet<IFile>();
+    Set<IFile> expectedPoms = new HashSet<IFile>();
+
+    for(MavenProjectChangedEvent event : events) {
+      actualPoms.add(event.getSource());
+    }
+
+    for(IProject project : projects) {
+      expectedPoms.add(project.getFile(IMavenConstants.POM_FILE_NAME));
+    }
+
+    assertEquals(expectedPoms, actualPoms);
   }
 }
