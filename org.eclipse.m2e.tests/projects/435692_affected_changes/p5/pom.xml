@@ -1,21 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?><project>
   <modelVersion>4.0.0</modelVersion>
+
   <parent>
     <groupId>org.eclipse.m2e.test</groupId>
     <artifactId>m2e-test-parent</artifactId>
     <version>1.0.0</version>
   </parent>
 
-  <groupId>t007</groupId>
-  <artifactId>t007-p3</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <groupId>435692</groupId>
+  <artifactId>435692-p5</artifactId>
+  <version>1.0</version>
 
   <dependencies>
     <dependency>
-	  <groupId>t007</groupId>
-	  <artifactId>t007-p2</artifactId>
-	  <version>0.0.3-SNAPSHOT</version>
-	</dependency>
+      <groupId>435692</groupId>
+      <artifactId>435692-p1</artifactId>
+      <version>3.0</version>
+    </dependency>
   </dependencies>
 
 </project>
