@@ -11,6 +11,12 @@ import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 public class CompilerSettings18Test extends AbstractMavenProjectTestCase {
 
   public void testCompilerSettings18() throws Exception {
+    // this test is meaningless on java 7 (and we don't support 6 and earlier)
+    // sadly, junit 3 does not support junit4's "Assume", have to make test pass
+    if(!"1.7".equals(System.getProperty("java.specification.version"))) {
+      return;
+    }
+
     IProject project = importProject("projects/compilerSettings18/pom.xml");
     assertNoErrors(project);
     waitForJobsToComplete();
