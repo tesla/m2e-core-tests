@@ -15,7 +15,10 @@
   <packaging>pom</packaging>
 
   <properties>
-    <tycho-version>0.20.0</tycho-version>
+    <!-- 
+      | can't use 0.20 because of https://bugs.eclipse.org/bugs/show_bug.cgi?id=431793 
+    -->
+    <tycho-version>0.21.0-SNAPSHOT</tycho-version>
 
     <eclipse-repo.url>http://download.eclipse.org/releases/luna</eclipse-repo.url>
     <m2e-core.url>http://repository.takari.io:8081/nexus/content/sites/m2e.extras/m2e/1.6.0/N/LATEST/</m2e-core.url>
@@ -35,6 +38,14 @@
       <url>${m2e-core.url}</url>
     </repository>
   </repositories>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>tycho-snapshots</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+      <snapshots><enabled>true</enabled></snapshots>
+    </pluginRepository>
+  </pluginRepositories>
 
   <build>
     <plugins>
