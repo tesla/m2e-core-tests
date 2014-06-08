@@ -1271,6 +1271,67 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
 
   }
 
+  public void test436929_import_refresh() throws Exception {
+
+    IProject[] projects = importProjects("projects/436929_import_refresh", new String[] {"p1/pom.xml", "deps/pom.xml",
+        "deps2/pom.xml", "p2/pom.xml"}, new ResolverConfiguration());
+
+    waitForJobsToComplete();
+
+    // imports deps3 (from repo)
+    IProject p1 = projects[0];
+
+    // imports deps (from workspace) and deps3 (from repo), depends on p1
+    IProject p2 = projects[3];
+
+    // imported by p2 and specifies p1's version
+    IProject managedDeps = projects[1];
+
+    // imported by p1 and p2's parent
+    IProject managedDeps2 = projects[2];
+
+    String expectedErrorMessage = "Missing artifact test:436929-p1:jar:2.0";
+    List<IMarker> markers = WorkspaceHelpers.findErrorMarkers(p2);
+    assertEquals(WorkspaceHelpers.toString(markers), 2, markers.size());
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_DEPENDENCY_ID, expectedErrorMessage, 34 /*lineNumber*/,
+        p2);
+
+    // 1. imported directly
+    events.clear();
+    copyContent(managedDeps, "pom_modified.xml", "pom.xml");
+    assertEventsFromProjects(events, managedDeps /* self */, p2);
+    assertNoErrors(p2);
+
+    IMavenProjectFacade f2 = manager.create(p2, monitor);
+    List<Artifact> a2 = new ArrayList<Artifact>(f2.getMavenProject(monitor).getArtifacts());
+    assertEquals(1, a2.size());
+    assertEquals("436929-p1", a2.get(0).getArtifactId());
+    assertEquals("1.0", a2.get(0).getVersion());
+
+    // 2. imported by parent which is not in the workspace 
+    events.clear();
+    IFile d2pom = managedDeps2.getFile("pom.xml");
+    d2pom.setLocalTimeStamp(d2pom.getLocalTimeStamp() + 1000L);
+    d2pom.touch(monitor);
+    waitForJobsToComplete();
+
+    /*
+     * assertion would fail with p1 missing if deps2 does not exist in repository
+     * since p1's parent (which imports deps2) will be set to null due to build failure
+     */
+    assertEventsFromProjects(events, managedDeps2 /* self */, p1, p2);
+
+    // 3. refresh on imported artifact download
+    events.clear();
+
+    // force download of deps3 from repo
+    FileUtils.deleteDirectory(new File(repo, "test/436929-deps3"));
+    MavenUpdateRequest request = new MavenUpdateRequest(new IProject[] {p1}, false, true);
+    manager.refresh(request, monitor);
+    // both p1 and p2 reference deps2
+    assertEventsFromProjects(events, p1 /* self */, p2);
+  }
+
   private static void assertEventsFromProjects(List<MavenProjectChangedEvent> events, IProject... projects) {
 
     Set<IFile> actualPoms = new HashSet<IFile>();
