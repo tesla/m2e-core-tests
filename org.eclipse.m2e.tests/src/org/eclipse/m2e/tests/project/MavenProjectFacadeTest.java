@@ -168,12 +168,34 @@ public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
     }
   }
 
+  public void test436668_EclipseProjectMetadataNotStale() throws Exception {
+    IProject project = importProject("projects/testIsStale/pom.xml");
+    waitForJobsToComplete();
+    assertNoErrors(project);
+
+    testIsNotStale(project, ".classpath");
+    testIsNotStale(project, ".project");
+  }
+
   private void testIsStale(IProject project, String filename) throws Exception {
+    testStale(project, filename, true);
+  }
+
+  private void testIsNotStale(IProject project, String filename) throws Exception {
+    testStale(project, filename, false);
+  }
+
+  private void testStale(IProject project, String filename, boolean staleIfFileModified) throws Exception {
     IMavenProjectFacade projectFacade = MavenPlugin.getMavenProjectRegistry().create(project, monitor);
     assertFalse("Expected not stale MavenProjectFacade before changing the " + filename + " file",
         projectFacade.isStale());
 
     project.getFile(filename).touch(monitor);
-    assertTrue("Expected stale MavenProjectFacade after changing the " + filename + " file", projectFacade.isStale());
+    if(staleIfFileModified) {
+      assertTrue("Expected stale MavenProjectFacade after changing the " + filename + " file", projectFacade.isStale());
+    } else {
+      assertFalse("Expected not stale MavenProjectFacade after changing the " + filename + " file",
+          projectFacade.isStale());
+    }
   }
 }
