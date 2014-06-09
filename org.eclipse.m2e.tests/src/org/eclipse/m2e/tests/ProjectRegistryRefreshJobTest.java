@@ -12,18 +12,23 @@
 package org.eclipse.m2e.tests;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.core.internal.events.ResourceChangeEvent;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
-import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.m2e.core.internal.MavenPluginActivator;
 import org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager;
+import org.eclipse.m2e.core.project.IMavenProjectChangedListener;
+import org.eclipse.m2e.core.project.MavenProjectChangedEvent;
 import org.eclipse.m2e.core.project.MavenUpdateRequest;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
@@ -154,6 +159,28 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
     assertNotNull(manager.getProject(p1));
   }
 
+  public void test436679_NoRefreshWhenImport() throws Exception {
+    ProjectRegistryManager manager = MavenPluginActivator.getDefault().getMavenProjectManagerImpl();
+
+    final List<MavenProjectChangedEvent> events = new ArrayList<>();
+    IMavenProjectChangedListener lisneter = new IMavenProjectChangedListener() {
+      public void mavenProjectChanged(MavenProjectChangedEvent[] _events, IProgressMonitor monitor) {
+        events.addAll(Arrays.asList(_events));
+      }
+    };
+
+    manager.addMavenProjectChangedListener(lisneter);
+    try {
+      IProject p1 = importProject("projects/updateProject/simple/pom.xml");
+      waitForJobsToComplete();
+      assertNotNull(manager.getProject(p1));
+
+      assertEquals(events.size(), 1);
+    } finally {
+      manager.removeMavenProjectChangedListener(lisneter);
+    }
+
+  }
 
   public void test416050_ignoreNonMavenProjectChanges() throws Exception {
     // import project
@@ -167,17 +194,19 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
     child.addChild(new ResourceDeltaStub(changedFile));
     IResourceChangeEvent event;
 
-    event = new ResourceChangeEvent(changedFile, IResourceChangeEvent.POST_CHANGE, IncrementalProjectBuilder.AUTO_BUILD, delta);
-    projectRefreshJob.resourceChanged(event );
-    assertTrue(projectRefreshJob.isEmpty()); 
-    
-    event = new ResourceChangeEvent(project, IResourceChangeEvent.PRE_CLOSE, IncrementalProjectBuilder.FULL_BUILD, delta) {
+    event = new ResourceChangeEvent(changedFile, IResourceChangeEvent.POST_CHANGE,
+        IncrementalProjectBuilder.AUTO_BUILD, delta);
+    projectRefreshJob.resourceChanged(event);
+    assertTrue(projectRefreshJob.isEmpty());
+
+    event = new ResourceChangeEvent(project, IResourceChangeEvent.PRE_CLOSE, IncrementalProjectBuilder.FULL_BUILD,
+        delta) {
       public IResource getResource() {
         return project;
       }
     };
-    projectRefreshJob.resourceChanged(event );
-    assertTrue(projectRefreshJob.isEmpty()); 
+    projectRefreshJob.resourceChanged(event);
+    assertTrue(projectRefreshJob.isEmpty());
   }
 
   private static void delete(File file) {
@@ -188,6 +217,5 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
     }
     file.delete();
   }
-  
-  
+
 }
