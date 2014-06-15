@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?><project>
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.eclipse.m2e.test</groupId>
+    <artifactId>m2e-test-parent</artifactId>
+    <version>1.0.0</version>
+  </parent>
+
+  <groupId>test</groupId>
+  <artifactId>436929-deps</artifactId>
+  <version>1.0</version>
+  <packaging>pom</packaging>
+  
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>test</groupId>
+        <artifactId>436929-p1</artifactId>
+        <version>2.0</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+  
+</project>
