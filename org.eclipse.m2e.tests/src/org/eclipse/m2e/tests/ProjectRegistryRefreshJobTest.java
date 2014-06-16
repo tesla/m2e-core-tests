@@ -182,6 +182,40 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
 
   }
 
+  public void test437493_NoRefreshWhenInitClasspathContainer() throws Exception {
+
+    String origSettings = mavenConfiguration.getUserSettingsFile();
+    try {
+      mavenConfiguration.setUserSettingsFile(new File("settings.xml").getCanonicalPath());
+      waitForJobsToComplete();
+
+      ProjectRegistryManager manager = MavenPluginActivator.getDefault().getMavenProjectManagerImpl();
+      final List<MavenProjectChangedEvent> events = new ArrayList<>();
+      IMavenProjectChangedListener lisneter = new IMavenProjectChangedListener() {
+        public void mavenProjectChanged(MavenProjectChangedEvent[] _events, IProgressMonitor monitor) {
+          events.addAll(Arrays.asList(_events));
+        }
+      };
+
+      manager.addMavenProjectChangedListener(lisneter);
+      try {
+        IProject p1 = importProject("customclasspath-classpath-containers",
+            "projects/customclasspath/classpath-containers", new ResolverConfiguration());
+
+        waitForJobsToComplete();
+        assertNotNull(manager.getProject(p1));
+
+        assertEquals(1, events.size());
+      } finally {
+        manager.removeMavenProjectChangedListener(lisneter);
+      }
+
+    } finally {
+      mavenConfiguration.setUserSettingsFile(origSettings);
+    }
+
+  }
+
   public void test416050_ignoreNonMavenProjectChanges() throws Exception {
     // import project
     project = createExisting("416050_ignoreNonMavenProjectChanges", "projects/416050_ignoreNonMavenProjectChanges");
