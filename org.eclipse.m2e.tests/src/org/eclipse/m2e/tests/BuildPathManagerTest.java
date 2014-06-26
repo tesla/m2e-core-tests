@@ -1175,6 +1175,15 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertNoErrors(project);
   }
 
+  public void test431080_flatDirectoryLayout() throws Exception {
+	  IProject project = importProject("projects/431080_flatDirectoryLayout/pom.xml");
+	  waitForJobsToComplete();
+
+	  project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+
+	  assertNoErrors(project);
+  }
+
   public void test360962_forbiddenReferencePreference() throws Exception {
     IProject project = importProject("projects/360962_forbiddenReferencePreference/custom/pom.xml");
     waitForJobsToComplete();
