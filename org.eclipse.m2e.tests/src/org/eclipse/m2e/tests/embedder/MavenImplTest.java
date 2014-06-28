@@ -29,6 +29,7 @@ import org.codehaus.plexus.util.FileUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.execution.MavenExecutionResult;
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.lifecycle.MavenExecutionPlan;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.project.MavenProject;
@@ -43,6 +44,7 @@ import org.eclipse.m2e.core.embedder.ILocalRepositoryListener;
 import org.eclipse.m2e.core.embedder.IMavenConfiguration;
 import org.eclipse.m2e.core.embedder.IMavenExecutionContext;
 import org.eclipse.m2e.core.internal.MavenPluginActivator;
+import org.eclipse.m2e.core.internal.embedder.MavenExecutionContext;
 import org.eclipse.m2e.core.internal.embedder.MavenImpl;
 import org.eclipse.m2e.core.internal.repository.RepositoryRegistry;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
@@ -530,5 +532,26 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
     } finally {
       configuration.setUserSettingsFile(origSettings);
     }
+  }
+
+  public void test438454_guiceScopedComponentInjection() throws Exception {
+    // the point of this test is to verify that @MojoExecutionScoped component can be instantiated and injected
+
+    MavenExecutionResult result = readMavenProject(new File("projects/438454_guiceScopes/pom.xml"), false);
+    assertFalse(result.hasExceptions());
+    MavenProject project = result.getProject();
+    MavenExecutionPlan executionPlan = maven.calculateExecutionPlan(project, Arrays.asList("compile"), true, monitor);
+    final MojoExecution execution = getExecution(executionPlan, "438454_guicescopes-plugin", "guicescopes");
+
+    MavenExecutionContext context = maven.createExecutionContext();
+    result = context.execute(project, new ICallable<MavenExecutionResult>() {
+      public MavenExecutionResult call(IMavenExecutionContext context, IProgressMonitor monitor) {
+        MavenSession session = context.getSession();
+        maven.execute(session, execution, monitor);
+        return session.getResult();
+      }
+    }, monitor);
+
+    assertFalse(result.getExceptions().toString(), result.hasExceptions());
   }
 }

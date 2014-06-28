@@ -6,5 +6,10 @@
       <prefix>422106_legacyPlexusUtils</prefix>
       <artifactId>422106_legacyPlexusUtils-plugin</artifactId>
     </plugin>
+    <plugin>
+      <name>438454_guicescopes-plugin</name>
+      <prefix>438454_guicescopes</prefix>
+      <artifactId>438454_guicescopes-plugin</artifactId>
+    </plugin>
   </plugins>
 </metadata>
