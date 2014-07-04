@@ -42,7 +42,7 @@
   <pluginRepositories>
     <pluginRepository>
       <id>tycho-snapshots</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+      <url>https://repo.eclipse.org/content/repositories/tycho-snapshots/</url>
       <snapshots><enabled>true</enabled></snapshots>
     </pluginRepository>
   </pluginRepositories>
