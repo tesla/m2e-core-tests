@@ -133,7 +133,7 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_BUILD_ID, expectedErrorMessage,
         56 /*lineNumber*/, project);
     assertTrue(marker.getAttribute(IMarker.MESSAGE).toString()
-        .endsWith(" (org.apache.maven.plugins:maven-deploy-plugin:2.5:deploy:default-deploy:deploy)"));
+        .contains(" (org.apache.maven.plugins:maven-deploy-plugin:2.5:deploy:default-deploy:deploy)"));
 
     // Verify that the marker is removed by a new build
     project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
