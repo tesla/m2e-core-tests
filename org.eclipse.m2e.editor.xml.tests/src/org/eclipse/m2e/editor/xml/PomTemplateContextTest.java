@@ -254,4 +254,23 @@ public class PomTemplateContextTest extends AbstractMavenProjectTestCase {
       PomTemplateContext.setSearchEngineForTests(null);
     }
   }
+  
+  public void test439251_GetTemplatesConfigurationFromMojoWithEmptyParameters() throws Exception {
+	    Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+	    Element plugin = doc.createElement("plugin");
+	    addNode(plugin, "groupId", "org.eclipse.dummy");
+	    addNode(plugin, "artifactId", "emptymojo");
+	    addNode(plugin, "version", "1.0.0");
+	    Element pluginConfiguration = addNode(plugin, "configuration");
+
+	    PomTemplateContext context = PomTemplateContext.fromNodeName("configuration");
+
+	    assertNotNull(context);
+	    assertSame(PomTemplateContext.CONFIGURATION, context);
+
+	    Template[] templates = context.getTemplates(null, null, pluginConfiguration, "");
+	    assertNotNull(templates);
+	    assertEquals(0, templates.length);
+	  }
+
 }
