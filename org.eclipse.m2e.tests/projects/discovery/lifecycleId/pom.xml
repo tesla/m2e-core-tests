@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project>
+
+  <parent>
+    <groupId>org.eclipse.m2e.test</groupId>
+    <artifactId>m2e-test-parent</artifactId>
+    <version>1.0.0</version>
+  </parent>
+
   <groupId>lifecyclemapping</groupId>
   <artifactId>missing</artifactId>
   <version>0.0.1-SNAPSHOT</version>

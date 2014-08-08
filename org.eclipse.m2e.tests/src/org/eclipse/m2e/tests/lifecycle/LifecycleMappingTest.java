@@ -321,7 +321,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     String expectedErrorMessage = "Lifecycle mapping \"unknown-or-missing\" is not available. To enable full functionality, install the lifecycle mapping and run Maven->Update Project Configuration.";
     IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID,
         expectedErrorMessage, null /*lineNumber*/, project);
-    WorkspaceHelpers.assertMarkerLocation(new SourceLocation(7, 3, 13), marker);
+    WorkspaceHelpers.assertMarkerLocation(new SourceLocation(14, 3, 13), marker);
     WorkspaceHelpers.assertLifecycleIdErrorMarkerAttributes(marker, "unknown-or-missing");
 
     ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade);

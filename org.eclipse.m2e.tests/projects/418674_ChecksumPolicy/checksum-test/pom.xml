@@ -1,23 +1,30 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>foo.bar</groupId>
-	<artifactId>checksum-test</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<repositories>
-		<repository>
-  		  <id>test-checksum</id>
-	      <url>file:repositories/badchecksumrepo/</url>
-          <snapshots>
-            <enabled>true</enabled>
-          </snapshots>
-        </repository>
-	</repositories>
-	<dependencies>
-		<dependency>
-			<groupId>org.eclipse.m2e.test</groupId>
-			<artifactId>bad-checksum</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-	</dependencies>
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.eclipse.m2e.test</groupId>
+    <artifactId>m2e-test-parent</artifactId>
+    <version>1.0.0</version>
+  </parent>
+
+  <groupId>foo.bar</groupId>
+  <artifactId>checksum-test</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <repositories>
+    <repository>
+      <id>test-checksum</id>
+      <url>file:repositories/badchecksumrepo/</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+  <dependencies>
+    <dependency>
+      <groupId>org.eclipse.m2e.test</groupId>
+      <artifactId>bad-checksum</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
 </project>
