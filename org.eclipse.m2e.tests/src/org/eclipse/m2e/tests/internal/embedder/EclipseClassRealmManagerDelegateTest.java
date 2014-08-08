@@ -18,10 +18,12 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
+import org.codehaus.plexus.classworlds.realm.ClassRealm;
+
 import org.apache.maven.classrealm.ClassRealmConstituent;
 import org.apache.maven.classrealm.ClassRealmManagerDelegate;
 import org.apache.maven.classrealm.ClassRealmRequest;
-import org.codehaus.plexus.classworlds.realm.ClassRealm;
+
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.internal.embedder.EclipseClassRealmManagerDelegate;
 import org.eclipse.m2e.core.internal.embedder.MavenImpl;
@@ -35,7 +37,7 @@ public class EclipseClassRealmManagerDelegateTest extends TestCase {
     super.setUp();
 
     delegate = (EclipseClassRealmManagerDelegate) ((MavenImpl) MavenPlugin.getMaven()).getPlexusContainer().lookup(
-        ClassRealmManagerDelegate.class);
+        ClassRealmManagerDelegate.class, EclipseClassRealmManagerDelegate.ROLE_HINT);
   }
 
   public void testRealmSetup() throws Exception {
