@@ -32,6 +32,8 @@ import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 
+import org.codehaus.plexus.classworlds.ClassWorld;
+import org.codehaus.plexus.classworlds.realm.ClassRealm;
 import org.codehaus.plexus.util.FileUtils;
 
 import org.apache.maven.artifact.Artifact;
@@ -1283,5 +1285,69 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     }
 
     assertEquals(expectedPoms, actualPoms);
+  }
+
+  public void test441257_stalePluginRealms() throws Exception {
+    IProject project = importProject("projects/441257_stalePluginRealms/basic/pom.xml");
+    project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+    waitForJobsToComplete();
+    assertNoErrors(project);
+
+    MavenProject mavenProject = manager.create(project, monitor).getMavenProject();
+
+    ClassRealm projectRealm = mavenProject.getClassRealm();
+    assertNotNull(projectRealm);
+    ClassWorld world = projectRealm.getWorld();
+    ClassRealm extensionRealm = world
+        .getRealm("extension>org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0");
+    assertNotNull(extensionRealm);
+    ClassRealm pluginRealm = world
+        .getRealm("plugin>org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0");
+    assertNotNull(pluginRealm);
+
+    MavenUpdateRequest request = new MavenUpdateRequest(project, false, true);
+    manager.refresh(request, monitor);
+    project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+    waitForJobsToComplete();
+    assertNoErrors(project);
+
+    mavenProject = manager.create(project, monitor).getMavenProject();
+    assertNotSame(projectRealm, mavenProject.getClassRealm());
+    assertNotSame(extensionRealm,
+        world.getRealm("extension>org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0"));
+    assertNotSame(pluginRealm,
+        world.getRealm("plugin>org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0"));
+  }
+
+  public void test441257_stalePluginRealms_withParent() throws Exception {
+    IProject project = importProject("projects/441257_stalePluginRealms/with-parent/pom.xml");
+    project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+    waitForJobsToComplete();
+    assertNoErrors(project);
+
+    MavenProject mavenProject = manager.create(project, monitor).getMavenProject();
+
+    ClassRealm projectRealm = mavenProject.getClassRealm();
+    assertNotNull(projectRealm);
+    ClassWorld world = projectRealm.getWorld();
+    ClassRealm extensionRealm = world
+        .getRealm("extension>org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0");
+    assertNotNull(extensionRealm);
+    ClassRealm pluginRealm = world
+        .getRealm("plugin>org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0");
+    assertNotNull(pluginRealm);
+
+    MavenUpdateRequest request = new MavenUpdateRequest(project, false, true);
+    manager.refresh(request, monitor);
+    project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+    waitForJobsToComplete();
+    assertNoErrors(project);
+
+    mavenProject = manager.create(project, monitor).getMavenProject();
+    assertNotSame(projectRealm, mavenProject.getClassRealm());
+    assertNotSame(extensionRealm,
+        world.getRealm("extension>org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0"));
+    assertNotSame(pluginRealm,
+        world.getRealm("plugin>org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0"));
   }
 }

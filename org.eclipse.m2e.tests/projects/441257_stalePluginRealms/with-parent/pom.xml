@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.eclipse.m2e.test.441257_stalePluginRealms</groupId>
+    <artifactId>parentWithBuildExtensions</artifactId>
+    <version>1.0.0</version>
+  </parent>
+
+  <groupId>org.eclipse.m2e.test</groupId>
+  <artifactId>441257_stalePluginRealms_withParent</artifactId>
+  <version>1.0.0</version>
+  <packaging>test-packaging-empty</packaging>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.eclipse.m2e.test.lifecyclemapping</groupId>
+        <artifactId>test-lifecyclemapping-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>test-goal-1</id>
+            <goals>
+              <goal>test-goal-1</goal>
+            </goals>
+            <phase>compile</phase>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>
