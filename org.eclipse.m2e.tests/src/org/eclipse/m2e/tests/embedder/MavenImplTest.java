@@ -157,7 +157,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
       configuration.setGlobalSettingsFile(new File("settings_empty.xml").getCanonicalPath());
 
       // sanity check
-      assertEquals("http://repo.maven.apache.org/maven2", maven.getArtifactRepositories().get(0).getUrl());
+      assertEquals("https://repo.maven.apache.org/maven2", maven.getArtifactRepositories().get(0).getUrl());
 
       configuration.setGlobalSettingsFile(new File("settingsWithCustomRepo.xml").getCanonicalPath());
       assertEquals("file:repositories/remoterepo", maven.getArtifactRepositories().get(0).getUrl());
