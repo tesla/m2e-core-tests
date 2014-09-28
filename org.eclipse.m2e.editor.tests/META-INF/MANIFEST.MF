@@ -21,6 +21,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.wst.sse.core,
  org.eclipse.wst.sse.ui,
  org.eclipse.search,
+ org.eclipse.equinox.ds,
+ org.eclipse.equinox.event,
  org.eclipse.m2e.tests.common,
  org.eclipse.m2e.core.ui,
  org.junit;bundle-version="4.0.0"
