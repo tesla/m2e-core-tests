@@ -47,7 +47,7 @@ public class MavenPomEditorDirtyTest extends AbstractMavenProjectTestJunit4 {
     IFile dummy = project.getFile("dummy.txt");
     IEditorPart dummyEditor = OpenPomAction.openEditor(new FileEditorInput(dummy), dummy.getName());
 
-    IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+    IWorkbenchPage page = PlatformUI.getWorkbench().getWorkbenchWindows()[0].getActivePage();
     assertSame("PomEditor active", dummyEditor, page.getActiveEditor());
 
     File pomFile = pom.getLocation().toFile();
