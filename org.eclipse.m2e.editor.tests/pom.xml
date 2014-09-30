@@ -28,8 +28,6 @@
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>tycho-surefire-plugin</artifactId>
         <configuration>
-          <useUIThread>false</useUIThread>
-          <forkedProcessTimeoutInSeconds>360</forkedProcessTimeoutInSeconds>
           <appArgLine>-pluginCustomization ${project.basedir}/plugin_customization.ini</appArgLine>
         </configuration>
       </plugin>
