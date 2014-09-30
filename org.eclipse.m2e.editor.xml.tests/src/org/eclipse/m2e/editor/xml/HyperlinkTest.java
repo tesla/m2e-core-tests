@@ -13,18 +13,17 @@ package org.eclipse.m2e.editor.xml;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.internal.UIPlugin;
+
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.editor.pom.MavenPomEditor;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.internal.UIPlugin;
 
 
 /**
@@ -66,7 +65,7 @@ public class HyperlinkTest extends AbstractPOMEditorTestCase {
     // test opening the link
     links[0].open();
     IWorkbench wbch = UIPlugin.getDefault().getWorkbench();
-    IEditorPart editor = wbch.getWorkbenchWindows()[0].getActivePage().getActiveEditor();
+    IEditorPart editor = wbch.getActiveWorkbenchWindow().getActivePage().getActiveEditor();
     assertTrue(editor instanceof MavenPomEditor);
     assertEquals(parentPom, ((MavenPomEditor) editor).getPomFile());
     ((MavenPomEditor) editor).close(false);

@@ -15,8 +15,6 @@ import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.performOnDOMDocu
 import java.util.HashMap;
 import java.util.List;
 
-import org.junit.AfterClass;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -37,7 +35,6 @@ import org.eclipse.ltk.core.refactoring.TextFileChange;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
@@ -82,6 +79,12 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 
   private MavenPomEditor editor = null;
 
+  @Override
+  protected void setUp() throws Exception {
+    super.setUp();
+  }
+
+  @Override
   public void tearDown() throws Exception {
     try {
       if(editor != null) {
@@ -90,11 +93,6 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
     } finally {
       super.tearDown();
     }
-  }
-
-  @AfterClass
-  public void afterClass() throws Exception {
-    waitForJobsToComplete();
   }
 
   /*
@@ -478,8 +476,7 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
   }
 
   protected static IWorkbenchPage getActivePage() {
-    IWorkbench workbench = PlatformUI.getWorkbench();
-    return workbench.getWorkbenchWindows()[0].getActivePage();
+    return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
   }
 
   protected static IProject getProject(IProject[] projects, String name) {
