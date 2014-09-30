@@ -776,6 +776,19 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertTrue(workspace.getRoot().getProject("project..import.p004.-2.0-").exists());
   }
 
+  public void testProjectNameWithNameTemplate() throws Exception {
+    deleteProject("343038");
+
+    ResolverConfiguration configuration = new ResolverConfiguration();
+    ProjectImportConfiguration projectImportConfiguration = new ProjectImportConfiguration(configuration);
+    projectImportConfiguration.setProjectNameTemplate("[name]-[version]");
+    importProject("343038", "projects/projectimport/343038", projectImportConfiguration);
+
+    waitForJobsToComplete();
+
+    assertTrue(workspace.getRoot().getProject("My super awesome project-0.0.1-SNAPSHOT").exists());
+  }
+
   public void testCompilerSettingsJsr14() throws Exception {
     deleteProject("compilerSettingsJsr14");
 
@@ -1176,12 +1189,12 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
   }
 
   public void test431080_flatDirectoryLayout() throws Exception {
-	  IProject project = importProject("projects/431080_flatDirectoryLayout/pom.xml");
-	  waitForJobsToComplete();
+    IProject project = importProject("projects/431080_flatDirectoryLayout/pom.xml");
+    waitForJobsToComplete();
 
-	  project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+    project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
 
-	  assertNoErrors(project);
+    assertNoErrors(project);
   }
 
   public void test360962_forbiddenReferencePreference() throws Exception {
