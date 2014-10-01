@@ -11,12 +11,12 @@
 
 package org.eclipse.m2e.tests;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -69,14 +69,9 @@ public class ResourceChangeListenerTest extends AbstractMavenProjectTestCase {
 
   public void testPomChanges() throws Exception {
     // modify
-    IFile pom = project.getFile("pom.xml");
-
-    InputStream contents = new FileInputStream("projects/resourcechange/pom001.xml");
-    pom.setContents(contents, IResource.NONE, null);
-    contents.close();
+    copyContent(project, new File("projects/resourcechange/pom001.xml"), "pom.xml");
 
     // assert
-    waitForJobsToComplete();
     IClasspathEntry[] cp = getMavenContainerEntries(project);
     assertEquals(1, cp.length);
     assertEquals("junit-4.1.jar", cp[0].getPath().lastSegment());
@@ -139,6 +134,7 @@ public class ResourceChangeListenerTest extends AbstractMavenProjectTestCase {
 
     // change
     project.getFile("pom.xml").delete(true, null);
+    updateMavenProject(project);
 
     // assert
     waitForJobsToComplete();
@@ -153,6 +149,7 @@ public class ResourceChangeListenerTest extends AbstractMavenProjectTestCase {
 
     // change
     project.getFile("pom.xml").move(project.getFullPath().append("backup"), true, null);
+    updateMavenProject(project);
 
     // assert
     waitForJobsToComplete();

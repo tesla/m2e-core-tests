@@ -17,7 +17,6 @@ import java.util.List;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -54,7 +53,6 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
 
     // Fix the pom, introduce a configuration problem
     copyContent(project, "pom_badConfiguration.xml", "pom.xml");
-    waitForJobsToComplete();
     facade = MavenPluginActivator.getDefault().getMavenProjectManagerImpl().getProject(project);
     assertNotNull("Expected not null MavenProjectFacade", facade);
     project = facade.getProject();
@@ -80,7 +78,6 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
 
     // Fix the current configuration problem, introduce a dependency problem
     copyContent(project, "pom_badDependency.xml", "pom.xml");
-    waitForJobsToComplete();
     MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
     expectedErrorMessage = "Missing artifact missing:missing:jar:0.0.0";
     List<IMarker> markers = WorkspaceHelpers.findErrorMarkers(project);
@@ -103,7 +100,6 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
 
     // Fix the current dependency problem
     copyContent(project, "pom_good.xml", "pom.xml");
-    waitForJobsToComplete();
     WorkspaceHelpers.assertErrorMarker("org.eclipse.jdt.core.problem",
         "The project cannot be built until build path errors are resolved", null /*lineNumber*/,
         null /*resourceRelativePath*/, project);
@@ -359,6 +355,7 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     List<IMarker> markers = WorkspaceHelpers.findErrorMarkers(project);
     // (jdt) The container 'Maven Dependencies' references non existing library ...missing/missing/0.0.0/missing-0.0.0.jar'
     // (maven) Missing artifact missing:missing:jar:0.0.0
+    // (maven) Missing artifact another-missing:another-missing:jar:1.0.0
     assertEquals(WorkspaceHelpers.toString(markers), 3, markers.size());
 
     IMarker marker = markers.get(1);
@@ -375,10 +372,7 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
   }
 
   public void testBuildCantReadPom() throws Exception {
-    IWorkspaceDescription description = workspace.getDescription();
-    description.setAutoBuilding(true);
-    workspace.setDescription(description);
-
+    setAutoBuilding(true);
     IProject project = importProject("projects/markers/testBuildCantReadPom/pom.xml");
     waitForJobsToComplete();
     WorkspaceHelpers.assertNoErrors(project);

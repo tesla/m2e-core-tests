@@ -135,7 +135,6 @@ public class MavenBuilderTest extends AbstractMavenProjectTestCase {
     assertEquals(false, a.isAccessible());
 
     copyContent(project, "pom_changed.xml", "pom.xml");
-    waitForJobsToComplete();
 
     project.build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
 

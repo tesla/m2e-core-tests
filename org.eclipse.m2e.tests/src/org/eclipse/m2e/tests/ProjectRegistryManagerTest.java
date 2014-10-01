@@ -15,7 +15,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -133,6 +132,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     IFile pom = p1.getFile("pom.xml");
     pom.setLocalTimeStamp(pom.getLocalTimeStamp() + 1000L);
     pom.touch(monitor);
+    updateMavenProject(p1);
     waitForJobsToComplete();
 
     assertEquals(1, events.size());
@@ -225,6 +225,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
 
     pom.setLocalTimeStamp(pom.getLocalTimeStamp() + 1000L);
     pom.touch(monitor);
+    updateMavenProject(p1);
     waitForJobsToComplete();
 
     IMavenProjectFacade newFacade = manager.create(p1, monitor);
@@ -534,10 +535,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertNull(f1); // XXX should I return non-null facade that does not have MavenProject?
 
     // update p1 to have p3 parent
-    InputStream contents = p1.getFile("pom_updated.xml").getContents();
-    p1.getFile("pom.xml").setContents(contents, IResource.FORCE, monitor);
-    contents.close();
-    waitForJobsToComplete();
+    copyContent(p1, "pom_updated.xml", "pom.xml");
 
     f1 = manager.create(p1, monitor);
     assertEquals("t008-p3", getParentProject(f1).getArtifactId());
@@ -1241,33 +1239,28 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     // 1. update p1 to have new dependency on junit
     events.clear();
     copyContent(p1, "pom_newDependency.xml", "pom.xml");
-
-    assertEventsFromProjects(events, p1 /* self */, p2 /* 1.0 */, p4 /* 2.0 (unresolved) */);
+    assertContainsOnly(getProjectsFromEvents(events), p1 /* self */, p2 /* 1.0 */, p4 /* 2.0 (unresolved) */);
 
     // 2. update p1's parent to a new version (should behave same as with dependency change)
     events.clear();
     copyContent(p1, "pom_changedParent.xml", "pom.xml"); // parent 1.0->2.0
-
-    assertEventsFromProjects(events, p1 /* self */, p2, p4);
+    assertContainsOnly(getProjectsFromEvents(events), p1 /* self */, p2, p4);
 
     // 3. update p1 to a new version (should rebuild all versionless dependents)
     events.clear();
     copyContent(p1, "pom_changedVersion.xml", "pom.xml"); // 1.0->2.0
-
-    assertEventsFromProjects(events, p1 /* self */, p2, p3, p4);
-    waitForJobsToComplete();
+    assertContainsOnly(getProjectsFromEvents(events), p1 /* self */, p2, p3, p4);
 
     // 4. add new dependency to parent (similar to [1])
     events.clear();
     copyContent(parent, "pom_newDependency.xml", "pom.xml");
     // p1 at this point references parent 2.0 (from repo), same with p4
-    assertEventsFromProjects(events, parent /* self */, p2, p3);
+    assertContainsOnly(getProjectsFromEvents(events), parent /* self */, p2, p3);
 
     // 5. update parent to new version (similar to [3])
     events.clear();
     copyContent(parent, "pom_changedVersion.xml", "pom.xml"); // 1.0 -> 3.0
-
-    assertEventsFromProjects(events, parent /* self */, p1, p2, p3, p4);
+    assertContainsOnly(getProjectsFromEvents(events), parent /* self */, p1, p2, p3, p4);
 
   }
 
@@ -1290,16 +1283,18 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     // imported by p1 and p2's parent
     IProject managedDeps2 = projects[2];
 
-    String expectedErrorMessage = "Missing artifact test:436929-p1:jar:2.0";
+    // (jdt) The container 'Maven Dependencies' references non existing library ...test/436929-p1/2.0/436929-p1-2.0.jar
+    // (maven) Missing artifact test:436929-p1:jar:2.0
     List<IMarker> markers = WorkspaceHelpers.findErrorMarkers(p2);
     assertEquals(WorkspaceHelpers.toString(markers), 2, markers.size());
+    String expectedErrorMessage = "Missing artifact test:436929-p1:jar:2.0";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_DEPENDENCY_ID, expectedErrorMessage, 34 /*lineNumber*/,
         p2);
 
     // 1. imported directly
     events.clear();
     copyContent(managedDeps, "pom_modified.xml", "pom.xml");
-    assertEventsFromProjects(events, managedDeps /* self */, p2);
+    assertContainsOnly(getProjectsFromEvents(events), managedDeps /* self */, p2);
     assertNoErrors(p2);
 
     IMavenProjectFacade f2 = manager.create(p2, monitor);
@@ -1313,13 +1308,14 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     IFile d2pom = managedDeps2.getFile("pom.xml");
     d2pom.setLocalTimeStamp(d2pom.getLocalTimeStamp() + 1000L);
     d2pom.touch(monitor);
+    updateMavenProject(managedDeps2);
     waitForJobsToComplete();
 
     /*
      * assertion would fail with p1 missing if deps2 does not exist in repository
      * since p1's parent (which imports deps2) will be set to null due to build failure
      */
-    assertEventsFromProjects(events, managedDeps2 /* self */, p1, p2);
+    assertContainsOnly(getProjectsFromEvents(events), managedDeps2 /* self */, p1, p2);
 
     // 3. refresh on imported artifact download
     events.clear();
@@ -1329,23 +1325,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     MavenUpdateRequest request = new MavenUpdateRequest(new IProject[] {p1}, false, true);
     manager.refresh(request, monitor);
     // both p1 and p2 reference deps2
-    assertEventsFromProjects(events, p1 /* self */, p2);
-  }
-
-  private static void assertEventsFromProjects(List<MavenProjectChangedEvent> events, IProject... projects) {
-
-    Set<IFile> actualPoms = new HashSet<IFile>();
-    Set<IFile> expectedPoms = new HashSet<IFile>();
-
-    for(MavenProjectChangedEvent event : events) {
-      actualPoms.add(event.getSource());
-    }
-
-    for(IProject project : projects) {
-      expectedPoms.add(project.getFile(IMavenConstants.POM_FILE_NAME));
-    }
-
-    assertEquals(expectedPoms, actualPoms);
+    assertContainsOnly(getProjectsFromEvents(events), p1 /* self */, p2);
   }
 
   public void test441257_stalePluginRealms() throws Exception {
