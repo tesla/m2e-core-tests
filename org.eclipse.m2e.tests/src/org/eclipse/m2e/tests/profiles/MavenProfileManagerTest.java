@@ -25,6 +25,7 @@ import org.eclipse.core.resources.IProject;
 import org.apache.maven.model.Profile;
 
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
+import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.profiles.core.internal.ProfileData;
 import org.eclipse.m2e.profiles.core.internal.ProfileState;
 
@@ -168,7 +169,7 @@ public class MavenProfileManagerTest extends AbstractMavenProfileTest {
         assertTrue(p.isAutoActive());
         assertEquals(ProfileState.Active, p.getActivationState());
       } else if("parent-profile".equals(pid)) {
-        assertFalse(p.isAutoActive());
+        assertTrue(p.isAutoActive());// True since Bug #441112 fix
       } else {
         fail("Unexpected profile " + pid);
       }
@@ -192,4 +193,41 @@ public class MavenProfileManagerTest extends AbstractMavenProfileTest {
       }
     }
   }
+
+  @Test
+  public void test441112_InheritParentActiveProfiles() throws Exception {
+    String projectsRoot = "projects/profiles/com.mygroup.test.bug.parent";
+
+    IProject[] projects = importProjects(projectsRoot, new String[] {"pom.xml", "com.mygroup.test.bug.itest/pom.xml"},
+        new ResolverConfiguration());
+    waitForJobsToComplete();
+    assertNotNull(projectsRoot + " could not be imported", projects);
+    assertEquals(2, projects.length);
+
+    IMavenProjectFacade facade = getFacade(projects[1]);
+    List<ProfileData> profiles = profileManager.getProfileDatas(facade, monitor);
+    assertEquals(profiles.toString(), 7 /*from projects*/+ 3 /*from settings*/, profiles.size());
+    for(ProfileData p : profiles) {
+      String pid = p.getId();
+
+      switch(pid) {
+        case "whenIsIntegrationTestsProjectInsideEclipse":
+        case "whenIsIntegrationTestsProjectInParent":
+        case "whenIsIntegrationTestsProjectInParentWithPropertyNegation":
+        case "whenIsIntegrationTestsProjectInChildPOM":
+        case "whenIsIntegrationTestsProjectInChildWithPropertyNegation":
+          assertTrue(p.getId() + " should be activated automatically", p.isAutoActive());
+          assertEquals(ProfileState.Active, p.getActivationState());
+          break;
+        case "whenIsIntegrationTestsProjectInParentWithoutProperty":
+        case "whenIsIntegrationTestsProjectInChildWithoutProperty":
+          assertFalse(p.getId() + " should not be activated automatically", p.isAutoActive());
+          assertEquals(ProfileState.Inactive, p.getActivationState());
+          break;
+        default:
+          //ignore settings profiles
+      }
+    }
+  }
+
 }
