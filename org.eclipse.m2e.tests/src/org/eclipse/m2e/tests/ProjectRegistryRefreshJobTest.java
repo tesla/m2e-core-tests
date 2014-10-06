@@ -18,10 +18,13 @@ import java.util.Arrays;
 import org.eclipse.core.internal.events.ResourceChangeEvent;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.m2e.core.internal.MavenPluginActivator;
 import org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager;
@@ -266,6 +269,32 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
     copyContent(project, "pomWithOneDependency.xml", "pom.xml", false);
     waitForJobsToComplete();
     assertContainsOnly(getProjectsFromEvents(events), project);
+  }
+
+  public void testXXXX_projectRenameRefresh() throws Exception {
+    IProject[] projects = importProjects("projects/updateProject/multiProject/", new String[] {"projectA/pom.xml",
+        "projectB/pom.xml"}, new ResolverConfiguration());
+    waitForJobsToComplete();
+
+    IProject p1 = projects[0];
+    IProject p2 = projects[1];
+
+    WorkspaceHelpers.assertNoErrors(p1);
+    WorkspaceHelpers.assertNoErrors(p2);
+
+    setAutoBuilding(true);
+    waitForJobsToComplete();
+
+    IProjectDescription description = p1.getDescription();
+    String newName = description.getName() + "_renamed";
+    description.setName(newName);
+    p1.move(description, IResource.FORCE | IResource.SHALLOW, new NullProgressMonitor());
+    waitForJobsToComplete();
+
+    p1 = ResourcesPlugin.getWorkspace().getRoot().getProject(newName);
+
+    WorkspaceHelpers.assertNoErrors(p1);
+    WorkspaceHelpers.assertNoErrors(p2);
   }
 
   private static void delete(File file) {
