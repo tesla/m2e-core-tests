@@ -50,7 +50,6 @@ public class WarnIfGroupSameThanParentTest extends AbstractMavenProjectTestCase 
           markers[1]);
       // Fix the problem - the marker should be removed
       copyContent(project, "pom_good.xml", "pom.xml");
-      waitForJobsToComplete();
       XmlEditorHelpers.assertNoEditorHintWarningMarkers(project);
     }
 
@@ -64,7 +63,6 @@ public class WarnIfGroupSameThanParentTest extends AbstractMavenProjectTestCase 
           markers[0]);
       // Fix the problem - the marker should be removed
       copyContent(project, "pom_good.xml", "pom.xml");
-      waitForJobsToComplete();
       XmlEditorHelpers.assertNoEditorHintWarningMarkers(project);
     }
 
@@ -78,7 +76,6 @@ public class WarnIfGroupSameThanParentTest extends AbstractMavenProjectTestCase 
           markers[0]);
       // Fix the problem - the marker should be removed
       copyContent(project, "pom_good.xml", "pom.xml");
-      waitForJobsToComplete();
       XmlEditorHelpers.assertNoEditorHintWarningMarkers(project);
     }
   }

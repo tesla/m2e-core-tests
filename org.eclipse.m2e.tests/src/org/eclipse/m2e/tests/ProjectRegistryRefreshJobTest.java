@@ -14,14 +14,12 @@ package org.eclipse.m2e.tests;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import org.eclipse.core.internal.events.ResourceChangeEvent;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
-import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -55,6 +53,16 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
 
   private IProject project;
 
+  ProjectRegistryManager manager;
+
+  ArrayList<MavenProjectChangedEvent> events;
+
+  IMavenProjectChangedListener listener = new IMavenProjectChangedListener() {
+    public void mavenProjectChanged(MavenProjectChangedEvent[] event, IProgressMonitor monitor) {
+      events.addAll(Arrays.asList(event));
+    }
+  };
+
   @Override
   public void setUp() throws Exception {
     super.setUp();
@@ -62,6 +70,21 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
     delete(LOCAL_REPO);
     mavenConfiguration.setUserSettingsFile(new File(SETTINGS_ONE).getAbsolutePath());
     waitForJobsToComplete();
+
+    manager = MavenPluginActivator.getDefault().getMavenProjectManagerImpl();
+    events = new ArrayList<MavenProjectChangedEvent>();
+    manager.addMavenProjectChangedListener(listener);
+  }
+
+  protected void tearDown() throws Exception {
+    try {
+      manager.removeMavenProjectChangedListener(listener);
+      listener = null;
+      events = null;
+      manager = null;
+    } finally {
+      super.tearDown();
+    }
   }
 
   public void testUpdateNotForced() throws Exception {
@@ -111,7 +134,6 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
     waitForJobsToComplete();
 
     copyContent(project, "pomWithSecondDependency.xml", "pom.xml");
-    waitForJobsToComplete();
     WorkspaceHelpers.assertNoErrors(project);
 
     assertEquals(338, LOCAL_ARTIFACT.length());
@@ -132,7 +154,6 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
 
     // Add dependency to original project
     copyContent(projects[0], "pomWithDependency.xml", "pom.xml");
-    waitForJobsToComplete();
     WorkspaceHelpers.assertNoErrors(projects[0]);
     WorkspaceHelpers.assertNoErrors(projects[1]);
 
@@ -140,10 +161,7 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
   }
 
   public void testRefreshAfterOpen() throws Exception {
-    IWorkspaceDescription description = workspace.getDescription();
-    description.setAutoBuilding(true);
-    workspace.setDescription(description);
-
+    setAutoBuilding(true);
     ProjectRegistryManager manager = MavenPluginActivator.getDefault().getMavenProjectManagerImpl();
 
     IProject p1 = importProject("projects/updateProject/simple/pom.xml");
@@ -160,26 +178,11 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
   }
 
   public void test436679_NoRefreshWhenImport() throws Exception {
-    ProjectRegistryManager manager = MavenPluginActivator.getDefault().getMavenProjectManagerImpl();
+    IProject p1 = importProject("projects/updateProject/simple/pom.xml");
+    waitForJobsToComplete();
+    assertNotNull(manager.getProject(p1));
 
-    final List<MavenProjectChangedEvent> events = new ArrayList<>();
-    IMavenProjectChangedListener lisneter = new IMavenProjectChangedListener() {
-      public void mavenProjectChanged(MavenProjectChangedEvent[] _events, IProgressMonitor monitor) {
-        events.addAll(Arrays.asList(_events));
-      }
-    };
-
-    manager.addMavenProjectChangedListener(lisneter);
-    try {
-      IProject p1 = importProject("projects/updateProject/simple/pom.xml");
-      waitForJobsToComplete();
-      assertNotNull(manager.getProject(p1));
-
-      assertEquals(events.size(), 1);
-    } finally {
-      manager.removeMavenProjectChangedListener(lisneter);
-    }
-
+    assertEquals(1, events.size());
   }
 
   public void test437493_NoRefreshWhenInitClasspathContainer() throws Exception {
@@ -189,26 +192,14 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
       mavenConfiguration.setUserSettingsFile(new File("settings.xml").getCanonicalPath());
       waitForJobsToComplete();
 
-      ProjectRegistryManager manager = MavenPluginActivator.getDefault().getMavenProjectManagerImpl();
-      final List<MavenProjectChangedEvent> events = new ArrayList<>();
-      IMavenProjectChangedListener lisneter = new IMavenProjectChangedListener() {
-        public void mavenProjectChanged(MavenProjectChangedEvent[] _events, IProgressMonitor monitor) {
-          events.addAll(Arrays.asList(_events));
-        }
-      };
+      events.clear();
+      IProject p1 = importProject("customclasspath-classpath-containers",
+          "projects/customclasspath/classpath-containers", new ResolverConfiguration());
 
-      manager.addMavenProjectChangedListener(lisneter);
-      try {
-        IProject p1 = importProject("customclasspath-classpath-containers",
-            "projects/customclasspath/classpath-containers", new ResolverConfiguration());
+      waitForJobsToComplete();
+      assertNotNull(manager.getProject(p1));
 
-        waitForJobsToComplete();
-        assertNotNull(manager.getProject(p1));
-
-        assertEquals(1, events.size());
-      } finally {
-        manager.removeMavenProjectChangedListener(lisneter);
-      }
+      assertEquals(1, events.size());
 
     } finally {
       mavenConfiguration.setUserSettingsFile(origSettings);
@@ -241,6 +232,40 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
     };
     projectRefreshJob.resourceChanged(event);
     assertTrue(projectRefreshJob.isEmpty());
+  }
+
+  public void test445675_autobuild() throws Exception {
+    // import with autobuild off
+    project = importProject("projects/updateProject/simple/pom.xml");
+    assertContainsOnly(getProjectsFromEvents(events), project);
+
+    copyContent(project, "pom.xml", "pomWithOneDependency.xml"); // save for later
+
+    // same as testRefreshAfterOpen() but with autobuild off
+    project.close(monitor);
+    waitForJobsToComplete();
+    assertNull(manager.getProject(project));
+
+    project.open(monitor);
+    waitForJobsToComplete();
+    assertNotNull(manager.getProject(project));
+
+    // change pom with autobuild off
+    events.clear();
+    copyContent(project, "pomWithSecondDependency.xml", "pom.xml", false);
+    waitForJobsToComplete();
+    assertEquals(0, events.size());
+
+    // project will get build when autobuild gets enabled
+    setAutoBuilding(true);
+    waitForJobsToComplete();
+    assertContainsOnly(getProjectsFromEvents(events), project);
+
+    // change pom with autobuild on
+    events.clear();
+    copyContent(project, "pomWithOneDependency.xml", "pom.xml", false);
+    waitForJobsToComplete();
+    assertContainsOnly(getProjectsFromEvents(events), project);
   }
 
   private static void delete(File file) {

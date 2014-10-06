@@ -24,7 +24,6 @@ public class MissingSchemaMarkerTest extends AbstractMavenProjectTestCase {
 
     // Fix the problem - the marker should be removed
     copyContent(project, "pom_good.xml", "pom.xml");
-    waitForJobsToComplete();
     XmlEditorHelpers.assertNoEditorHintWarningMarkers(project);
   }
 }

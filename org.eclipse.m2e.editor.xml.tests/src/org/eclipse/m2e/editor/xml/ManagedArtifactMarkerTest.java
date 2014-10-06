@@ -54,7 +54,6 @@ public class ManagedArtifactMarkerTest extends AbstractMavenProjectTestCase {
 
     // Fix the problem - the marker should be removed
     copyContent(project, "pom_good.xml", "pom.xml");
-    waitForJobsToComplete();
     XmlEditorHelpers.assertNoEditorHintWarningMarkers(project);
   }
 
@@ -87,7 +86,6 @@ public class ManagedArtifactMarkerTest extends AbstractMavenProjectTestCase {
 
     // Fix the problem - the marker should be removed
     copyContent(project, "pom_good.xml", "pom.xml");
-    waitForJobsToComplete();
     XmlEditorHelpers.assertNoEditorHintWarningMarkers(project);
   }
 }
