@@ -132,7 +132,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     IFile pom = p1.getFile("pom.xml");
     pom.setLocalTimeStamp(pom.getLocalTimeStamp() + 1000L);
     pom.touch(monitor);
-    updateMavenProject(p1);
+    refreshMavenProject(p1);
     waitForJobsToComplete();
 
     assertEquals(1, events.size());
@@ -225,7 +225,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
 
     pom.setLocalTimeStamp(pom.getLocalTimeStamp() + 1000L);
     pom.touch(monitor);
-    updateMavenProject(p1);
+    refreshMavenProject(p1);
     waitForJobsToComplete();
 
     IMavenProjectFacade newFacade = manager.create(p1, monitor);
@@ -1308,7 +1308,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     IFile d2pom = managedDeps2.getFile("pom.xml");
     d2pom.setLocalTimeStamp(d2pom.getLocalTimeStamp() + 1000L);
     d2pom.touch(monitor);
-    updateMavenProject(managedDeps2);
+    refreshMavenProject(managedDeps2);
     waitForJobsToComplete();
 
     /*

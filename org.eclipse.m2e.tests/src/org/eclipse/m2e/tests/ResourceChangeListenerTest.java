@@ -134,7 +134,7 @@ public class ResourceChangeListenerTest extends AbstractMavenProjectTestCase {
 
     // change
     project.getFile("pom.xml").delete(true, null);
-    updateMavenProject(project);
+    refreshMavenProject(project);
 
     // assert
     waitForJobsToComplete();
@@ -149,7 +149,7 @@ public class ResourceChangeListenerTest extends AbstractMavenProjectTestCase {
 
     // change
     project.getFile("pom.xml").move(project.getFullPath().append("backup"), true, null);
-    updateMavenProject(project);
+    refreshMavenProject(project);
 
     // assert
     waitForJobsToComplete();
