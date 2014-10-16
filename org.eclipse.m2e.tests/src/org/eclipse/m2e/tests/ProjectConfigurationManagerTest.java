@@ -28,12 +28,14 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
@@ -314,6 +316,33 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     IProjectConfigurationManager manager = MavenPlugin.getProjectConfigurationManager();
     // make sure #updateProjectConfiguration(MavenUpdateRequest, IProgressMonitor) does not blow up
     manager.updateProjectConfiguration(new MavenUpdateRequest(project, true, false), monitor);
+  }
+
+  public void test447460MultipleUpdateConfiguration() throws Exception {
+    // the project import already performs a configuration !!!
+    IProject project = importProject("projects/447460_MultipleUpdateConfiguration/pom.xml");
+    IJavaProject javaProject = JavaCore.create(project);
+    // check whether everything has been imported correctly
+    List<IClasspathEntry> cpEntries = filterClasspath(javaProject.getRawClasspath(), IClasspathEntry.CPE_SOURCE);
+    assertNotNull(cpEntries);
+    assertEquals("Invalid number of classpath entries", 4, cpEntries.size());
+    for(IClasspathEntry cpEntry : cpEntries) {
+      IPath[] exclusions = cpEntry.getExclusionPatterns();
+      assertNotNull(exclusions);
+      assertEquals("Classpath entry contains an exclusion pattern.", 0, exclusions.length);
+    }
+  }
+
+  private List<IClasspathEntry> filterClasspath(IClasspathEntry[] candidates, int cptype) {
+    List<IClasspathEntry> result = new ArrayList<>();
+    if(candidates != null) {
+      for(IClasspathEntry entry : candidates) {
+        if(entry.getEntryKind() == cptype) {
+          result.add(entry);
+        }
+      }
+    }
+    return result;
   }
 
   public void testConfigureProjectEncodingForBasicProject() throws Exception {
