@@ -20,31 +20,39 @@ import java.util.Properties;
 
 import org.eclipse.core.externaltools.internal.model.BuilderCoreUtils;
 import org.eclipse.core.externaltools.internal.model.ExternalToolBuilder;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.core.runtime.preferences.DefaultScope;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.codehaus.plexus.util.FileUtils;
 
 import org.apache.maven.archetype.catalog.Archetype;
+import org.apache.maven.model.Model;
+import org.apache.maven.model.Parent;
 
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.internal.IMavenConstants;
 import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.internal.preferences.MavenConfigurationImpl;
+import org.eclipse.m2e.core.internal.preferences.MavenPreferenceConstants;
 import org.eclipse.m2e.core.internal.preferences.ProblemSeverity;
 import org.eclipse.m2e.core.internal.project.registry.ProjectRegistryRefreshJob;
 import org.eclipse.m2e.core.lifecyclemapping.model.IPluginExecutionMetadata;
@@ -147,13 +155,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
       archetype.setVersion("1.0");
       archetype.setRepository("http://bad.host"); // should be mirrored by settings
 
-      IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject("mngeclipse-2110");
-      ProjectImportConfiguration pic = new ProjectImportConfiguration(new ResolverConfiguration());
-
-      IProjectConfigurationManager manager = MavenPlugin.getProjectConfigurationManager();
-      manager.createArchetypeProject(project, null, archetype, "m2e.its", "mngeclipse-2110", "1.0-SNAPSHOT", "jar",
-          new Properties(), pic, monitor);
-
+      IProject project = createArchetypeProject("mngeclipse-2110", null, archetype);
       assertTrue(project.isAccessible());
     } finally {
       mavenConfiguration.setUserSettingsFile(oldSettings);
@@ -419,6 +421,148 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
 
   public void testIgnoreStaleProjectConfiguration() throws Exception {
     testStaleProjectConfigurationMarker(ProblemSeverity.ignore);
+  }
+
+  public void testHiddenFolderForSimpleModule() throws Exception {
+
+    IProject parentProject = createSimplePomProject("parent001");
+    assertTrue(parentProject.isAccessible());
+
+    boolean originalValue = MavenPlugin.getMavenConfiguration().isHideFoldersOfNestedProjects();
+    IEclipsePreferences preferences = DefaultScope.INSTANCE.getNode(IMavenConstants.PLUGIN_ID);
+
+    Model model = initializeModel(parentProject);
+
+    try {
+      preferences.putBoolean(MavenPreferenceConstants.P_HIDE_FOLDERS_OF_NESTED_PROJECTS, Boolean.FALSE);
+      String moduleName = "visible-child";
+      Model visibleModuleModel = model.clone();
+      visibleModuleModel.setArtifactId(moduleName);
+
+      IProject moduleProject = createSimpleProject(moduleName,
+          parentProject.getLocation().append(new Path(moduleName)), visibleModuleModel);
+      assertNoErrors(moduleProject);
+
+      parentProject.refreshLocal(IResource.DEPTH_ONE, monitor);
+      IFolder moduleFolder = parentProject.getFolder(moduleName);
+      assertTrue(moduleFolder.exists());
+      assertFalse(moduleFolder + " should be visible", moduleFolder.isHidden());
+    } finally {
+      preferences
+          .putBoolean(MavenPreferenceConstants.P_HIDE_FOLDERS_OF_NESTED_PROJECTS, Boolean.valueOf(originalValue));
+    }
+
+    try {
+      preferences.putBoolean(MavenPreferenceConstants.P_HIDE_FOLDERS_OF_NESTED_PROJECTS, Boolean.TRUE);
+      String moduleName = "hidden-child";
+
+      Model hiddenModuleModel = model.clone();
+      hiddenModuleModel.setArtifactId(moduleName);
+
+      IProject moduleProject = createSimpleProject(moduleName,
+          parentProject.getLocation().append(new Path(moduleName)), hiddenModuleModel);
+      assertNoErrors(moduleProject);
+
+      parentProject.refreshLocal(IResource.DEPTH_ONE, monitor);
+      IFolder moduleFolder = parentProject.getFolder(moduleName);
+      assertTrue(moduleFolder.exists());
+      assertTrue(moduleFolder + " should be hidden", moduleFolder.isHidden());
+    } finally {
+      preferences
+          .putBoolean(MavenPreferenceConstants.P_HIDE_FOLDERS_OF_NESTED_PROJECTS, Boolean.valueOf(originalValue));
+    }
+  }
+
+  private Model initializeModel(IProject parentProject) {
+    Model model = new Model();
+    model.setModelVersion("4.0.0");
+
+    if(parentProject == null) {
+      return model;
+    }
+
+    IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().create(parentProject, monitor);
+    if(facade != null) {
+      Parent parent = new Parent();
+      parent.setGroupId(facade.getArtifactKey().getGroupId());
+      parent.setArtifactId(facade.getArtifactKey().getArtifactId());
+      parent.setVersion(facade.getArtifactKey().getVersion());
+      model.setParent(parent);
+    }
+
+    return model;
+  }
+
+  public void testHiddenFolderForArchetypeModule() throws Exception {
+    IProject parentProject = createSimplePomProject("parent002");
+    assertTrue(parentProject.isAccessible());
+
+    boolean originalValue = MavenPlugin.getMavenConfiguration().isHideFoldersOfNestedProjects();
+    IEclipsePreferences preferences = DefaultScope.INSTANCE.getNode(IMavenConstants.PLUGIN_ID);
+
+    try {
+      preferences.putBoolean(MavenPreferenceConstants.P_HIDE_FOLDERS_OF_NESTED_PROJECTS, Boolean.TRUE);
+      String moduleName = "archetyped";
+      Archetype archetype = new Archetype();
+      archetype.setGroupId("org.apache.maven.archetypes");
+      archetype.setArtifactId("maven-archetype-quickstart");
+      archetype.setVersion("RELEASE");
+      IProject moduleProject = createArchetypeProject(moduleName, parentProject.getLocation(), archetype);
+
+      assertNoErrors(moduleProject);
+
+      parentProject.refreshLocal(IResource.DEPTH_ONE, monitor);
+      IFolder moduleFolder = parentProject.getFolder(moduleName);
+      assertTrue(moduleFolder.exists());
+      assertTrue(moduleFolder + " should be hidden", moduleFolder.isHidden());
+    } finally {
+      preferences
+          .putBoolean(MavenPreferenceConstants.P_HIDE_FOLDERS_OF_NESTED_PROJECTS, Boolean.valueOf(originalValue));
+    }
+  }
+
+  private IProject createSimpleProject(final String projectName, final IPath location, final Model model)
+      throws CoreException {
+    final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+
+    workspace.run(new IWorkspaceRunnable() {
+      public void run(IProgressMonitor monitor) throws CoreException {
+        ProjectImportConfiguration pic = new ProjectImportConfiguration(new ResolverConfiguration());
+        MavenPlugin.getProjectConfigurationManager().createSimpleProject(project, location, model, new String[0], pic,
+            monitor);
+      }
+    }, MavenPlugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
+
+    return project;
+  }
+
+  private IProject createSimplePomProject(final String projectName) throws CoreException {
+    Model model = new Model();
+    model.setGroupId(projectName);
+    model.setArtifactId(projectName);
+    model.setVersion("0.0.1-SNAPSHOT");
+    model.setPackaging("pom");
+    Parent parent = new Parent();
+    parent.setGroupId("org.eclipse.m2e.test");
+    parent.setArtifactId("m2e-test-parent");
+    parent.setVersion("1.0.0");
+    model.setParent(parent);
+    return createSimpleProject(projectName, null, model);
+  }
+
+  private IProject createArchetypeProject(final String projectName, final IPath location, final Archetype archetype)
+      throws CoreException {
+    final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+
+    workspace.run(new IWorkspaceRunnable() {
+      public void run(IProgressMonitor monitor) throws CoreException {
+        ProjectImportConfiguration pic = new ProjectImportConfiguration(new ResolverConfiguration());
+        MavenPlugin.getProjectConfigurationManager().createArchetypeProjects(location, archetype, projectName,
+            projectName, "0.0.1-SNAPSHOT", "jar", new Properties(), pic, monitor);
+      }
+    }, MavenPlugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
+
+    return project;
   }
 
   protected void testStaleProjectConfigurationMarker(ProblemSeverity problemSeverity) throws Exception {
