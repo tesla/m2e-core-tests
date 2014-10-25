@@ -327,9 +327,19 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     assertNotNull(cpEntries);
     assertEquals("Invalid number of classpath entries", 4, cpEntries.size());
     for(IClasspathEntry cpEntry : cpEntries) {
-      IPath[] exclusions = cpEntry.getExclusionPatterns();
-      assertNotNull(exclusions);
-      assertEquals("Classpath entry contains an exclusion pattern.", 0, exclusions.length);
+      String[] path = cpEntry.getPath().segments();
+      if("java".equals(path[path.length - 1])) {
+        // sources
+        IPath[] exclusions = cpEntry.getExclusionPatterns();
+        assertNotNull(exclusions);
+        assertEquals("Classpath source entry isn't supposed to contain any exclusion pattern.", 0, exclusions.length);
+      } else {
+        // resources
+        IPath[] exclusions = cpEntry.getExclusionPatterns();
+        assertNotNull(exclusions);
+        assertEquals("Classpath resource entry contains more or less than one exclusion pattern.", 1, exclusions.length);
+        assertEquals("Exclusion pattern is supposed to be '**' !", new Path("**"), exclusions[0]);
+      }
     }
   }
 
