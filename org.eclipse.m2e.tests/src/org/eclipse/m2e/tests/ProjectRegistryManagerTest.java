@@ -1391,4 +1391,20 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertNotSame(pluginRealm,
         world.getRealm("plugin>org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0"));
   }
+
+  public void test453995_dependencyManagementVersionless() throws Exception {
+    IProject project = importProject("projects/453995_dependencyManagementVersionless/pom.xml");
+    waitForJobsToComplete();
+
+    MavenUpdateRequest request = new MavenUpdateRequest(project, false, true);
+    manager.refresh(request, monitor); // shouldn't throw any exceptions
+
+    List<IMarker> markers = WorkspaceHelpers.findErrorMarkers(project);
+    assertEquals(WorkspaceHelpers.toString(markers), 1, markers.size());
+    String expectedErrorMessage = "Project build error: 'dependencyManagement.dependencies.dependency.version' for test:nonexisting:pom is missing.";
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_POM_LOADING_ID, expectedErrorMessage, 15 /*lineNumber*/,
+        project);
+
+  }
+
 }
