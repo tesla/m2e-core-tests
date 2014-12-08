@@ -30,6 +30,9 @@ import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.codehaus.plexus.classworlds.ClassWorld;
 import org.codehaus.plexus.classworlds.realm.ClassRealm;
@@ -56,7 +59,9 @@ import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.MavenProjectChangedEvent;
 import org.eclipse.m2e.core.project.MavenUpdateRequest;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
+import org.eclipse.m2e.jdt.internal.BuildPathManager;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
+import org.eclipse.m2e.tests.common.ClasspathHelpers;
 import org.eclipse.m2e.tests.common.FilexWagon;
 import org.eclipse.m2e.tests.common.RequireMavenExecutionContext;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
@@ -1168,9 +1173,14 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     try {
       setChecksumPolicy(ArtifactRepositoryPolicy.CHECKSUM_POLICY_FAIL);
       IProject project = importProject("projects/418674_ChecksumPolicy/checksum-test/pom.xml");
+      IJavaProject javaProject = JavaCore.create(project);
       List<IMarker> errors = findErrorMarkers(project);
       assertEquals(toString(errors), 1, errors.size());
       assertTrue(errors.get(0).getAttribute(IMarker.MESSAGE, null).contains("Checksum validation failed"));
+
+      IClasspathEntry[] cp;
+      cp = BuildPathManager.getMaven2ClasspathContainer(javaProject).getClasspathEntries();
+      ClasspathHelpers.assertClasspath(new String[0], cp);
 
       setChecksumPolicy(ArtifactRepositoryPolicy.CHECKSUM_POLICY_WARN);
 
@@ -1180,6 +1190,8 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
       waitForJobsToComplete();
       assertNoErrors(project);
 
+      cp = BuildPathManager.getMaven2ClasspathContainer(javaProject).getClasspathEntries();
+      ClasspathHelpers.assertClasspath(new String[] {".*bad-checksum-0.0.1-SNAPSHOT.jar"}, cp);
     } finally {
       ((MavenConfigurationImpl) mavenConfiguration).setGlobalChecksumPolicy(originalPolicy);
     }
@@ -1195,9 +1207,14 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     try {
       //repo is configured to fail if checksums don't match
       IProject project = importProject("projects/418674_ChecksumPolicy/checksum-test2/pom.xml");
+      IJavaProject javaProject = JavaCore.create(project);
       List<IMarker> errors = findErrorMarkers(project);
       assertEquals(toString(errors), 1, errors.size());
       assertTrue(errors.get(0).getAttribute(IMarker.MESSAGE, null).contains("Checksum validation failed"));
+
+      IClasspathEntry[] cp;
+      cp = BuildPathManager.getMaven2ClasspathContainer(javaProject).getClasspathEntries();
+      ClasspathHelpers.assertClasspath(new String[0], cp);
 
       //Override specific repo config
       setChecksumPolicy(ArtifactRepositoryPolicy.CHECKSUM_POLICY_WARN);
@@ -1208,6 +1225,8 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
       waitForJobsToComplete();
       assertNoErrors(project);
 
+      cp = BuildPathManager.getMaven2ClasspathContainer(javaProject).getClasspathEntries();
+      ClasspathHelpers.assertClasspath(new String[] {".*bad-checksum-0.0.1-SNAPSHOT.jar"}, cp);
     } finally {
       ((MavenConfigurationImpl) mavenConfiguration).setGlobalChecksumPolicy(originalPolicy);
     }
