@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin>
+  <extension point="org.eclipse.m2e.core.lifecycleMappings">
+    <lifecycleMapping id="unknown-or-missing" name="unknown-or-missing" class="unknown-or-missing"></lifecycleMapping>
+  </extension>
+</plugin>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin>
+  <extension point="org.eclipse.m2e.core.projectConfigurators">
+    <configurator id="a.configurator-id" name="a.configurator-id" class="a.configurator-id"></configurator>
+  </extension>
+</plugin>
