@@ -283,7 +283,7 @@ public class LifecycleMappingDiscoveryTest extends AbstractLifecycleMappingTest 
     // sanity check
     assertEquals(1, request.getProjects().size());
     assertFalse("Expected an incomplete mapping", request.isMappingComplete());
-    assertEquals("Unexpected requirements number", 3, request.getRequirements().size());
+    assertEquals("Unexpected requirements number", 2, request.getRequirements().size());
 
     MavenDiscoveryService srv = new MavenDiscoveryService();
 
@@ -309,7 +309,7 @@ public class LifecycleMappingDiscoveryTest extends AbstractLifecycleMappingTest 
     Map<ILifecycleMappingRequirement, List<IMavenDiscoveryProposal>> proposals = srv.discover(
         request.getRequirements(), null, monitor);
 
-    assertEquals(1, proposals.size());
+    assertEquals(2, proposals.size()); // two different mojo executions
 
     assertSame(items.get(0),
         ((InstallCatalogItemMavenDiscoveryProposal) proposals.get(configurator).get(0)).getCatalogItem());

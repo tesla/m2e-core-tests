@@ -43,9 +43,9 @@ public class MavenDiscoveryMarkerResolutionGeneratorTest extends AbstractLifecyc
     IProject project = facade.getProject();
 
     List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
-    assertEquals("Error markers", 2, errorMarkers.size());
+    assertEquals("Error markers", 1, errorMarkers.size());
 
-    String expectedErrorMessage = "Project configurator \"no such project configurator id for test-lifecyclemapping-plugin:test-goal-for-eclipse-extension2 - embedded from pom\" is not available. To enable full functionality, install the project configurator and run Maven->Update Project Configuration.";
+    String expectedErrorMessage = "Project configurator \"no such project configurator id for test-lifecyclemapping-plugin:test-goal-for-eclipse-extension2 - embedded from pom\" required by plugin execution \"org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-for-eclipse-extension2 (execution: default-test-goal-for-eclipse-extension2, phase: compile)\" is not available. To enable full functionality, install the project configurator and run Maven->Update Project Configuration.";
     IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID,
         expectedErrorMessage, null /*lineNumber*/, project);
     WorkspaceHelpers
