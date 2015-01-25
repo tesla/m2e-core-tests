@@ -88,4 +88,23 @@ public class ManagedArtifactMarkerTest extends AbstractMavenProjectTestCase {
     copyContent(project, "pom_good.xml", "pom.xml");
     XmlEditorHelpers.assertNoEditorHintWarningMarkers(project);
   }
+  
+  public void test355882_noMarkerOnDifferentClassifier() throws Exception {
+	    IProject project = importProject("projects/355882/test1/pom.xml");
+	    waitForJobsToComplete();
+	    XmlEditorHelpers.assertNoEditorHintWarningMarkers(project);
+  }
+
+  public void test355882_MarkerOnClassifierVersionOverride() throws Exception {
+	    IProject project = importProject("projects/355882/test2/pom.xml");
+	    waitForJobsToComplete();
+	    
+	    IMarker[] markers = XmlEditorHelpers.findEditorHintWarningMarkers(project).toArray(new IMarker[0]);
+	    assertEquals(1, markers.length);
+
+	    XmlEditorHelpers.assertEditorHintWarningMarker(IMavenConstants.MARKER_POM_LOADING_ID,
+	        IMavenConstants.EDITOR_HINT_MANAGED_DEPENDENCY_OVERRIDE, null /* message */, 12 /* lineNumber */,
+	        2 /* resolutions */, markers[0]);
+
+  }
 }
