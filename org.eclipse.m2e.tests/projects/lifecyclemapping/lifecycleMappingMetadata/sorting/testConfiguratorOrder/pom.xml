@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.eclipse.m2e.test</groupId>
+		<artifactId>m2e-test-parent</artifactId>
+		<version>1.0.0</version>
+	</parent>
+
+	<groupId>lifecycleMappingMetadataTests</groupId>
+	<artifactId>testConfigurationOrder</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<lifecycleMappings>
+								<lifecycleMapping>
+									<packagingType>jar</packagingType>
+									<lifecycleMappingId>org.eclipse.m2e.jdt.JarLifecycleMapping</lifecycleMappingId>
+									<pluginExecutions>
+										<pluginExecution>
+											<pluginExecutionFilter>
+												<groupId>org.apache.maven.plugins</groupId>
+												<artifactId>maven-compiler-plugin</artifactId>
+												<versionRange>[2.0,)</versionRange>
+												<goals>
+													<goal>compile</goal>
+												</goals>
+											</pluginExecutionFilter>
+											<action>
+												<configurator>
+													<id>org.eclipse.m2e.configurator.testsecondary6</id>
+												</configurator>
+											</action>
+										</pluginExecution>
+										<pluginExecution>
+											<pluginExecutionFilter>
+												<groupId>org.apache.maven.plugins</groupId>
+												<artifactId>maven-compiler-plugin</artifactId>
+												<versionRange>[2.0,)</versionRange>
+												<goals>
+													<goal>compile</goal>
+												</goals>
+											</pluginExecutionFilter>
+											<action>
+												<configurator>
+													<id>org.eclipse.m2e.configurator.testsecondary5</id>
+												</configurator>
+											</action>
+										</pluginExecution>
+										<pluginExecution>
+											<pluginExecutionFilter>
+												<groupId>org.apache.maven.plugins</groupId>
+												<artifactId>maven-compiler-plugin</artifactId>
+												<versionRange>[2.0,)</versionRange>
+												<goals>
+													<goal>compile</goal>
+												</goals>
+											</pluginExecutionFilter>
+											<action>
+												<configurator>
+													<id>org.eclipse.m2e.configurator.testsecondary3</id>
+												</configurator>
+											</action>
+										</pluginExecution>
+										<pluginExecution>
+											<pluginExecutionFilter>
+												<groupId>org.apache.maven.plugins</groupId>
+												<artifactId>maven-compiler-plugin</artifactId>
+												<versionRange>[2.0,)</versionRange>
+												<goals>
+													<goal>compile</goal>
+												</goals>
+											</pluginExecutionFilter>
+											<action>
+												<configurator>
+													<id>org.eclipse.m2e.configurator.testsecondary4</id>
+												</configurator>
+											</action>
+										</pluginExecution>
+
+
+
+
+									</pluginExecutions>
+								</lifecycleMapping>
+							</lifecycleMappings>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+</project>
