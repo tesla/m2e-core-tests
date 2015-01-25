@@ -19,11 +19,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.JavaCore;
+
+import org.codehaus.plexus.util.IOUtil;
 
 import org.eclipse.m2e.core.internal.IMavenConstants;
 import org.eclipse.m2e.core.internal.lifecyclemapping.DefaultLifecycleMapping;
@@ -721,6 +724,17 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
       ((MavenConfigurationImpl) mavenConfiguration).setNotCoveredMojoExecutionSeverity(originalSeverity);
     }
 
+  }
+
+  public void testOrder() throws Exception {
+    IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/lifecycleMappingMetadata/sorting/",
+        "testConfiguratorOrder/pom.xml");
+    WorkspaceHelpers.assertNoErrors(facade.getProject());
+
+    IFile log = facade.getProject().getFile("target/configurator-log.txt");
+    assertTrue(log.getFullPath() + " is missing", log.exists());
+    String order = IOUtil.toString(log.getContents(true));
+    assertEquals("TEST_SECONDARY3,TEST_SECONDARY4,TEST_SECONDARY6,TEST_SECONDARY5", order);
   }
 
 }

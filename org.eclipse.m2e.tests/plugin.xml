@@ -59,7 +59,34 @@
             class="org.eclipse.m2e.tests.configurators.TestProjectConfigurator"
             id="org.eclipse.m2e.configurator.testsecondary2"
             name="TEST_SECONDARY2"
-            secondaryTo="org.eclipse.m2e.configurator.test">
+            runsAfter="org.eclipse.m2e.configurator.test">
+      </configurator>
+      
+      <!-- Test configurators order-->
+      <configurator
+            class="org.eclipse.m2e.tests.configurators.TestProjectConfigurator3"
+            id="org.eclipse.m2e.configurator.testsecondary3"
+            name="TEST_SECONDARY3"
+            runsAfter="org.eclipse.m2e.jdt.javaConfigurator, some.missing.configurator?">
+      </configurator>
+      <configurator
+            class="org.eclipse.m2e.tests.configurators.TestProjectConfigurator3"
+            id="org.eclipse.m2e.configurator.testsecondary4"
+            name="TEST_SECONDARY4"
+            runsAfter="org.eclipse.m2e.configurator.testsecondary3"
+            runsBefore="org.eclipse.m2e.configurator.testsecondary6">
+      </configurator>
+      <configurator
+            class="org.eclipse.m2e.tests.configurators.TestProjectConfigurator3"
+            id="org.eclipse.m2e.configurator.testsecondary5"
+            name="TEST_SECONDARY5"
+            runsAfter="org.eclipse.m2e.configurator.testsecondary4,org.eclipse.m2e.configurator.testsecondary6">
+      </configurator>
+      <configurator
+            class="org.eclipse.m2e.tests.configurators.TestProjectConfigurator3"
+            id="org.eclipse.m2e.configurator.testsecondary6"
+            name="TEST_SECONDARY6"
+            runsBefore="some.missing.configurator">
       </configurator>
       <configurator
             class="org.eclipse.m2e.tests.jdt.TestJavaCodeGenerationProjectConfigurator"
