@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>test</groupId>
+  <artifactId>442560</artifactId>
+  <packaging>jar</packaging>
+  <version>1.0</version>
+  
+  <!--
+  <pluginRepositories>
+    <pluginRepository>
+      <id>takari-snapshots</id>
+      <url>https://otto.takari.io/content/repositories/snapshots</url>
+      <snapshots><enabled>true</enabled></snapshots>
+    </pluginRepository>
+  </pluginRepositories>
+  -->
+  
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>2.4</version>
+          <configuration>
+            <archive>
+              <manifestSections>
+                <manifestSection></manifestSection>
+                <anyItemName></anyItemName>
+              </manifestSections>
+            </archive>
+            <blablabla>
+              <anything implementation="org.apache.maven.artifact.Artifact">
+                <availableVersions></availableVersions>
+              </anything>
+            </blablabla>
+          </configuration>
+          <executions>
+            <execution>
+              <goals>
+                <goal>help</goal>
+              </goals>
+              <configuration>
+                <detail/>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <!-- 
+        <plugin>
+          <groupId>io.takari.maven.plugins</groupId>
+          <artifactId>takari-lifecycle-plugin</artifactId>
+          <version>1.11.0-SNAPSHOT</version>
+          <configuration>
+            <deploy></deploy>
+          </configuration>
+        </plugin>
+        -->
+      </plugins>
+    </pluginManagement>
+  </build>
+  
+  
+</project>
