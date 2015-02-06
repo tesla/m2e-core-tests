@@ -75,7 +75,7 @@ public class PluginConfigCompletionTest extends AbstractCompletionTest {
 
       PomContentAssistProcessor processor = new PomContentAssistProcessor(sourceViewer);
       ICompletionProposal[] proposals = processor.computeCompletionProposals(sourceViewer, offset);
-      assertEquals("Proposal count", 9 + 2, proposals.length);
+      assertEquals("Proposal count", 10 + 2, proposals.length);
   }
   
   public void testListItemNameCompletion() throws Exception {
@@ -99,9 +99,10 @@ public class PluginConfigCompletionTest extends AbstractCompletionTest {
 
       PomContentAssistProcessor processor = new PomContentAssistProcessor(sourceViewer);
       ICompletionProposal[] proposals = processor.computeCompletionProposals(sourceViewer, offset);
-      assertEquals("Proposal count", 1 + 2, proposals.length);
+      assertEquals("Proposal count", 2 + 2, proposals.length);
       
-      assertEquals("List item proposal", "name", proposals[0].getDisplayString());
+      assertEquals("List item proposal", "manifestEntries", proposals[0].getDisplayString());
+      assertEquals("List item proposal", "name", proposals[1].getDisplayString());
   }
   
   public void testAnyListItemNameParameterCompletion() throws Exception {
@@ -112,9 +113,10 @@ public class PluginConfigCompletionTest extends AbstractCompletionTest {
 
       PomContentAssistProcessor processor = new PomContentAssistProcessor(sourceViewer);
       ICompletionProposal[] proposals = processor.computeCompletionProposals(sourceViewer, offset);
-      assertEquals("Proposal count", 1 + 2, proposals.length);
+      assertEquals("Proposal count", 2 + 2, proposals.length);
       
-      assertEquals("List item proposal", "name", proposals[0].getDisplayString());
+      assertEquals("List item proposal", "manifestEntries", proposals[0].getDisplayString());
+      assertEquals("List item proposal", "name", proposals[1].getDisplayString());
   }
   
   public void testUnknownContentCompletion() throws Exception {
@@ -136,7 +138,7 @@ public class PluginConfigCompletionTest extends AbstractCompletionTest {
 
       PomContentAssistProcessor processor = new PomContentAssistProcessor(sourceViewer);
       ICompletionProposal[] proposals = processor.computeCompletionProposals(sourceViewer, offset);
-      assertEquals("Proposal count", 17+2, proposals.length);
+      assertEquals("Proposal count", 18+2, proposals.length);
   }
   
   public void testImplementationListItemNameCompletion() throws Exception {
