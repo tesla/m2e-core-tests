@@ -7,16 +7,6 @@
   <packaging>jar</packaging>
   <version>1.0</version>
   
-  <!--
-  <pluginRepositories>
-    <pluginRepository>
-      <id>takari-snapshots</id>
-      <url>https://otto.takari.io/content/repositories/snapshots</url>
-      <snapshots><enabled>true</enabled></snapshots>
-    </pluginRepository>
-  </pluginRepositories>
-  -->
-  
   <build>
     <pluginManagement>
       <plugins>
@@ -32,7 +22,7 @@
               </manifestSections>
             </archive>
             <blablabla>
-              <anything implementation="org.apache.maven.artifact.Artifact">
+              <anything implementation="org.apache.maven.artifact.DefaultArtifact">
                 <availableVersions></availableVersions>
               </anything>
             </blablabla>
@@ -48,16 +38,39 @@
             </execution>
           </executions>
         </plugin>
-        <!-- 
         <plugin>
-          <groupId>io.takari.maven.plugins</groupId>
-          <artifactId>takari-lifecycle-plugin</artifactId>
-          <version>1.11.0-SNAPSHOT</version>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
           <configuration>
-            <deploy></deploy>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-ear-plugin</artifactId>
+                    <versionRange>[1.0,)</versionRange>
+                    <goals>
+                        <goal>generate-application-xml</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <execute>
+                    </execute>
+                  </action>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
           </configuration>
         </plugin>
-        -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-ear-plugin</artifactId>
+          <version>2.8</version>
+          <configuration>
+            <modules></modules>
+          </configuration>
+        </plugin>
       </plugins>
     </pluginManagement>
   </build>
