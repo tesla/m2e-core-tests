@@ -339,7 +339,12 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
     }
   }
 
-  public void testSslWithMutualHandshake() throws Exception {
+  // Standard JDK SSL implementation reads javax.net.ssl.keyStore/trustStore system properties once and
+  // ignores all subsequent properties value changes. Because of this limitation, this test cannot be run 
+  // together with any other code that uses SSL, which is impractical. DISABLED the tests to avoid false
+  // automated test failures, but we can still run the test manually if there are any concerns about
+  // javax.net.ssl.keyStore/trustStore system properties support.
+  public void DISABLED_testSslWithMutualHandshake() throws Exception {
     FileHelpers.deleteDirectory(new File("target/localrepo/org/eclipse/m2e/its/mngeclipse-2149"));
 
     HttpServer httpServer = new HttpServer();
