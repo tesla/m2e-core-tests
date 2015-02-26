@@ -1426,4 +1426,25 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
 
   }
 
+  public void test460983_parentVersionRange() throws Exception {
+    mavenConfiguration.setUserSettingsFile(new File("settings-filex.xml").getCanonicalPath());
+    injectFilexWagon();
+
+    FilexWagon.setRequestFilterPattern("460983_parentVersionRange/.*pom", true);
+
+    IProject[] projects = importProjects("projects/460983_parentVersionRange", new String[] {"pom.xml",
+        "module/pom.xml"}, new ResolverConfiguration());
+    waitForJobsToComplete();
+    assertNoErrors(projects[0]);
+    assertNoErrors(projects[1]);
+
+    assertTrue(FilexWagon.getRequests().isEmpty());
+
+    MavenUpdateRequest request = new MavenUpdateRequest(projects[1], false, true);
+    manager.refresh(request, monitor); // shouldn't throw any exceptions
+    assertNoErrors(projects[1]);
+
+    assertTrue(FilexWagon.getRequests().isEmpty());
+  }
+
 }

@@ -12,8 +12,10 @@
 package org.eclipse.m2e.tests;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -22,8 +24,10 @@ import org.eclipse.core.resources.IProject;
 import org.apache.maven.project.MavenProject;
 
 import org.eclipse.m2e.core.MavenPlugin;
+import org.eclipse.m2e.core.embedder.ArtifactKey;
 import org.eclipse.m2e.core.embedder.IMaven;
 import org.eclipse.m2e.core.internal.project.registry.Capability;
+import org.eclipse.m2e.core.internal.project.registry.IProjectRegistry;
 import org.eclipse.m2e.core.internal.project.registry.MavenProjectFacade;
 import org.eclipse.m2e.core.internal.project.registry.MutableProjectRegistry;
 import org.eclipse.m2e.core.internal.project.registry.ProjectRegistry;
@@ -113,7 +117,7 @@ public class MutableProjectRegistryTest extends AbstractMavenProjectTestCase {
     delta.removeProject(f1.getPom(), f1.getArtifactKey());
 
     assertNull(delta.getProjectFacade(f1.getPom()));
-    assertNull(delta.getWorkspaceArtifact(f1.getArtifactKey()));
+    assertTrue(getWorkspaceArtifacts(delta, f1.getArtifactKey()).isEmpty());
 
     assertEquals(0, delta.getProjects().length);
     assertSame(f1, state.getProjects()[0]);
@@ -121,13 +125,17 @@ public class MutableProjectRegistryTest extends AbstractMavenProjectTestCase {
     List<MavenProjectChangedEvent> events = state.apply(delta);
 
     assertNull(state.getProjectFacade(f1.getPom()));
-    assertNull(state.getWorkspaceArtifact(f1.getArtifactKey()));
+    assertTrue(getWorkspaceArtifacts(state, f1.getArtifactKey()).isEmpty());
     assertEquals(0, state.getProjects().length);
 
     assertEquals(1, events.size());
     assertEquals(MavenProjectChangedEvent.KIND_REMOVED, events.get(0).getKind());
     assertSame(f1, events.get(0).getOldMavenProject());
     assertNull(events.get(0).getMavenProject());
+  }
+
+  private Map<ArtifactKey, Collection<IFile>> getWorkspaceArtifacts(IProjectRegistry state, ArtifactKey artifact) {
+    return state.getWorkspaceArtifacts(artifact.getGroupId(), artifact.getArtifactId());
   }
 
   public void testRemoveUnknownProject() throws Exception {
