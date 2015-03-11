@@ -258,7 +258,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     WorkspaceHelpers
         .assertErrorMarker(
             IMavenConstants.MARKER_POM_LOADING_ID,
-            "Project build error: Non-resolvable parent POM: Could not find artifact t001:t001-p3:pom:0.0.1-SNAPSHOT in central (file:repositories/remoterepo) and 'parent.relativePath' points at wrong local POM",
+            "Project build error: Non-resolvable parent POM for t001:t001-p2:[unknown-version]: Could not find artifact t001:t001-p3:pom:0.0.1-SNAPSHOT in central (file:repositories/remoterepo) and 'parent.relativePath' points at wrong local POM",
             6 /*lineNumber*/, p2);
 
     IProject p3 = createExisting("t001-p3");
@@ -1174,13 +1174,11 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
       setChecksumPolicy(ArtifactRepositoryPolicy.CHECKSUM_POLICY_FAIL);
       IProject project = importProject("projects/418674_ChecksumPolicy/checksum-test/pom.xml");
       IJavaProject javaProject = JavaCore.create(project);
-      List<IMarker> errors = findErrorMarkers(project);
-      assertEquals(toString(errors), 1, errors.size());
-      assertTrue(errors.get(0).getAttribute(IMarker.MESSAGE, null).contains("Checksum validation failed"));
+      assertHasMarker(project, IMavenConstants.MARKER_DEPENDENCY_ID, "Checksum validation failed");
 
       IClasspathEntry[] cp;
       cp = BuildPathManager.getMaven2ClasspathContainer(javaProject).getClasspathEntries();
-      ClasspathHelpers.assertClasspath(new String[0], cp);
+      ClasspathHelpers.assertClasspath(new String[] {".*bad-checksum-0.0.1-SNAPSHOT.jar"}, cp);
 
       setChecksumPolicy(ArtifactRepositoryPolicy.CHECKSUM_POLICY_WARN);
 
@@ -1197,6 +1195,17 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     }
   }
 
+  private void assertHasMarker(IProject project, String type, String messageSubstring) throws CoreException {
+    IMarker[] markers = project.findMarkers(type, true /*subtypes*/, IResource.DEPTH_INFINITE);
+    for(IMarker marker : markers) {
+      String message = marker.getAttribute(IMarker.MESSAGE, "");
+      if(message.contains(messageSubstring)) {
+        return;
+      }
+    }
+    fail("Expected markers not found, found messages " + toString(markers));
+  }
+
   public void test418674_ChecksumPolicyWarn() throws Exception {
     // clean local repo
     FileUtils.deleteDirectory(new File(repo, "org/eclipse/m2e/test/bad-checksum"));
@@ -1208,13 +1217,11 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
       //repo is configured to fail if checksums don't match
       IProject project = importProject("projects/418674_ChecksumPolicy/checksum-test2/pom.xml");
       IJavaProject javaProject = JavaCore.create(project);
-      List<IMarker> errors = findErrorMarkers(project);
-      assertEquals(toString(errors), 1, errors.size());
-      assertTrue(errors.get(0).getAttribute(IMarker.MESSAGE, null).contains("Checksum validation failed"));
+      assertHasMarker(project, IMavenConstants.MARKER_DEPENDENCY_ID, "Checksum validation failed");
 
       IClasspathEntry[] cp;
       cp = BuildPathManager.getMaven2ClasspathContainer(javaProject).getClasspathEntries();
-      ClasspathHelpers.assertClasspath(new String[0], cp);
+      ClasspathHelpers.assertClasspath(new String[] {".*bad-checksum-0.0.1-SNAPSHOT.jar"}, cp);
 
       //Override specific repo config
       setChecksumPolicy(ArtifactRepositoryPolicy.CHECKSUM_POLICY_WARN);
@@ -1361,9 +1368,6 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     ClassRealm extensionRealm = world
         .getRealm("extension>org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0");
     assertNotNull(extensionRealm);
-    ClassRealm pluginRealm = world
-        .getRealm("plugin>org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0");
-    assertNotNull(pluginRealm);
 
     MavenUpdateRequest request = new MavenUpdateRequest(project, false, true);
     manager.refresh(request, monitor);
@@ -1375,8 +1379,6 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertNotSame(projectRealm, mavenProject.getClassRealm());
     assertNotSame(extensionRealm,
         world.getRealm("extension>org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0"));
-    assertNotSame(pluginRealm,
-        world.getRealm("plugin>org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0"));
   }
 
   public void test441257_stalePluginRealms_withParent() throws Exception {
@@ -1393,9 +1395,6 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     ClassRealm extensionRealm = world
         .getRealm("extension>org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0");
     assertNotNull(extensionRealm);
-    ClassRealm pluginRealm = world
-        .getRealm("plugin>org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0");
-    assertNotNull(pluginRealm);
 
     MavenUpdateRequest request = new MavenUpdateRequest(project, false, true);
     manager.refresh(request, monitor);
@@ -1407,8 +1406,6 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertNotSame(projectRealm, mavenProject.getClassRealm());
     assertNotSame(extensionRealm,
         world.getRealm("extension>org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0"));
-    assertNotSame(pluginRealm,
-        world.getRealm("plugin>org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0"));
   }
 
   public void test453995_dependencyManagementVersionless() throws Exception {
