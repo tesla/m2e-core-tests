@@ -215,6 +215,17 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     assertNoErrors(project);
   }
 
+  public void testAutomaticUpdateProjectConfigurationMarker() throws Exception {
+    setAutoBuilding(true);
+    setAutomaticallyUpdateConfiguration(true);
+    IProject project = importProject("projects/staleconfiguration/basic/pom.xml");
+    assertNoErrors(project);
+
+    copyContent(project, new File("projects/staleconfiguration/basic/pom-changed.xml"), "pom.xml");
+
+    assertNoErrors(project);
+  }
+
   public void testStaleProjectConfigurationMarkerAfterFixingMissingBuildExtension() throws Exception {
     IProject project = importProjects("projects/staleconfiguration/missingextension", new String[] {"pom.xml"},
         new ResolverConfiguration(), true)[0];
