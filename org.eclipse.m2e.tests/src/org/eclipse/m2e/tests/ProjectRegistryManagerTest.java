@@ -1444,4 +1444,15 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertTrue(FilexWagon.getRequests().isEmpty());
   }
 
+  public void test463075_extensionAndPluginRealm() throws Exception {
+    IProject[] projects = importProjects("projects/463075_extensionAndPluginRealm", new String[] {
+        "extension-and-plugin/pom.xml", "extension-only/pom.xml"}, new ResolverConfiguration());
+    waitForJobsToComplete();
+    assertNoErrors(projects[0]);
+    assertNoErrors(projects[1]);
+
+    MavenUpdateRequest request = new MavenUpdateRequest(projects[0], false, false);
+    manager.refresh(request, monitor);
+    assertNoErrors(projects[0]);
+  }
 }
