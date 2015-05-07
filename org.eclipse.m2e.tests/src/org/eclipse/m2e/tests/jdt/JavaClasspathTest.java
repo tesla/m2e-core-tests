@@ -26,6 +26,7 @@ import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.jdt.IClasspathManager;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
+import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
 
 public class JavaClasspathTest extends AbstractMavenProjectTestCase {
@@ -42,9 +43,9 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     assertEquals(5, cp.length);
     assertEquals("/customclasspath-p001/src/main/java", cp[0].getPath().toPortableString()); // <= main sources
     assertEquals("/customclasspath-p001/src/main/java2", cp[1].getPath().toPortableString()); // <= custom entry
-    assertEquals("org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER", cp[2].getPath().segment(0));
-    assertEquals("/customclasspath-p001/src/test/java", cp[3].getPath().toPortableString()); // <= test sources
-    assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", cp[4].getPath().segment(0));
+    assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", cp[2].getPath().segment(0));
+    assertEquals("org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER", cp[3].getPath().segment(0));
+    assertEquals("/customclasspath-p001/src/test/java", cp[4].getPath().toPortableString()); // <= test sources
   }
 
   public void testStaleDerivedEntries() throws Exception {
@@ -67,9 +68,9 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     // this results in unexpected classpath order, i.e. compile sources appear *after* test sources in some cases
 
     assertEquals("/customclasspath-p001/src/main/java2", cp[0].getPath().toPortableString()); // <= custom entry
-    assertEquals("org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER", cp[1].getPath().segment(0));
-    assertEquals("/customclasspath-p001/src/test/java", cp[2].getPath().toPortableString()); // <= test sources
-    assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", cp[3].getPath().segment(0));
+    assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", cp[1].getPath().segment(0));
+    assertEquals("org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER", cp[2].getPath().segment(0));
+    assertEquals("/customclasspath-p001/src/test/java", cp[3].getPath().toPortableString()); // <= test sources
     assertEquals("/customclasspath-p001/src/main/java3", cp[4].getPath().toPortableString()); // <= main sources
   }
 
@@ -83,11 +84,11 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     assertEquals(5, cp.length);
 
     assertClasspath(new String[] {//
-        "org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER",//
+        "org.eclipse.jdt.launching.JRE_CONTAINER/.*",//
+            "org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER",//
             "container1",//
             "/customclasspath-classpath-containers/src/main/java", //
-            "/customclasspath-classpath-containers/src/test/java", //
-            "org.eclipse.jdt.launching.JRE_CONTAINER/.*"//            
+            "/customclasspath-classpath-containers/src/test/java" //
         }, cp);
 
     Assert
@@ -130,11 +131,11 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     assertEquals(5, cp.length);
 
     assertClasspath(new String[] {//
-        "org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER",//
+        "org.eclipse.jdt.launching.JRE_CONTAINER/.*",//
+            "org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER",//
             "container1",//
             "/orderOf-classpath-containers/src/main/java", //
-            "/orderOf-classpath-containers/src/test/java", //
-            "org.eclipse.jdt.launching.JRE_CONTAINER/.*"//            
+            "/orderOf-classpath-containers/src/test/java" //
         }, cp);
 
     // Simulate user changes the order or the classpath entries. The order should be preserved during update if nothing changes in the pom.xml
@@ -152,11 +153,11 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     assertEquals(5, cp.length);
 
     assertClasspath(new String[] {//
-        "/orderOf-classpath-containers/src/main/java", //
-            "/orderOf-classpath-containers/src/test/java", //
-            "container1",//
-            "org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER",//               
-            "org.eclipse.jdt.launching.JRE_CONTAINER/.*"//            
+        "container1",//
+            "/orderOf-classpath-containers/src/main/java", //
+            "org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER",//
+            "org.eclipse.jdt.launching.JRE_CONTAINER/.*",//
+            "/orderOf-classpath-containers/src/test/java" //
         }, cp);
 
     // Simulate another change to the classpath
@@ -174,11 +175,11 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     assertEquals(5, cp.length);
 
     assertClasspath(new String[] {//
-        "/orderOf-classpath-containers/src/main/java", //
-            "/orderOf-classpath-containers/src/test/java", //
+        "container1",//
+            "/orderOf-classpath-containers/src/main/java", //
+            "org.eclipse.jdt.launching.JRE_CONTAINER/.*",//
             "org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER",//
-            "container1",//
-            "org.eclipse.jdt.launching.JRE_CONTAINER/.*"//            
+            "/orderOf-classpath-containers/src/test/java" //
         }, cp);
 
   }
@@ -212,6 +213,34 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
 
     assertEquals(1, junit.getAccessRules().length);
     assertEquals("foo/bar/**", junit.getAccessRules()[0].getPattern().toPortableString());
+  }
+
+  public void test466518_classpathJREOrder() throws Exception {
+    IProject project = importProject("projects/466518_classpathJREOrder/pom.xml");
+    WorkspaceHelpers.assertNoErrors(project);
+
+    IClasspathEntry[] cp = JavaCore.create(project).getRawClasspath();
+
+    assertClasspath(new String[] {//
+        "/466518-project/src/main/java", //
+            "/466518-project/src/test/java", //
+            "org.eclipse.jdt.launching.JRE_CONTAINER/.*",//
+            "org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER",//
+        }, cp);
+
+    copyContent(project, "pom_changed.xml", "pom.xml");
+    MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
+    waitForJobsToComplete();
+    WorkspaceHelpers.assertNoErrors(project);
+
+    cp = JavaCore.create(project).getRawClasspath();
+
+    assertClasspath(new String[] {//
+        "/466518-project/src/main/java", //
+            "/466518-project/src/test/java", //
+            "org.eclipse.jdt.launching.JRE_CONTAINER/.*",//
+            "org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER",//
+        }, cp);
   }
 
 }
