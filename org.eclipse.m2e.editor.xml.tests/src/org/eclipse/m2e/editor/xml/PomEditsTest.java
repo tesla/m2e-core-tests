@@ -11,14 +11,20 @@
 
 package org.eclipse.m2e.editor.xml;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits;
+import org.eclipse.m2e.editor.pom.ElementValueProvider;
 import org.eclipse.m2e.editor.xml.internal.XmlUtils;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.wst.sse.core.StructuredModelManager;
+import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.sse.core.internal.provisional.IndexedRegion;
+import org.eclipse.wst.xml.core.internal.XMLCorePlugin;
+import org.eclipse.wst.xml.core.internal.preferences.XMLCorePreferenceNames;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 
@@ -42,4 +48,49 @@ public class PomEditsTest extends AbstractMavenProjectTestCase {
       model.releaseFromRead();
     }
   }
+  
+  public void test467590_emptyPom() throws Exception {
+    
+    // default config for xml formatter
+    XMLCorePlugin.getDefault().getPluginPreferences().setValue(XMLCorePreferenceNames.INDENTATION_CHAR, XMLCorePreferenceNames.SPACE);
+    XMLCorePlugin.getDefault().getPluginPreferences().setValue(XMLCorePreferenceNames.INDENTATION_SIZE, 4);
+    
+    IProject project = importProject("projects/467590_emptyPom/pom.xml");
+    
+    PomEdits.performOnDOMDocument(new PomEdits.OperationTuple(project.getFile("test1/pom.xml"), new PomEdits.Operation() {
+      public void process(Document document) {
+        ElementValueProvider provider = new ElementValueProvider(PomEdits.GROUP_ID);
+        Element el = provider.get(document);
+        PomEdits.setText(el, "test1");
+      }
+    }));
+    
+    assertContentsEqual(project.getFile("test1/result_pom.xml"), project.getFile("test1/pom.xml"));
+    
+    PomEdits.performOnDOMDocument(new PomEdits.OperationTuple(project.getFile("test2/pom.xml"), new PomEdits.Operation() {
+      public void process(Document document) {
+        ElementValueProvider provider = new ElementValueProvider(PomEdits.GROUP_ID);
+        Element el = provider.get(document);
+        PomEdits.setText(el, "test2");
+      }
+    }));
+    
+    assertContentsEqual(project.getFile("test2/result_pom.xml"), project.getFile("test2/pom.xml"));
+  }
+  
+  private void assertContentsEqual(IFile expected, IFile actual) throws Exception {
+    String expectedContent = getContent(expected);
+    String actualContent = getContent(actual);
+    assertEquals(expectedContent, actualContent);
+  }
+
+  private String getContent(IFile file) throws Exception{
+    IStructuredModel model = StructuredModelManager.getModelManager().getModelForRead(file);
+    try {
+      return model.getStructuredDocument().get();
+    } finally {
+      model.releaseFromRead();
+    }
+  }
+
 }
