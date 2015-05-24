@@ -52,8 +52,8 @@ public class PluginConfigCompletionTest extends AbstractCompletionTest {
       PomContentAssistProcessor processor = new PomContentAssistProcessor(sourceViewer);
       ICompletionProposal[] proposals = processor.computeCompletionProposals(sourceViewer, offset);
       
-      // 30 parameter proposals, 2 = cdata and processing instr, 1 = wst xml editor thinks that you can also put <project> under <configuration>
-      assertEquals("Proposal count", 30 + 3, proposals.length);
+      // 32 parameter proposals, 2 = cdata and processing instr, 1 = wst xml editor thinks that you can also put <project> under <configuration>
+      assertEquals("Proposal count", 32 + 3, proposals.length);
   }
 
   public void testSingleMojoCompletion() throws Exception {
@@ -201,4 +201,20 @@ public class PluginConfigCompletionTest extends AbstractCompletionTest {
       assertEquals("Execute proposal", "runOnIncremental", proposals[1].getDisplayString());
 
   }
+  
+  public void testMetadataExtension() throws Exception {
+      initViewer();
+      
+      String docString = sourceViewer.getDocument().get();
+      int offset = docString.indexOf("<test1/>");
+
+      PomContentAssistProcessor processor = new PomContentAssistProcessor(sourceViewer);
+      ICompletionProposal[] proposals = processor.computeCompletionProposals(sourceViewer, offset);
+      
+      assertEquals("Proposal count", 2 + 3, proposals.length);
+      assertEquals("Extension test1", "test1", proposals[0].getDisplayString());
+      assertEquals("Extension test2", "test2", proposals[1].getDisplayString());
+  }
+
+
 }

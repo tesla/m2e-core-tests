@@ -71,6 +71,14 @@
             <modules></modules>
           </configuration>
         </plugin>
+        <plugin>
+          <groupId>test</groupId>
+          <artifactId>plugin</artifactId>
+          <version>1.0</version>
+          <configuration>
+            <test1/>
+          </configuration>
+        </plugin>
       </plugins>
     </pluginManagement>
   </build>
