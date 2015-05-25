@@ -139,6 +139,25 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     assertFalse(marker.getId() == newMarker.getId());
   }
 
+  public void testManagedTransitive() throws Exception {
+    // Import project with a managed transitive dependency problem
+    IProject project = createExisting("markerTest", "projects/markers/testManagedTransitive");
+    waitForJobsToComplete();
+    assertNotNull("Expected not null project", project);
+    IMavenProjectFacade facade = MavenPluginActivator.getDefault().getMavenProjectManagerImpl()
+        .create(project, monitor);
+    assertNotNull("Expected not null MavenProjectFacade", facade);
+
+    String expectedErrorMessage = "Missing artifact commons-logging:commons-logging:jar:100";
+    List<IMarker> markers = WorkspaceHelpers.findErrorMarkers(project);
+    // (jdt) The container 'Maven Dependencies' references non existing library ...commons-logging/commons-logging/100/commons-logging-100.jar'
+    // (maven) Missing artifact commons-logging:commons-logging:jar:100
+    assertEquals(WorkspaceHelpers.toString(markers), 2, markers.size());
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_DEPENDENCY_ID, expectedErrorMessage, 10 /*lineNumber*/,
+        project);
+
+  }
+
   public void testBuildContextWithOneProjectConfigurator() throws Exception {
     IProject project = createExisting("markerTest", "projects/markers/testBuildContextWithOneProjectConfigurator");
     waitForJobsToComplete();
