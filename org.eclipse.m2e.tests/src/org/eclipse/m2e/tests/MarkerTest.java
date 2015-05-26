@@ -44,8 +44,8 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     IProject project = createExisting("markerTest", "projects/markers/testWorkflow");
     waitForJobsToComplete();
     assertNotNull("Expected not null project", project);
-    IMavenProjectFacade facade = MavenPluginActivator.getDefault().getMavenProjectManagerImpl()
-        .create(project, monitor);
+    IMavenProjectFacade facade = MavenPluginActivator.getDefault().getMavenProjectManagerImpl().create(project,
+        monitor);
     assertNull("Expected null MavenProjectFacade", facade);
     String expectedErrorMessage = "Project build error: Non-readable POM ";
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_POM_LOADING_ID, expectedErrorMessage, 1 /*lineNumber*/,
@@ -144,8 +144,8 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     IProject project = createExisting("markerTest", "projects/markers/testManagedTransitive");
     waitForJobsToComplete();
     assertNotNull("Expected not null project", project);
-    IMavenProjectFacade facade = MavenPluginActivator.getDefault().getMavenProjectManagerImpl()
-        .create(project, monitor);
+    IMavenProjectFacade facade = MavenPluginActivator.getDefault().getMavenProjectManagerImpl().create(project,
+        monitor);
     assertNotNull("Expected not null MavenProjectFacade", facade);
 
     String expectedErrorMessage = "Missing artifact commons-logging:commons-logging:jar:100";
@@ -156,14 +156,23 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_DEPENDENCY_ID, expectedErrorMessage, 10 /*lineNumber*/,
         project);
 
+    copyContent(project, "pom_imported.xml", "pom.xml");
+    MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
+    waitForJobsToComplete();
+
+    // same as before
+    markers = WorkspaceHelpers.findErrorMarkers(project);
+    assertEquals(WorkspaceHelpers.toString(markers), 2, markers.size());
+    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_DEPENDENCY_ID, expectedErrorMessage, 11 /*lineNumber*/,
+        project);
   }
 
   public void testBuildContextWithOneProjectConfigurator() throws Exception {
     IProject project = createExisting("markerTest", "projects/markers/testBuildContextWithOneProjectConfigurator");
     waitForJobsToComplete();
     assertNotNull("Expected not null project", project);
-    IMavenProjectFacade facade = MavenPluginActivator.getDefault().getMavenProjectManagerImpl()
-        .create(project, monitor);
+    IMavenProjectFacade facade = MavenPluginActivator.getDefault().getMavenProjectManagerImpl().create(project,
+        monitor);
     assertNotNull("Expected not null MavenProjectFacade", facade);
     WorkspaceHelpers.assertNoErrors(project);
 
@@ -233,8 +242,8 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     IProject project = createExisting("markerTest", "projects/markers/testBuildContextWithTwoProjectConfigurators");
     waitForJobsToComplete();
     assertNotNull("Expected not null project", project);
-    IMavenProjectFacade facade = MavenPluginActivator.getDefault().getMavenProjectManagerImpl()
-        .create(project, monitor);
+    IMavenProjectFacade facade = MavenPluginActivator.getDefault().getMavenProjectManagerImpl().create(project,
+        monitor);
     assertNotNull("Expected not null MavenProjectFacade", facade);
     WorkspaceHelpers.assertNoErrors(project);
 
@@ -277,11 +286,12 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
   }
 
   public void testBuildContextWithSameProjectConfiguratorTwice() throws Exception {
-    IProject project = createExisting("markerTest", "projects/markers/testBuildContextWithSameProjectConfiguratorTwice");
+    IProject project = createExisting("markerTest",
+        "projects/markers/testBuildContextWithSameProjectConfiguratorTwice");
     waitForJobsToComplete();
     assertNotNull("Expected not null project", project);
-    IMavenProjectFacade facade = MavenPluginActivator.getDefault().getMavenProjectManagerImpl()
-        .create(project, monitor);
+    IMavenProjectFacade facade = MavenPluginActivator.getDefault().getMavenProjectManagerImpl().create(project,
+        monitor);
     assertNotNull("Expected not null MavenProjectFacade", facade);
     WorkspaceHelpers.assertNoErrors(project);
 
