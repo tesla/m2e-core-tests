@@ -460,9 +460,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertEquals("t007-p2", a1.get(0).getArtifactId());
     assertEquals("junit", a1.get(1).getArtifactId());
 
-    assertEquals(2, events.size());
-    assertEquals(p1.getFile(IMavenConstants.POM_FILE_NAME), events.get(0).getSource());
-    assertEquals(p2.getFile(IMavenConstants.POM_FILE_NAME), events.get(1).getSource());
+    assertContainsOnly(getProjectsFromEvents(events), p1, p2);
   }
 
   public void test007_changedVersion() throws Exception {
