@@ -129,8 +129,8 @@ public class ProjectConfigurationElementSorterTest extends TestCase {
     List<String> sortedConfigurators = sorter.getSortedConfigurators();
 
     assertNotNull(sortedConfigurators);
-    assertEquals(sorter.getIncompleteConfigurators() + " has an unexpected size", 3, sorter
-        .getIncompleteConfigurators().size());//c2 (missing required), c3 (depends on c2), c6 (depends on c3)
+    assertEquals(sorter.getIncompleteConfigurators() + " has an unexpected size", 3,
+        sorter.getIncompleteConfigurators().size());//c2 (missing required), c3 (depends on c2), c6 (depends on c3)
     String msg = "invalid converter position in " + sortedConfigurators.toString();
     assertEquals(msg, c0.id, sortedConfigurators.get(0));
     assertEquals(msg, c1.id, sortedConfigurators.get(1));
@@ -148,6 +148,28 @@ public class ProjectConfigurationElementSorterTest extends TestCase {
     assertTrue(c2.id + " is missing from " + result, incompleteMetadatas.contains(c2.id));
     assertTrue(c3.id + " is missing from " + result, incompleteMetadatas.contains(c3.id));
     assertTrue(c6.id + " is missing from " + result, incompleteMetadatas.contains(c6.id));
+  }
+
+  public void testSortConfigurators_isRoot() throws Exception {
+
+    ConfiguratorMock jdt = ConfiguratorMock.create("jdt");
+    ConfiguratorMock android = ConfiguratorMock.create("android", "jdt?");
+    Map<String, IConfigurationElement> configElements = new HashMap<>();
+    for(ConfiguratorMock c : Arrays.asList(jdt, android)) {
+      configElements.put(c.id, c);
+    }
+
+    ProjectConfigurationElementSorter sorter = new ProjectConfigurationElementSorter(Arrays.asList(android.id),
+        configElements);
+    List<String> sortedConfigurators = sorter.getSortedConfigurators();
+
+    assertNotNull(sortedConfigurators);
+    String msg = "invalid converter position in " + sortedConfigurators.toString();
+    assertEquals(msg, jdt.id, sortedConfigurators.get(0));
+    assertEquals(msg, android.id, sortedConfigurators.get(1));
+
+    assertTrue(android.id + " should be found as root configurator", sorter.isRootConfigurator(android.id));
+    assertTrue(jdt.id + " should be found as root configurator", sorter.isRootConfigurator(jdt.id));
   }
 
   private static class ConfiguratorMock extends ConfigElementMock {
