@@ -26,7 +26,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.equinox.ds,
  org.eclipse.equinox.event
 Bundle-Name: %Bundle-Name
-Bundle-Version: 1.6.0.qualifier
+Bundle-Version: 1.6.1.qualifier
 MavenArtifact-ArtifactId: org.eclipse.m2e.editor.xml.tests
 Bundle-Vendor: %Bundle-Vendor
 Bundle-SymbolicName: org.eclipse.m2e.editor.xml.tests;singleton:=true
