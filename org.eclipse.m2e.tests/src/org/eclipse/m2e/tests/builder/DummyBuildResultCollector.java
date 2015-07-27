@@ -12,6 +12,8 @@
 package org.eclipse.m2e.tests.builder;
 
 import java.io.File;
+import java.util.Collections;
+import java.util.Set;
 
 import org.eclipse.m2e.core.internal.builder.IIncrementalBuildFramework.BuildResultCollector;
 
@@ -28,6 +30,11 @@ class DummyBuildResultCollector implements BuildResultCollector {
 
   @Override
   public void removeMessages(File file) {
+  }
+
+  @Override
+  public Set<File> getFiles() {
+    return Collections.emptySet();
   }
 
 }
