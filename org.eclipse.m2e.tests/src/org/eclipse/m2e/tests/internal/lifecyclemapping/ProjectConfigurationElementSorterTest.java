@@ -50,7 +50,7 @@ public class ProjectConfigurationElementSorterTest extends TestCase {
 
     assertNotNull(sortedConfigurators);
     assertEquals(configElements.size(), sortedConfigurators.size());
-    String msg = "invalid converter position in " + sortedConfigurators.toString();
+    String msg = "invalid configurator position in " + sortedConfigurators.toString();
     assertEquals(msg, c2.id, sortedConfigurators.get(0));
     assertEquals(msg, c3.id, sortedConfigurators.get(1));
     assertEquals(msg, c1.id, sortedConfigurators.get(2));
@@ -96,7 +96,7 @@ public class ProjectConfigurationElementSorterTest extends TestCase {
 
     assertNotNull(sortedConfigurators);
     assertEquals(sortedConfigurators + " has an unexpected size", 1, sortedConfigurators.size());
-    String msg = "invalid converter position in " + sortedConfigurators;
+    String msg = "invalid configurator position in " + sortedConfigurators;
     assertEquals(msg, c0.id, sortedConfigurators.get(0));
 
     Set<String> missingConfigurators = sorter.getMissingConfigurators();
@@ -131,7 +131,7 @@ public class ProjectConfigurationElementSorterTest extends TestCase {
     assertNotNull(sortedConfigurators);
     assertEquals(sorter.getIncompleteConfigurators() + " has an unexpected size", 3,
         sorter.getIncompleteConfigurators().size());//c2 (missing required), c3 (depends on c2), c6 (depends on c3)
-    String msg = "invalid converter position in " + sortedConfigurators.toString();
+    String msg = "invalid configurator position in " + sortedConfigurators.toString();
     assertEquals(msg, c0.id, sortedConfigurators.get(0));
     assertEquals(msg, c1.id, sortedConfigurators.get(1));
     assertEquals(msg, c4.id, sortedConfigurators.get(2));
@@ -164,12 +164,33 @@ public class ProjectConfigurationElementSorterTest extends TestCase {
     List<String> sortedConfigurators = sorter.getSortedConfigurators();
 
     assertNotNull(sortedConfigurators);
-    String msg = "invalid converter position in " + sortedConfigurators.toString();
-    assertEquals(msg, jdt.id, sortedConfigurators.get(0));
-    assertEquals(msg, android.id, sortedConfigurators.get(1));
+    String msg = "invalid configurator position in " + sortedConfigurators.toString();
+    assertEquals(msg, android.id, sortedConfigurators.get(0));
 
     assertTrue(android.id + " should be found as root configurator", sorter.isRootConfigurator(android.id));
-    assertTrue(jdt.id + " should be found as root configurator", sorter.isRootConfigurator(jdt.id));
+  }
+
+  public void testSortConfigurators_471840() throws Exception {
+
+    ConfiguratorMock jdt = ConfiguratorMock.create("jdt");
+    ConfiguratorMock jpa = ConfiguratorMock.create("jpa", "jdt?,wtp?");
+    ConfiguratorMock weirdo = ConfiguratorMock.create("weirdo", "jdt?,wtp?");
+    ConfiguratorMock groovy = ConfiguratorMock.create("groovy");
+    Map<String, IConfigurationElement> configElements = new HashMap<>();
+    for(ConfiguratorMock c : Arrays.asList(jdt, jpa, groovy, weirdo)) {
+      configElements.put(c.id, c);
+    }
+
+    ProjectConfigurationElementSorter sorter = new ProjectConfigurationElementSorter(
+        Arrays.asList(jpa.id, groovy.id, weirdo.id), configElements);
+    List<String> sortedConfigurators = sorter.getSortedConfigurators();
+
+    assertEquals(3, sortedConfigurators.size());
+    assertFalse(sortedConfigurators.contains("jdt"));
+
+    assertTrue(groovy.id + " should be found as root configurator", sorter.isRootConfigurator(groovy.id));
+    assertFalse(jpa.id + " should not be found as root configurator", sorter.isRootConfigurator(jpa.id));
+    assertFalse(weirdo.id + " should not be found as root configurator", sorter.isRootConfigurator(weirdo.id));
   }
 
   private static class ConfiguratorMock extends ConfigElementMock {
