@@ -737,4 +737,11 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertEquals("TEST_SECONDARY3,TEST_SECONDARY4,TEST_SECONDARY6,TEST_SECONDARY5", order);
   }
 
+  public void test371618_NullLifecycleMappingPluginVersion() throws Exception {
+    IProject[] projects = importProjects("projects/lifecyclemapping/371618",
+        new String[] {"pom.xml", "testchild/pom.xml"}, new ResolverConfiguration());
+    WorkspaceHelpers.assertNoErrors(projects[0]);
+    WorkspaceHelpers.assertNoErrors(projects[1]);
+  }
+
 }
