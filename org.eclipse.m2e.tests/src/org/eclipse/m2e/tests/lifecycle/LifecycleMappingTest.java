@@ -744,4 +744,18 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     WorkspaceHelpers.assertNoErrors(projects[1]);
   }
 
+  public void testConfiguratorsFollowPhaseOrder() throws Exception {
+	MavenProjectFacade facade = (MavenProjectFacade) importMavenProject(
+	        "projects/lifecyclemapping/lifecycleMappingMetadata/PluginExecutionActionsTest/testConfiguratorsOrder",
+	        "pom.xml");
+	assertNotNull("Expected not null MavenProjectFacade", facade);
+
+	ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade);
+	assertNotNull("Expected not null lifecycle mapping", lifecycleMapping);
+
+	List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
+	assertEquals(2, configurators.size());
+	assertEquals(TestProjectConfigurator2.class, configurators.get(0).getClass());
+	assertEquals(TestProjectConfigurator.class, configurators.get(1).getClass());
+  }
 }
