@@ -237,10 +237,39 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
 
     assertClasspath(new String[] {//
         "/466518-project/src/main/java", //
-            "/466518-project/src/test/java", //
-            "org.eclipse.jdt.launching.JRE_CONTAINER/.*",//
-            "org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER",//
-        }, cp);
+        "/466518-project/src/test/java", //
+        "org.eclipse.jdt.launching.JRE_CONTAINER/.*",//
+        "org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER",//
+    }, cp);
+  }
+
+  public void test388541_KeepClasspathAttributes() throws Exception {
+    IProject project = importProject("projects/388541/pom.xml");
+    assertNoErrors(project);
+
+    IJavaProject javaProject = JavaCore.create(project);
+
+    IClasspathEntry[] cp = javaProject.getRawClasspath();
+
+    assertEquals(cp.toString(), 5, cp.length);
+
+    assertClasspath(new String[] {//
+        "M2_REPO/junit/junit/3.8.1/junit-3.8.1.jar", //
+        "org.eclipse.jdt.launching.JRE_CONTAINER/.*", //
+        "/388541/src/main/java", //
+        "/388541/src/test/java", //
+        "org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER",//
+    }, cp);
+
+    //Check Variable classpath entry attributes/accessrules are preserved
+    IClasspathEntry javaSource = cp[2];
+
+    assertEquals("foo value should not change", "bar", getClasspathAttribute(javaSource, "foo").getValue());
+    assertEquals("ignore_option_problems value should not change", "true",
+        getClasspathAttribute(javaSource, "ignore_option_problems").getValue());
+    assertEquals("maven.pomderived value should change", "true",
+        getClasspathAttribute(javaSource, "maven.pomderived").getValue());
+
   }
 
 }
