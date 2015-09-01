@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="var" path="M2_REPO/junit/junit/3.8.1/junit-3.8.1.jar" sourcepath="/foo/bar/sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/foo/bar/javadoc/"/>
+			<attribute name="source_encoding" value="UTF-8"/>
+		</attributes>
+		<accessrules>
+			<accessrule kind="nonaccessible" pattern="foo/bar/**"/>
+		</accessrules>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.4">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="target/classes" path="src/main/java">
+		<attributes>
+			<attribute name="ignore_option_problems" value="true"/>
+			<attribute name="foo" value="bar"/>
+			<attribute name="maven.pomderived" value="false"/><!-- m2e should override this -->
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="output" path="target/classes"/>
+</classpath>
