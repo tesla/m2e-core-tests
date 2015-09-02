@@ -34,6 +34,12 @@
             id="MNGECLIPSE-2313_markAllRawClasspathEntries">
       </configurator>
       <configurator
+            class="org.eclipse.m2e.tests.configurators.DeleteFooBarAttributesConfigurator"
+            id="DeleteFooBarAttributesConfigurator"
+            runsAfter="org.eclipse.m2e.jdt.javaConfigurator"
+            >
+      </configurator>
+      <configurator
             class="org.eclipse.m2e.tests.ThrowBuildExceptionProjectConfigurator"
             id="org.eclipse.m2e.tests.ThrowBuildExceptionProjectConfigurator">
       </configurator>

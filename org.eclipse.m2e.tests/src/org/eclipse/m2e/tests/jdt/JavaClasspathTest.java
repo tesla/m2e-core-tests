@@ -269,6 +269,7 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
         getClasspathAttribute(javaSource, "ignore_option_problems").getValue());
     assertEquals("maven.pomderived value should change", "true",
         getClasspathAttribute(javaSource, "maven.pomderived").getValue());
+    assertNull("foobar value should have been removed", getClasspathAttribute(javaSource, "foobar"));
 
   }
 

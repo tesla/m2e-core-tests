@@ -19,6 +19,7 @@
 			<attribute name="ignore_option_problems" value="true"/>
 			<attribute name="foo" value="bar"/>
 			<attribute name="maven.pomderived" value="false"/><!-- m2e should override this -->
+			<attribute name="foobar" value="delete-me"/><!-- java configurator should delete this -->
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="output" path="target/classes"/>
