@@ -11,9 +11,13 @@
 
 package org.eclipse.m2e.editor.xml;
 
+import java.util.List;
+
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.m2e.core.internal.IMavenConstants;
+import org.eclipse.m2e.core.internal.preferences.MavenConfigurationImpl;
+import org.eclipse.m2e.core.internal.preferences.ProblemSeverity;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 
@@ -107,4 +111,44 @@ public class ManagedArtifactMarkerTest extends AbstractMavenProjectTestCase {
 	        2 /* resolutions */, markers[0]);
 
   }
+  
+  public void test439309_errorOnManagedVersionOverride() throws Exception {
+    String originalSeverity = mavenConfiguration.getOverridingManagedVersionExecutionSeverity();
+    try {
+          ((MavenConfigurationImpl) mavenConfiguration).setOverridingManagedVersionExecutionSeverity(ProblemSeverity.error
+             .toString());
+    
+    IProject project = importProject("projects/MNGECLIPSE-2559/pom.xml");
+    waitForJobsToComplete();
+
+    List<IMarker> markers = XmlEditorHelpers.findErrorMarkers(project);
+    assertEquals(2, markers.size());
+    XmlEditorHelpers.assertEditorHintErrorMarker(IMavenConstants.MARKER_POM_LOADING_ID,
+        IMavenConstants.EDITOR_HINT_MANAGED_DEPENDENCY_OVERRIDE, null /* message */, 18 /* lineNumber */,
+        2 /* resolutions */, markers.get(0));
+    XmlEditorHelpers.assertEditorHintErrorMarker(IMavenConstants.MARKER_POM_LOADING_ID,
+        IMavenConstants.EDITOR_HINT_MANAGED_PLUGIN_OVERRIDE, null /* message */, 47 /* lineNumber */,
+        2 /* resolutions */, markers.get(1));
+    } finally {
+       ((MavenConfigurationImpl) mavenConfiguration).setOverridingManagedVersionExecutionSeverity(originalSeverity);
+    }
+  }
+
+  public void test439309_ignoreManagedVersionOverride() throws Exception {
+    String originalSeverity = mavenConfiguration.getOverridingManagedVersionExecutionSeverity();
+    try {
+          ((MavenConfigurationImpl) mavenConfiguration).setOverridingManagedVersionExecutionSeverity(ProblemSeverity.ignore
+             .toString());
+    
+    IProject project = importProject("projects/MNGECLIPSE-2559/pom.xml");
+    waitForJobsToComplete();
+
+    XmlEditorHelpers.assertNoEditorHintWarningMarkers(project);
+    XmlEditorHelpers.assertNoErrors(project);
+
+    } finally {
+       ((MavenConfigurationImpl) mavenConfiguration).setOverridingManagedVersionExecutionSeverity(originalSeverity);
+    }
+  }
+
 }
