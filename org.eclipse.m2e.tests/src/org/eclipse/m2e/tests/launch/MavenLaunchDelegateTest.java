@@ -14,12 +14,16 @@ package org.eclipse.m2e.tests.launch;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 
 import org.eclipse.m2e.actions.MavenLaunchConstants;
@@ -70,6 +74,21 @@ public class MavenLaunchDelegateTest {
     ILaunchConfiguration configuration = getLaunchConfiguration("projects/462944/foo/bar/baz");
     launcher.appendRuntimeSpecificArguments("3.2.5", arguments, configuration);
     assertEquals("", arguments.toString());
+  }
+
+  @Test
+  public void testGetVMArgumentsSubstituteMultiModuleDir() throws Exception {
+    Path workspaceRoot = ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile().toPath();
+    Path mvn = workspaceRoot.resolve(Paths.get("foo", ".mvn"));
+    if(!Files.exists(mvn)) {
+      Files.createDirectories(mvn);
+    }
+    ILaunchConfiguration configuration = new MockLaunchConfiguration(
+        Collections.singletonMap(MavenLaunchConstants.ATTR_POM_DIR, "${workspace_loc}/foo/bar"));
+    launcher.appendRuntimeSpecificArguments("3.3.3", arguments, configuration);
+    String expectedVmArgs = "-Dmaven.multiModuleProjectDirectory="
+        + MavenLaunchUtils.quote(ResourcesPlugin.getWorkspace().getRoot().getLocation().append("foo").toOSString());
+    assertEquals(expectedVmArgs, arguments.toString());
   }
 
   private ILaunchConfiguration getLaunchConfiguration(String pomDirectory) {
