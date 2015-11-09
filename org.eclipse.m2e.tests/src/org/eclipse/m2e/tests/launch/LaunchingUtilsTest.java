@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2015 Sonatype, Inc.
+ * Copyright (c) 2015 Konrad Windszus.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *      Sonatype, Inc. - initial API and implementation
+ *      Konrad Windszus - initial API and implementation
  *******************************************************************************/
 
 package org.eclipse.m2e.tests.launch;
@@ -35,26 +35,29 @@ public class LaunchingUtilsTest extends AbstractMavenProjectTestCase {
     IProject project = createExisting("simpleproject", "projects/simple-pom");
     String projectLocationWithVariable = LaunchingUtils.generateProjectLocationVariableExpression(project);
 
-    String oldProjectLocation = LaunchingUtils.substituteVar(projectLocationWithVariable);
-    Assert.assertEquals(project.getLocation().toOSString(), oldProjectLocation);
+    String projectLocation = LaunchingUtils.substituteVar(projectLocationWithVariable);
+    Assert.assertEquals(project.getLocation().toOSString(), projectLocation);
     // now move the projects location: the new location must be outside of the workspace folder, otherwise 
     // it is implicitly assumed this is an existing project in the workspace already!
-    moveExistingProjectLocation(project, new File("projects/simple-pom"),
+    moveExistingProjectLocation(project,
         new File(workspace.getRoot().getLocation().toFile(), "../someotherprojectfolder"));
     String newProjectLocation = LaunchingUtils.substituteVar(projectLocationWithVariable);
-    Assert.assertNotEquals(newProjectLocation, oldProjectLocation);
+    Assert.assertNotEquals(newProjectLocation, projectLocation);
+    // the resolved project location should still be valid
     Assert.assertEquals(project.getLocation().toOSString(), newProjectLocation);
   }
 
   /**
-   * Similar to {@link #createExisting}
+   * Similar to {@link #createExisting}, but moves the existing project to a different location while keeping the same
+   * project name.
    * 
-   * @throws CoreException
-   * @throws IOException
+   * @param project the current project.
+   * @param projectTargetFolder the target folder to which the project's content should be moved (must be outside of the
+   *          workspace folder)
    */
-  protected void moveExistingProjectLocation(IProject project, File projectSourceFolder, File projectTargetFolder)
+  protected void moveExistingProjectLocation(IProject project, File projectTargetFolder)
       throws CoreException, IOException {
-    copyDir(projectSourceFolder, projectTargetFolder);
+    copyDir(project.getLocation().toFile(), projectTargetFolder);
     workspace.run(new IWorkspaceRunnable() {
       public void run(IProgressMonitor monitor) throws CoreException {
         // delete old project
