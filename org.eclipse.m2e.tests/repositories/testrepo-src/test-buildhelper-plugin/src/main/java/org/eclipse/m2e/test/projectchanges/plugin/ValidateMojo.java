@@ -3,38 +3,15 @@ package org.eclipse.m2e.test.projectchanges.plugin;
 import java.util.List;
 
 import org.apache.maven.model.Resource;
-import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.project.MavenProject;
 
 /**
  * @goal validate
  */
 public class ValidateMojo
-    extends AbstractMojo
+    extends AbstractProjectChangesMojo
 {
-    /** @parameter expression="${project}" */
-    private MavenProject project;
-
-    /** @parameter */
-    private String sourceRoot;
-
-    /** @parameter */
-    private String testSourceRoot;
-
-    /** @parameter */
-    private Resource resource;
-
-    /** @parameter */
-    private Resource testResource;
-
-    /** @parameter */
-    private String propertyName;
-
-    /** @parameter */
-    private String propertyValue;
-
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
@@ -46,10 +23,12 @@ public class ValidateMojo
         {
             throw new MojoExecutionException( "Missing expected testSourceRoot " + testSourceRoot );
         }
+        setAbsoulteResourceDir( resource );
         if ( !contains( project.getResources(), resource ) )
         {
             throw new MojoExecutionException( "Missing expected resource " + toString( resource ) );
         }
+        setAbsoulteResourceDir( testResource );
         if ( !contains( project.getTestResources(), testResource ) )
         {
             throw new MojoExecutionException( "Missing expected testResource " + toString( testResource ) );
