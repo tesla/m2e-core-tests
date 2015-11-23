@@ -273,4 +273,33 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
 
   }
 
+  public void test480137_addingResourceFoldersAreNotRemovedDuringConfigurationUpdate() throws Exception {
+    IProject project = importProject("480137_addingResourceFoldersUnstable",
+        "projects/480137_addingResourceFoldersUnstable", new ResolverConfiguration());
+    assertNoErrors(project);
+
+    IJavaProject javaProject = JavaCore.create(project);
+
+    assertClasspath(new String[] {//
+        "/480137_addingResourceFoldersUnstable/src/main/java", //
+        "/480137_addingResourceFoldersUnstable/src/main/js", //
+        "/480137_addingResourceFoldersUnstable/src/test/java", //
+        "/480137_addingResourceFoldersUnstable/src/test/js", //
+        "org.eclipse.jdt.launching.JRE_CONTAINER/.*", //
+        "org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER", //
+    }, //
+        javaProject.getRawClasspath());
+
+    MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
+
+    assertClasspath(new String[] {//
+        "/480137_addingResourceFoldersUnstable/src/main/java", //
+        "/480137_addingResourceFoldersUnstable/src/main/js", //
+        "/480137_addingResourceFoldersUnstable/src/test/java", //
+        "/480137_addingResourceFoldersUnstable/src/test/js", //
+        "org.eclipse.jdt.launching.JRE_CONTAINER/.*", //
+        "org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER", //
+    }, //
+        javaProject.getRawClasspath());
+  }
 }
