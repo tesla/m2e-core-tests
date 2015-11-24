@@ -64,10 +64,27 @@ public class PomTemplateContextTest extends AbstractMavenProjectTestCase {
     assertEquals(29, templates.length);
     assertContextTypeId(PREFIX + "phase", templates);
   }
-
-  public void testGetTemplatesScope() throws Exception {
+  
+  public void testGetTemplatesDependencyScope() throws Exception {
     Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
-    Element scope = doc.createElement("scope");
+    Element depElement = addNode(doc.createElement("dependencies"), "dependency");
+    Element scope = addNode(depElement, "scope");
+
+    PomTemplateContext context = PomTemplateContext.fromNodeName("scope");
+
+    assertNotNull(context);
+    assertSame(PomTemplateContext.SCOPE, context);
+
+    Template[] templates = context.getTemplates(null, null, scope, "");
+    assertNotNull(templates);
+    assertEquals(5, templates.length);
+    assertContextTypeId(PREFIX + "scope", templates);
+  }
+  
+  public void testGetTemplatesDependencyManagementScope() throws Exception {
+    Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+    Element depElement = addNode(addNode(doc.createElement("dependencyManagement"), "dependencies"), "dependency");
+    Element scope = addNode(depElement, "scope");
 
     PomTemplateContext context = PomTemplateContext.fromNodeName("scope");
 
@@ -272,5 +289,4 @@ public class PomTemplateContextTest extends AbstractMavenProjectTestCase {
 	    assertNotNull(templates);
 	    assertEquals(0, templates.length);
 	  }
-
 }
