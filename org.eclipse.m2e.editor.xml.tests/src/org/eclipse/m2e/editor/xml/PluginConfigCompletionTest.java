@@ -11,6 +11,8 @@
 
 package org.eclipse.m2e.editor.xml;
 
+import java.util.List;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -49,11 +51,10 @@ public class PluginConfigCompletionTest extends AbstractCompletionTest {
       String docString = sourceViewer.getDocument().get();
       int offset = docString.indexOf("<archive>");
 
-      PomContentAssistProcessor processor = new PomContentAssistProcessor(sourceViewer);
-      ICompletionProposal[] proposals = processor.computeCompletionProposals(sourceViewer, offset);
+      List<ICompletionProposal> proposals = getProposals(offset);
       
       // 32 parameter proposals, 2 = cdata and processing instr, 1 = wst xml editor thinks that you can also put <project> under <configuration>
-      assertEquals("Proposal count", 32 + 3, proposals.length);
+      assertEquals("Proposal count", 32, proposals.size());
   }
 
   public void testSingleMojoCompletion() throws Exception {
@@ -62,9 +63,8 @@ public class PluginConfigCompletionTest extends AbstractCompletionTest {
       String docString = sourceViewer.getDocument().get();
       int offset = docString.indexOf("<detail/>");
 
-      PomContentAssistProcessor processor = new PomContentAssistProcessor(sourceViewer);
-      ICompletionProposal[] proposals = processor.computeCompletionProposals(sourceViewer, offset);
-      assertEquals("Proposal count", 4 + 3, proposals.length);
+      List<ICompletionProposal> proposals = getProposals(offset);
+      assertEquals("Proposal count", 4, proposals.size());
   }
 
   public void testNestedParameterCompletion() throws Exception {
@@ -73,9 +73,8 @@ public class PluginConfigCompletionTest extends AbstractCompletionTest {
       String docString = sourceViewer.getDocument().get();
       int offset = docString.indexOf("<manifestSections>");
 
-      PomContentAssistProcessor processor = new PomContentAssistProcessor(sourceViewer);
-      ICompletionProposal[] proposals = processor.computeCompletionProposals(sourceViewer, offset);
-      assertEquals("Proposal count", 10 + 2, proposals.length);
+      List<ICompletionProposal> proposals = getProposals(offset);
+      assertEquals("Proposal count", 10, proposals.size());
   }
   
   public void testListItemNameCompletion() throws Exception {
@@ -84,11 +83,10 @@ public class PluginConfigCompletionTest extends AbstractCompletionTest {
       String docString = sourceViewer.getDocument().get();
       int offset = docString.indexOf("<manifestSection>");
 
-      PomContentAssistProcessor processor = new PomContentAssistProcessor(sourceViewer);
-      ICompletionProposal[] proposals = processor.computeCompletionProposals(sourceViewer, offset);
-      assertEquals("Proposal count", 1 + 2, proposals.length);
+      List<ICompletionProposal> proposals = getProposals(offset);
+      assertEquals("Proposal count", 1, proposals.size());
       
-      assertEquals("List item proposal", "manifestSection", proposals[0].getDisplayString());
+      assertEquals("List item proposal", "manifestSection", proposals.get(0).getDisplayString());
   }
   
   public void testListItemParameterCompletion() throws Exception {
@@ -97,12 +95,11 @@ public class PluginConfigCompletionTest extends AbstractCompletionTest {
       String docString = sourceViewer.getDocument().get();
       int offset = docString.indexOf("</manifestSection>");
 
-      PomContentAssistProcessor processor = new PomContentAssistProcessor(sourceViewer);
-      ICompletionProposal[] proposals = processor.computeCompletionProposals(sourceViewer, offset);
-      assertEquals("Proposal count", 2 + 2, proposals.length);
+      List<ICompletionProposal> proposals = getProposals(offset);
+      assertEquals("Proposal count", 2, proposals.size());
       
-      assertEquals("List item proposal", "manifestEntries", proposals[0].getDisplayString());
-      assertEquals("List item proposal", "name", proposals[1].getDisplayString());
+      assertEquals("List item proposal", "manifestEntries", proposals.get(0).getDisplayString());
+      assertEquals("List item proposal", "name", proposals.get(1).getDisplayString());
   }
   
   public void testAnyListItemNameParameterCompletion() throws Exception {
@@ -111,12 +108,11 @@ public class PluginConfigCompletionTest extends AbstractCompletionTest {
       String docString = sourceViewer.getDocument().get();
       int offset = docString.indexOf("</anyItemName>");
 
-      PomContentAssistProcessor processor = new PomContentAssistProcessor(sourceViewer);
-      ICompletionProposal[] proposals = processor.computeCompletionProposals(sourceViewer, offset);
-      assertEquals("Proposal count", 2 + 2, proposals.length);
+      List<ICompletionProposal> proposals = getProposals(offset);
+      assertEquals("Proposal count", 2, proposals.size());
       
-      assertEquals("List item proposal", "manifestEntries", proposals[0].getDisplayString());
-      assertEquals("List item proposal", "name", proposals[1].getDisplayString());
+      assertEquals("List item proposal", "manifestEntries", proposals.get(0).getDisplayString());
+      assertEquals("List item proposal", "name", proposals.get(1).getDisplayString());
   }
   
   public void testUnknownContentCompletion() throws Exception {
@@ -125,9 +121,8 @@ public class PluginConfigCompletionTest extends AbstractCompletionTest {
       String docString = sourceViewer.getDocument().get();
       int offset = docString.indexOf("<anything ");
 
-      PomContentAssistProcessor processor = new PomContentAssistProcessor(sourceViewer);
-      ICompletionProposal[] proposals = processor.computeCompletionProposals(sourceViewer, offset);
-      assertEquals("Proposal count", 2, proposals.length);
+      List<ICompletionProposal> proposals = getProposals(offset);
+      assertEquals("Proposal count", 0, proposals.size());
   }
   
   public void testImplementationContentCompletion() throws Exception {
@@ -136,9 +131,8 @@ public class PluginConfigCompletionTest extends AbstractCompletionTest {
       String docString = sourceViewer.getDocument().get();
       int offset = docString.indexOf("</anything>");
 
-      PomContentAssistProcessor processor = new PomContentAssistProcessor(sourceViewer);
-      ICompletionProposal[] proposals = processor.computeCompletionProposals(sourceViewer, offset);
-      assertEquals("Proposal count", 14+2, proposals.length);
+      List<ICompletionProposal> proposals = getProposals(offset);
+      assertEquals("Proposal count", 14, proposals.size());
   }
   
   public void testImplementationListItemNameCompletion() throws Exception {
@@ -147,11 +141,10 @@ public class PluginConfigCompletionTest extends AbstractCompletionTest {
       String docString = sourceViewer.getDocument().get();
       int offset = docString.indexOf("</availableVersions>");
 
-      PomContentAssistProcessor processor = new PomContentAssistProcessor(sourceViewer);
-      ICompletionProposal[] proposals = processor.computeCompletionProposals(sourceViewer, offset);
-      assertEquals("Proposal count", 1 + 2, proposals.length);
+      List<ICompletionProposal> proposals = getProposals(offset);
+      assertEquals("Proposal count", 1, proposals.size());
       
-      assertEquals("List item proposal", "availableVersion", proposals[0].getDisplayString());
+      assertEquals("List item proposal", "availableVersion", proposals.get(0).getDisplayString());
   }
   
   public void testSubclassListItems() throws Exception {
@@ -160,45 +153,42 @@ public class PluginConfigCompletionTest extends AbstractCompletionTest {
       String docString = sourceViewer.getDocument().get();
       int offset = docString.indexOf("</modules>");
 
-      PomContentAssistProcessor processor = new PomContentAssistProcessor(sourceViewer);
-      ICompletionProposal[] proposals = processor.computeCompletionProposals(sourceViewer, offset);
-      assertEquals("Proposal count", 12 + 2, proposals.length);
+      List<ICompletionProposal> proposals = getProposals(offset);
+      assertEquals("Proposal count", 12, proposals.size());
       
-      assertEquals("Subclass item", "appClientModule", proposals[0].getDisplayString());
-      assertEquals("Subclass item", "ejb3Module", proposals[1].getDisplayString());
-      assertEquals("Subclass item", "ejbClientModule", proposals[2].getDisplayString());
-      assertEquals("Subclass item", "ejbModule", proposals[3].getDisplayString());
-      assertEquals("Subclass item", "harModule", proposals[4].getDisplayString());
-      assertEquals("Subclass item", "jarModule", proposals[5].getDisplayString());
-      assertEquals("Subclass item", "javaModule", proposals[6].getDisplayString());
-      assertEquals("Subclass item", "parModule", proposals[7].getDisplayString());
-      assertEquals("Subclass item", "rarModule", proposals[8].getDisplayString());
-      assertEquals("Subclass item", "sarModule", proposals[9].getDisplayString());
-      assertEquals("Subclass item", "webModule", proposals[10].getDisplayString());
-      assertEquals("Subclass item", "wsrModule", proposals[11].getDisplayString());
+      assertEquals("Subclass item", "appClientModule", proposals.get(0).getDisplayString());
+      assertEquals("Subclass item", "ejb3Module", proposals.get(1).getDisplayString());
+      assertEquals("Subclass item", "ejbClientModule", proposals.get(2).getDisplayString());
+      assertEquals("Subclass item", "ejbModule", proposals.get(3).getDisplayString());
+      assertEquals("Subclass item", "harModule", proposals.get(4).getDisplayString());
+      assertEquals("Subclass item", "jarModule", proposals.get(5).getDisplayString());
+      assertEquals("Subclass item", "javaModule", proposals.get(6).getDisplayString());
+      assertEquals("Subclass item", "parModule", proposals.get(7).getDisplayString());
+      assertEquals("Subclass item", "rarModule", proposals.get(8).getDisplayString());
+      assertEquals("Subclass item", "sarModule", proposals.get(9).getDisplayString());
+      assertEquals("Subclass item", "webModule", proposals.get(10).getDisplayString());
+      assertEquals("Subclass item", "wsrModule", proposals.get(11).getDisplayString());
   }
   
   public void testM2ELifecycleMappingConfiguration() throws Exception {
       initViewer();
       
-      PomContentAssistProcessor processor = new PomContentAssistProcessor(sourceViewer);
-      
       String docString = sourceViewer.getDocument().get();
       
       int offset = docString.indexOf("</lifecycleMappingMetadata>");
-      ICompletionProposal[] proposals = processor.computeCompletionProposals(sourceViewer, offset);
-      assertEquals("Proposal count", 1 + 2, proposals.length);
-      assertEquals("List item proposal", "pluginExecutions", proposals[0].getDisplayString());
+      List<ICompletionProposal> proposals = getProposals(offset);
+      assertEquals("Proposal count", 1, proposals.size());
+      assertEquals("List item proposal", "pluginExecutions", proposals.get(0).getDisplayString());
       
       offset = docString.indexOf("</pluginExecutionFilter>");
-      proposals = processor.computeCompletionProposals(sourceViewer, offset);
-      assertEquals("Proposal count", 4 + 2, proposals.length);
+      proposals = getProposals(offset);
+      assertEquals("Proposal count", 4, proposals.size());
 
       offset = docString.indexOf("</execute>");
-      proposals = processor.computeCompletionProposals(sourceViewer, offset);
-      assertEquals("Proposal count", 2 + 2, proposals.length);
-      assertEquals("Execute proposal", "runOnConfiguration", proposals[0].getDisplayString());
-      assertEquals("Execute proposal", "runOnIncremental", proposals[1].getDisplayString());
+      proposals = getProposals(offset);
+      assertEquals("Proposal count", 2, proposals.size());
+      assertEquals("Execute proposal", "runOnConfiguration", proposals.get(0).getDisplayString());
+      assertEquals("Execute proposal", "runOnIncremental", proposals.get(1).getDisplayString());
 
   }
   
@@ -208,12 +198,11 @@ public class PluginConfigCompletionTest extends AbstractCompletionTest {
       String docString = sourceViewer.getDocument().get();
       int offset = docString.indexOf("<test1/>");
 
-      PomContentAssistProcessor processor = new PomContentAssistProcessor(sourceViewer);
-      ICompletionProposal[] proposals = processor.computeCompletionProposals(sourceViewer, offset);
+      List<ICompletionProposal> proposals = getProposals(offset);
       
-      assertEquals("Proposal count", 2 + 3, proposals.length);
-      assertEquals("Extension test1", "test1", proposals[0].getDisplayString());
-      assertEquals("Extension test2", "test2", proposals[1].getDisplayString());
+      assertEquals("Proposal count", 2, proposals.size());
+      assertEquals("Extension test1", "test1", proposals.get(0).getDisplayString());
+      assertEquals("Extension test2", "test2", proposals.get(1).getDisplayString());
   }
 
 

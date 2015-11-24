@@ -11,14 +11,17 @@
 
 package org.eclipse.m2e.editor.xml;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.eclipse.wst.xml.ui.internal.contentassist.XMLContentAssistProcessor;
+import java.util.List;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.wst.sse.ui.contentassist.CompletionProposalInvocationContext;
+import org.eclipse.wst.sse.ui.contentassist.ICompletionProposalComputer;
 
 @SuppressWarnings("restriction")
 public abstract class AbstractCompletionTest extends AbstractPOMEditorTestCase {
-  protected XMLContentAssistProcessor xmlContentAssistProcessor = null;
+  protected ICompletionProposalComputer xmlContentAssistProcessor = null;
 
   protected IFile loadProjectsAndFiles() throws Exception {
     return null;
@@ -26,18 +29,22 @@ public abstract class AbstractCompletionTest extends AbstractPOMEditorTestCase {
 
   protected void setUp() throws Exception {
     super.setUp();
-    xmlContentAssistProcessor = new PomContentAssistProcessor(sourceViewer);
+    xmlContentAssistProcessor = new PomContentAssistProcessor();
+    xmlContentAssistProcessor.sessionStarted();
   }
 
   protected void tearDown() throws Exception {
     try {
-      xmlContentAssistProcessor.release();
+      xmlContentAssistProcessor.sessionEnded();
     } finally {
       super.tearDown();
     }
   }
 
-  protected ICompletionProposal[] getProposals(int offset) throws Exception {
-    return xmlContentAssistProcessor.computeCompletionProposals(sourceViewer, offset);
+  @SuppressWarnings("unchecked")
+  protected List<ICompletionProposal> getProposals(int offset) throws Exception {
+    return xmlContentAssistProcessor.computeCompletionProposals(
+      new CompletionProposalInvocationContext(sourceViewer, offset), 
+      new NullProgressMonitor());
   }
 }

@@ -11,6 +11,8 @@
 
 package org.eclipse.m2e.editor.xml;
 
+import java.util.List;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -53,10 +55,10 @@ public class PropertyCompletionTest extends AbstractCompletionTest {
     IDOMNode node = (IDOMNode) ContentAssistUtils.getNodeAt(sourceViewer, offset);
     assertEquals("anotherProperty", node.getLocalName());
 
-    ICompletionProposal[] proposals = getProposals(offset);
-    assertTrue("Length less than 1", proposals.length > 1);
-    assertEquals(InsertExpressionProposal.class, proposals[0].getClass());
-    assertEquals("${aProperty}", ((InsertExpressionProposal) proposals[0]).getDisplayString());
+    List<ICompletionProposal> proposals = getProposals(offset);
+    assertTrue("Length less than 1", proposals.size() > 1);
+    assertEquals(InsertExpressionProposal.class, proposals.get(0).getClass());
+    assertEquals("${aProperty}", ((InsertExpressionProposal) proposals.get(0)).getDisplayString());
   }
 
 }
