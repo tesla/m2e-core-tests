@@ -18,6 +18,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.IMavenLauncherConfiguration;
 import org.eclipse.m2e.core.internal.MavenPluginActivator;
 import org.eclipse.m2e.core.internal.launch.AbstractMavenRuntime;
@@ -71,6 +72,15 @@ public class MavenRuntimeManagerTest extends TestCase {
     assertTrue(runtime.isAvailable());
     assertEquals(MavenRuntimeManagerImpl.EMBEDDED, runtime.getLocation());
 
+    MavenPlugin.getMavenConfiguration().setGlobalSettingsFile("settings.xml");
+    try {
+      assertEquals(new File(MavenPlugin.getMavenConfiguration().getGlobalSettingsFile()).getCanonicalPath(),
+          runtime.getSettings());
+    } finally {
+      MavenPlugin.getMavenConfiguration().setGlobalSettingsFile(null);
+    }
+    assertEquals(null, runtime.getSettings());
+
     assertTrue(runtime.equals(runtime));
     assertFalse(runtime.equals(null));
     assertTrue(runtime.hashCode() != 0);
@@ -101,6 +111,14 @@ public class MavenRuntimeManagerTest extends TestCase {
     assertTrue(runtime.isEditable());
     assertFalse(runtime.isAvailable()); // runtime from non-existing folder
     assertEquals(location, runtime.getLocation());
+    MavenPlugin.getMavenConfiguration().setGlobalSettingsFile("settings.xml");
+    try {
+      assertEquals(new File(MavenPlugin.getMavenConfiguration().getGlobalSettingsFile()).getCanonicalPath(),
+          runtime.getSettings());
+    } finally {
+      MavenPlugin.getMavenConfiguration().setGlobalSettingsFile(null);
+    }
+    assertEquals(null, runtime.getSettings());
 
     DummyLauncherConfig m2conf = new DummyLauncherConfig();
     runtime.createLauncherConfiguration(m2conf, null);

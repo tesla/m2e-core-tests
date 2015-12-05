@@ -11,6 +11,7 @@
 
 package org.eclipse.m2e.tests.launch;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
@@ -18,22 +19,33 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.Launch;
+import org.eclipse.jdt.launching.IVMRunner;
 
 import org.eclipse.m2e.actions.MavenLaunchConstants;
+import org.eclipse.m2e.core.MavenPlugin;
+import org.eclipse.m2e.core.embedder.IMavenConfiguration;
 import org.eclipse.m2e.internal.launch.MavenLaunchDelegate;
 import org.eclipse.m2e.internal.launch.MavenLaunchUtils;
 import org.eclipse.m2e.internal.launch.MavenRuntimeLaunchSupport.VMArguments;
+import org.eclipse.m2e.internal.launch.MavenSourceLocator;
 import org.eclipse.m2e.tests.mocks.MockLaunchConfiguration;
+import org.eclipse.m2e.tests.mocks.MockVMRunner;
 
 
 public class MavenLaunchDelegateTest {
+
+  MockVMRunner runner;
 
   private MavenLaunchDelegate launcher;
 
@@ -41,7 +53,13 @@ public class MavenLaunchDelegateTest {
 
   @Before
   public void setUp() {
-    launcher = new MavenLaunchDelegate();
+    runner = new MockVMRunner();
+
+    launcher = new MavenLaunchDelegate() {
+      public IVMRunner getVMRunner(ILaunchConfiguration configuration, String mode) {
+        return runner;
+      }
+    };
     arguments = new VMArguments();
   }
 
@@ -91,9 +109,63 @@ public class MavenLaunchDelegateTest {
     assertEquals(expectedVmArgs, arguments.toString());
   }
 
-  private ILaunchConfiguration getLaunchConfiguration(String pomDirectory) {
+  @Test
+  public void testGlobalSettingsProgramArguments() throws Exception {
+    IMavenConfiguration mavenConfig = MavenPlugin.getMavenConfiguration();
+    MockLaunchConfiguration configuration = getLaunchConfiguration("projects/444262_settings");
+    try {
+      performDummyLaunch(configuration);
+      assertArrayEquals(new String[] {"-B"}, runner.getConfiguration().getProgramArguments());
+
+      // relative preference path to global settings is relative to eclipse home 
+      mavenConfig.setGlobalSettingsFile("settings_empty.xml");
+      performDummyLaunch(configuration);
+      assertArrayEquals(new String[] {"-B", "-gs", new File("settings_empty.xml").getAbsolutePath()},
+          runner.getConfiguration().getProgramArguments());
+
+      // specifying -gs within goals overrides global settings from  configuration
+      configuration.getAttributes().put(MavenLaunchConstants.ATTR_GOALS, "clean -gs other_settings.xml");
+      performDummyLaunch(configuration);
+      assertArrayEquals(new String[] {"-B", "clean", "-gs", "other_settings.xml"},
+          runner.getConfiguration().getProgramArguments());
+
+    } finally {
+      mavenConfig.setGlobalSettingsFile(null);
+    }
+  }
+
+  @Test
+  public void testUserSettingsProgramArguments() throws Exception {
+    IMavenConfiguration mavenConfig = MavenPlugin.getMavenConfiguration();
+    MockLaunchConfiguration configuration = getLaunchConfiguration("projects/444262_settings");
+    try {
+      mavenConfig.setUserSettingsFile(new File("settings_empty.xml").getAbsolutePath());
+      performDummyLaunch(configuration);
+      assertArrayEquals(new String[] {"-B", "-s", mavenConfig.getUserSettingsFile()},
+          runner.getConfiguration().getProgramArguments());
+
+      configuration.getAttributes().put(MavenLaunchConstants.ATTR_USER_SETTINGS, "settings.xml");
+      performDummyLaunch(configuration);
+      assertArrayEquals(new String[] {"-B", "-s", "settings.xml"}, runner.getConfiguration().getProgramArguments());
+    } finally {
+      mavenConfig.setUserSettingsFile(null);
+    }
+  }
+
+  private void performDummyLaunch(ILaunchConfiguration configuration) throws Exception {
+    Launch launch = new Launch(configuration, "run", new MavenSourceLocator());
+    try {
+      launcher.launch(configuration, "run", launch, new NullProgressMonitor());
+    } finally {
+      launch.launchRemoved(launch);
+    }
+  }
+
+  private MockLaunchConfiguration getLaunchConfiguration(String pomDirectory) {
     File file = new File(pomDirectory);
     String absPomDir = file.getAbsolutePath();
-    return new MockLaunchConfiguration(Collections.singletonMap(MavenLaunchConstants.ATTR_POM_DIR, absPomDir));
+    Map<String, Object> attributes = new HashMap<>();
+    attributes.put(MavenLaunchConstants.ATTR_POM_DIR, absPomDir);
+    return new MockLaunchConfiguration(attributes);
   }
 }
