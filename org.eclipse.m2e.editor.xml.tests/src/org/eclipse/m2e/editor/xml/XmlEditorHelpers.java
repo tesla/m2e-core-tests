@@ -17,6 +17,7 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.m2e.core.internal.IMavenConstants;
+import org.eclipse.m2e.editor.xml.internal.markers.MavenMarkerResolutionGenerator;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 import org.junit.Assert;
 

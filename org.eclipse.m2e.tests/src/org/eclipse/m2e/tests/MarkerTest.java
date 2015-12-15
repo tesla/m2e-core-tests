@@ -31,9 +31,9 @@ import org.eclipse.m2e.core.internal.MavenPluginActivator;
 import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.internal.markers.MavenMarkerManager;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
-import org.eclipse.m2e.editor.xml.internal.lifecycle.LifecycleMappingProposal;
-import org.eclipse.m2e.editor.xml.internal.lifecycle.WorkspaceLifecycleMappingProposal;
-import org.eclipse.m2e.internal.discovery.markers.DiscoveryWizardProposal;
+import org.eclipse.m2e.editor.xml.internal.lifecycle.LifecycleMappingResolution;
+import org.eclipse.m2e.editor.xml.internal.lifecycle.WorkspaceLifecycleMappingResolution;
+import org.eclipse.m2e.internal.discovery.markers.DiscoveryWizardResolution;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
@@ -357,9 +357,9 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     IMarkerResolution[] resolutions = IDE.getMarkerHelpRegistry().getResolutions(errorMarkers.get(0));
 
     assertEquals(3, resolutions.length);
-    assertNotNull(getResolution(resolutions, DiscoveryWizardProposal.class));
-    assertNotNull(getResolution(resolutions, LifecycleMappingProposal.class));
-    assertNotNull(getResolution(resolutions, WorkspaceLifecycleMappingProposal.class));
+    assertNotNull(getResolution(resolutions, DiscoveryWizardResolution.class));
+    assertNotNull(getResolution(resolutions, LifecycleMappingResolution.class));
+    assertNotNull(getResolution(resolutions, WorkspaceLifecycleMappingResolution.class));
   }
 
   public void testNoDuplicateMarker() throws CoreException {
