@@ -376,5 +376,11 @@
             id="org.eclipse.m2e.jdt.fancyClassifierClasspathProvider"
             name="Fancy Classifier Classpath Provider">
       </classifierClasspathProvider>
+   </extension>
+   <extension
+         point="org.eclipse.m2e.core.lifecycleParticipants">
+      <participant
+            hint="TestLifecycleParticipant">
+      </participant>
    </extension>      
 </plugin>

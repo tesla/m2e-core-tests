@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>org.eclipse.m2e.test</groupId>
+  <artifactId>486737-lifecycle-participant</artifactId>
+  <versioning>
+    <versions>
+      <version>0.0.1-SNAPSHOT</version>
+    </versions>
+    <lastUpdated>20160201161615</lastUpdated>
+  </versioning>
+</metadata>

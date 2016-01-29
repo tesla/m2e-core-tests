@@ -559,4 +559,14 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
 
     assertFalse(result.getExceptions().toString(), result.hasExceptions());
   }
+
+  public void test486737_lifecycleParticipant() throws Exception {
+    MavenExecutionResult result = readMavenProject(new File("projects/486737_lifecycleParticipant/pom.xml"), false);
+    assertFalse(result.hasExceptions());
+
+    MavenProject project = result.getProject();
+
+    // the Extension changes the source folder
+    assertEquals("dummySrc", project.getModel().getBuild().getSourceDirectory());
+  }
 }
