@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.jdt.IClasspathManager;
+import org.eclipse.m2e.jdt.internal.MavenClasspathHelpers;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
@@ -119,6 +120,31 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     for(int i = 0; i < originalCp.length; i++ ) {
       assertEquals("classpath entry changed", originalCp[i], updatedCp[i]);
     }
+  }
+
+  public void test486739_PreserveExportedOnUpdate() throws Exception {
+    IProject project = importProject("projects/486739_exportedContainer/pom.xml");
+    //assertNoErrors(project);
+
+    IJavaProject javaProject = JavaCore.create(project);
+    IClasspathEntry[] originalCp = javaProject.getRawClasspath();
+
+    assertEquals(5, originalCp.length);
+    assertEquals("org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER", originalCp[4].getPath().segment(0));
+    assertFalse(originalCp[4].isExported());
+
+    originalCp[4] = MavenClasspathHelpers.getDefaultContainerEntry(true);
+    javaProject.setRawClasspath(originalCp, monitor);
+
+    MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
+    waitForJobsToComplete();
+    //assertNoErrors(project);
+
+    javaProject = JavaCore.create(project);
+    IClasspathEntry[] updatedCp = javaProject.getRawClasspath();
+    assertEquals("classpath changed on update", originalCp.length, updatedCp.length);
+    assertEquals("org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER", updatedCp[4].getPath().segment(0));
+    assertTrue(updatedCp[4].isExported());
   }
 
   public void test398121_PreserveOrderOfClasspathContainersOnUpdate() throws Exception {
