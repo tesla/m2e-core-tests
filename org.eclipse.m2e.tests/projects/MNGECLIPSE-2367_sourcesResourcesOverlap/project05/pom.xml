@@ -1,0 +1,24 @@
+<project>
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>MNGECLIPSE-2367_sourcesResourcesOverlap</groupId>
+  <artifactId>project05</artifactId>
+  <version>1.0</version>
+
+  <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <includes>
+          <include>*.txt</include>
+        </includes>
+      </resource>
+      <resource>
+        <directory>src/main/resources/txts</directory>
+        <excludes>
+           <exclude>*.txt</exclude>
+        </excludes>
+      </resource>
+    </resources>
+  </build>
+</project>

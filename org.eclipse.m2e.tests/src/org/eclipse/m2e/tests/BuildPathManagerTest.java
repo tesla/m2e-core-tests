@@ -11,6 +11,8 @@
 
 package org.eclipse.m2e.tests;
 
+import static org.eclipse.m2e.tests.common.ClasspathHelpers.assertClasspath;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -354,8 +356,8 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
       // cleanup
       deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t001/0.0.1/"));
       deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t002/0.0.1/"));
-      MavenPlugin.getMavenProjectRegistry().refresh(
-          new MavenUpdateRequest(new IProject[] {project}, false /*offline*/, false));
+      MavenPlugin.getMavenProjectRegistry()
+          .refresh(new MavenUpdateRequest(new IProject[] {project}, false /*offline*/, false));
       waitForJobsToComplete();
     }
 
@@ -580,8 +582,8 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
 
     assertEquals(1, cp.length);
     assertNotNull(cp[0].getSourceAttachmentPath());
-    assertEquals(cp[0].getSourceAttachmentPath().toString(), "downloadsources-t006-0.0.1-sources.jar", cp[0]
-        .getSourceAttachmentPath().lastSegment());
+    assertEquals(cp[0].getSourceAttachmentPath().toString(), "downloadsources-t006-0.0.1-sources.jar",
+        cp[0].getSourceAttachmentPath().lastSegment());
   }
 
   public void testDownloadSources_006_nonMavenProject() throws Exception {
@@ -990,8 +992,8 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
       fail("Project creation should fail if the POM exists in the target folder");
     } catch(CoreException e) {
       final String msg = IMavenConstants.POM_FILE_NAME + " already exists";
-      assertTrue("Project creation should throw a \"" + msg + "\" exception if the POM exists in the target folder", e
-          .getMessage().indexOf(msg) > 0);
+      assertTrue("Project creation should throw a \"" + msg + "\" exception if the POM exists in the target folder",
+          e.getMessage().indexOf(msg) > 0);
     }
 
     tmp.delete();
@@ -1156,9 +1158,53 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertTrue(project.getFile("target/classes/test.properties").isAccessible());
   }
 
+  public void test486721_sourceAndResourceUnderSameNonDefaultFolder() throws Exception {
+    IProject project = importProject("projects/MNGECLIPSE-2367_sourcesResourcesOverlap/project04/pom.xml");
+    assertNoErrors(project);
+
+    IJavaProject javaProject = JavaCore.create(project);
+
+    IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
+
+    assertClasspath(new String[] {//
+        "/project04/src/main/java", //
+        "/project04/src/main_impl/java", //
+        "/project04/src/test/java", //
+        "org.eclipse.jdt.launching.JRE_CONTAINER/.*", //
+        "org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER", //
+    }, //
+        rawClasspath);
+    assertEquals(0, rawClasspath[0].getExclusionPatterns().length);
+    assertEquals(0, rawClasspath[1].getExclusionPatterns().length);
+    assertEquals(1, rawClasspath[1].getInclusionPatterns().length);
+    assertEquals("**/*.java", rawClasspath[1].getInclusionPatterns()[0].toString());
+    assertEquals(0, rawClasspath[2].getExclusionPatterns().length);
+  }
+
+  public void test486721_overlappingResourceFolders() throws Exception {
+    IProject project = importProject("projects/MNGECLIPSE-2367_sourcesResourcesOverlap/project05/pom.xml");
+    assertNoErrors(project);
+
+    IJavaProject javaProject = JavaCore.create(project);
+
+    IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
+
+    assertClasspath(new String[] {//
+        "/project05/src/main/java", //
+        "/project05/src/main/resources", //
+        "/project05/src/test/java", //
+        "org.eclipse.jdt.launching.JRE_CONTAINER/.*", //
+        "org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER", //
+    }, //
+        rawClasspath);
+    assertEquals(0, rawClasspath[1].getInclusionPatterns().length);
+    assertEquals(1, rawClasspath[1].getExclusionPatterns().length);
+    assertEquals("**", rawClasspath[1].getExclusionPatterns()[0].toString());
+  }
+
   public void testMNGECLIPSE_2433_resourcesOutsideBasdir() throws Exception {
-    IProject[] projects = importProjects("projects/MNGECLIPSE-2433_resourcesOutsideBasdir", new String[] {
-        "project01/pom.xml", "project02/pom.xml"}, new ResolverConfiguration());
+    IProject[] projects = importProjects("projects/MNGECLIPSE-2433_resourcesOutsideBasdir",
+        new String[] {"project01/pom.xml", "project02/pom.xml"}, new ResolverConfiguration());
     projects[1].build(IncrementalProjectBuilder.FULL_BUILD, monitor);
 
     // project02 has resources folder outside of it's basedir. m2e does not support this and probably never will.
@@ -1210,8 +1256,8 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
   }
 
   public void test388596_expandedSnapshotDependency() throws Exception {
-    IProject[] projects = importProjects("projects/388596_expandedSnapshotDependency", new String[] {"a/pom.xml",
-        "b/pom.xml"}, new ResolverConfiguration());
+    IProject[] projects = importProjects("projects/388596_expandedSnapshotDependency",
+        new String[] {"a/pom.xml", "b/pom.xml"}, new ResolverConfiguration());
     waitForJobsToComplete();
 
     IJavaProject javaProject = JavaCore.create(projects[1]);
