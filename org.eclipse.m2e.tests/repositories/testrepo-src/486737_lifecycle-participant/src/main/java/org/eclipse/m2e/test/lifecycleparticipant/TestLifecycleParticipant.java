@@ -12,21 +12,25 @@ import org.apache.maven.model.building.ModelBuildingRequest;
 import org.apache.maven.model.building.ModelCache;
 import org.apache.maven.project.MavenProject;
 
+import java.io.File;
+
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 
 @Component(role = AbstractMavenLifecycleParticipant.class, hint = "TestLifecycleParticipant")
 public class TestLifecycleParticipant extends AbstractMavenLifecycleParticipant
 {
-	private static final String DUMMY_SOURCE_FOLDER = "dummySrc";
+  private static final String DUMMY_SOURCE_FOLDER = "dummySrc";
 
-	@Requirement
-	private ModelBuilder modelBuilder;
+  @Requirement
+  private ModelBuilder modelBuilder;
 
-	@Override
-	public void afterProjectsRead(MavenSession session) throws MavenExecutionException {
-		MavenProject currentProject = session.getCurrentProject();
-    currentProject.getBuild().setSourceDirectory(DUMMY_SOURCE_FOLDER);
-	}
+  @Override
+  public void afterProjectsRead(MavenSession session) throws MavenExecutionException {
+    MavenProject currentProject = session.getCurrentProject();
+    File sourceFolder = new File(currentProject.getBasedir(), DUMMY_SOURCE_FOLDER);
+    currentProject.getBuild().setSourceDirectory(sourceFolder.getAbsolutePath());
+    currentProject.getCompileSourceRoots().set(0, sourceFolder.getAbsolutePath());
+  }
 
 }

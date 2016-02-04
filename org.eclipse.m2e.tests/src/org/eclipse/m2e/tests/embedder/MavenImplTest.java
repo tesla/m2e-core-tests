@@ -46,6 +46,7 @@ import org.eclipse.m2e.core.embedder.IMavenExecutionContext;
 import org.eclipse.m2e.core.internal.MavenPluginActivator;
 import org.eclipse.m2e.core.internal.embedder.MavenExecutionContext;
 import org.eclipse.m2e.core.internal.embedder.MavenImpl;
+import org.eclipse.m2e.core.internal.project.registry.MavenProjectFacade;
 import org.eclipse.m2e.core.internal.repository.RepositoryRegistry;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.m2e.tests.common.FileHelpers;
@@ -560,6 +561,14 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
     assertFalse(result.getExceptions().toString(), result.hasExceptions());
   }
 
+  public void test486737_readProject() throws Exception {
+    // make sure MavenImpl.readProject() works with an active Extension
+    MavenProject mavenProject = MavenPlugin.getMaven().readProject(new File("projects/486737_lifecycleParticipant/pom.xml"), monitor);
+    
+    // the Extension changes the source folder
+    assertTrue(mavenProject.getModel().getBuild().getSourceDirectory().endsWith("dummySrc"));
+  }
+  
   public void test486737_lifecycleParticipant() throws Exception {
     MavenExecutionResult result = readMavenProject(new File("projects/486737_lifecycleParticipant/pom.xml"), false);
     assertFalse(result.hasExceptions());
@@ -567,6 +576,6 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
     MavenProject project = result.getProject();
 
     // the Extension changes the source folder
-    assertEquals("dummySrc", project.getModel().getBuild().getSourceDirectory());
+    assertTrue(project.getModel().getBuild().getSourceDirectory().endsWith("dummySrc"));
   }
 }

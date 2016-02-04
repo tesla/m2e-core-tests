@@ -588,6 +588,37 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     assertTrue(listenerCalled[0]);
   }
 
+  public void test486737_projectUpdate() throws Exception {
+    IProject project = importProject("projects/486737_lifecycleParticipant/pom.xml");
+    waitForJobsToComplete();
+    assertNoErrors(project);
+
+    project.getFile("pom.xml").touch(monitor);
+
+    IMavenProjectFacade projectFacade = MavenPlugin.getMavenProjectRegistry().create(project, monitor);
+    assertTrue(projectFacade.isStale());
+
+    // update the project
+    IProjectConfigurationManager manager = MavenPlugin.getProjectConfigurationManager();
+    manager.updateProjectConfiguration(new MavenUpdateRequest(project, true, false), monitor);
+    waitForJobsToComplete(monitor);
+
+    projectFacade = MavenPlugin.getMavenProjectRegistry().create(project, monitor);
+    assertFalse(projectFacade.isStale());
+    assertNoErrors(project);
+
+    IJavaProject javaProject = JavaCore.create(project);
+    IClasspathEntry sourceEntry = null;
+    for(IClasspathEntry cpe : javaProject.getRawClasspath()) {
+      if(cpe.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+        sourceEntry = cpe;
+        break;
+      }
+    }
+    assertNotNull(sourceEntry);
+    assertEquals("dummySrc", sourceEntry.getPath().lastSegment());
+  }
+
   private IProject createSimpleProject(final String projectName, final IPath location, final Model model)
       throws CoreException {
     return createSimpleProject(projectName, location, model, null);
