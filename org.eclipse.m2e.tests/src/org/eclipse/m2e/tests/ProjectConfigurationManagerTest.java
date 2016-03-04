@@ -20,6 +20,7 @@ import java.util.Properties;
 
 import org.eclipse.core.externaltools.internal.model.BuilderCoreUtils;
 import org.eclipse.core.externaltools.internal.model.ExternalToolBuilder;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -42,6 +43,7 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.codehaus.plexus.util.FileUtils;
 
@@ -134,8 +136,9 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
       mavenConfiguration.setUserSettingsFile(new File("projects/MNGECLIPSE-1990/settings.xml").getAbsolutePath());
       List<String> requests;
       try {
-        importProjects("projects/MNGECLIPSE-1990", new String[] {"pom.xml", "dependent/pom.xml", "dependency/pom.xml",
-            "parent/pom.xml"}, new ResolverConfiguration());
+        importProjects("projects/MNGECLIPSE-1990",
+            new String[] {"pom.xml", "dependent/pom.xml", "dependency/pom.xml", "parent/pom.xml"},
+            new ResolverConfiguration());
         requests = FilexWagon.getRequests();
       } finally {
         Job.getJobManager().removeJobChangeListener(jobChangeListener);
@@ -301,8 +304,8 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     String firstBuilderId = projectDescription.getBuildSpec()[0].getBuilderName();
     assertNotSame(IMavenConstants.BUILDER_ID, firstBuilderId);
     assertEquals(ExternalToolBuilder.ID, projectDescription.getBuildSpec()[1].getBuilderName());
-    String launchConfigHandleArg = (String) projectDescription.getBuildSpec()[1].getArguments().get(
-        BuilderCoreUtils.LAUNCH_CONFIG_HANDLE);
+    String launchConfigHandleArg = (String) projectDescription.getBuildSpec()[1].getArguments()
+        .get(BuilderCoreUtils.LAUNCH_CONFIG_HANDLE);
     assertNotNull(launchConfigHandleArg);
     assertTrue(launchConfigHandleArg.contains(IMavenConstants.BUILDER_ID));
 
@@ -350,7 +353,8 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
         // resources
         IPath[] exclusions = cpEntry.getExclusionPatterns();
         assertNotNull(exclusions);
-        assertEquals("Classpath resource entry contains more or less than one exclusion pattern.", 1, exclusions.length);
+        assertEquals("Classpath resource entry contains more or less than one exclusion pattern.", 1,
+            exclusions.length);
         assertEquals("Exclusion pattern is supposed to be '**' !", new Path("**"), exclusions[0]);
       }
     }
@@ -432,8 +436,8 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
   public void test397251_forcePluginResolutionUpdate() throws Exception {
     FileUtils.deleteDirectory(new File("target/397251localrepo"));
 
-    MojoExecutionKey key = new MojoExecutionKey("org.apache.maven.plugins", "maven-compiler-plugin", "2.0.2",
-        "compile", "compile", "default-compile");
+    MojoExecutionKey key = new MojoExecutionKey("org.apache.maven.plugins", "maven-compiler-plugin", "2.0.2", "compile",
+        "compile", "default-compile");
 
     mavenConfiguration.setUserSettingsFile("projects/397251_forcePluginResolutionUpdate/settings.xml");
     waitForJobsToComplete();
@@ -489,8 +493,8 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
       Model visibleModuleModel = model.clone();
       visibleModuleModel.setArtifactId(moduleName);
 
-      IProject moduleProject = createSimpleProject(moduleName,
-          parentProject.getLocation().append(new Path(moduleName)), visibleModuleModel);
+      IProject moduleProject = createSimpleProject(moduleName, parentProject.getLocation().append(new Path(moduleName)),
+          visibleModuleModel);
       assertNoErrors(moduleProject);
 
       parentProject.refreshLocal(IResource.DEPTH_ONE, monitor);
@@ -498,8 +502,8 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
       assertTrue(moduleFolder.exists());
       assertFalse(moduleFolder + " should be visible", moduleFolder.isHidden());
     } finally {
-      preferences
-          .putBoolean(MavenPreferenceConstants.P_HIDE_FOLDERS_OF_NESTED_PROJECTS, Boolean.valueOf(originalValue));
+      preferences.putBoolean(MavenPreferenceConstants.P_HIDE_FOLDERS_OF_NESTED_PROJECTS,
+          Boolean.valueOf(originalValue));
     }
 
     try {
@@ -509,8 +513,8 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
       Model hiddenModuleModel = model.clone();
       hiddenModuleModel.setArtifactId(moduleName);
 
-      IProject moduleProject = createSimpleProject(moduleName,
-          parentProject.getLocation().append(new Path(moduleName)), hiddenModuleModel);
+      IProject moduleProject = createSimpleProject(moduleName, parentProject.getLocation().append(new Path(moduleName)),
+          hiddenModuleModel);
       assertNoErrors(moduleProject);
 
       parentProject.refreshLocal(IResource.DEPTH_ONE, monitor);
@@ -518,8 +522,8 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
       assertTrue(moduleFolder.exists());
       assertTrue(moduleFolder + " should be hidden", moduleFolder.isHidden());
     } finally {
-      preferences
-          .putBoolean(MavenPreferenceConstants.P_HIDE_FOLDERS_OF_NESTED_PROJECTS, Boolean.valueOf(originalValue));
+      preferences.putBoolean(MavenPreferenceConstants.P_HIDE_FOLDERS_OF_NESTED_PROJECTS,
+          Boolean.valueOf(originalValue));
     }
   }
 
@@ -566,8 +570,8 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
       assertTrue(moduleFolder.exists());
       assertTrue(moduleFolder + " should be hidden", moduleFolder.isHidden());
     } finally {
-      preferences
-          .putBoolean(MavenPreferenceConstants.P_HIDE_FOLDERS_OF_NESTED_PROJECTS, Boolean.valueOf(originalValue));
+      preferences.putBoolean(MavenPreferenceConstants.P_HIDE_FOLDERS_OF_NESTED_PROJECTS,
+          Boolean.valueOf(originalValue));
     }
   }
 
@@ -588,12 +592,18 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     assertTrue(listenerCalled[0]);
   }
 
-  public void test486737_projectUpdate() throws Exception {
-    IProject project = importProject("projects/486737_lifecycleParticipant/pom.xml");
+  /**
+   * Tests that a project using the lifecycle participant has the correct src folder configuration (as configured by the
+   * participant). Afterwards, removes the participant and verifies that the default source folder src/main/java is
+   * used.
+   */
+  public void test486737_removeParticipant() throws Exception {
+    IProject project = importProject("projects/486737_lifecycleParticipant_addRemoveParticipant/pom.xml");
     waitForJobsToComplete();
     assertNoErrors(project);
 
-    project.getFile("pom.xml").touch(monitor);
+    IFile pomFile = project.getFile("pom.xml");
+    pomFile.touch(monitor);
 
     IMavenProjectFacade projectFacade = MavenPlugin.getMavenProjectRegistry().create(project, monitor);
     assertTrue(projectFacade.isStale());
@@ -608,15 +618,89 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     assertNoErrors(project);
 
     IJavaProject javaProject = JavaCore.create(project);
-    IClasspathEntry sourceEntry = null;
+    assertTrue(hasSourceFolder(javaProject, "dummySrc"));
+
+    // now remove the participant
+    pomFile.delete(true, monitor);
+    IFile pomWithoutParticipant = project.getFile("pom_without_participant.xml");
+    pomWithoutParticipant.move(pomFile.getFullPath(), true, monitor);
+
+    manager.updateProjectConfiguration(new MavenUpdateRequest(project, true, false), monitor);
+    waitForJobsToComplete(monitor);
+
+    projectFacade = MavenPlugin.getMavenProjectRegistry().create(project, monitor);
+    assertFalse(projectFacade.isStale());
+    assertNoErrors(project);
+
+    assertTrue(hasSourceFolder(javaProject, "src/main/java"));
+  }
+
+  /**
+   * Tests that a project using the lifecycle participant has the correct src folder configuration (as configured by the
+   * participant). Afterwards, removes the participant and verifies that the default source folder src/main/java is
+   * used.
+   */
+  public void test486737_addParticipant() throws Exception {
+    IProject project = importProject("projects/486737_lifecycleParticipant_addRemoveParticipant/pom.xml");
+    waitForJobsToComplete();
+    assertNoErrors(project);
+
+    IFile pomFile = project.getFile("pom.xml");
+    // start without a participant
+    pomFile.delete(true, monitor);
+    IFile pomWithoutParticipant = project.getFile("pom_without_participant.xml");
+    pomWithoutParticipant.copy(pomFile.getFullPath(), true, monitor);
+
+    IMavenProjectFacade projectFacade = MavenPlugin.getMavenProjectRegistry().create(project, monitor);
+    assertTrue(projectFacade.isStale());
+
+    // update the project
+    IProjectConfigurationManager manager = MavenPlugin.getProjectConfigurationManager();
+    manager.updateProjectConfiguration(new MavenUpdateRequest(project, true, false), monitor);
+    waitForJobsToComplete(monitor);
+
+    projectFacade = MavenPlugin.getMavenProjectRegistry().create(project, monitor);
+    assertFalse(projectFacade.isStale());
+    assertNoErrors(project);
+
+    IJavaProject javaProject = JavaCore.create(project);
+    assertTrue(hasSourceFolder(javaProject, "src/main/java"));
+
+    // now add the participant
+    pomFile.delete(true, monitor);
+    IFile pomWithParticipant = project.getFile("pom_with_participant.xml");
+    pomWithParticipant.copy(pomFile.getFullPath(), true, monitor);
+
+    assertTrue(projectFacade.isStale());
+
+    manager.updateProjectConfiguration(new MavenUpdateRequest(project, true, false), monitor);
+    waitForJobsToComplete(monitor);
+
+    projectFacade = MavenPlugin.getMavenProjectRegistry().create(project, monitor);
+    assertFalse(projectFacade.isStale());
+    assertNoErrors(project);
+
+    assertTrue(hasSourceFolder(javaProject, "dummySrc"));
+  }
+
+  /**
+   * Returns true if there exists a source folder with the given trailing path in the given project. Fails with an
+   * exception when there is no such source folder.
+   * 
+   * @param javaProject
+   * @param trailingPath the last part of the expected source folder path (should be unique)
+   * @throws JavaModelException
+   */
+  private boolean hasSourceFolder(IJavaProject javaProject, String trailingPath) throws JavaModelException {
     for(IClasspathEntry cpe : javaProject.getRawClasspath()) {
       if(cpe.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
-        sourceEntry = cpe;
-        break;
+        if(cpe.getPath().toString().endsWith(trailingPath)) {
+          return true;
+        }
       }
     }
-    assertNotNull(sourceEntry);
-    assertEquals("dummySrc", sourceEntry.getPath().lastSegment());
+    fail("no source folder found in java project: " + javaProject.getElementName());
+    return false; // not reached
   }
 
   private IProject createSimpleProject(final String projectName, final IPath location, final Model model)
@@ -689,8 +773,8 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
 
         workspace.run(new IWorkspaceRunnable() {
           public void run(IProgressMonitor monitor) throws CoreException {
-            MavenPlugin.getProjectConfigurationManager()
-                .updateProjectConfiguration(projectFacade.getProject(), monitor);
+            MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(projectFacade.getProject(),
+                monitor);
           }
         }, monitor);
       }
