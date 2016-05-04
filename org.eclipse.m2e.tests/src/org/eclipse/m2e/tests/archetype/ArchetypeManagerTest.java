@@ -12,10 +12,15 @@
 package org.eclipse.m2e.tests.archetype;
 
 import java.io.File;
+import java.net.URL;
 import java.util.Collection;
 import java.util.List;
 
+import org.osgi.framework.Bundle;
+
 import junit.framework.TestCase;
+
+import org.eclipse.core.runtime.Platform;
 
 import org.apache.maven.archetype.catalog.Archetype;
 import org.apache.maven.archetype.catalog.ArchetypeCatalog;
@@ -39,6 +44,8 @@ import org.eclipse.m2e.tests.common.HttpServer;
  * @author Eugene Kuleshov
  */
 public class ArchetypeManagerTest extends TestCase {
+
+  private static final String M2E_TEST_PLUGIN_ID = "org.eclipse.m2e.tests";
 
   private static final String ARCHETYPE_REPOS_SETTINGS = "src/org/eclipse/m2e/tests/archetype/settings_archetypes.xml";
 
@@ -92,6 +99,28 @@ public class ArchetypeManagerTest extends TestCase {
     ArchetypeCatalog catalog = catalogFactory.getArchetypeCatalog();
     assertNotNull(catalog);
     assertEquals(2, catalog.getArchetypes().size());
+  }
+
+  public void testEmbeddedLocalArchetypeCatalogFactory() throws Exception {
+    Bundle bundle = Platform.getBundle(M2E_TEST_PLUGIN_ID);
+    assertNotNull(bundle);
+    URL embeddedCatalog = bundle.getEntry("/resources/490230_embedded_archetype_catalog/my-catalog.xml");
+    LocalCatalogFactory catalogFactory = new LocalCatalogFactory(embeddedCatalog.toString(), "embedded", false);
+    ArchetypeCatalog catalog = catalogFactory.getArchetypeCatalog();
+    assertNotNull(catalog);
+    assertEquals(1, catalog.getArchetypes().size());
+  }
+
+  public void testBadLocalArchetypeCatalogFactory() throws Exception {
+    asserEmptyCatalog("crap://nope", "bad-local");
+    asserEmptyCatalog("bundleentry://nooope", "missing-embedded");
+  }
+
+  public void asserEmptyCatalog(String url, String description) throws Exception {
+    LocalCatalogFactory catalogFactory = new LocalCatalogFactory(url, description, true);
+    ArchetypeCatalog catalog = catalogFactory.getArchetypeCatalog();
+    assertNotNull(catalog);
+    assertEquals(0, catalog.getArchetypes().size());
   }
 
   public void testRemoteArchetypeCatalogFactory() throws Exception {
