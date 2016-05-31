@@ -13,6 +13,7 @@ package org.eclipse.m2e.tests.lifecycle;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -27,12 +28,20 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.codehaus.plexus.util.IOUtil;
+import org.codehaus.plexus.util.xml.Xpp3Dom;
+import org.codehaus.plexus.util.xml.Xpp3DomBuilder;
+
+import org.apache.maven.plugin.MojoExecution;
+import org.apache.maven.project.MavenProject;
 
 import org.eclipse.m2e.core.internal.IMavenConstants;
+import org.eclipse.m2e.core.internal.lifecyclemapping.AnnotationMappingMetadataSource;
 import org.eclipse.m2e.core.internal.lifecyclemapping.DefaultLifecycleMapping;
 import org.eclipse.m2e.core.internal.lifecyclemapping.InvalidLifecycleMapping;
 import org.eclipse.m2e.core.internal.lifecyclemapping.LifecycleMappingFactory;
 import org.eclipse.m2e.core.internal.lifecyclemapping.LifecycleMappingResult;
+import org.eclipse.m2e.core.internal.lifecyclemapping.MappingMetadataSource;
+import org.eclipse.m2e.core.internal.lifecyclemapping.SimpleMappingMetadataSource;
 import org.eclipse.m2e.core.internal.lifecyclemapping.model.LifecycleMappingMetadata;
 import org.eclipse.m2e.core.internal.lifecyclemapping.model.LifecycleMappingMetadataSource;
 import org.eclipse.m2e.core.internal.lifecyclemapping.model.PluginExecutionMetadata;
@@ -125,22 +134,27 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     IProject project = facade.getProject();
     WorkspaceHelpers.assertNoErrors(project);
 
-    List<LifecycleMappingMetadataSource> metadataSources = LifecycleMappingFactory.getPomMappingMetadataSources(
-        facade.getMavenProject(monitor), monitor);
+    List<MappingMetadataSource> metadataSources = LifecycleMappingFactory
+        .getPomMappingMetadataSources(facade.getMavenProject(monitor), monitor);
     assertNotNull(metadataSources);
     assertEquals(1, metadataSources.size());
-    LifecycleMappingMetadataSource metadataSource = metadataSources.get(0);
-    assertEquals("testLifecycleMappingMetadata", metadataSource.getGroupId());
-    assertEquals("testLifecycleMappingMetadata1", metadataSource.getArtifactId());
-    assertEquals("0.0.1", metadataSource.getVersion());
+
+    assertEquals(SimpleMappingMetadataSource.class, metadataSources.get(0).getClass());
+    SimpleMappingMetadataSource metadataSource = (SimpleMappingMetadataSource) metadataSources.get(0);
+    assertEquals(1, metadataSource.getSources().size());
+
+    LifecycleMappingMetadataSource source = metadataSource.getSources().get(0);
+    assertEquals("testLifecycleMappingMetadata", source.getGroupId());
+    assertEquals("testLifecycleMappingMetadata1", source.getArtifactId());
+    assertEquals("0.0.1", source.getVersion());
 
     // Assert lifecycle mappings
-    assertNotNull(getLifecycleMappingMetadata(metadataSource, "war"));
-    assertEquals("fakeid", getLifecycleMappingMetadata(metadataSource, "war").getLifecycleMappingId());
-    assertNull(getLifecycleMappingMetadata(metadataSource, "jar"));
+    assertNotNull(getLifecycleMappingMetadata(source, "war"));
+    assertEquals("fakeid", getLifecycleMappingMetadata(source, "war").getLifecycleMappingId());
+    assertNull(getLifecycleMappingMetadata(source, "jar"));
 
     // Assert mojo/plugin executions
-    List<PluginExecutionMetadata> pluginExecutions = metadataSources.get(0).getPluginExecutions();
+    List<PluginExecutionMetadata> pluginExecutions = source.getPluginExecutions();
     assertEquals(3, pluginExecutions.size());
     Set<String> goals = new LinkedHashSet<String>();
 
@@ -167,18 +181,29 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     IProject project = facade.getProject();
     WorkspaceHelpers.assertNoErrors(project);
 
-    List<LifecycleMappingMetadataSource> metadata = LifecycleMappingFactory.getPomMappingMetadataSources(
-        facade.getMavenProject(monitor), monitor);
+    List<MappingMetadataSource> metadata = LifecycleMappingFactory
+        .getPomMappingMetadataSources(facade.getMavenProject(monitor), monitor);
     assertNotNull(metadata);
     assertEquals(2, metadata.size());
-    assertEquals("testLifecycleMappingMetadata", metadata.get(0).getGroupId());
-    assertEquals("testLifecycleMappingMetadata2", metadata.get(0).getArtifactId());
-    assertEquals("0.0.2", metadata.get(0).getVersion());
-    assertEquals("testLifecycleMappingMetadata", metadata.get(1).getGroupId());
-    assertEquals("testLifecycleMappingMetadata1", metadata.get(1).getArtifactId());
-    assertEquals("0.0.1", metadata.get(1).getVersion());
 
-    List<PluginExecutionMetadata> pluginExecutions = metadata.get(0).getPluginExecutions();
+    assertEquals(SimpleMappingMetadataSource.class, metadata.get(0).getClass());
+    assertEquals(SimpleMappingMetadataSource.class, metadata.get(1).getClass());
+    SimpleMappingMetadataSource metadataSource1 = (SimpleMappingMetadataSource) metadata.get(0);
+    SimpleMappingMetadataSource metadataSource2 = (SimpleMappingMetadataSource) metadata.get(1);
+    assertEquals(1, metadataSource1.getSources().size());
+    assertEquals(1, metadataSource2.getSources().size());
+
+    LifecycleMappingMetadataSource source1 = metadataSource1.getSources().get(0);
+    assertEquals("testLifecycleMappingMetadata", source1.getGroupId());
+    assertEquals("testLifecycleMappingMetadata2", source1.getArtifactId());
+    assertEquals("0.0.2", source1.getVersion());
+
+    LifecycleMappingMetadataSource source2 = metadataSource2.getSources().get(0);
+    assertEquals("testLifecycleMappingMetadata", source2.getGroupId());
+    assertEquals("testLifecycleMappingMetadata1", source2.getArtifactId());
+    assertEquals("0.0.1", source2.getVersion());
+
+    List<PluginExecutionMetadata> pluginExecutions = source1.getPluginExecutions();
     assertEquals(2, pluginExecutions.size());
     Set<String> goals = new LinkedHashSet<String>();
 
@@ -200,17 +225,28 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     IProject project = facade.getProject();
     WorkspaceHelpers.assertNoErrors(project);
 
-    List<LifecycleMappingMetadataSource> metadata = LifecycleMappingFactory.getPomMappingMetadataSources(
-        facade.getMavenProject(monitor), monitor);
+    List<MappingMetadataSource> metadata = LifecycleMappingFactory
+        .getPomMappingMetadataSources(facade.getMavenProject(monitor), monitor);
     assertNotNull(metadata);
     assertEquals(2, metadata.size());
-    assertEquals("testLifecycleMappingMetadata", metadata.get(0).getGroupId());
-    assertEquals("testLifecycleMappingMetadata2", metadata.get(0).getArtifactId());
-    assertEquals("0.0.2", metadata.get(0).getVersion());
 
-    assertEquals("testLifecycleMappingMetadata", metadata.get(1).getGroupId());
-    assertEquals("testLifecycleMappingMetadata1", metadata.get(1).getArtifactId());
-    assertEquals("0.0.1", metadata.get(1).getVersion());
+    assertEquals(SimpleMappingMetadataSource.class, metadata.get(0).getClass());
+    assertEquals(SimpleMappingMetadataSource.class, metadata.get(1).getClass());
+    SimpleMappingMetadataSource metadataSource1 = (SimpleMappingMetadataSource) metadata.get(0);
+    SimpleMappingMetadataSource metadataSource2 = (SimpleMappingMetadataSource) metadata.get(1);
+
+    assertEquals(1, metadataSource1.getSources().size());
+    assertEquals(1, metadataSource2.getSources().size());
+
+    LifecycleMappingMetadataSource source1 = metadataSource1.getSources().get(0);
+    assertEquals("testLifecycleMappingMetadata", source1.getGroupId());
+    assertEquals("testLifecycleMappingMetadata2", source1.getArtifactId());
+    assertEquals("0.0.2", source1.getVersion());
+
+    LifecycleMappingMetadataSource source2 = metadataSource2.getSources().get(0);
+    assertEquals("testLifecycleMappingMetadata", source2.getGroupId());
+    assertEquals("testLifecycleMappingMetadata1", source2.getArtifactId());
+    assertEquals("0.0.1", source2.getVersion());
   }
 
   public void testGetLifecycleMappingMetadataMerge() throws Exception {
@@ -220,16 +256,28 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     IProject project = facade.getProject();
     WorkspaceHelpers.assertNoErrors(project);
 
-    List<LifecycleMappingMetadataSource> metadata = LifecycleMappingFactory.getPomMappingMetadataSources(
-        facade.getMavenProject(monitor), monitor);
+    List<MappingMetadataSource> metadata = LifecycleMappingFactory
+        .getPomMappingMetadataSources(facade.getMavenProject(monitor), monitor);
     assertNotNull(metadata);
     assertEquals(2, metadata.size());
-    assertEquals("testLifecycleMappingMetadata", metadata.get(0).getGroupId());
-    assertEquals("testLifecycleMappingMetadata2", metadata.get(0).getArtifactId());
-    assertEquals("0.0.2", metadata.get(0).getVersion());
-    assertEquals("testLifecycleMappingMetadata", metadata.get(1).getGroupId());
-    assertEquals("testLifecycleMappingMetadata1", metadata.get(1).getArtifactId());
-    assertEquals("0.0.1", metadata.get(1).getVersion());
+
+    assertEquals(SimpleMappingMetadataSource.class, metadata.get(0).getClass());
+    assertEquals(SimpleMappingMetadataSource.class, metadata.get(1).getClass());
+    SimpleMappingMetadataSource metadataSource1 = (SimpleMappingMetadataSource) metadata.get(0);
+    SimpleMappingMetadataSource metadataSource2 = (SimpleMappingMetadataSource) metadata.get(1);
+
+    assertEquals(1, metadataSource1.getSources().size());
+    assertEquals(1, metadataSource2.getSources().size());
+
+    LifecycleMappingMetadataSource source1 = metadataSource1.getSources().get(0);
+    assertEquals("testLifecycleMappingMetadata", source1.getGroupId());
+    assertEquals("testLifecycleMappingMetadata2", source1.getArtifactId());
+    assertEquals("0.0.2", source1.getVersion());
+
+    LifecycleMappingMetadataSource source2 = metadataSource2.getSources().get(0);
+    assertEquals("testLifecycleMappingMetadata", source2.getGroupId());
+    assertEquals("testLifecycleMappingMetadata1", source2.getArtifactId());
+    assertEquals("0.0.1", source2.getVersion());
   }
 
   private void assertPluginExecutionMetadata(String groupId, String artifactId, String versionRange, Set<String> goals,
@@ -745,17 +793,76 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
   }
 
   public void testConfiguratorsFollowPhaseOrder() throws Exception {
-	MavenProjectFacade facade = (MavenProjectFacade) importMavenProject(
-	        "projects/lifecyclemapping/lifecycleMappingMetadata/PluginExecutionActionsTest/testConfiguratorsOrder",
-	        "pom.xml");
-	assertNotNull("Expected not null MavenProjectFacade", facade);
+    MavenProjectFacade facade = (MavenProjectFacade) importMavenProject(
+        "projects/lifecyclemapping/lifecycleMappingMetadata/PluginExecutionActionsTest/testConfiguratorsOrder",
+        "pom.xml");
+    assertNotNull("Expected not null MavenProjectFacade", facade);
 
-	ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade);
-	assertNotNull("Expected not null lifecycle mapping", lifecycleMapping);
+    ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade);
+    assertNotNull("Expected not null lifecycle mapping", lifecycleMapping);
 
-	List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
-	assertEquals(2, configurators.size());
-	assertEquals(TestProjectConfigurator2.class, configurators.get(0).getClass());
-	assertEquals(TestProjectConfigurator.class, configurators.get(1).getClass());
+    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
+    assertEquals(2, configurators.size());
+    assertEquals(TestProjectConfigurator2.class, configurators.get(0).getClass());
+    assertEquals(TestProjectConfigurator.class, configurators.get(1).getClass());
+  }
+
+  public void test494858ProcessingInstructions() throws Exception {
+    MavenProjectFacade facade = (MavenProjectFacade) importMavenProject(
+        "projects/lifecyclemapping/lifecycleMappingMetadata/ProcessingInstructions", "pom.xml");
+
+    assertNotNull("Expected not null MavenProjectFacade", facade);
+    WorkspaceHelpers.assertNoErrors(facade.getProject());
+
+    MavenProject project = facade.getMavenProject(monitor);
+    MavenProject parent = project.getParent();
+
+    List<MappingMetadataSource> metadata = LifecycleMappingFactory
+        .getPomMappingMetadataSources(facade.getMavenProject(monitor), monitor);
+    assertNotNull(metadata);
+    assertEquals(2, metadata.size());
+
+    assertEquals(AnnotationMappingMetadataSource.class, metadata.get(0).getClass());
+    assertEquals(AnnotationMappingMetadataSource.class, metadata.get(1).getClass());
+
+    LifecycleMappingResult mappingResult = calculateLifecycleMapping(facade);
+    Map<MojoExecutionKey, List<IPluginExecutionMetadata>> mapping = mappingResult.getMojoExecutionMapping();
+
+    List<MojoExecution> validations = facade.getMojoExecutions("org.eclipse.m2e.test.lifecyclemapping",
+        "test-buildhelper-plugin", monitor, "validate");
+    assertEquals(3, validations.size());
+
+    assertExecution(validations.get(0), mapping, project, "test1", PluginExecutionAction.ignore, "<ignore/>");
+    assertExecution(validations.get(1), mapping, parent, "test2", PluginExecutionAction.ignore, "<ignore/>");
+    assertExecution(validations.get(2), mapping, project, "test3", PluginExecutionAction.configurator,
+        "<configurator><id>org.eclipse.m2e.configurator.test</id></configurator>");
+
+    validations = facade.getMojoExecutions("org.eclipse.m2e.test.lifecyclemapping", "test-embeddedmapping-plugin",
+        monitor, "test-goal-1", "test-goal-2");
+    assertEquals(4, validations.size());
+
+    String exec = "<execute><runOnConfiguration>true</runOnConfiguration><runOnIncremental>true</runOnIncremental></execute>";
+
+    assertExecution(validations.get(0), mapping, parent, "test4", PluginExecutionAction.execute, exec);
+    assertExecution(validations.get(1), mapping, parent, "test5", PluginExecutionAction.execute, exec);
+    assertExecution(validations.get(2), mapping, parent, "test6", PluginExecutionAction.execute, exec);
+    assertExecution(validations.get(3), mapping, project, "test7", PluginExecutionAction.execute,
+        "<execute><runOnConfiguration>true</runOnConfiguration></execute>");
+  }
+
+  private void assertExecution(MojoExecution execution, Map<MojoExecutionKey, List<IPluginExecutionMetadata>> mapping,
+      MavenProject sourceProject, String executionId, PluginExecutionAction action, String domContent)
+          throws Exception {
+    assertEquals(executionId, execution.getExecutionId());
+    List<IPluginExecutionMetadata> metadatas = mapping.get(new MojoExecutionKey(execution));
+    assertNotNull(metadatas);
+    assertEquals(1, metadatas.size());
+    PluginExecutionMetadata metadata = (PluginExecutionMetadata) metadatas.get(0);
+    assertEquals(sourceProject, metadata.getSource().getSource());
+    assertEquals(action, metadata.getAction());
+    Xpp3Dom actionDom = new Xpp3Dom("action");
+    actionDom.addChild(Xpp3DomBuilder.build(new StringReader(domContent)));
+    assertEquals(actionDom, metadata.getActionDom());
+
   }
 }

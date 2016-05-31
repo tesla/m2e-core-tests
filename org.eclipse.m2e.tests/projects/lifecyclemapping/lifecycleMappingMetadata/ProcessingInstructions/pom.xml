@@ -1,0 +1,75 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.eclipse.m2e.test.lifecyclemapping</groupId>
+    <artifactId>annotated-parent</artifactId>
+    <version>1.0.0</version>
+  </parent>
+  <groupId>lifecycleMappingMetadataTests</groupId>
+  <artifactId>child</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.eclipse.m2e.test.lifecyclemapping</groupId>
+        <artifactId>test-buildhelper-plugin</artifactId>
+        <version>1.0.0</version>
+        <extensions>true</extensions>
+        <executions>
+          <execution>
+            <?m2e ignore?>
+            <id>test1</id>
+            <goals>
+              <goal>validate</goal>
+            </goals>
+            <phase>generate-sources</phase>
+          </execution>
+          <execution>
+            <?m2e configurator org.eclipse.m2e.configurator.test?>
+            <id>test3</id>
+            <goals>
+              <goal>validate</goal>
+            </goals>
+            <phase>generate-sources</phase>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.eclipse.m2e.test.lifecyclemapping</groupId>
+        <artifactId>test-embeddedmapping-plugin</artifactId>
+      </plugin>
+    </plugins>
+    
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.eclipse.m2e.test.lifecyclemapping</groupId>
+          <artifactId>test-embeddedmapping-plugin</artifactId>
+          <version>1.0.0</version>
+          <executions>
+            <execution>
+              <id>test6</id>
+              <goals>
+                <goal>test-goal-1</goal>
+              </goals>
+              <phase>generate-sources</phase>
+            </execution>
+            <execution>
+              <?m2e execute onConfiguration?>
+              <id>test7</id>
+              <goals>
+                <goal>test-goal-1</goal>
+              </goals>
+              <phase>generate-sources</phase>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+  
+</project>
