@@ -11,6 +11,9 @@
 
 package org.eclipse.m2e.tests.embedder;
 
+import java.net.URL;
+import java.net.URLClassLoader;
+
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.transfer.TransferListener;
 import org.eclipse.core.runtime.CoreException;
@@ -145,5 +148,16 @@ public class MavenExecutionContextTest extends AbstractMavenProjectTestCase {
         return null;
       }
     }, monitor);
+  }
+
+  public void test496492_threadContextClassloaderLeak() throws Exception {
+    ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+    maven.execute(new ICallable<Void>() {
+      public Void call(IMavenExecutionContext context, IProgressMonitor monitor) {
+        Thread.currentThread().setContextClassLoader(new URLClassLoader(new URL[0]));
+        return null;
+      }
+    }, monitor);
+    assertSame(tccl, Thread.currentThread().getContextClassLoader());
   }
 }
