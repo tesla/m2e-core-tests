@@ -15,7 +15,7 @@
   <packaging>pom</packaging>
 
   <properties>
-    <tycho-version>0.23.0</tycho-version>
+    <tycho-version>0.25.0</tycho-version>
 
     <eclipse-repo.url>http://download.eclipse.org/releases/mars</eclipse-repo.url>
     <m2e-core.url>http://repository.takari.io:8081/nexus/content/sites/m2e.extras/m2e/1.8.0/N/LATEST/</m2e-core.url>
