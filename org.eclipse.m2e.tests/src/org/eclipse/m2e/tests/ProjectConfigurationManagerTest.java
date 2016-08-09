@@ -59,6 +59,7 @@ import org.eclipse.m2e.core.internal.project.registry.ProjectRegistryRefreshJob;
 import org.eclipse.m2e.core.lifecyclemapping.model.IPluginExecutionMetadata;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.IProjectConfigurationManager;
+import org.eclipse.m2e.core.project.IProjectCreationListener;
 import org.eclipse.m2e.core.project.MavenProjectInfo;
 import org.eclipse.m2e.core.project.MavenUpdateRequest;
 import org.eclipse.m2e.core.project.ProjectImportConfiguration;
@@ -570,23 +571,50 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     }
   }
 
+  public void test473953_ProjectCreationListener() throws Exception {
+    boolean[] listenerCalled = new boolean[1];
+    IProjectCreationListener l = new IProjectCreationListener() {
+      public void projectCreated(IProject project) {
+        listenerCalled[0] = true;
+      }
+    };
+    IProject project = createSimplePomProject("testProject", l);
+    assertNoErrors(project);
+    assertTrue(listenerCalled[0]);
+    
+    listenerCalled[0] = false;
+    importProject("projects/projectimport/p001/pom.xml", new ResolverConfiguration(), l);
+    assertNoErrors(project);
+    assertTrue(listenerCalled[0]);
+  }
+
   private IProject createSimpleProject(final String projectName, final IPath location, final Model model)
       throws CoreException {
+    return createSimpleProject(projectName, location, model, null);
+  }
+
+  private IProject createSimpleProject(final String projectName, final IPath location, final Model model,
+      final IProjectCreationListener listener) throws CoreException {
     final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 
     workspace.run(new IWorkspaceRunnable() {
       public void run(IProgressMonitor monitor) throws CoreException {
         ProjectImportConfiguration pic = new ProjectImportConfiguration(new ResolverConfiguration());
         MavenPlugin.getProjectConfigurationManager().createSimpleProject(project, location, model, new String[0], pic,
-            monitor);
+            listener, monitor);
       }
     }, MavenPlugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
 
     return project;
   }
 
-  private IProject createSimplePomProject(final String projectName) throws CoreException {
+  private IProject createSimplePomProject(String projectName) throws CoreException {
+    return createSimplePomProject(projectName, null);
+  }
+
+  private IProject createSimplePomProject(String projectName, IProjectCreationListener listener) throws CoreException {
     Model model = new Model();
+    model.setModelVersion("4.0.0");
     model.setGroupId(projectName);
     model.setArtifactId(projectName);
     model.setVersion("0.0.1-SNAPSHOT");
@@ -596,7 +624,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     parent.setArtifactId("m2e-test-parent");
     parent.setVersion("1.0.0");
     model.setParent(parent);
-    return createSimpleProject(projectName, null, model);
+    return createSimpleProject(projectName, null, model, listener);
   }
 
   private IProject createArchetypeProject(final String projectName, final IPath location, final Archetype archetype)
