@@ -12,6 +12,8 @@
 package org.eclipse.m2e.tests.embedder;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -95,14 +97,20 @@ public class MavenRuntimeManagerTest extends TestCase {
     List<String> classpathEntries = m2conf.realms.get(MavenEmbeddedRuntime.PLEXUS_CLASSWORLD_NAME);
     assertNotNull("Realm " + MavenEmbeddedRuntime.PLEXUS_CLASSWORLD_NAME + " does not exist", classpathEntries);
     assertTrue(classpathEntries.size() > 0);
-    boolean found = false;
+    boolean foundPlexusApi = false;
+    boolean foundSlf4j = false;
     for(String classpathEntry : classpathEntries) {
       if(classpathEntry.contains("plexus-build-api")) {
-        found = true;
+        foundPlexusApi = true;
         break;
+      } else if(classpathEntry.contains("org.slf4j.api")
+          //or in Dev mode:
+          || Files.isRegularFile(Paths.get(classpathEntry, "org", "slf4j", "Logger.class"))) {
+        foundSlf4j = true;
       }
     }
-    assertFalse("plexus-build-api jar is in classpath", found);
+    assertFalse("plexus-build-api jar is in classpath", foundPlexusApi);
+    assertTrue("slf4j-api bundle is missing from the classpath", foundSlf4j);
   }
 
   public void testExternalRuntime() throws Exception {
