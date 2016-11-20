@@ -311,68 +311,112 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
   }
 
   public void testDownloadSources_001_basic() throws Exception {
-    deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t001/0.0.1/"));
-    deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t002/0.0.1/"));
+    MavenConfigurationImpl config = (MavenConfigurationImpl) MavenPlugin.getMavenConfiguration();
+    boolean downloadSources = config.isDownloadSources();
+    try {
+      config.setDownloadSources(false);
 
-    IProject project = createExisting("downloadsources-p001", "projects/downloadsources/p001");
-    waitForJobsToComplete();
-
-    IJavaProject javaProject = JavaCore.create(project);
-    IClasspathContainer container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
-
-    // sanity check
-    IClasspathEntry[] cp = container.getClasspathEntries();
-    assertEquals(2, cp.length);
-    assertNull(cp[0].getSourceAttachmentPath());
-    assertNull(cp[1].getSourceAttachmentPath());
-
-    // test project
-    getBuildPathManager().scheduleDownload(project, true, false);
-    waitForJobsToComplete();
-    container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
-    cp = container.getClasspathEntries();
-    assertEquals(2, cp.length);
-    assertEquals("downloadsources-t001-0.0.1-sources.jar", cp[0].getSourceAttachmentPath().lastSegment());
-    assertEquals("downloadsources-t002-0.0.1-sources.jar", cp[1].getSourceAttachmentPath().lastSegment());
-
-    {
-      // cleanup
       deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t001/0.0.1/"));
       deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t002/0.0.1/"));
-      MavenPlugin.getMavenProjectRegistry().refresh(new MavenUpdateRequest(project, false /*offline*/, false));
+
+      IProject project = createExisting("downloadsources-p001", "projects/downloadsources/p001");
       waitForJobsToComplete();
-    }
 
-    // test one entry
-    getBuildPathManager().scheduleDownload(getPackageFragmentRoot(javaProject, cp[0]), true, false);
-    waitForJobsToComplete();
-    container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
-    cp = container.getClasspathEntries();
-    assertEquals(2, cp.length);
-    assertEquals("downloadsources-t001-0.0.1-sources.jar", cp[0].getSourceAttachmentPath().lastSegment());
-    assertNull(cp[1].getSourceAttachmentPath());
+      IJavaProject javaProject = JavaCore.create(project);
+      IClasspathContainer container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
 
-    {
-      // cleanup
-      deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t001/0.0.1/"));
-      deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t002/0.0.1/"));
-      MavenPlugin.getMavenProjectRegistry()
-          .refresh(new MavenUpdateRequest(new IProject[] {project}, false /*offline*/, false));
+      // sanity check
+      IClasspathEntry[] cp = container.getClasspathEntries();
+      assertEquals(2, cp.length);
+      assertNull(cp[0].getSourceAttachmentPath());
+      assertNull(cp[1].getSourceAttachmentPath());
+
+      // test project
+      getBuildPathManager().scheduleDownload(project, true, false);
       waitForJobsToComplete();
-    }
+      container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
+      cp = container.getClasspathEntries();
+      assertEquals(2, cp.length);
+      assertEquals("downloadsources-t001-0.0.1-sources.jar", cp[0].getSourceAttachmentPath().lastSegment());
+      assertEquals("downloadsources-t002-0.0.1-sources.jar", cp[1].getSourceAttachmentPath().lastSegment());
 
-    // test two entries
-    getBuildPathManager().scheduleDownload(getPackageFragmentRoot(javaProject, cp[0]), true, false);
-    getBuildPathManager().scheduleDownload(getPackageFragmentRoot(javaProject, cp[1]), true, false);
-    waitForJobsToComplete();
-    container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
-    cp = container.getClasspathEntries();
-    assertEquals(2, cp.length);
-    assertEquals("downloadsources-t001-0.0.1-sources.jar", cp[0].getSourceAttachmentPath().lastSegment());
-    assertEquals("downloadsources-t002-0.0.1-sources.jar", cp[1].getSourceAttachmentPath().lastSegment());
+      {
+        // cleanup
+        deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t001/0.0.1/"));
+        deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t002/0.0.1/"));
+        MavenPlugin.getMavenProjectRegistry().refresh(new MavenUpdateRequest(project, false /*offline*/, false));
+        waitForJobsToComplete();
+      }
+
+      // test one entry
+      getBuildPathManager().scheduleDownload(getPackageFragmentRoot(javaProject, cp[0]), true, false);
+      waitForJobsToComplete();
+      container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
+      cp = container.getClasspathEntries();
+      assertEquals(2, cp.length);
+      assertEquals("downloadsources-t001-0.0.1-sources.jar", cp[0].getSourceAttachmentPath().lastSegment());
+      assertNull(cp[1].getSourceAttachmentPath());
+
+      {
+        // cleanup
+        deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t001/0.0.1/"));
+        deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t002/0.0.1/"));
+        MavenPlugin.getMavenProjectRegistry()
+            .refresh(new MavenUpdateRequest(new IProject[] {project}, false /*offline*/, false));
+        waitForJobsToComplete();
+      }
+
+      // test two entries
+      getBuildPathManager().scheduleDownload(getPackageFragmentRoot(javaProject, cp[0]), true, false);
+      getBuildPathManager().scheduleDownload(getPackageFragmentRoot(javaProject, cp[1]), true, false);
+      waitForJobsToComplete();
+      container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
+      cp = container.getClasspathEntries();
+      assertEquals(2, cp.length);
+      assertEquals("downloadsources-t001-0.0.1-sources.jar", cp[0].getSourceAttachmentPath().lastSegment());
+      assertEquals("downloadsources-t002-0.0.1-sources.jar", cp[1].getSourceAttachmentPath().lastSegment());
+    } finally {
+      config.setDownloadSources(downloadSources);
+    }
   }
 
   public void testDownloadSources_001_workspaceRestart() throws Exception {
+    MavenConfigurationImpl config = (MavenConfigurationImpl) MavenPlugin.getMavenConfiguration();
+    boolean downloadSources = config.isDownloadSources();
+    try {
+      config.setDownloadSources(false);
+      deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t001/0.0.1/"));
+      deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t002/0.0.1/"));
+
+      IProject project = createExisting("downloadsources-p001", "projects/downloadsources/p001");
+      waitForJobsToComplete();
+
+      IJavaProject javaProject = JavaCore.create(project);
+      IClasspathContainer container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
+
+      // sanity check
+      IClasspathEntry[] cp = container.getClasspathEntries();
+      assertEquals(2, cp.length);
+      assertNull(cp[0].getSourceAttachmentPath());
+      assertNull(cp[1].getSourceAttachmentPath());
+
+      // purge MavenProject cache to simulate workspace restart
+      deserializeFromWorkspaceState(MavenPlugin.getMavenProjectRegistry().getProject(project));
+
+      // test project
+      getBuildPathManager().scheduleDownload(project, true, false);
+      waitForJobsToComplete();
+      container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
+      cp = container.getClasspathEntries();
+      assertEquals(2, cp.length);
+      assertEquals("downloadsources-t001-0.0.1-sources.jar", cp[0].getSourceAttachmentPath().lastSegment());
+      assertEquals("downloadsources-t002-0.0.1-sources.jar", cp[1].getSourceAttachmentPath().lastSegment());
+    } finally {
+      config.setDownloadSources(downloadSources);
+    }
+  }
+
+  public void testDownloadSourcesByDefault() throws Exception {
     deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t001/0.0.1/"));
     deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t002/0.0.1/"));
 
@@ -384,18 +428,6 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
 
     // sanity check
     IClasspathEntry[] cp = container.getClasspathEntries();
-    assertEquals(2, cp.length);
-    assertNull(cp[0].getSourceAttachmentPath());
-    assertNull(cp[1].getSourceAttachmentPath());
-
-    // purge MavenProject cache to simulate workspace restart
-    deserializeFromWorkspaceState(MavenPlugin.getMavenProjectRegistry().getProject(project));
-
-    // test project
-    getBuildPathManager().scheduleDownload(project, true, false);
-    waitForJobsToComplete();
-    container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
-    cp = container.getClasspathEntries();
     assertEquals(2, cp.length);
     assertEquals("downloadsources-t001-0.0.1-sources.jar", cp[0].getSourceAttachmentPath().lastSegment());
     assertEquals("downloadsources-t002-0.0.1-sources.jar", cp[1].getSourceAttachmentPath().lastSegment());
@@ -516,15 +548,6 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     IJavaProject javaProject = JavaCore.create(project);
     IClasspathContainer container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
     IClasspathEntry[] cp = container.getClasspathEntries();
-    assertEquals(1, cp.length);
-    assertNull(cp[0].getSourceAttachmentPath());
-
-    getBuildPathManager().scheduleDownload(project, true, false);
-    waitForJobsToComplete();
-
-    javaProject = JavaCore.create(project);
-    container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
-    cp = container.getClasspathEntries();
     assertEquals(1, cp.length);
     assertEquals("downloadsources-t004-0.0.1-sources.jar", cp[0].getSourceAttachmentPath().lastSegment());
   }
