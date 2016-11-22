@@ -401,6 +401,39 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertEquals("downloadsources-t002-0.0.1-sources.jar", cp[1].getSourceAttachmentPath().lastSegment());
   }
 
+  public void testDownloadSources_OnPrefChange() throws Exception {
+    MavenConfigurationImpl config = (MavenConfigurationImpl) MavenPlugin.getMavenConfiguration();
+    boolean downloadSources = config.isDownloadSources();
+    try {
+      config.setDownloadSources(false);
+      deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t001/0.0.1/"));
+      deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t002/0.0.1/"));
+
+      IProject project = createExisting("downloadsources-p001", "projects/downloadsources/p001");
+      waitForJobsToComplete();
+
+      IJavaProject javaProject = JavaCore.create(project);
+      IClasspathContainer container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
+
+      // sanity check
+      IClasspathEntry[] cp = container.getClasspathEntries();
+      assertEquals(2, cp.length);
+      assertNull(cp[0].getSourceAttachmentPath());
+      assertNull(cp[1].getSourceAttachmentPath());
+
+      config.setDownloadSources(true);
+      waitForJobsToComplete();
+
+      //sources should be attached automatically
+      container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
+      cp = container.getClasspathEntries();
+      assertEquals(2, cp.length);
+      assertEquals("downloadsources-t001-0.0.1-sources.jar", cp[0].getSourceAttachmentPath().lastSegment());
+      assertEquals("downloadsources-t002-0.0.1-sources.jar", cp[1].getSourceAttachmentPath().lastSegment());
+    } finally {
+      config.setDownloadSources(downloadSources);
+    }
+  }
   private IPackageFragmentRoot getPackageFragmentRoot(IJavaProject javaProject, IClasspathEntry cp)
       throws JavaModelException {
     return javaProject.findPackageFragmentRoot(cp.getPath());
