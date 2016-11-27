@@ -43,23 +43,36 @@ public class EclipseIncrementalBuildContextTest extends AbstractMavenProjectTest
     Scanner scanner;
 
     scanner = context.newScanner(new File(project.getLocation().toFile(), "src/main/resources"), true);
-    checkScanner(scanner);
+    checkResourcesScanner(scanner);
 
     scanner = context.newScanner(new File(project.getLocation().toFile(), "src/main/resources"), false);
-    checkScanner(scanner);
+    checkResourcesScanner(scanner);
+
+    scanner = context.newScanner(project.getLocation().toFile(), false);
+    checkBaseDirScanner(scanner);
   }
 
   private EclipseIncrementalBuildContext newBuildContext(ResourceDeltaStub delta) {
     return new EclipseIncrementalBuildContext(delta, new HashMap<String, Object>(), new DummyBuildResultCollector());
   }
 
-  private void checkScanner(Scanner scanner) {
+  private void checkResourcesScanner(Scanner scanner) {
     // both forward and backward slashes must be understood as separators
     scanner.setIncludes(new String[] {"sub/dir\\file.txt"});
     scanner.scan();
 
     List<String> included = Arrays.asList(scanner.getIncludedFiles());
     assertTrue(included.toString(), included.contains("sub" + File.separator + "dir" + File.separator + "file.txt"));
+  }
+
+  private void checkBaseDirScanner(Scanner scanner) {
+    // Scanning the root directory must find the file
+    scanner.setIncludes(new String[] {"**/file.txt"});
+    scanner.scan();
+
+    List<String> included = Arrays.asList(scanner.getIncludedFiles());
+    assertTrue(included.toString(), included.contains("src" + File.separator + "main" + File.separator + "resources"
+        + File.separator + "sub" + File.separator + "dir" + File.separator + "file.txt"));
   }
 
 }
