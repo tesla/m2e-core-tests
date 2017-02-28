@@ -392,12 +392,33 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     assertEquals("missing", marker.getAttribute(IMavenConstants.MARKER_ATTR_ARTIFACT_ID));
     assertEquals("0.0.0", marker.getAttribute(IMavenConstants.MARKER_ATTR_VERSION));
     assertEquals("", marker.getAttribute(IMavenConstants.MARKER_ATTR_CLASSIFIER));
+    assertEquals(9, marker.getAttribute(IMarker.LINE_NUMBER));
+    assertEquals(3, marker.getAttribute(IMavenConstants.MARKER_COLUMN_START));
+    assertEquals(14, marker.getAttribute(IMavenConstants.MARKER_COLUMN_END));
 
     marker = markers.get(2);
     assertEquals("another-missing", marker.getAttribute(IMavenConstants.MARKER_ATTR_GROUP_ID));
     assertEquals("another-missing", marker.getAttribute(IMavenConstants.MARKER_ATTR_ARTIFACT_ID));
     assertEquals("1.0.0", marker.getAttribute(IMavenConstants.MARKER_ATTR_VERSION));
     assertEquals("test", marker.getAttribute(IMavenConstants.MARKER_ATTR_CLASSIFIER));
+    assertEquals(14, marker.getAttribute(IMarker.LINE_NUMBER));
+    assertEquals(3, marker.getAttribute(IMavenConstants.MARKER_COLUMN_START));
+    assertEquals(14, marker.getAttribute(IMavenConstants.MARKER_COLUMN_END));
+
+  }
+
+  public void test512825_missingArtifactVersion() throws Exception {
+    IProject project = importProject("projects/markers/testArtifactMissingVersion/pom.xml");
+    waitForJobsToComplete();
+    List<IMarker> markers = WorkspaceHelpers.findErrorMarkers(project);
+    assertEquals(WorkspaceHelpers.toString(markers), 1, markers.size());
+
+    IMarker marker = markers.get(0);
+    assertEquals("Project build error: 'dependencies.dependency.version' for missing:missing:jar is missing.",
+        marker.getAttribute(IMarker.MESSAGE));
+    assertEquals(9, marker.getAttribute(IMarker.LINE_NUMBER));
+    assertEquals(1, marker.getAttribute(IMavenConstants.MARKER_COLUMN_START));
+    assertEquals(14, marker.getAttribute(IMavenConstants.MARKER_COLUMN_END));
   }
 
   public void testBuildCantReadPom() throws Exception {
