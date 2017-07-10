@@ -307,7 +307,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
       assertEquals(1, artifacts.size());
       Artifact a = artifacts.iterator().next();
       assertEquals(true, a.isResolved());
-      assertEquals(p2.getFile(IMavenConstants.POM_FILE_NAME).getLocation().toFile(), a.getFile());
+      assertEquals(p2.getFolder("target/classes").getLocation().toFile(), a.getFile());
     }
 
     deleteProject(p2);

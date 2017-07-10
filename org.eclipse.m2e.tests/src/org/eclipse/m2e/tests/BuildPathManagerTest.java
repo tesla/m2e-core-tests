@@ -16,8 +16,10 @@ import static org.eclipse.m2e.tests.common.ClasspathHelpers.assertClasspath;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IProject;
@@ -44,10 +46,12 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.codehaus.plexus.util.DirectoryScanner;
 
 import org.apache.maven.archetype.catalog.Archetype;
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
+import org.apache.maven.project.MavenProject;
 
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.internal.IMavenConstants;
@@ -56,6 +60,7 @@ import org.eclipse.m2e.core.internal.index.IMutableIndex;
 import org.eclipse.m2e.core.internal.index.nexus.NexusIndex;
 import org.eclipse.m2e.core.internal.index.nexus.NexusIndexManager;
 import org.eclipse.m2e.core.internal.preferences.MavenConfigurationImpl;
+import org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager;
 import org.eclipse.m2e.core.internal.repository.RepositoryRegistry;
 import org.eclipse.m2e.core.project.IProjectConfigurationManager;
 import org.eclipse.m2e.core.project.MavenUpdateRequest;
@@ -75,6 +80,18 @@ import org.eclipse.m2e.tests.common.WorkspaceHelpers;
  */
 @SuppressWarnings("restriction")
 public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
+
+  private ProjectRegistryManager manager;
+
+  protected void setUp() throws Exception {
+    super.setUp();
+    manager = MavenPluginActivator.getDefault().getMavenProjectManagerImpl();
+  }
+
+  protected void tearDown() throws Exception {
+    manager = null;
+    super.tearDown();
+  }
 
   public void testEnableMavenNature() throws Exception {
     deleteProject("MNGECLIPSE-248parent");
@@ -283,6 +300,11 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertEquals(new Path("/p2"), cp[0].getPath());
     assertEquals("junit-4.0.jar", cp[2].getPath().lastSegment());
     assertEquals("easymock-1.0.jar", cp[1].getPath().lastSegment());
+
+    Set<Artifact> artifacts = getMavenProjectArtifacts(project1);
+    assertEquals(3, artifacts.size());
+    Artifact a1 = artifacts.iterator().next();
+    assertEquals(project2.getFolder("target/classes").getLocation().toFile(), a1.getFile());
   }
 
   public void testClasspathOrderWorkspace003() throws Exception {
@@ -686,7 +708,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertEquals("classifiers-p2-0.0.1.jar", cp[0].getPath().lastSegment());
     assertEquals("classifiers-p2-0.0.1-tests.jar", cp[1].getPath().lastSegment());
 
-    createExisting("classifiers-p2", "projects/classifiers/classifiers-p2");
+    IProject p2 = createExisting("classifiers-p2", "projects/classifiers/classifiers-p2");
     waitForJobsToComplete();
 
     container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
@@ -694,6 +716,13 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
 
     assertEquals(1, cp.length);
     assertEquals("classifiers-p2", cp[0].getPath().lastSegment());
+
+    Set<Artifact> artifacts = getMavenProjectArtifacts(p1);
+    assertEquals(2, artifacts.size());
+
+    Iterator<Artifact> it = artifacts.iterator();
+    assertEquals(p2.getFolder("target/classes").getLocation().toFile(), it.next().getFile());
+    assertEquals(p2.getFolder("target/test-classes").getLocation().toFile(), it.next().getFile());
   }
 
   public void testCreateSimpleProject() throws CoreException {
@@ -746,6 +775,12 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     cp = getMavenContainerEntries(p1);
     assertEquals(1, cp.length);
     assertEquals(p2.getFullPath(), cp[0].getPath());
+
+    Set<Artifact> artifacts = getMavenProjectArtifacts(p1);
+    assertEquals(1, artifacts.size());
+
+    Iterator<Artifact> it = artifacts.iterator();
+    assertEquals(p2.getFolder("target/classes").getLocation().toFile(), it.next().getFile());
   }
 
   public void testProjectNameTemplate() throws Exception {
@@ -1266,5 +1301,10 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
 
     assertEquals(1, cp.length);
     ClasspathHelpers.assertClasspathEntry(cp, projects[0].getFullPath());
+  }
+
+  private Set<Artifact> getMavenProjectArtifacts(IProject p) throws CoreException {
+    MavenProject mavenProject = manager.create(p, monitor).getMavenProject(monitor);
+    return mavenProject.getArtifacts();
   }
 }
