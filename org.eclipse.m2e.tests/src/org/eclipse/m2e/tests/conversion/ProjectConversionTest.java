@@ -13,11 +13,13 @@ package org.eclipse.m2e.tests.conversion;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.util.Hashtable;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.m2e.tests.common.FileHelpers;
 
@@ -67,6 +69,23 @@ public class ProjectConversionTest extends AbstractProjectConversionTestCase {
     //Checks a project having optional and missing source directories doesn't crash
     // during conversion
     testProjectConversion("missing-source-folder");
+  }
+
+  public void testInheritJavaSettingsDuringConversion() throws Exception {
+    //Checks a project having optional and missing source directories doesn't crash
+    // during conversion
+    Hashtable<String, String> options = JavaCore.getOptions();
+    try {
+      String version = "1.7";
+      Hashtable<String, String> newOptions = new Hashtable<>(options);
+      newOptions.put(JavaCore.COMPILER_SOURCE, version);
+      newOptions.put(JavaCore.COMPILER_COMPLIANCE, version);
+      newOptions.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, version);
+      JavaCore.setOptions(newOptions);
+      testProjectConversion("inherit-workspace-settings");
+    } finally {
+      JavaCore.setOptions(options);
+    }
   }
 
   public void testProjectConversionWithSvn() throws Exception {
