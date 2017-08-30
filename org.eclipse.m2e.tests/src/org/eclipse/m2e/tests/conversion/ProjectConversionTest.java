@@ -72,7 +72,7 @@ public class ProjectConversionTest extends AbstractProjectConversionTestCase {
   }
 
   public void testInheritJavaSettingsDuringConversion() throws Exception {
-    //Checks a project having optional and missing source directories doesn't crash
+    //Checks a project with no specific compiler settings inherits workspace compiler settings
     // during conversion
     Hashtable<String, String> options = JavaCore.getOptions();
     try {
