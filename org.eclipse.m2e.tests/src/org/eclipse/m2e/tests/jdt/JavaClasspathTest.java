@@ -15,16 +15,29 @@ import static org.eclipse.m2e.tests.common.ClasspathHelpers.assertClasspath;
 import static org.eclipse.m2e.tests.common.ClasspathHelpers.getClasspathAttribute;
 import static org.eclipse.m2e.tests.common.ClasspathHelpers.getClasspathEntry;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.junit.Assert;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
+import org.eclipse.m2e.jdt.IClasspathDescriptor;
+import org.eclipse.m2e.jdt.IClasspathEntryDescriptor;
 import org.eclipse.m2e.jdt.IClasspathManager;
+import org.eclipse.m2e.jdt.internal.ClasspathDescriptor;
 import org.eclipse.m2e.jdt.internal.MavenClasspathHelpers;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
@@ -55,8 +68,7 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     assertNoErrors(project);
     copyContent(project, "pom-custom-source-root.xml", "pom.xml");
 
-    MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
-    waitForJobsToComplete();
+    updateProjectConfiguration(project);
     assertNoErrors(project);
 
     IJavaProject javaProject = JavaCore.create(project);
@@ -110,9 +122,7 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", originalCp[3].getPath().segment(0));
     assertEquals("org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER", originalCp[4].getPath().segment(0));
 
-    MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
-    waitForJobsToComplete();
-    //assertNoErrors(project);
+    updateProjectConfiguration(project);
 
     javaProject = JavaCore.create(project);
     IClasspathEntry[] updatedCp = javaProject.getRawClasspath();
@@ -136,9 +146,7 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     originalCp[4] = MavenClasspathHelpers.getDefaultContainerEntry(true);
     javaProject.setRawClasspath(originalCp, monitor);
 
-    MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
-    waitForJobsToComplete();
-    //assertNoErrors(project);
+    updateProjectConfiguration(project);
 
     javaProject = JavaCore.create(project);
     IClasspathEntry[] updatedCp = javaProject.getRawClasspath();
@@ -170,9 +178,7 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
 
     javaProject.setRawClasspath(newOrder, null);
 
-    // Update the project
-    MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
-    waitForJobsToComplete();
+    updateProjectConfiguration(project);
 
     cp = javaProject.getRawClasspath();
 
@@ -192,9 +198,7 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
 
     javaProject.setRawClasspath(newOrder, null);
 
-    // Update the project
-    MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
-    waitForJobsToComplete();
+    updateProjectConfiguration(project);
 
     cp = javaProject.getRawClasspath();
 
@@ -209,6 +213,8 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
         }, cp);
 
   }
+
+
 
   public void test394042_ClasspathEntry4() throws Exception {
     IProject project = importProject("projects/394042_ClasspathEntry4/pom.xml");
@@ -255,8 +261,7 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
         }, cp);
 
     copyContent(project, "pom_changed.xml", "pom.xml");
-    MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
-    waitForJobsToComplete();
+    updateProjectConfiguration(project);
     WorkspaceHelpers.assertNoErrors(project);
 
     cp = JavaCore.create(project).getRawClasspath();
@@ -327,5 +332,67 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
         "org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER", //
     }, //
         javaProject.getRawClasspath());
+  }
+
+  public void test525880_JavaAccessRulesArePreservedOnUpdate() throws Exception {
+    IProject project = importProject("projects/525880_java_pom_with_access_rules/pom.xml");
+    addAccessRulesToClasspathContainers(JavaCore.create(project));
+    assertContainersHaveAccessRules(JavaCore.create(project));
+
+    updateProjectConfiguration(project);
+
+    assertContainersHaveAccessRules(JavaCore.create(project));
+  }
+
+  private void updateProjectConfiguration(IProject project) throws CoreException, InterruptedException {
+    MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
+    waitForJobsToComplete();
+  }
+
+  private void assertContainersHaveAccessRules(IJavaProject javaProject) throws JavaModelException {
+    List<IClasspathEntry> containerEntries = Stream.of(javaProject.getRawClasspath())
+        .filter(mavenClasspathEntry()).collect(Collectors.toList());
+    assertEquals(1, containerEntries.size());
+
+    containerEntries.forEach(entry -> {
+      assertNotNull(entry.getAccessRules());
+      List<IAccessRule> accessRules = Arrays.asList(entry.getAccessRules());
+      assertEquals(1, accessRules.size());
+      accessRules.forEach(accessRule -> {
+        assertEquals(IAccessRule.K_DISCOURAGED, accessRule.getKind());
+        assertEquals("**/internal/**", accessRule.getPattern().toPortableString());
+      });
+    });
+  }
+
+  private void addAccessRulesToClasspathContainers(IJavaProject javaProject)
+      throws JavaModelException, InterruptedException, CoreException {
+    IClasspathDescriptor classpath = new ClasspathDescriptor(javaProject);
+
+    List<IClasspathEntryDescriptor> containerEntries = classpath.getEntryDescriptors().stream()
+        .filter(mavenClasspathEntryDescriptor())
+        .collect(Collectors.toList());
+    assertEquals(1, containerEntries.size());
+
+    containerEntries.forEach(this::addAccessRule);
+
+    List<IClasspathEntry> updatedEntries = classpath.getEntryDescriptors().stream().map(e -> e.toClasspathEntry())
+        .collect(Collectors.toList());
+    javaProject.setRawClasspath(updatedEntries.toArray(new IClasspathEntry[0]), monitor);
+    waitForJobsToComplete();
+  }
+
+  private Predicate<IClasspathEntry> mavenClasspathEntry() {
+    return entry -> entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER
+        && entry.getPath().toPortableString().equals(IClasspathManager.CONTAINER_ID);
+  }
+
+  private Predicate<IClasspathEntryDescriptor> mavenClasspathEntryDescriptor() {
+    return entry -> entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER
+        && entry.getPath().toPortableString().equals(IClasspathManager.CONTAINER_ID);
+  }
+
+  private void addAccessRule(IClasspathEntryDescriptor entry) {
+    entry.addAccessRule(JavaCore.newAccessRule(Path.fromPortableString("**/internal/**"), IAccessRule.K_DISCOURAGED));
   }
 }
