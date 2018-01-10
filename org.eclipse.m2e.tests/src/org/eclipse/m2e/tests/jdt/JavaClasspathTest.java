@@ -344,6 +344,24 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     assertContainersHaveAccessRules(JavaCore.create(project));
   }
 
+  public void test518218_configureMethodParametersGenerationWithParameters() throws Exception {
+    testMethodParametersGeneration("projects/518218/parameters/pom.xml");
+  }
+
+  public void test518218_configureMethodParametersGenerationWithCompilerArgs() throws Exception {
+    testMethodParametersGeneration("projects/518218/compilerArgs/pom.xml");
+  }
+
+  public void test518218_configureMethodParametersGenerationWithCompilerArgument() throws Exception {
+    testMethodParametersGeneration("projects/518218/compilerArgument/pom.xml");
+  }
+
+  private void testMethodParametersGeneration(String projectPath) throws Exception {
+    IProject project = importProject(projectPath);
+    IJavaProject javaProject = JavaCore.create(project);
+    assertEquals(JavaCore.GENERATE, javaProject.getOption(JavaCore.COMPILER_CODEGEN_METHOD_PARAMETERS_ATTR, false));
+  }
+
   private void updateProjectConfiguration(IProject project) throws CoreException, InterruptedException {
     MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
     waitForJobsToComplete();
