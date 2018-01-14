@@ -692,6 +692,41 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     }
   }
 
+  public void testDownloadSources_008_fallbackToJavadocWhenMissingSources() throws Exception {
+    boolean oldDownloadSources = mavenConfiguration.isDownloadSources();
+    boolean oldDownloadJavadoc = mavenConfiguration.isDownloadJavaDoc();
+    try {
+      ((MavenConfigurationImpl) mavenConfiguration).setDownloadSources(true);
+      ((MavenConfigurationImpl) mavenConfiguration).setDownloadJavadoc(false);
+      deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t008/0.0.1"));
+
+      IProject project = createExisting("downloadsources-p003", "projects/downloadsources/p008");
+      waitForJobsToComplete();
+
+      // sanity check
+      IJavaProject javaProject = JavaCore.create(project);
+      IClasspathContainer container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
+      IClasspathEntry[] cp = container.getClasspathEntries();
+      assertEquals(1, cp.length);
+      assertNull(cp[0].getSourceAttachmentPath());
+      assertEquals("" + cp[0], 0, getAttributeCount(cp[0], IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME));
+
+      MavenUpdateRequest request = new MavenUpdateRequest(project, false/*offline*/, false/*updateSnapshots*/);
+      //when sources are missing, we expect the javadoc to be downloaded if available.
+      MavenPlugin.getMavenProjectRegistry().refresh(request);
+      waitForJobsToComplete();
+      container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
+      cp = container.getClasspathEntries();
+
+      assertEquals(1, cp.length);
+      assertNull(cp[0].getSourceAttachmentPath()); // sanity check
+      assertEquals("" + cp[0], 1, getAttributeCount(cp[0], IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME));
+    } finally {
+      ((MavenConfigurationImpl) mavenConfiguration).setDownloadSources(oldDownloadSources);
+      ((MavenConfigurationImpl) mavenConfiguration).setDownloadJavadoc(oldDownloadJavadoc);
+    }
+  }
+
   private BuildPathManager getBuildPathManager() {
     return (BuildPathManager) MavenJdtPlugin.getDefault().getBuildpathManager();
   }
