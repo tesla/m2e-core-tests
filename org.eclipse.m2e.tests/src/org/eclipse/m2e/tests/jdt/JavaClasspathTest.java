@@ -27,6 +27,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IAccessRule;
+import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -37,6 +38,7 @@ import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.jdt.IClasspathDescriptor;
 import org.eclipse.m2e.jdt.IClasspathEntryDescriptor;
 import org.eclipse.m2e.jdt.IClasspathManager;
+import org.eclipse.m2e.jdt.internal.BuildPathManager;
 import org.eclipse.m2e.jdt.internal.ClasspathDescriptor;
 import org.eclipse.m2e.jdt.internal.MavenClasspathHelpers;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
@@ -360,6 +362,102 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     IProject project = importProject(projectPath);
     IJavaProject javaProject = JavaCore.create(project);
     assertEquals(JavaCore.GENERATE, javaProject.getOption(JavaCore.COMPILER_CODEGEN_METHOD_PARAMETERS_ATTR, false));
+  }
+
+  public void test526858_TestClasspathAttributeOnJar() throws Exception {
+    IProject project = importProject("projects/526858-test-classpath/jar-dependencies/pom.xml");
+
+    IJavaProject javaProject = JavaCore.create(project);
+    IClasspathEntry[] cp = javaProject.getRawClasspath();
+
+    assertEquals(4, cp.length);
+
+    assertClasspath(new String[] {//
+        "/jar-dependencies/src/main/java", //
+        "/jar-dependencies/src/test/java", //
+        "org.eclipse.jdt.launching.JRE_CONTAINER/.*", //
+        "org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER" //
+    }, cp);
+    assertNotTest(cp[0]);
+    assertTest(cp[1]);
+
+    IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
+        .getClasspathEntries();
+    assertEquals("" + Arrays.asList(classpathEntries), 5, classpathEntries.length);
+    //test dependency
+    assertEquals("junit-3.8.1.jar", classpathEntries[0].getPath().lastSegment());
+    assertTest(classpathEntries[0]);
+    //compile dependency
+    assertEquals("commons-io-2.5.jar", classpathEntries[1].getPath().lastSegment());
+    assertNotTest(classpathEntries[1]);
+    //test + transitive test dependencies
+    assertEquals("commons-beanutils-1.6.jar", classpathEntries[2].getPath().lastSegment());
+    assertTest(classpathEntries[2]);
+    assertEquals("commons-logging-1.0.jar", classpathEntries[3].getPath().lastSegment());
+    assertTest(classpathEntries[3]);
+    assertEquals("commons-collections-2.0.jar", classpathEntries[4].getPath().lastSegment());
+    assertTest(classpathEntries[4]);
+  }
+
+  public void test526858_TestClasspathAttributeOnProject() throws Exception {
+    IProject[] projects = importProjects("projects/526858-test-classpath/",
+        new String[] {"jar-dependencies/pom.xml", "project-dependencies-1/pom.xml"}, new ResolverConfiguration());
+
+    IJavaProject javaProject = JavaCore.create(projects[1]);
+
+    IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
+        .getClasspathEntries();
+    assertEquals("" + Arrays.asList(classpathEntries), 2, classpathEntries.length);
+    //project dependency
+    assertEquals("jar-dependencies", classpathEntries[0].getPath().lastSegment());
+    assertTest(classpathEntries[0]);
+    assertDoesntExportTests(classpathEntries[0]);
+
+    //transitive test dependency
+    assertEquals("commons-io-2.5.jar", classpathEntries[1].getPath().lastSegment());
+    assertTest(classpathEntries[1]);
+  }
+
+  public void test526858_ProjectExportingTests() throws Exception {
+    IProject[] projects = importProjects("projects/526858-test-classpath/",
+        new String[] {"jar-dependencies/pom.xml", "project-dependencies-2/pom.xml"}, new ResolverConfiguration());
+
+    IJavaProject javaProject = JavaCore.create(projects[1]);
+
+    IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
+        .getClasspathEntries();
+    assertEquals("" + Arrays.asList(classpathEntries), 2, classpathEntries.length);
+    //project dependency
+    assertEquals("jar-dependencies", classpathEntries[0].getPath().lastSegment());
+    assertNotTest(classpathEntries[0]);
+    assertExportsTests(classpathEntries[0]);
+
+    //transitive dependency
+    assertEquals("commons-io-2.5.jar", classpathEntries[1].getPath().lastSegment());
+    assertNotTest(classpathEntries[1]);
+  }
+
+  private void assertTest(IClasspathEntry entry) {
+    IClasspathAttribute cpAttr = getClasspathAttribute(entry, IClasspathManager.TEST_ATTRIBUTE);
+    assertNotNull(entry.getPath().lastSegment() + " is missing the test attribute", cpAttr);
+    assertEquals(entry.getPath().lastSegment() + " is missing the test attribute", "true", cpAttr.getValue());
+  }
+
+  private void assertNotTest(IClasspathEntry entry) {
+    IClasspathAttribute cpAttr = getClasspathAttribute(entry, IClasspathManager.TEST_ATTRIBUTE);
+    assertNull(entry.getPath().lastSegment() + " should not have the test attribute", cpAttr);
+  }
+
+  private void assertExportsTests(IClasspathEntry entry) {
+    IClasspathAttribute cpAttr = getClasspathAttribute(entry, IClasspathManager.WITHOUT_TEST_CODE);
+    assertNull(entry.getPath().lastSegment() + " should not have the without_test_code attribute", cpAttr);
+  }
+
+  private void assertDoesntExportTests(IClasspathEntry entry) {
+    IClasspathAttribute cpAttr = getClasspathAttribute(entry, IClasspathManager.WITHOUT_TEST_CODE);
+    assertNotNull(entry.getPath().lastSegment() + " is missing the without_test_code attribute", cpAttr);
+    assertEquals(entry.getPath().lastSegment() + " is missing the without_test_code attribute", "true",
+        cpAttr.getValue());
   }
 
   private void updateProjectConfiguration(IProject project) throws CoreException, InterruptedException {
