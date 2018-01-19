@@ -700,7 +700,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
       ((MavenConfigurationImpl) mavenConfiguration).setDownloadJavadoc(false);
       deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t008/0.0.1"));
 
-      IProject project = createExisting("downloadsources-p003", "projects/downloadsources/p008");
+      IProject project = createExisting("downloadsources-p008", "projects/downloadsources/p008");
       waitForJobsToComplete();
 
       // sanity check
