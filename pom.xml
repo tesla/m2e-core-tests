@@ -16,18 +16,24 @@
 
   <properties>
     <tycho-version>1.0.0</tycho-version>
-
-    <eclipse-repo.url>http://download.eclipse.org/releases/oxygen</eclipse-repo.url>
-    <m2e-core.url>http://repository.takari.io:8081/nexus/content/sites/m2e.extras/m2e/1.9.0/N/LATEST/</m2e-core.url>
-    <tycho.test.jvmArgs>-Xmx800m -XX:MaxPermSize=256m</tycho.test.jvmArgs>
+    <eclipse.stream>photon</eclipse.stream>
+    <eclipse-repo.url>http://download.eclipse.org/eclipse/updates/4.8-I-builds/</eclipse-repo.url>
+    <eclipse-simrel.url>http://download.eclipse.org/releases/${eclipse.stream}</eclipse-simrel.url>
+    <m2e-core.url>https://ci.eclipse.org/m2e/job/m2e-master/lastSuccessfulBuild/artifact/org.eclipse.m2e.site/target/repository/</m2e-core.url>
+    <tycho.test.jvmArgs>-Xmx800m</tycho.test.jvmArgs>
     <tycho.surefire.timeout>900</tycho.surefire.timeout>
   </properties>
 
   <repositories>
     <repository>
-      <id>eclipse</id>
+      <id>platform</id>
       <layout>p2</layout>
       <url>${eclipse-repo.url}</url>
+    </repository>
+    <repository>
+      <id>simrel</id>
+      <layout>p2</layout>
+      <url>${eclipse-simrel.url}</url>
     </repository>
     <repository>
       <id>m2e-core</id>
@@ -100,7 +106,7 @@
         </os>
       </activation>
       <properties>
-        <tycho.test.jvmArgs>-Xmx800m -XX:MaxPermSize=256m -XstartOnFirstThread</tycho.test.jvmArgs>
+        <tycho.test.jvmArgs>-Xmx800m -XstartOnFirstThread</tycho.test.jvmArgs>
       </properties>
       <build>
         <pluginManagement>

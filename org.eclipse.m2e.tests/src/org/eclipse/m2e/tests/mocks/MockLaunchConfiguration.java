@@ -11,6 +11,7 @@
 
 package org.eclipse.m2e.tests.mocks;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -289,6 +290,70 @@ public class MockLaunchConfiguration implements ILaunchConfiguration {
   public boolean isReadOnly() {
     // TODO Auto-generated method isReadOnly
     return false;
+  }
+
+  /* (non-Javadoc)
+   * @see org.eclipse.debug.core.ILaunchConfiguration#delete(int)
+   */
+  public void delete(int flag) throws CoreException {
+    // TODO Auto-generated method delete
+
+  }
+
+  /* (non-Javadoc)
+   * @see org.eclipse.debug.core.ILaunchConfiguration#getPrototype()
+   */
+  public ILaunchConfiguration getPrototype() throws CoreException {
+    // TODO Auto-generated method getPrototype
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see org.eclipse.debug.core.ILaunchConfiguration#isAttributeModified(java.lang.String)
+   */
+  public boolean isAttributeModified(String attribute) throws CoreException {
+    // TODO Auto-generated method isAttributeModified
+    return false;
+  }
+
+  /* (non-Javadoc)
+   * @see org.eclipse.debug.core.ILaunchConfiguration#isPrototype()
+   */
+  public boolean isPrototype() {
+    // TODO Auto-generated method isPrototype
+    return false;
+  }
+
+  /* (non-Javadoc)
+   * @see org.eclipse.debug.core.ILaunchConfiguration#getPrototypeChildren()
+   */
+  public Collection<ILaunchConfiguration> getPrototypeChildren() throws CoreException {
+    // TODO Auto-generated method getPrototypeChildren
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see org.eclipse.debug.core.ILaunchConfiguration#getKind()
+   */
+  public int getKind() throws CoreException {
+    // TODO Auto-generated method getKind
+    return 0;
+  }
+
+  /* (non-Javadoc)
+   * @see org.eclipse.debug.core.ILaunchConfiguration#getPrototypeVisibleAttributes()
+   */
+  public Set<String> getPrototypeVisibleAttributes() throws CoreException {
+    // TODO Auto-generated method getPrototypeVisibleAttributes
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see org.eclipse.debug.core.ILaunchConfiguration#setPrototypeAttributeVisibility(java.lang.String, boolean)
+   */
+  public void setPrototypeAttributeVisibility(String attribute, boolean visible) throws CoreException {
+    // TODO Auto-generated method setPrototypeAttributeVisibility
+
   }
 
 }

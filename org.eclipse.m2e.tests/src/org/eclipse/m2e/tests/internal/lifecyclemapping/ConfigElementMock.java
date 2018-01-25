@@ -87,4 +87,12 @@ class ConfigElementMock implements IConfigurationElement {
   public boolean isValid() {
     return false;
   }
+
+  /* (non-Javadoc)
+   * @see org.eclipse.core.runtime.IConfigurationElement#getHandleId()
+   */
+  public int getHandleId() {
+    // TODO Auto-generated method getHandleId
+    return 0;
+  }
 }
