@@ -25,6 +25,7 @@ import org.junit.Assert;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IClasspathAttribute;
@@ -34,10 +35,12 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.m2e.core.MavenPlugin;
+import org.eclipse.m2e.core.embedder.ArtifactKey;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.jdt.IClasspathDescriptor;
 import org.eclipse.m2e.jdt.IClasspathEntryDescriptor;
 import org.eclipse.m2e.jdt.IClasspathManager;
+import org.eclipse.m2e.jdt.MavenJdtPlugin;
 import org.eclipse.m2e.jdt.internal.BuildPathManager;
 import org.eclipse.m2e.jdt.internal.ClasspathDescriptor;
 import org.eclipse.m2e.jdt.internal.MavenClasspathHelpers;
@@ -435,6 +438,27 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     //transitive dependency
     assertEquals("commons-io-2.5.jar", classpathEntries[1].getPath().lastSegment());
     assertNotTest(classpathEntries[1]);
+  }
+
+  public void testProjectEncodingTests() throws Exception {
+    IProject[] projects = importProjects("projects/526858-test-classpath/", new String[] {"jar-dependencies/pom.xml"},
+        new ResolverConfiguration());
+    IProject project = projects[0];
+    IJavaProject javaProject = JavaCore.create(project);
+    ArtifactKey key = new ArtifactKey("junit", "junit", "3.8.1", "sources");
+    MavenPlugin.getMaven().resolve(key.getGroupId(), key.getArtifactId(), key.getVersion(), "jar", key.getClassifier(),
+        null, new NullProgressMonitor());
+    MavenJdtPlugin.getDefault().getBuildpathManager().updateClasspath(project, new NullProgressMonitor());
+    updateProjectConfiguration(project);
+    IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
+        .getClasspathEntries();
+    assertTrue(classpathEntries.length > 0);
+    IClasspathEntry entry = classpathEntries[0];
+    assertEquals("junit-3.8.1.jar", entry.getPath().lastSegment());
+    IClasspathAttribute encoding = getClasspathAttribute(entry, IClasspathAttribute.SOURCE_ATTACHMENT_ENCODING);
+    assertNotNull(entry.getPath().lastSegment() + " is missing the source_encoding attribute", encoding);
+    assertEquals(entry.getPath().lastSegment() + " is missing the source_encoding attribute", "ISO-8859-2",
+        encoding.getValue());
   }
 
   private void assertTest(IClasspathEntry entry) {
