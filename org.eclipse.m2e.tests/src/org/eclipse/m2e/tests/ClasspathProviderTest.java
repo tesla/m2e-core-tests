@@ -19,10 +19,6 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import org.apache.maven.model.Dependency;
-import org.apache.maven.model.Model;
-import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
-import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
@@ -32,6 +28,12 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
+
+import org.apache.maven.model.Dependency;
+import org.apache.maven.model.Model;
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
+
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.project.IProjectConfigurationManager;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
@@ -69,6 +71,29 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     assertEquals("testlib-2.0.jar", userClasspath[1].getPath().lastSegment());
     assertEquals("commons-logging-1.0.2.jar", userClasspath[2].getPath().lastSegment());
     assertEquals(new Path("/cptest2/target/classes"), userClasspath[3].getPath());
+  }
+
+  public void testNonDefaultTestSource() throws Exception {
+    deleteProject("515398");
+    IProject project = createExisting("515398", "projects/515398");
+    waitForJobsToComplete();
+    workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+
+    WorkspaceHelpers.assertNoErrors(project);
+
+    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager()
+        .getLaunchConfiguration(project.getFile("TestApp.launch"));
+
+    MavenRuntimeClasspathProvider classpathProvider = new MavenRuntimeClasspathProvider();
+    IRuntimeClasspathEntry[] unresolvedClasspath = classpathProvider.computeUnresolvedClasspath(configuration);
+    assertEquals(Arrays.asList(unresolvedClasspath).toString(), 3, unresolvedClasspath.length);
+
+    IRuntimeClasspathEntry[] resolvedClasspath = classpathProvider.resolveClasspath(unresolvedClasspath, configuration);
+    IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
+
+    assertEquals(Arrays.asList(userClasspath).toString(), 2, userClasspath.length);
+    assertEquals(new Path("/515398/target/test-classes"), userClasspath[0].getPath());
+    assertEquals(new Path("/515398/target/classes"), userClasspath[1].getPath());
   }
 
   public void testSourcePath() throws Exception {
