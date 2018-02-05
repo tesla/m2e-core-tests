@@ -15,7 +15,7 @@
   <packaging>pom</packaging>
 
   <properties>
-    <tycho-version>1.0.0</tycho-version>
+    <tycho-version>1.1.0</tycho-version>
     <eclipse.stream>photon</eclipse.stream>
     <eclipse-repo.url>http://download.eclipse.org/eclipse/updates/4.8-I-builds/</eclipse-repo.url>
     <eclipse-simrel.url>http://download.eclipse.org/releases/${eclipse.stream}</eclipse-simrel.url>
