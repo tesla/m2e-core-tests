@@ -70,6 +70,7 @@ import org.eclipse.m2e.core.repository.IRepository;
 import org.eclipse.m2e.core.repository.IRepositoryRegistry;
 import org.eclipse.m2e.jdt.MavenJdtPlugin;
 import org.eclipse.m2e.jdt.internal.BuildPathManager;
+import org.eclipse.m2e.jdt.internal.MavenClasspathHelpers;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.m2e.tests.common.ClasspathHelpers;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
@@ -1336,6 +1337,62 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
 
     assertEquals(1, cp.length);
     ClasspathHelpers.assertClasspathEntry(cp, projects[0].getFullPath());
+  }
+
+  public void test385391_keepCustomSourceEncoding() throws Exception {
+    IProject project = createSimpleProject("simple-project", null);
+
+    IJavaProject javaProject = JavaCore.create(project);
+
+    IClasspathEntry[] entries = getMavenContainerEntries(project);
+    assertEquals(Arrays.toString(entries), 1, entries.length);
+    assertEquals(IClasspathEntry.CPE_LIBRARY, entries[0].getEntryKind());
+    assertEquals("junit-3.8.1.jar", entries[0].getPath().lastSegment());
+    assertNull(MavenClasspathHelpers.getAttribute(entries[0], IClasspathAttribute.SOURCE_ATTACHMENT_ENCODING));
+
+    final IClasspathContainer container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
+
+    IPath entryPath = container.getClasspathEntries()[0].getPath();
+
+    String encoding = "ISO-8859-1";
+
+    IClasspathAttribute attribute = JavaCore.newClasspathAttribute(IClasspathAttribute.SOURCE_ATTACHMENT_ENCODING,
+        encoding);
+
+    final IClasspathEntry entry = JavaCore.newLibraryEntry(entryPath, //
+        entries[0].getSourceAttachmentPath(), entries[0].getSourceAttachmentRootPath(), new IAccessRule[0], //
+        new IClasspathAttribute[] {attribute}, // 
+        false /*not exported*/);
+
+    BuildPathManager buildpathManager = getBuildPathManager();
+
+    IClasspathContainer containerSuggestion = new IClasspathContainer() {
+      public IClasspathEntry[] getClasspathEntries() {
+        return new IClasspathEntry[] {entry};
+      }
+
+      public String getDescription() {
+        return container.getDescription();
+      }
+
+      public int getKind() {
+        return container.getKind();
+      }
+
+      public IPath getPath() {
+        return container.getPath();
+      }
+    };
+    buildpathManager.persistAttachedSourcesAndJavadoc(javaProject, containerSuggestion, monitor);
+    waitForJobsToComplete();
+
+    // check custom source encoding
+    IClasspathContainer container2 = BuildPathManager.getMaven2ClasspathContainer(javaProject);
+    IClasspathEntry entry2 = container2.getClasspathEntries()[0];
+    assertEquals(entryPath, entry2.getPath());
+    assertEquals(entry.getSourceAttachmentPath(), entry2.getSourceAttachmentPath());
+    assertEquals(entry.getSourceAttachmentRootPath(), entry2.getSourceAttachmentRootPath());
+    assertEquals(encoding, MavenClasspathHelpers.getAttribute(entry2, IClasspathAttribute.SOURCE_ATTACHMENT_ENCODING));
   }
 
   private Set<Artifact> getMavenProjectArtifacts(IProject p) throws CoreException {
