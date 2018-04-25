@@ -364,6 +364,17 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     assertEquals(JavaCore.GENERATE, javaProject.getOption(JavaCore.COMPILER_CODEGEN_METHOD_PARAMETERS_ATTR, false));
   }
 
+  public void test534049_SetReleaseFlag() throws Exception {
+    IProject project = importProject("projects/release-flag/pom.xml");
+    IJavaProject javaProject = JavaCore.create(project);
+    assertEquals(JavaCore.DISABLED, javaProject.getOption(JavaCore.COMPILER_RELEASE, false));
+
+    copyContent(project, "pom-release.xml", "pom.xml");
+    updateProjectConfiguration(project);
+    javaProject = JavaCore.create(project);
+    assertEquals(JavaCore.ENABLED, javaProject.getOption(JavaCore.COMPILER_RELEASE, false));
+  }
+
   public void test526858_TestClasspathAttributeOnJar() throws Exception {
     IProject project = importProject("projects/526858-test-classpath/jar-dependencies/pom.xml");
 
