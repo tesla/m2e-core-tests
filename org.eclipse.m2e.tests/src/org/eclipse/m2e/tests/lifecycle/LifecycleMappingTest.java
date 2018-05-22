@@ -865,4 +865,18 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertEquals(actionDom, metadata.getActionDom());
 
   }
+
+  public void test387736_missingAction() throws Exception {
+    IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/387736", "pom.xml");
+    assertNotNull("Expected not null MavenProjectFacade", facade);
+    IProject project = facade.getProject();
+    assertNotNull("Expected not null project", project);
+
+    // the mapping is ignored because of the missing action
+    List<MojoExecutionKey> notCoveredMojoExecutions = getNotCoveredMojoExecutions(facade);
+    assertEquals(notCoveredMojoExecutions.toString(), 1, notCoveredMojoExecutions.size());
+    assertEquals(
+        "org.eclipse.m2e.test.lifecyclemapping:test-buildhelper-plugin:1.0.0:publish (execution: add-source, phase: generate-sources)",
+        notCoveredMojoExecutions.get(0).toString());
+  }
 }
