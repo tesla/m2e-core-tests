@@ -167,6 +167,30 @@ public class ArchetypeManagerTest extends TestCase {
     assertNull(archetypeManager.getArchetypeCatalogFactory(catalogFactory.getId()));
   }
 
+  public void testActiveArchetypeCatalogs() throws Exception {
+    Collection<ArchetypeCatalogFactory> catalogs = archetypeManager.getArchetypeCatalogs();
+    //disable catalogs
+    catalogs.forEach(c -> c.setEnabled(false));
+    //save/reload
+    archetypeManager.saveCatalogs();
+    archetypeManager.readCatalogs();
+    assertEquals(0, archetypeManager.getActiveArchetypeCatalogs().size());
+
+    //check all catalogs are disabled and re-enable them
+    Collection<ArchetypeCatalogFactory> catalogs2 = archetypeManager.getArchetypeCatalogs();
+    for(ArchetypeCatalogFactory c : catalogs2) {
+      assertFalse(c.isEnabled());
+      c.setEnabled(true);
+    }
+    //save/reload
+    archetypeManager.saveCatalogs();
+    archetypeManager.readCatalogs();
+
+    //check all catalogs are now enabled
+    assertEquals(catalogs.size(), archetypeManager.getActiveArchetypeCatalogs().size());
+
+  }
+
   public void testAddRemoteCatalog() throws Exception {
     HttpServer httpServer = new HttpServer();
     httpServer.addResources("/", "");
