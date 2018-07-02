@@ -15,9 +15,9 @@
   <packaging>pom</packaging>
 
   <properties>
-    <tycho-version>1.1.0</tycho-version>
+    <tycho-version>1.2.0</tycho-version>
     <eclipse.stream>photon</eclipse.stream>
-    <eclipse-repo.url>http://download.eclipse.org/eclipse/updates/4.8-I-builds/</eclipse-repo.url>
+    <eclipse-repo.url>http://download.eclipse.org/eclipse/updates/4.8/</eclipse-repo.url>
     <eclipse-simrel.url>http://download.eclipse.org/releases/${eclipse.stream}</eclipse-simrel.url>
     <m2e-core.url>https://ci.eclipse.org/m2e/job/m2e-master/lastSuccessfulBuild/artifact/org.eclipse.m2e.site/target/repository/</m2e-core.url>
     <tycho.test.jvmArgs>-Xmx800m</tycho.test.jvmArgs>
