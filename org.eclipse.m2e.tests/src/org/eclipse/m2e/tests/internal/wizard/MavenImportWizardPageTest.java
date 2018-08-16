@@ -100,4 +100,10 @@ public class MavenImportWizardPageTest extends AbstractMavenProjectTestCase {
     assertTrue(page.shouldCreateWorkingSet());
     assertEquals(workingSetName, page.getWorkingSetName());
   }
+
+  public void test533463_noArtifactId() throws Exception {
+    scanProjects("projects/533463_noArtifactId");
+    assertFalse(page.shouldCreateWorkingSet());
+    assertEquals("", page.getWorkingSetName());
+  }
 }
