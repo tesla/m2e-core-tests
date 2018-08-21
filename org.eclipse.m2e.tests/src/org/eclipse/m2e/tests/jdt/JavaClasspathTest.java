@@ -429,6 +429,46 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     assertTest(classpathEntries[1]);
   }
 
+  public void test414645_TestClasspathAttributeOnRuntimeJarDependencies() throws Exception {
+    IProject project = importProject("projects/414645-no-runtime-scope-in-main/runtime-jar-dependencies/pom.xml");
+
+    IJavaProject javaProject = JavaCore.create(project);
+
+    IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
+        .getClasspathEntries();
+    assertEquals("" + Arrays.asList(classpathEntries), 3, classpathEntries.length);
+    //runtime + transitive runtime dependencies
+    assertEquals("commons-beanutils-1.6.jar", classpathEntries[0].getPath().lastSegment());
+    assertTest(classpathEntries[0]);
+    assertEquals("commons-logging-1.0.jar", classpathEntries[1].getPath().lastSegment());
+    assertTest(classpathEntries[1]);
+    assertEquals("commons-collections-2.0.jar", classpathEntries[2].getPath().lastSegment());
+    assertTest(classpathEntries[2]);
+  }
+
+  public void test414645_TestClasspathAttributeOnRuntimeProjectDependencies() throws Exception {
+    IProject[] projects = importProjects("projects/414645-no-runtime-scope-in-main/",
+        new String[] {"runtime-jar-dependencies/pom.xml", "runtime-project-dependencies/pom.xml"},
+        new ResolverConfiguration());
+
+    IJavaProject javaProject = JavaCore.create(projects[1]);
+
+    IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
+        .getClasspathEntries();
+    assertEquals("" + Arrays.asList(classpathEntries), 4, classpathEntries.length);
+    //project dependency
+    assertEquals("runtime-jar-dependencies", classpathEntries[0].getPath().lastSegment());
+    assertTest(classpathEntries[0]);
+    assertDoesntExportTests(classpathEntries[0]);
+
+    //transitive runtime dependency
+    assertEquals("commons-beanutils-1.6.jar", classpathEntries[1].getPath().lastSegment());
+    assertTest(classpathEntries[1]);
+    assertEquals("commons-logging-1.0.jar", classpathEntries[2].getPath().lastSegment());
+    assertTest(classpathEntries[2]);
+    assertEquals("commons-collections-2.0.jar", classpathEntries[3].getPath().lastSegment());
+    assertTest(classpathEntries[3]);
+  }
   public void test526858_ProjectExportingTests() throws Exception {
     IProject[] projects = importProjects("projects/526858-test-classpath/",
         new String[] {"jar-dependencies/pom.xml", "project-dependencies-2/pom.xml"}, new ResolverConfiguration());
