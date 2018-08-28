@@ -24,6 +24,7 @@ import java.util.stream.Stream;
 import org.junit.Assert;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IAccessRule;
@@ -486,6 +487,42 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     //transitive dependency
     assertEquals("commons-io-2.5.jar", classpathEntries[1].getPath().lastSegment());
     assertNotTest(classpathEntries[1]);
+  }
+
+  public void test537851_DisableTestClasspathFlag() throws Exception {
+    IProject[] projects = importProjects("projects/537851-test-jar-in-compile-scope/",
+        new String[] {"test-jar/pom.xml", "project-consuming-test-jar/pom.xml"}, new ResolverConfiguration());
+
+    workspace.build(IncrementalProjectBuilder.INCREMENTAL_BUILD, monitor);
+
+    IProject testJar = projects[0];
+    assertNoErrors(testJar);
+    IProject project = projects[1];
+    assertNoErrors(project);
+
+
+    IJavaProject javaTestJar = JavaCore.create(testJar);
+    //No test flag on sources
+    IClasspathEntry[] cp = javaTestJar.getRawClasspath();
+    for(IClasspathEntry cpe : cp) {
+      assertNotTest(cpe);
+    }
+
+    IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaTestJar)
+        .getClasspathEntries();
+    assertEquals("" + Arrays.asList(classpathEntries), 1, classpathEntries.length);
+    //No test flag on dependencies
+    assertEquals("junit-3.8.1.jar", classpathEntries[0].getPath().lastSegment());
+    assertNotTest(classpathEntries[0]);
+
+
+    IJavaProject javaProject = JavaCore.create(project);
+    classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
+        .getClasspathEntries();
+    assertEquals("" + Arrays.asList(classpathEntries), 2, classpathEntries.length);
+    //project dependency
+    assertEquals("test-jar", classpathEntries[0].getPath().lastSegment());
+    assertNotTest(classpathEntries[0]);
   }
 
   private void assertTest(IClasspathEntry entry) {
