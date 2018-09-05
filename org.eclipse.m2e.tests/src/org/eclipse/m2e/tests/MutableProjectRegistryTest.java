@@ -20,12 +20,14 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.apache.maven.project.MavenProject;
 
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.ArtifactKey;
 import org.eclipse.m2e.core.embedder.IMaven;
+import org.eclipse.m2e.core.internal.MavenPluginActivator;
 import org.eclipse.m2e.core.internal.project.registry.Capability;
 import org.eclipse.m2e.core.internal.project.registry.IProjectRegistry;
 import org.eclipse.m2e.core.internal.project.registry.MavenProjectFacade;
@@ -39,6 +41,7 @@ import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 @SuppressWarnings("restriction")
 public class MutableProjectRegistryTest extends AbstractMavenProjectTestCase {
 
+  private static final String WORKSPACE_STATE_SER = "workspaceState.ser";
   private IMaven maven = MavenPlugin.getMaven();
 
   public void testAddProject() throws Exception {
@@ -192,8 +195,17 @@ public class MutableProjectRegistryTest extends AbstractMavenProjectTestCase {
     state = reader.readWorkspaceState(null);
     assertFalse(state.isValid());
 
-    new File(tmpDir, "workspaceState.ser").delete();
+    new File(tmpDir, WORKSPACE_STATE_SER).delete();
     tmpDir.delete();
+  }
+
+  public void testSaveParticipant() throws Exception {
+    File stateLocationDir = MavenPluginActivator.getDefault().getStateLocation().toFile();
+    File workspaceFile = new File(stateLocationDir, WORKSPACE_STATE_SER);
+    workspaceFile.delete();
+    ResourcesPlugin.getWorkspace().save(true, null);
+    assertTrue(workspaceFile.exists());
+    workspaceFile.delete();
   }
 
   public void testForeignClassesInSerializedProjectRegistry() throws Exception {
@@ -217,7 +229,7 @@ public class MutableProjectRegistryTest extends AbstractMavenProjectTestCase {
     state = reader.readWorkspaceState(null);
     assertTrue(state.isValid());
 
-    new File(tmpDir, "workspaceState.ser").delete();
+    new File(tmpDir, WORKSPACE_STATE_SER).delete();
     tmpDir.delete();
   }
 
