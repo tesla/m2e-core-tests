@@ -12,12 +12,12 @@
 
   <groupId>org.eclipse.m2e</groupId>
   <artifactId>m2e-core-tests</artifactId>
-  <version>1.9.1-SNAPSHOT</version>
+  <version>1.10.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <properties>
     <tycho-version>1.2.0</tycho-version>
-    <eclipse.stream>photon</eclipse.stream>
+    <eclipse.stream>2018-09</eclipse.stream>
     <eclipse-repo.url>http://download.eclipse.org/eclipse/updates/4.8/</eclipse-repo.url>
     <eclipse-simrel.url>http://download.eclipse.org/releases/${eclipse.stream}</eclipse-simrel.url>
     <m2e-core.url>https://ci.eclipse.org/m2e/job/m2e-master/lastSuccessfulBuild/artifact/org.eclipse.m2e.site/target/repository/</m2e-core.url>
@@ -120,7 +120,7 @@
                 <dependencies>
                   <dependency>
                     <artifactId>org.eclipse.jdt.launching.macosx</artifactId>
-                    <version>3.2.100</version>
+                    <version>0.0.0</version>
                     <type>eclipse-plugin</type>
                   </dependency>
                 </dependencies>
