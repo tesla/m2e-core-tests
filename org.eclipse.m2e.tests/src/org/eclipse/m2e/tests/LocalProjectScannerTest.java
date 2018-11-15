@@ -13,17 +13,21 @@ package org.eclipse.m2e.tests;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
 import junit.framework.TestCase;
 
-import org.eclipse.core.internal.resources.ProjectInfo;
 import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.codehaus.plexus.util.FileUtils;
 
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.MavenModelManager;
@@ -253,6 +257,29 @@ public class LocalProjectScannerTest extends TestCase {
       assertEquals(MavenProjectInfo.RENAME_NO, subProject.getBasedirRename());
     }
 
+  }
+
+  public void testStackOverflow() throws Exception {
+    File tempDirectory = new File(System.getProperty("java.io.tmpdir"), "/testlink-" + new Random().nextInt(10000));
+    tempDirectory.mkdirs();
+    File d1 = new File(tempDirectory, "d1");
+    File d2 = new File(tempDirectory, "d2");
+    d1.mkdirs();
+    d2.mkdirs();
+    File d1link = new File(d1, "d2");
+    File d2link = new File(d2, "d1");
+    try {
+      Files.createSymbolicLink(Paths.get(d1link.getPath()), Paths.get(d2.getAbsolutePath()));
+      Files.createSymbolicLink(Paths.get(d2link.getPath()), Paths.get(d1.getAbsolutePath()));
+      LocalProjectScanner scanner = new LocalProjectScanner(tempDirectory.getParentFile(), tempDirectory.toString(),
+          false, modelManager);
+      scanner.run(new NullProgressMonitor());
+      List<MavenProjectInfo> projects = scanner.getProjects();
+      assertEquals(0, projects.size());
+    } finally {
+      FileUtils.deleteDirectory(tempDirectory);
+    }
+    assertFalse(tempDirectory.exists());
   }
 
   public void testNoMetadata() throws Exception {
