@@ -21,8 +21,9 @@
     <eclipse-repo.url>http://download.eclipse.org/eclipse/updates/4.8/</eclipse-repo.url>
     <eclipse-simrel.url>http://download.eclipse.org/releases/${eclipse.stream}</eclipse-simrel.url>
     <m2e-core.url>https://ci.eclipse.org/m2e/job/m2e-master/lastSuccessfulBuild/artifact/org.eclipse.m2e.site/target/repository/</m2e-core.url>
-    <tycho.test.jvmArgs>-Xmx800m</tycho.test.jvmArgs>
+    <tycho.testArgLine>-Xmx800m</tycho.testArgLine>
     <tycho.surefire.timeout>900</tycho.surefire.timeout>
+    <jacoco.destFile>../target/jacoco.exec</jacoco.destFile>
   </properties>
 
   <repositories>
@@ -61,6 +62,40 @@
         <version>${tycho-version}</version>
         <extensions>true</extensions>
       </plugin>
+<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>target-platform-configuration</artifactId>
+				<version>${tycho-version}</version>
+				<configuration>
+					<dependency-resolution>
+						<extraRequirements>
+							<requirement>
+								<type>eclipse-plugin</type>
+								<id>javax.annotation</id>
+								<versionRange>0.0.0</versionRange>
+							</requirement>
+						</extraRequirements>
+					</dependency-resolution>
+				</configuration>
+			</plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.8.2</version>
+        <executions>
+          <execution>
+            <goals><goal>prepare-agent</goal></goals>
+          </execution>
+        </executions>
+        <configuration>
+          <append>true</append>
+          <includes>
+            <include>org.eclipse.m2e*</include>
+            <include>org.apache.maven*</include>
+            <include>org.eclipse.aether*</include>
+          </includes>
+        </configuration>
+      </plugin>
     </plugins>
 
     <pluginManagement>
@@ -73,7 +108,6 @@
             <useUIHarness>true</useUIHarness>
             <!-- kill test JVM if tests take more than 10 minutes (600 seconds) to finish -->
             <forkedProcessTimeoutInSeconds>${tycho.surefire.timeout}</forkedProcessTimeoutInSeconds>
-            <argLine>${tycho.test.jvmArgs}</argLine>
             <includes>
               <include>**/*Test.class</include>
             </includes>
