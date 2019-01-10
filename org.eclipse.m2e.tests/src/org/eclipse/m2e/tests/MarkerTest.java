@@ -11,7 +11,10 @@
 
 package org.eclipse.m2e.tests;
 
+import static org.junit.Assert.assertNotEquals;
+
 import java.io.File;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.resources.IMarker;
@@ -430,7 +433,7 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     // pom.xml got garbled using regular workspace APIs
     copyContent(project, "pom_bad.xml", "pom.xml");
     List<IMarker> markers = WorkspaceHelpers.findErrorMarkers(project);
-    assertEquals(WorkspaceHelpers.toString(markers), 1, markers.size());
+    assertNotEquals(WorkspaceHelpers.toString(markers), Collections.emptyList(), markers);
 
     copyContent(project, "pom_good.xml", "pom.xml");
     WorkspaceHelpers.assertNoErrors(project);
@@ -441,7 +444,7 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     FileUtils.copyFile(new File(basedir, "pom_bad.xml"), new File(basedir, "pom.xml"));
     project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
     markers = WorkspaceHelpers.findErrorMarkers(project);
-    assertEquals(WorkspaceHelpers.toString(markers), 1, markers.size());
+    assertNotEquals(WorkspaceHelpers.toString(markers), Collections.emptyList(), markers);
 
     copyContent(project, "pom_good.xml", "pom.xml");
     WorkspaceHelpers.assertNoErrors(project);
