@@ -258,7 +258,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     WorkspaceHelpers
         .assertErrorMarker(
             IMavenConstants.MARKER_POM_LOADING_ID,
-            "Project build error: Non-resolvable parent POM for t001:t001-p2:[unknown-version]: Could not find artifact t001:t001-p3:pom:0.0.1-SNAPSHOT in central (file:repositories/remoterepo) and 'parent.relativePath' points at wrong local POM",
+            "Project build error: Non-resolvable parent POM for t001:t001-p2:0.0.1-SNAPSHOT: Could not find artifact t001:t001-p3:pom:0.0.1-SNAPSHOT in central (file:repositories/remoterepo) and 'parent.relativePath' points at wrong local POM",
             6 /*lineNumber*/, p2);
 
     IProject p3 = createExisting("t001-p3");

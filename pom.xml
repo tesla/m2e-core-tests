@@ -17,7 +17,7 @@
 	<packaging>pom</packaging>
 
 	<properties>
-		<tycho-version>1.3.0</tycho-version>
+		<tycho-version>1.4.0</tycho-version>
 		<eclipse.stream>2019-03</eclipse.stream>
 		<eclipse-repo.url>http://download.eclipse.org/eclipse/updates/4.11/</eclipse-repo.url>
 		<eclipse-simrel.url>http://download.eclipse.org/releases/${eclipse.stream}</eclipse-simrel.url>

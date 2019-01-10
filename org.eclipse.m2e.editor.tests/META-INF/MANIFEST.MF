@@ -24,6 +24,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.m2e.tests.common,
  org.eclipse.m2e.core.ui,
  org.junit;bundle-version="4.0.0"
+Require-Capability: osgi.extender; filter:="(&(osgi.extender=osgi.component)(version>=1.2)(!(version>=2.0)))"
 Bundle-Name: %Bundle-Name
 Bundle-Version: 1.12.0.qualifier
 MavenArtifact-ArtifactId: org.eclipse.m2e.test
