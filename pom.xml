@@ -1,48 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>org.sonatype.forge</groupId>
-    <artifactId>forge-parent</artifactId>
-    <version>10</version>
-    <relativePath />
-  </parent>
+	<parent>
+		<groupId>org.sonatype.forge</groupId>
+		<artifactId>forge-parent</artifactId>
+		<version>10</version>
+		<relativePath />
+	</parent>
 
-  <groupId>org.eclipse.m2e</groupId>
-  <artifactId>m2e-core-tests</artifactId>
-  <version>1.10.0-SNAPSHOT</version>
-  <packaging>pom</packaging>
+	<groupId>org.eclipse.m2e</groupId>
+	<artifactId>m2e-core-tests</artifactId>
+	<version>1.11.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
 
-  <properties>
-    <tycho-version>1.2.0</tycho-version>
-    <eclipse.stream>2018-09</eclipse.stream>
-    <eclipse-repo.url>http://download.eclipse.org/eclipse/updates/4.8/</eclipse-repo.url>
-    <eclipse-simrel.url>http://download.eclipse.org/releases/${eclipse.stream}</eclipse-simrel.url>
-    <m2e-core.url>https://ci.eclipse.org/m2e/job/m2e-master/lastSuccessfulBuild/artifact/org.eclipse.m2e.site/target/repository/</m2e-core.url>
-    <tycho.testArgLine>-Xmx800m</tycho.testArgLine>
-    <tycho.surefire.timeout>900</tycho.surefire.timeout>
-    <jacoco.destFile>../target/jacoco.exec</jacoco.destFile>
-  </properties>
+	<properties>
+		<tycho-version>1.3.0</tycho-version>
+		<eclipse.stream>2018-09</eclipse.stream>
+		<eclipse-repo.url>http://download.eclipse.org/eclipse/updates/4.8/</eclipse-repo.url>
+		<eclipse-simrel.url>http://download.eclipse.org/releases/${eclipse.stream}</eclipse-simrel.url>
+		<m2e-core.url>https://ci.eclipse.org/m2e/job/m2e-master/lastSuccessfulBuild/artifact/org.eclipse.m2e.site/target/repository/</m2e-core.url>
+		<tycho.testArgLine>-Xmx800m</tycho.testArgLine>
+		<tycho.surefire.timeout>900</tycho.surefire.timeout>
+		<jacoco.destFile>../target/jacoco.exec</jacoco.destFile>
+	</properties>
 
-  <repositories>
-    <repository>
-      <id>platform</id>
-      <layout>p2</layout>
-      <url>${eclipse-repo.url}</url>
-    </repository>
-    <repository>
-      <id>simrel</id>
-      <layout>p2</layout>
-      <url>${eclipse-simrel.url}</url>
-    </repository>
-    <repository>
-      <id>m2e-core</id>
-      <layout>p2</layout>
-      <url>${m2e-core.url}</url>
-    </repository>
-  </repositories>
+	<repositories>
+		<repository>
+			<id>platform</id>
+			<layout>p2</layout>
+			<url>${eclipse-repo.url}</url>
+		</repository>
+		<repository>
+			<id>simrel</id>
+			<layout>p2</layout>
+			<url>${eclipse-simrel.url}</url>
+		</repository>
+		<repository>
+			<id>m2e-core</id>
+			<layout>p2</layout>
+			<url>${m2e-core.url}</url>
+		</repository>
+	</repositories>
 
   <!--
   <pluginRepositories>
@@ -54,15 +55,15 @@
   </pluginRepositories>
   -->
 
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.eclipse.tycho</groupId>
-        <artifactId>tycho-maven-plugin</artifactId>
-        <version>${tycho-version}</version>
-        <extensions>true</extensions>
-      </plugin>
-<plugin>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-maven-plugin</artifactId>
+				<version>${tycho-version}</version>
+				<extensions>true</extensions>
+			</plugin>
+			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>target-platform-configuration</artifactId>
 				<version>${tycho-version}</version>
@@ -78,91 +79,94 @@
 					</dependency-resolution>
 				</configuration>
 			</plugin>
-      <plugin>
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.2</version>
-        <executions>
-          <execution>
-            <goals><goal>prepare-agent</goal></goals>
-          </execution>
-        </executions>
-        <configuration>
-          <append>true</append>
-          <includes>
-            <include>org.eclipse.m2e*</include>
-            <include>org.apache.maven*</include>
-            <include>org.eclipse.aether*</include>
-          </includes>
-        </configuration>
-      </plugin>
-    </plugins>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.2</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<append>true</append>
+					<includes>
+						<include>org.eclipse.m2e*</include>
+						<include>org.apache.maven*</include>
+						<include>org.eclipse.aether*</include>
+					</includes>
+				</configuration>
+			</plugin>
+		</plugins>
 
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.eclipse.tycho</groupId>
-          <artifactId>tycho-surefire-plugin</artifactId>
-          <version>${tycho-version}</version>
-          <configuration>
-            <useUIHarness>true</useUIHarness>
-            <!-- kill test JVM if tests take more than 10 minutes (600 seconds) to finish -->
-            <forkedProcessTimeoutInSeconds>${tycho.surefire.timeout}</forkedProcessTimeoutInSeconds>
-            <includes>
-              <include>**/*Test.class</include>
-            </includes>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-  </build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.eclipse.tycho</groupId>
+					<artifactId>tycho-surefire-plugin</artifactId>
+					<version>${tycho-version}</version>
+					<configuration>
+						<useUIHarness>true</useUIHarness>
+						<!-- kill test JVM if tests take more than 10 minutes (600 seconds) 
+							to finish -->
+						<forkedProcessTimeoutInSeconds>${tycho.surefire.timeout}</forkedProcessTimeoutInSeconds>
+						<includes>
+							<include>**/*Test.class</include>
+						</includes>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
 
-  <profiles>
-    <profile>
-      <id>uts</id>
-      <modules>
-        <module>org.eclipse.m2e.tests</module>
-      </modules>
-    </profile>
+	<profiles>
+		<profile>
+			<id>uts</id>
+			<modules>
+				<module>org.eclipse.m2e.tests</module>
+			</modules>
+		</profile>
 
-    <profile>
-      <id>its</id>
-      <modules>
-        <module>org.eclipse.m2e.editor.tests</module>
-        <module>org.eclipse.m2e.editor.xml.tests</module>
-      </modules>
-    </profile>
+		<profile>
+			<id>its</id>
+			<modules>
+				<module>org.eclipse.m2e.editor.tests</module>
+				<module>org.eclipse.m2e.editor.xml.tests</module>
+			</modules>
+		</profile>
 
-    <profile>
-      <id>osx</id>
-      <activation>
-        <os>
-          <family>mac</family>
-        </os>
-      </activation>
-      <properties>
-        <tycho.test.jvmArgs>-Xmx800m -XstartOnFirstThread</tycho.test.jvmArgs>
-      </properties>
-      <build>
-        <pluginManagement>
-          <plugins>
-            <plugin>
-              <groupId>org.eclipse.tycho</groupId>
-              <artifactId>tycho-surefire-plugin</artifactId>
-              <version>${tycho-version}</version>
-              <configuration>
-                <dependencies>
-                  <dependency>
-                    <artifactId>org.eclipse.jdt.launching.macosx</artifactId>
-                    <version>0.0.0</version>
-                    <type>eclipse-plugin</type>
-                  </dependency>
-                </dependencies>
-              </configuration>
-            </plugin>
-          </plugins>
-        </pluginManagement>
-      </build>
-    </profile>
-  </profiles>
+		<profile>
+			<id>osx</id>
+			<activation>
+				<os>
+					<family>mac</family>
+				</os>
+			</activation>
+			<properties>
+				<tycho.testArgLine>-Xmx800m -XstartOnFirstThread</tycho.testArgLine>
+			</properties>
+			<build>
+				<pluginManagement>
+					<plugins>
+						<plugin>
+							<groupId>org.eclipse.tycho</groupId>
+							<artifactId>tycho-surefire-plugin</artifactId>
+							<version>${tycho-version}</version>
+							<configuration>
+								<dependencies>
+									<dependency>
+										<artifactId>org.eclipse.jdt.launching.macosx</artifactId>
+										<version>0.0.0</version>
+										<type>eclipse-plugin</type>
+									</dependency>
+								</dependencies>
+							</configuration>
+						</plugin>
+					</plugins>
+				</pluginManagement>
+			</build>
+		</profile>
+	</profiles>
 </project>
