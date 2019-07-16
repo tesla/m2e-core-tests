@@ -33,6 +33,8 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.launching.JavaRuntime;
+import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
 
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
@@ -525,6 +527,14 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     assertNotTest(classpathEntries[0]);
   }
 
+  public void test549312_fallbackToLatestEE() throws Exception {
+    IProject project = importProject("projects/549312-fallbackToLatestEE/pom.xml");
+    String expectedCompliance = getLatestExecutionEnvironment().getComplianceOptions()
+        .get(JavaCore.COMPILER_COMPLIANCE);
+    IJavaProject javaTestJar = JavaCore.create(project);
+    assertEquals(expectedCompliance, javaTestJar.getOptions(false).get(JavaCore.COMPILER_COMPLIANCE));
+  }
+
   private void assertTest(IClasspathEntry entry) {
     IClasspathAttribute cpAttr = getClasspathAttribute(entry, IClasspathManager.TEST_ATTRIBUTE);
     assertNotNull(entry.getPath().lastSegment() + " is missing the test attribute", cpAttr);
@@ -598,5 +608,13 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
 
   private void addAccessRule(IClasspathEntryDescriptor entry) {
     entry.addAccessRule(JavaCore.newAccessRule(Path.fromPortableString("**/internal/**"), IAccessRule.K_DISCOURAGED));
+  }
+
+  private IExecutionEnvironment getLatestExecutionEnvironment() {
+    return Stream.of(JavaRuntime.getExecutionEnvironmentsManager().getExecutionEnvironments()).sorted((a, b) -> {
+      double compA = Double.valueOf(a.getComplianceOptions().get(JavaCore.COMPILER_COMPLIANCE));
+      double compB = Double.valueOf(b.getComplianceOptions().get(JavaCore.COMPILER_COMPLIANCE));
+      return (int) (compB - compA);
+    }).findFirst().orElse(null);
   }
 }
