@@ -25,7 +25,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
@@ -45,8 +44,6 @@ import org.apache.maven.project.MavenProject;
 
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.ArtifactRef;
-import org.eclipse.m2e.core.embedder.ICallable;
-import org.eclipse.m2e.core.embedder.IMavenExecutionContext;
 import org.eclipse.m2e.core.internal.IMavenConstants;
 import org.eclipse.m2e.core.internal.MavenPluginActivator;
 import org.eclipse.m2e.core.internal.embedder.MavenExecutionContext;
@@ -73,11 +70,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
 
   ArrayList<MavenProjectChangedEvent> events;
 
-  IMavenProjectChangedListener listener = new IMavenProjectChangedListener() {
-    public void mavenProjectChanged(MavenProjectChangedEvent[] event, IProgressMonitor monitor) {
-      events.addAll(Arrays.asList(event));
-    }
-  };
+  IMavenProjectChangedListener listener = (event, monitor) -> events.addAll(Arrays.asList(event));
 
   protected void setUp() throws Exception {
     super.setUp();
@@ -406,11 +399,9 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
   protected MavenProject getParentProject(final IMavenProjectFacade f) throws CoreException {
     // create execution context with proper resolver configuration
     MavenExecutionContext context = manager.createExecutionContext(f.getPom(), f.getResolverConfiguration());
-    return context.execute(f.getMavenProject(monitor), new ICallable<MavenProject>() {
-      public MavenProject call(IMavenExecutionContext context, IProgressMonitor monitor) throws CoreException {
-        return MavenPlugin.getMaven().resolveParentProject(f.getMavenProject(monitor), monitor);
-      }
-    }, monitor);
+    return context.execute(f.getMavenProject(monitor),
+        (context1, monitor) -> MavenPlugin.getMaven().resolveParentProject(f.getMavenProject(monitor), monitor),
+        monitor);
   }
 
   public void test007_staleDependencies() throws Exception {

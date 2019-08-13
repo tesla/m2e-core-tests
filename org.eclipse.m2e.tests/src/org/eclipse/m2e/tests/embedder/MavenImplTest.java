@@ -38,11 +38,8 @@ import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 
 import org.eclipse.m2e.core.MavenPlugin;
-import org.eclipse.m2e.core.embedder.ArtifactKey;
-import org.eclipse.m2e.core.embedder.ICallable;
 import org.eclipse.m2e.core.embedder.ILocalRepositoryListener;
 import org.eclipse.m2e.core.embedder.IMavenConfiguration;
-import org.eclipse.m2e.core.embedder.IMavenExecutionContext;
 import org.eclipse.m2e.core.internal.MavenPluginActivator;
 import org.eclipse.m2e.core.internal.embedder.MavenExecutionContext;
 import org.eclipse.m2e.core.internal.embedder.MavenImpl;
@@ -222,16 +219,13 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
 
     FileUtils.deleteDirectory(new File(localRepository.getBasedir(), "junit/junit/3.8.2"));
 
-    ILocalRepositoryListener listener = new ILocalRepositoryListener() {
-      public void artifactInstalled(File repositoryBasedir, ArtifactKey baseArtifact, ArtifactKey artifact,
-          File artifactFile) {
-        assertEquals(localRepository.getBasedir(), repositoryBasedir.getAbsolutePath());
+    ILocalRepositoryListener listener = (repositoryBasedir, baseArtifact, artifact, artifactFile) -> {
+      assertEquals(localRepository.getBasedir(), repositoryBasedir.getAbsolutePath());
 
-        assertEquals("junit:junit:3.8.2::", artifact.toPortableString());
+      assertEquals("junit:junit:3.8.2::", artifact.toPortableString());
 
-        assertEquals(new File(localRepository.getBasedir(), "junit/junit/3.8.2/junit-3.8.2.jar"),
-            artifactFile.getAbsoluteFile());
-      }
+      assertEquals(new File(localRepository.getBasedir(), "junit/junit/3.8.2/junit-3.8.2.jar"),
+          artifactFile.getAbsoluteFile());
     };
 
     maven.addLocalRepositoryListener(listener);
@@ -502,12 +496,10 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
 
   private MavenExecutionResult readMavenProject(final File pomFile, final boolean resolveDependencies,
       IProgressMonitor monitor) throws CoreException {
-    return maven.execute(new ICallable<MavenExecutionResult>() {
-      public MavenExecutionResult call(IMavenExecutionContext context, IProgressMonitor monitor) throws CoreException {
-        ProjectBuildingRequest configuration = context.newProjectBuildingRequest();
-        configuration.setResolveDependencies(resolveDependencies);
-        return maven.readMavenProject(pomFile, configuration);
-      }
+    return maven.execute((context, monitor1) -> {
+      ProjectBuildingRequest configuration = context.newProjectBuildingRequest();
+      configuration.setResolveDependencies(resolveDependencies);
+      return maven.readMavenProject(pomFile, configuration);
     }, monitor);
   }
 
@@ -549,12 +541,10 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
     final MojoExecution execution = getExecution(executionPlan, "438454_guicescopes-plugin", "guicescopes");
 
     MavenExecutionContext context = maven.createExecutionContext();
-    result = context.execute(project, new ICallable<MavenExecutionResult>() {
-      public MavenExecutionResult call(IMavenExecutionContext context, IProgressMonitor monitor) {
-        MavenSession session = context.getSession();
-        maven.execute(session, execution, monitor);
-        return session.getResult();
-      }
+    result = context.execute(project, (context1, monitor) -> {
+      MavenSession session = context1.getSession();
+      maven.execute(session, execution, monitor);
+      return session.getResult();
     }, monitor);
 
     assertFalse(result.getExceptions().toString(), result.hasExceptions());
