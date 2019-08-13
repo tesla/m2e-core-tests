@@ -52,7 +52,6 @@ import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits.CompoundOperation;
 import org.eclipse.m2e.editor.AbstractMavenProjectTestJunit4;
-import org.eclipse.m2e.tests.common.RequireMavenExecutionContext;
 
 
 @SuppressWarnings("restriction")
@@ -84,14 +83,7 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestJunit4
 
     final ManageDependenciesDialog.DepLabelProvider provider = new ManageDependenciesDialog.DepLabelProvider();
 
-    Display.getDefault().syncExec(new Runnable() {
-
-      @SuppressWarnings("synthetic-access")
-      public void run() {
-        foreground = provider.getForeground(project);
-
-      }
-    });
+    Display.getDefault().syncExec(() -> foreground = provider.getForeground(project));
     assertNull(foreground);
 
     IMaven maven = MavenPlugin.getMaven();
@@ -102,12 +94,7 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestJunit4
     assertEquals(project2.getArtifactId(), "forge-parent");
     assertEquals(project2.getGroupId(), "org.sonatype.forge");
     assertEquals(project2.getVersion(), "6");
-    Display.getDefault().syncExec(new Runnable() {
-
-      public void run() {
-        foreground = provider.getForeground(project2);
-      }
-    });
+    Display.getDefault().syncExec(() -> foreground = provider.getForeground(project2));
     assertNotNull(foreground);
   }
 
@@ -117,8 +104,8 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestJunit4
     IStructuredModel model = loadModels("projects/same", new String[] {"parent/pom.xml", "child/pom.xml"}).get("child");
 
     assertNotNull(model);
-    IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().getMavenProject(TEST_GROUP_ID + ".same",
-        "child", TEST_VERSION);
+    IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().getMavenProject(TEST_GROUP_ID + ".same", "child",
+        TEST_VERSION);
     MavenProject project = facade.getMavenProject(monitor);
     assertEquals(project.getArtifactId(), "child");
 
@@ -158,8 +145,8 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestJunit4
   }
 
   private IDOMModel createTempModel(IStructuredModel model) {
-    IDOMModel tempModel = (IDOMModel) StructuredModelManager.getModelManager().createUnManagedStructuredModelFor(
-        "org.eclipse.m2e.core.pomFile");
+    IDOMModel tempModel = (IDOMModel) StructuredModelManager.getModelManager()
+        .createUnManagedStructuredModelFor("org.eclipse.m2e.core.pomFile");
     assertNotNull(tempModel);
     tempModel.getStructuredDocument().setText(StructuredModelManager.getModelManager(),
         model.getStructuredDocument().getText());
@@ -172,7 +159,8 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestJunit4
    */
   @Test
   public void testDiffPOMs() throws Exception {
-    Map<String, IStructuredModel> models = loadModels("projects/diff", new String[] {"child/pom.xml", "parent/pom.xml"});
+    Map<String, IStructuredModel> models = loadModels("projects/diff",
+        new String[] {"child/pom.xml", "parent/pom.xml"});
     IStructuredModel child = models.get("child-diff");
     IStructuredModel parent = models.get("parent-diff");
 
@@ -266,8 +254,8 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestJunit4
   @Test
   public void testDepExistsDiffVersion() throws Exception {
 
-    IStructuredModel model = loadModels("projects/dep_exists_diff_version", new String[] {"project/pom.xml"}).get(
-        "dep_exists_diff_version");
+    IStructuredModel model = loadModels("projects/dep_exists_diff_version", new String[] {"project/pom.xml"})
+        .get("dep_exists_diff_version");
 
     IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().getMavenProject(TEST_GROUP_ID,
         "dep_exists_diff_version", TEST_VERSION);
@@ -313,8 +301,8 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestJunit4
   public void testDepExistsDiffVersionDiffPOMs() throws Exception {
     String ARTIFACT_ID_CHILD = "dep_exists_diff_version_diff_poms_child";
     String ARTIFACT_ID_PARENT = "dep_exists_diff_version_diff_poms_parent";
-    Map<String, IStructuredModel> models = loadModels("projects/dep_exists_diff_version_diff_poms", new String[] {
-        "child/pom.xml", "parent/pom.xml"});
+    Map<String, IStructuredModel> models = loadModels("projects/dep_exists_diff_version_diff_poms",
+        new String[] {"child/pom.xml", "parent/pom.xml"});
     IStructuredModel child = models.get(ARTIFACT_ID_CHILD);
     IStructuredModel parent = models.get(ARTIFACT_ID_PARENT);
 

@@ -23,7 +23,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.m2e.core.internal.MavenPluginActivator;
@@ -60,11 +59,7 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
 
   ArrayList<MavenProjectChangedEvent> events;
 
-  IMavenProjectChangedListener listener = new IMavenProjectChangedListener() {
-    public void mavenProjectChanged(MavenProjectChangedEvent[] event, IProgressMonitor monitor) {
-      events.addAll(Arrays.asList(event));
-    }
-  };
+  IMavenProjectChangedListener listener = (event, monitor) -> events.addAll(Arrays.asList(event));
 
   @Override
   public void setUp() throws Exception {

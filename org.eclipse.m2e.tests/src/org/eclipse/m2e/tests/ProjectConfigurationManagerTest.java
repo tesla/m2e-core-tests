@@ -31,7 +31,6 @@ import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
@@ -110,11 +109,10 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
 
     final ProjectImportConfiguration importConfiguration = new ProjectImportConfiguration(new ResolverConfiguration());
 
-    workspace.run(new IWorkspaceRunnable() {
-      public void run(IProgressMonitor monitor) throws CoreException {
-        MavenPlugin.getProjectConfigurationManager().importProjects(projectInfos, importConfiguration, monitor);
-      }
-    }, MavenPlugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
+    workspace.run(
+        (IWorkspaceRunnable) monitor -> MavenPlugin.getProjectConfigurationManager().importProjects(projectInfos,
+            importConfiguration, monitor),
+        MavenPlugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
   }
 
   public void testWorkspaceResolutionOfInterModuleDependenciesDuringImport() throws Exception {
@@ -188,11 +186,8 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     WorkspaceHelpers.assertMarker(IMavenConstants.MARKER_CONFIGURATION_ID, IMarker.SEVERITY_ERROR,
         Messages.ProjectConfigurationUpdateRequired, null, null, project);
 
-    workspace.run(new IWorkspaceRunnable() {
-      public void run(IProgressMonitor monitor) throws CoreException {
-        MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(projectFacade.getProject(), monitor);
-      }
-    }, monitor);
+    workspace.run((IWorkspaceRunnable) monitor -> MavenPlugin.getProjectConfigurationManager()
+        .updateProjectConfiguration(projectFacade.getProject(), monitor), monitor);
     assertNoErrors(project);
   }
 
@@ -208,11 +203,8 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     WorkspaceHelpers.assertMarker(IMavenConstants.MARKER_CONFIGURATION_ID, IMarker.SEVERITY_ERROR,
         Messages.ProjectConfigurationUpdateRequired, null, null, project);
 
-    workspace.run(new IWorkspaceRunnable() {
-      public void run(IProgressMonitor monitor) throws CoreException {
-        MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(projectFacade.getProject(), monitor);
-      }
-    }, monitor);
+    workspace.run((IWorkspaceRunnable) monitor -> MavenPlugin.getProjectConfigurationManager()
+        .updateProjectConfiguration(projectFacade.getProject(), monitor), monitor);
     assertNoErrors(project);
   }
 
@@ -240,11 +232,8 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
 
     final IMavenProjectFacade projectFacade = MavenPlugin.getMavenProjectRegistry().create(project, monitor);
 
-    workspace.run(new IWorkspaceRunnable() {
-      public void run(IProgressMonitor monitor) throws CoreException {
-        MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(projectFacade.getProject(), monitor);
-      }
-    }, monitor);
+    workspace.run((IWorkspaceRunnable) monitor -> MavenPlugin.getProjectConfigurationManager()
+        .updateProjectConfiguration(projectFacade.getProject(), monitor), monitor);
     assertNoErrors(project);
   }
 
@@ -573,11 +562,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
 
   public void test473953_ProjectCreationListener() throws Exception {
     boolean[] listenerCalled = new boolean[1];
-    IProjectCreationListener l = new IProjectCreationListener() {
-      public void projectCreated(IProject project) {
-        listenerCalled[0] = true;
-      }
-    };
+    IProjectCreationListener l = project -> listenerCalled[0] = true;
     IProject project = createSimplePomProject("testProject", l);
     assertNoErrors(project);
     assertTrue(listenerCalled[0]);
@@ -597,12 +582,10 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
       final IProjectCreationListener listener) throws CoreException {
     final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 
-    workspace.run(new IWorkspaceRunnable() {
-      public void run(IProgressMonitor monitor) throws CoreException {
-        ProjectImportConfiguration pic = new ProjectImportConfiguration(new ResolverConfiguration());
-        MavenPlugin.getProjectConfigurationManager().createSimpleProject(project, location, model, new String[0], pic,
-            listener, monitor);
-      }
+    workspace.run((IWorkspaceRunnable) monitor -> {
+      ProjectImportConfiguration pic = new ProjectImportConfiguration(new ResolverConfiguration());
+      MavenPlugin.getProjectConfigurationManager().createSimpleProject(project, location, model, new String[0], pic,
+          listener, monitor);
     }, MavenPlugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
 
     return project;
@@ -631,12 +614,10 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
       throws CoreException {
     final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 
-    workspace.run(new IWorkspaceRunnable() {
-      public void run(IProgressMonitor monitor) throws CoreException {
-        ProjectImportConfiguration pic = new ProjectImportConfiguration(new ResolverConfiguration());
-        MavenPlugin.getProjectConfigurationManager().createArchetypeProjects(location, archetype, projectName,
-            projectName, "0.0.1-SNAPSHOT", "jar", new Properties(), pic, monitor);
-      }
+    workspace.run((IWorkspaceRunnable) monitor -> {
+      ProjectImportConfiguration pic = new ProjectImportConfiguration(new ResolverConfiguration());
+      MavenPlugin.getProjectConfigurationManager().createArchetypeProjects(location, archetype, projectName,
+          projectName, "0.0.1-SNAPSHOT", "jar", new Properties(), pic, monitor);
     }, MavenPlugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
 
     return project;
@@ -656,12 +637,8 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
         WorkspaceHelpers.assertMarker(IMavenConstants.MARKER_CONFIGURATION_ID, problemSeverity.getSeverity(),
             Messages.ProjectConfigurationUpdateRequired, null, null, project);
 
-        workspace.run(new IWorkspaceRunnable() {
-          public void run(IProgressMonitor monitor) throws CoreException {
-            MavenPlugin.getProjectConfigurationManager()
-                .updateProjectConfiguration(projectFacade.getProject(), monitor);
-          }
-        }, monitor);
+        workspace.run((IWorkspaceRunnable) monitor -> MavenPlugin.getProjectConfigurationManager()
+            .updateProjectConfiguration(projectFacade.getProject(), monitor), monitor);
       }
       assertNoErrors(project);
     } finally {
