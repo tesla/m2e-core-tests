@@ -11,8 +11,6 @@
 
 package org.eclipse.m2e.editor.xml;
 
-import junit.framework.Assert;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.text.source.IOverviewRuler;
@@ -84,7 +82,7 @@ public abstract class AbstractPOMEditorTestCase extends AbstractMavenProjectTest
       sourceViewer = new DummyStructuredTextViewer(parent, null, null, false, SWT.NONE);
       sourceViewer.setMavenProject(new MavenProject());
     } else {
-      Assert.fail("Unable to run the test as a display must be available.");
+      fail("Unable to run the test as a display must be available.");
     }
 
     configureSourceViewer();
