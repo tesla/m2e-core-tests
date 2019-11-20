@@ -115,7 +115,7 @@ public class MavenModelManagerTest extends AbstractMavenProjectTestCase {
 
     assertEquals("<project xmlns=\"http://maven.apache.org/POM/4.0.0\" " //
         + "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " //
-        + "xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" //
+        + "xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" //
         + "  <modelVersion>4.0.0</modelVersion>\n" //
         + "  <groupId>org.sonatype.projects</groupId>\n" //
         + "  <artifactId>foo</artifactId>\n" //
