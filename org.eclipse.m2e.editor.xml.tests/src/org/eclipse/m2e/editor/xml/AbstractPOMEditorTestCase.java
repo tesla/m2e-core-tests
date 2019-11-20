@@ -101,9 +101,9 @@ public abstract class AbstractPOMEditorTestCase extends AbstractMavenProjectTest
       this.mavenProject = mp;
     }
 
-    public Object getAdapter(Class adapter) {
+    public <T> T getAdapter(Class<T> adapter) {
       if(MavenProject.class.equals(adapter)) {
-        return mavenProject;
+        return adapter.cast(mavenProject);
       }
       return null;
     }
