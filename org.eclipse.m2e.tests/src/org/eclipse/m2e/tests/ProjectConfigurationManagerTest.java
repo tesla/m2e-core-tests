@@ -290,7 +290,8 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     String firstBuilderId = projectDescription.getBuildSpec()[0].getBuilderName();
     assertNotSame(IMavenConstants.BUILDER_ID, firstBuilderId);
     assertEquals(ExternalToolBuilder.ID, projectDescription.getBuildSpec()[1].getBuilderName());
-    String launchConfigHandleArg = (String) projectDescription.getBuildSpec()[1].getArguments().get(
+    String launchConfigHandleArg = projectDescription.getBuildSpec()[1].getArguments()
+        .get(
         BuilderCoreUtils.LAUNCH_CONFIG_HANDLE);
     assertNotNull(launchConfigHandleArg);
     assertTrue(launchConfigHandleArg.contains(IMavenConstants.BUILDER_ID));
