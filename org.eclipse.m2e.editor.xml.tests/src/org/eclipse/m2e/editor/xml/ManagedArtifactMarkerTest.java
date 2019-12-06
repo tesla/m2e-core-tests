@@ -151,4 +151,12 @@ public class ManagedArtifactMarkerTest extends AbstractMavenProjectTestCase {
     }
   }
 
+  public void test553839_noErrorCausedByPluginVersionFromSuperPom() throws Exception {
+    IProject project = importProject("projects/553839/pom.xml");
+    waitForJobsToComplete();
+
+    XmlEditorHelpers.assertNoEditorHintWarningMarkers(project);
+    XmlEditorHelpers.assertNoErrors(project);
+  }
+
 }
