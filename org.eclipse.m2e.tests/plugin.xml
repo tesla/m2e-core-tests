@@ -16,7 +16,7 @@
    
    <extension point="org.eclipse.m2e.core.archetypeCatalogs">
       <local name="archetype-catalog.xml" description="Test Catalog"/>
-      <remote url="http://repo1.maven.org/maven2/archetype-catalog.xml" description="Test Remote Catalog"/>
+      <!-- remote url="http://repo1.maven.org/maven2/archetype-catalog.xml" description="Test Remote Catalog"/ -->
    </extension>
    
    <extension point="org.eclipse.m2e.core.projectConfigurators">
