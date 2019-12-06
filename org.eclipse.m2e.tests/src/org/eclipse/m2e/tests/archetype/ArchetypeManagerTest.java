@@ -90,6 +90,18 @@ public class ArchetypeManagerTest extends TestCase {
       // assertFalse(archetypes.isEmpty());  empty because no catalog created for the local repository
     }
 
+    {
+      ArchetypeCatalogFactory catalog = archetypeManager
+          .getArchetypeCatalogFactory("https://repo1.maven.org/maven2/archetype-catalog.xml");
+      assertNotNull(catalog);
+      assertEquals("Maven Central", catalog.getDescription());
+      ArchetypeCatalog archetypeCatalog = catalog.getArchetypeCatalog();
+      assertNotNull(archetypeCatalog);
+      List<?> archetypes = archetypeCatalog.getArchetypes();
+      assertNotNull(archetypes);
+      assertFalse(archetypes.isEmpty());
+    }
+
     Collection<ArchetypeCatalogFactory> catalogs = archetypeManager.getArchetypeCatalogs();
     assertEquals("" + catalogs.toString(), 5, catalogs.size());
   }
