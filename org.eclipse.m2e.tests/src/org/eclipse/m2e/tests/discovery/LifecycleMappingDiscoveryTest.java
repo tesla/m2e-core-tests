@@ -157,7 +157,7 @@ public class LifecycleMappingDiscoveryTest extends AbstractLifecycleMappingTest 
     MavenDiscoveryService srv = new MavenDiscoveryService();
     CatalogItem item = new CatalogItem();
     LifecycleMappingMetadataSource metadataSource = readLifecycleMappingMetadata("projects/discovery/match-test-goal-1-and-2.xml");
-    srv.addCatalogItem(item, metadataSource, Collections.EMPTY_LIST, Collections.EMPTY_LIST);
+    srv.addCatalogItem(item, metadataSource, Collections.emptyList(), Collections.emptyList());
 
     Map<ILifecycleMappingRequirement, List<IMavenDiscoveryProposal>> proposals = srv.discover(
         request.getRequirements(), null, monitor);
