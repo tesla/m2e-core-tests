@@ -11,6 +11,10 @@
 
 package org.eclipse.m2e.tests.ui;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.ui.IEditorPart;
 

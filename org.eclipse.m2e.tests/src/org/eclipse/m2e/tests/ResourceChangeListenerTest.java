@@ -11,9 +11,14 @@
 
 package org.eclipse.m2e.tests;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+
+import org.junit.After;
+import org.junit.Before;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -36,7 +41,8 @@ public class ResourceChangeListenerTest extends AbstractMavenProjectTestCase {
 
   IProject project;
 
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     super.setUp();
     deleteProject("resourcechange");
     project = createProject("resourcechange", "projects/resourcechange/pom.xml");
@@ -49,7 +55,8 @@ public class ResourceChangeListenerTest extends AbstractMavenProjectTestCase {
     waitForJobsToComplete();
   }
 
-  protected void tearDown() throws Exception {
+  @After
+  public void tearDown() throws Exception {
     try {
       deleteProject("resourcechange");
     } finally {

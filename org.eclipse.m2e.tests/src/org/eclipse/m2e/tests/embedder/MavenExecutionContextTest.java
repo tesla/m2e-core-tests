@@ -11,8 +11,17 @@
 
 package org.eclipse.m2e.tests.embedder;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.net.URL;
 import java.net.URLClassLoader;
+
+import org.junit.Before;
 
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.transfer.TransferListener;
@@ -33,8 +42,8 @@ import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 public class MavenExecutionContextTest extends AbstractMavenProjectTestCase {
 
   MavenImpl maven;
-
-  protected void setUp() throws Exception {
+@Before
+  public void setUp() throws Exception {
     super.setUp();
     maven = (MavenImpl) MavenPlugin.getMaven();
   }

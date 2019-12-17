@@ -11,9 +11,14 @@
 
 package org.eclipse.m2e.tests.conversion;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.FileFilter;
 import java.util.Hashtable;
+
+import org.junit.After;
+import org.junit.Before;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -31,12 +36,14 @@ import org.eclipse.m2e.tests.common.FileHelpers;
  */
 public class ProjectConversionTest extends AbstractProjectConversionTestCase {
 
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     super.setUp();
     System.setProperty("org.eclipse.m2e.jdt.conversion.compiler.version", "2.3.2");
   }
 
-  protected void tearDown() throws Exception {
+  @After
+  public void tearDown() throws Exception {
     System.clearProperty("org.eclipse.m2e.jdt.conversion.compiler.version");
     super.tearDown();
   }

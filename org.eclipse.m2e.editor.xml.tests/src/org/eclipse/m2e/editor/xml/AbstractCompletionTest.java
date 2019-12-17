@@ -18,6 +18,8 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.wst.sse.ui.contentassist.CompletionProposalInvocationContext;
 import org.eclipse.wst.sse.ui.contentassist.ICompletionProposalComputer;
+import org.junit.After;
+import org.junit.Before;
 
 @SuppressWarnings("restriction")
 public abstract class AbstractCompletionTest extends AbstractPOMEditorTestCase {
@@ -27,13 +29,15 @@ public abstract class AbstractCompletionTest extends AbstractPOMEditorTestCase {
     return null;
   }
 
-  protected void setUp() throws Exception {
+  @Before
+public void setUp() throws Exception {
     super.setUp();
     xmlContentAssistProcessor = new PomContentAssistProcessor();
     xmlContentAssistProcessor.sessionStarted();
   }
 
-  protected void tearDown() throws Exception {
+  @After
+	public void tearDown() throws Exception {
     try {
       xmlContentAssistProcessor.sessionEnded();
     } finally {

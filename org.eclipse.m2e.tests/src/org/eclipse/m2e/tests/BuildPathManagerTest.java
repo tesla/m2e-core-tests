@@ -12,6 +12,12 @@
 package org.eclipse.m2e.tests;
 
 import static org.eclipse.m2e.tests.common.ClasspathHelpers.assertClasspath;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,6 +26,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+
+import org.junit.After;
+import org.junit.Before;
 
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IProject;
@@ -84,12 +93,14 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
 
   private ProjectRegistryManager manager;
 
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     super.setUp();
     manager = MavenPluginActivator.getDefault().getMavenProjectManagerImpl();
   }
 
-  protected void tearDown() throws Exception {
+  @After
+  public void tearDown() throws Exception {
     manager = null;
     super.tearDown();
   }

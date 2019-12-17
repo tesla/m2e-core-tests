@@ -11,6 +11,9 @@
 
 package org.eclipse.m2e.tests.conversion;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
@@ -98,7 +101,8 @@ public class ProjectConversionManagerTest extends AbstractProjectConversionTestC
     assertEquals(msg, "org.eclipse.m2e.jdt.javaProjectConversionParticipant", participants.get(i++ ).getId());
     assertEquals(msg, "org.eclipse.m2e.tests.conversion.testProjectConversionParticipant4", participants.get(i++ )
         .getId());
-    assertEquals(msg, "org.eclipse.m2e.tests.conversion.testProjectConversionParticipant3", participants.get(i++ )
+    assertEquals(msg, "org.eclipse.m2e.tests.conversion.testProjectConversionParticipant3",
+        participants.get(i++ )
         .getId());
   }
 

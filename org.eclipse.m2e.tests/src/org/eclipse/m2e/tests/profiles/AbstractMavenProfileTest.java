@@ -13,6 +13,9 @@ package org.eclipse.m2e.tests.profiles;
 
 import java.io.File;
 
+import org.junit.After;
+import org.junit.Before;
+
 import org.eclipse.core.resources.IProject;
 
 import org.eclipse.m2e.core.MavenPlugin;
@@ -30,7 +33,8 @@ public abstract class AbstractMavenProfileTest extends AbstractMavenProjectTestC
   private String originalSettings;
 
   @Override
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     super.setUp();
     originalSettings = mavenConfiguration.getUserSettingsFile();
     mavenConfiguration.setUserSettingsFile(new File("settings_profiles.xml").getCanonicalPath());
@@ -42,7 +46,8 @@ public abstract class AbstractMavenProfileTest extends AbstractMavenProjectTestC
   }
 
   @Override
-  protected void tearDown() throws Exception {
+  @After
+  public void tearDown() throws Exception {
     profileManager = null;
     if(originalSettings != null) {
       mavenConfiguration.setUserSettingsFile(originalSettings);

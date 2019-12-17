@@ -11,6 +11,12 @@
 
 package org.eclipse.m2e.tests.conversion;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -47,7 +53,7 @@ public class ProjectConversionEnablerTest extends AbstractProjectConversionTestC
     assertNotNull(en.canBeConverted(project));
     assertTrue(en.canBeConverted(project).isOK());
     String[] packagings = en.getPackagingTypes(project);
-    assertEquals(FooEnablerBase.PACKAGING, packagings);
+    assertArrayEquals(FooEnablerBase.PACKAGING, packagings);
   }
 
   public void testProjectCannotBeConverted() throws Exception {
@@ -71,7 +77,7 @@ public class ProjectConversionEnablerTest extends AbstractProjectConversionTestC
     assertEquals(IStatus.ERROR, en.canBeConverted(project).getSeverity());
     assertEquals(MavenLayoutEnablerBase.ERR_MSG, en.canBeConverted(project).getMessage());
     String[] packagings = en.getPackagingTypes(project);
-    assertEquals(FooEnablerBase.PACKAGING, packagings);
+    assertArrayEquals(FooEnablerBase.PACKAGING, packagings);
   }
 
   public void testEnablerNotFound() throws Exception {

@@ -11,6 +11,8 @@
 
 package org.eclipse.m2e.tests.launch;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;

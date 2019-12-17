@@ -11,11 +11,19 @@
 
 package org.eclipse.m2e.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
+
+import org.junit.Rule;
+import org.junit.rules.TestName;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -42,6 +50,10 @@ import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
 
 public class MarkerTest extends AbstractMavenProjectTestCase {
+
+  @Rule
+  public TestName name = new TestName();
+
   public void test() throws Exception {
     // Import a project with bad pom.xml
     IProject project = createExisting("markerTest", "projects/markers/testWorkflow");
@@ -366,7 +378,7 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
   }
 
   public void testNoDuplicateMarker() throws CoreException {
-    final IProject p = workspace.getRoot().getProject(getName());
+    final IProject p = workspace.getRoot().getProject(name.getMethodName());
     p.create(new NullProgressMonitor());
     p.open(new NullProgressMonitor());
     MavenMarkerManager mmm = new MavenMarkerManager(null);

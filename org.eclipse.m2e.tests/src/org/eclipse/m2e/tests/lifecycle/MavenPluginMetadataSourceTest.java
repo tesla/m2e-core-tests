@@ -11,6 +11,9 @@
 
 package org.eclipse.m2e.tests.lifecycle;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import java.util.List;
 
 import org.eclipse.core.resources.IMarker;

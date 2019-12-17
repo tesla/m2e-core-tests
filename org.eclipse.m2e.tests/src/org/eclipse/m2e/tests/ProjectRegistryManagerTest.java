@@ -11,12 +11,26 @@
 
 package org.eclipse.m2e.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.TestName;
 
 import org.eclipse.aether.repository.RepositoryPolicy;
 import org.eclipse.core.resources.IFile;
@@ -72,7 +86,11 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
 
   IMavenProjectChangedListener listener = (event, monitor) -> events.addAll(Arrays.asList(event));
 
-  protected void setUp() throws Exception {
+  @Rule
+  public TestName name = new TestName();
+
+  @Before
+  public void setUp() throws Exception {
     super.setUp();
 
     manager = MavenPluginActivator.getDefault().getMavenProjectManagerImpl();
@@ -81,7 +99,8 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     manager.addMavenProjectChangedListener(listener);
   }
 
-  protected void tearDown() throws Exception {
+  @After
+  public void tearDown() throws Exception {
     try {
       manager.removeMavenProjectChangedListener(listener);
       listener = null;
@@ -890,7 +909,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
           if(event.getJob() instanceof ProjectRegistryRefreshJob) {
             // cancel all those concurrent refresh jobs, we want to monitor the main thread only
             event.getJob().cancel();
-            System.out.println(getName() + ": ProjectRegistryRefreshJob was cancelled");
+            System.out.println(name.getMethodName() + ": ProjectRegistryRefreshJob was cancelled");
           }
         }
       };

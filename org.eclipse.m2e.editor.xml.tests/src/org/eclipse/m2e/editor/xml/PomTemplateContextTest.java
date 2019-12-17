@@ -11,6 +11,10 @@
 
 package org.eclipse.m2e.editor.xml;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.eclipse.jface.text.templates.Template;

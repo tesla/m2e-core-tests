@@ -11,10 +11,15 @@
 
 package org.eclipse.m2e.tests.embedder;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.List;
+
+import org.junit.After;
+import org.junit.Before;
 
 import org.eclipse.aether.graph.DependencyNode;
 import org.eclipse.aether.util.artifact.JavaScopes;
@@ -54,7 +59,8 @@ public class MavenModelManagerTest extends AbstractMavenProjectTestCase {
 
   private PomResourceImpl resource = null;
 
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     super.setUp();
 
     IWorkspace workspace = ResourcesPlugin.getWorkspace();
@@ -69,7 +75,8 @@ public class MavenModelManagerTest extends AbstractMavenProjectTestCase {
     }
   }
 
-  protected void tearDown() throws Exception {
+  @After
+  public void tearDown() throws Exception {
     try {
       if(resource != null) {
         resource.unload();

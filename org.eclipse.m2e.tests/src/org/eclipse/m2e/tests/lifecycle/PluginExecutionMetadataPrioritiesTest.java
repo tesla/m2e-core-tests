@@ -1,9 +1,15 @@
 
 package org.eclipse.m2e.tests.lifecycle;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.List;
+
+import org.junit.After;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -24,7 +30,8 @@ import org.eclipse.m2e.tests.configurators.TestLifecycleMapping;
 
 @SuppressWarnings("restriction")
 public class PluginExecutionMetadataPrioritiesTest extends AbstractLifecycleMappingTest {
-  protected void tearDown() throws Exception {
+  @After
+  public void tearDown() throws Exception {
     super.tearDown();
     // ensure there is no workspace lifecycle mapping
     LifecycleMappingFactory.writeWorkspaceMetadata(new LifecycleMappingMetadataSource());

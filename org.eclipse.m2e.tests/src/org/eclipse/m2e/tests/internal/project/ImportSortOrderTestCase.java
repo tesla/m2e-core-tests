@@ -11,6 +11,8 @@
 
 package org.eclipse.m2e.tests.internal.project;
 
+import static org.junit.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

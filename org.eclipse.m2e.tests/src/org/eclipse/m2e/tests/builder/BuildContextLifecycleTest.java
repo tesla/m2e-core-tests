@@ -1,6 +1,8 @@
 
 package org.eclipse.m2e.tests.builder;
 
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 
 import org.eclipse.core.resources.IProject;

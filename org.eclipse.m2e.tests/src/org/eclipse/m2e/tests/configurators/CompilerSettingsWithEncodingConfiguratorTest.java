@@ -11,6 +11,8 @@
 
 package org.eclipse.m2e.tests.configurators;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 
 import org.eclipse.core.resources.IFolder;

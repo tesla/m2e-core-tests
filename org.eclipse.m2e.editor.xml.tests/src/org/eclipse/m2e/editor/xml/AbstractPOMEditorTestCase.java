@@ -26,6 +26,11 @@ import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
 import org.eclipse.wst.sse.ui.internal.StructuredTextViewer;
 import org.eclipse.wst.xml.ui.StructuredTextViewerConfigurationXML;
+import org.junit.After;
+import org.junit.Before;
+
+import static org.junit.Assert.fail;
+
 import org.apache.maven.project.MavenProject;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.m2e.tests.common.RequireMavenExecutionContext;
@@ -42,13 +47,14 @@ public abstract class AbstractPOMEditorTestCase extends AbstractMavenProjectTest
 
   private IStructuredModel model;
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
-    file = loadProjectsAndFiles();
-    loadXMLFile();
-    initializeSourceViewer();
-  }
+	@Override
+	@Before
+	public void setUp() throws Exception {
+		super.setUp();
+		file = loadProjectsAndFiles();
+		loadXMLFile();
+		initializeSourceViewer();
+	}
 
   protected abstract IFile loadProjectsAndFiles() throws Exception;
 
@@ -109,8 +115,8 @@ public abstract class AbstractPOMEditorTestCase extends AbstractMavenProjectTest
     }
   }
 
-  @Override
-  protected void tearDown() throws Exception {
+  @Override @After
+  public void tearDown() throws Exception {
     try {
       model.releaseFromEdit();
     } finally {
