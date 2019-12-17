@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import org.eclipse.core.externaltools.internal.model.BuilderCoreUtils;
@@ -81,6 +83,17 @@ import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
 
 public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCase {
+
+  @Before
+  public void setUp() throws Exception {
+    super.setUp();
+  }
+
+  @After
+  public void tearDown() throws Exception {
+    super.tearDown();
+  }
+
   @Test
   public void testBasedirRenameRequired() throws Exception {
     testBasedirRename(MavenProjectInfo.RENAME_REQUIRED);
