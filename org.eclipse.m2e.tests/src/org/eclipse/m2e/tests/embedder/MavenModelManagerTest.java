@@ -23,6 +23,7 @@ import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import org.eclipse.aether.graph.DependencyNode;
 import org.eclipse.aether.util.artifact.JavaScopes;
@@ -46,12 +47,11 @@ import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.model.edit.pom.util.PomResourceImpl;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
+import org.eclipse.m2e.tests.common.MavenRunner;
 import org.eclipse.m2e.tests.common.RequireMavenExecutionContext;
 
 
-/**
- * @author Eugene Kuleshov
- */
+@RunWith(MavenRunner.class)
 public class MavenModelManagerTest extends AbstractMavenProjectTestCase {
 
   private static final String TEST_PROJECT_NAME = "editor-tests";

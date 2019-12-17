@@ -25,7 +25,9 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
@@ -48,10 +50,18 @@ import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.jdt.internal.launch.MavenRuntimeClasspathProvider;
 import org.eclipse.m2e.jdt.internal.launch.MavenSourcePathProvider;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
+import org.eclipse.m2e.tests.common.MavenRunner;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
 
+@RunWith(MavenRunner.class)
 public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
+
+  @Before
+  public void setUp() throws Exception {
+    super.setUp();
+  }
+
   @Test
   public void test() throws Exception {
     IProject cptest = createExisting("cptest", "projects/MNGECLIPSE-369/cptest");

@@ -31,9 +31,11 @@ import java.util.Set;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
+import org.junit.runner.RunWith;
 
 import org.eclipse.aether.repository.RepositoryPolicy;
 import org.eclipse.core.resources.IFile;
@@ -77,10 +79,11 @@ import org.eclipse.m2e.jdt.internal.BuildPathManager;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.m2e.tests.common.ClasspathHelpers;
 import org.eclipse.m2e.tests.common.FilexWagon;
+import org.eclipse.m2e.tests.common.MavenRunner;
 import org.eclipse.m2e.tests.common.RequireMavenExecutionContext;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
-
+@RunWith(MavenRunner.class)
 public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
 
   ProjectRegistryManager manager;
@@ -824,6 +827,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
    * This test disabled until https://issues.sonatype.org/browse/MNGECLIPSE-1448 is resolved
    */
   @Test
+  @Ignore
   public void _testExtensionPluginResolution() throws Exception {
     IProject p1 = createExisting("MNGECLIPSE380-plugin", "resources/MNGECLIPSE380/plugin");
     IProject p2 = createExisting("MNGECLIPSE380-project", "resources/MNGECLIPSE380/project");
