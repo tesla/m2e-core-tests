@@ -29,6 +29,7 @@ import org.eclipse.m2e.editor.pom.MavenPomEditor;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
+import org.junit.Test;
 
 
 /**
@@ -52,7 +53,7 @@ public class HyperlinkTest extends AbstractPOMEditorTestCase {
     return (IFile) projects[1].findMember("pom.xml");
 
   }
-
+  @Test
   public void testHasLink() throws Exception {
     // Locate the area where we want to detect the link
     IRegion region = new Region(sourceViewer.getDocument().getLineOffset(12) + 17, 10);

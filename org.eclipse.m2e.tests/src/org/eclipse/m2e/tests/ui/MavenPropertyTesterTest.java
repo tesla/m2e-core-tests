@@ -16,6 +16,8 @@ package org.eclipse.m2e.tests.ui;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Test;
+
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 
@@ -30,6 +32,7 @@ public class MavenPropertyTesterTest extends AbstractMavenProjectTestCase {
   private static final String IS_BUILD_DIRECTORY = "isBuildDirectory"; //$NON-NLS-1$
 
   @RequireMavenExecutionContext
+  @Test
   public void testIsBuildDirectory() throws Exception {
     IProject[] projects = importProjects("projects/385422_filterMavenBuildDir/", new String[] {"simple/pom.xml",
         "nonDefaultBuildDir/pom.xml"}, new ResolverConfiguration());

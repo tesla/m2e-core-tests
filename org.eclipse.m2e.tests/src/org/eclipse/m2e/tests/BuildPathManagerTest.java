@@ -31,6 +31,8 @@ import java.util.Set;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IProject;
@@ -107,6 +109,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     super.tearDown();
   }
 
+  @Test
   public void testEnableMavenNature() throws Exception {
     deleteProject("MNGECLIPSE-248parent");
     deleteProject("MNGECLIPSE-248child");
@@ -155,6 +158,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     WorkspaceHelpers.assertNoErrors(project2);
   }
 
+  @Test
   public void testDisableMavenNature() throws Exception {
     deleteProject("disablemaven-p001");
     IProject p = createExisting("disablemaven-p001", "projects/disablemaven/p001");
@@ -183,6 +187,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     return false;
   }
 
+  @Test
   public void testEnableMavenNatureWithNoWorkspace() throws Exception {
     deleteProject("MNGECLIPSE-248parent");
     deleteProject("MNGECLIPSE-248child");
@@ -206,6 +211,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertEquals("MNGECLIPSE-248parent-1.0.0.jar", project2entries[0].getPath().lastSegment());
   }
 
+  @Test
   public void testProjectImportWithProfile1() throws Exception {
     deleteProject("MNGECLIPSE-353");
 
@@ -227,6 +233,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     WorkspaceHelpers.assertNoErrors(project);
   }
 
+  @Test
   public void testProjectImportWithProfile2() throws Exception {
     deleteProject("MNGECLIPSE-353");
 
@@ -250,6 +257,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     WorkspaceHelpers.assertNoErrors(project);
   }
 
+  @Test
   public void testProjectImport001_useMavenOutputFolders() throws Exception {
     deleteProject("projectimport-p001");
 
@@ -271,6 +279,8 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
   }
 
   // disabled nested modules tests 
+  @Test
+  @Ignore
   public void _testProjectImport002_useMavenOutputFolders() throws Exception {
     deleteProject("projectimport-p002");
 
@@ -289,6 +299,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertEquals(new Path("/projectimport-p002/p002-m1/target/classes"), cp[0].getOutputLocation());
   }
 
+  @Test
   public void testClasspathOrderWorkspace001() throws Exception {
     deleteProject("p1");
     deleteProject("p2");
@@ -321,6 +332,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertEquals(project2.getFolder("target/classes").getLocation().toFile(), a1.getFile());
   }
 
+  @Test
   public void testClasspathOrderWorkspace003() throws Exception {
     deleteProject("p3");
 
@@ -346,6 +358,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertEquals("xml-apis-1.0.b2.jar", cp[5].getPath().lastSegment());
   }
 
+  @Test
   public void testDownloadSources_001_basic() throws Exception {
     deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t001/0.0.1/"));
     deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t002/0.0.1/"));
@@ -408,6 +421,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertEquals("downloadsources-t002-0.0.1-sources.jar", cp[1].getSourceAttachmentPath().lastSegment());
   }
 
+  @Test
   public void testDownloadSources_001_workspaceRestart() throws Exception {
     deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t001/0.0.1/"));
     deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t002/0.0.1/"));
@@ -456,6 +470,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     }
   }
 
+  @Test
   public void testDownloadSources_001_sourceAttachment() throws Exception {
     new File(repo, "downloadsources/downloadsources-t001/0.0.1/downloadsources-t001-0.0.1-sources.jar").delete();
     new File(repo, "downloadsources/downloadsources-t002/0.0.1/downloadsources-t002-0.0.1-sources.jar").delete();
@@ -519,6 +534,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertEquals(false, file.canRead());
   }
 
+  @Test
   public void testDownloadSources_002_javadoconly() throws Exception {
     deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t003/0.0.1"));
 
@@ -542,6 +558,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertEquals("" + cp[0], 1, getAttributeCount(cp[0], IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME));
   }
 
+  @Test
   public void testDownloadSources_003_customRemoteRepository() throws Exception {
     deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t004/0.0.1"));
 
@@ -576,6 +593,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     return count;
   }
 
+  @Test
   public void testDownloadSources_004_testsClassifier() throws Exception {
     deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t005/0.0.1"));
 
@@ -598,6 +616,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertEquals("downloadsources-t005-0.0.1-test-sources.jar", cp[1].getSourceAttachmentPath().lastSegment());
   }
 
+  @Test
   public void testDownloadSources_005_classifier() throws Exception {
     deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t006/0.0.1"));
 
@@ -622,6 +641,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
         cp[0].getSourceAttachmentPath().lastSegment());
   }
 
+  @Test
   public void testDownloadSources_006_nonMavenProject() throws Exception {
     RepositoryRegistry repositoryRegistry = (RepositoryRegistry) MavenPlugin.getRepositoryRegistry();
     repositoryRegistry.updateRegistry(monitor);
@@ -673,6 +693,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertEquals(false, cp[cp.length - 1].isExported());
   }
 
+  @Test
   public void testDownloadSources_007_missingTestsSources() throws Exception {
     // see MNGECLIPSE-1777
     deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t007/0.0.1"));
@@ -706,6 +727,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     }
   }
 
+  @Test
   public void testDownloadSources_008_fallbackToJavadocWhenMissingSources() throws Exception {
     boolean oldDownloadSources = mavenConfiguration.isDownloadSources();
     boolean oldDownloadJavadoc = mavenConfiguration.isDownloadJavaDoc();
@@ -745,6 +767,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     return (BuildPathManager) MavenJdtPlugin.getDefault().getBuildpathManager();
   }
 
+  @Test
   public void testClassifiers() throws Exception {
     IProject p1 = createExisting("classifiers-p1", "projects/classifiers/classifiers-p1");
     waitForJobsToComplete();
@@ -774,6 +797,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertEquals(p2.getFolder("target/test-classes").getLocation().toFile(), it.next().getFile());
   }
 
+  @Test
   public void testCreateSimpleProject() throws CoreException {
     IProject project = createSimpleProject("simple-project", null);
 
@@ -802,6 +826,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertTrue(project.getFolder("src/test/resources").exists());
   }
 
+  @Test
   public void test005_dependencyAvailableFromLocalRepoAndWorkspace() throws Exception {
     IProject p1 = createExisting("t005-p1", "resources/t005/t005-p1");
     IProject p2 = createExisting("t005-p2", "resources/t005/t005-p2");
@@ -832,6 +857,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertEquals(p2.getFolder("target/classes").getLocation().toFile(), it.next().getFile());
   }
 
+  @Test
   public void testProjectNameTemplate() throws Exception {
     deleteProject("p003");
     deleteProject("projectimport.p003-2.0");
@@ -849,6 +875,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertTrue(workspace.getRoot().getProject("projectimport.p003-2.0").exists());
   }
 
+  @Test
   public void testProjectNameTemplateWithProperties() throws Exception {
     deleteProject("project..import.p004.-2.0-");
 
@@ -862,6 +889,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertTrue(workspace.getRoot().getProject("project..import.p004.-2.0-").exists());
   }
 
+  @Test
   public void testProjectNameWithNameTemplate() throws Exception {
     deleteProject("343038");
 
@@ -875,6 +903,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertTrue(workspace.getRoot().getProject("My super awesome project-0.0.1-SNAPSHOT").exists());
   }
 
+  @Test
   public void testCompilerSettingsJsr14() throws Exception {
     deleteProject("compilerSettingsJsr14");
 
@@ -897,6 +926,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertEquals("J2SE-1.5", JavaRuntime.getExecutionEnvironmentId(jreEntry.getPath()));
   }
 
+  @Test
   public void testCompilerSettings14() throws Exception {
     deleteProject("compilerSettings14");
 
@@ -931,6 +961,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     return null;
   }
 
+  @Test
   public void testMavenBuilderOrder() throws Exception {
     IProject project = createExisting("builderOrder", "projects/builderOrder");
     IProjectDescription description = project.getDescription();
@@ -971,6 +1002,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
   }
 
   // MNGECLIPSE-1133
+  @Test
   public void testUpdateProjectConfigurationWithWorkspace() throws Exception {
     deleteProject("MNGECLIPSE-1133parent");
     deleteProject("MNGECLIPSE-1133child");
@@ -1060,6 +1092,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     return project;
   }
 
+  @Test
   public void testSimpleProjectInExternalLocation() throws CoreException, IOException {
     File tmp = File.createTempFile("m2eclipse", "test");
     tmp.delete(); //deleting a tmp file so we can use the name for a folder
@@ -1083,6 +1116,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     tmp.delete();
   }
 
+  @Test
   public void testArchetypeProject() throws CoreException {
     Archetype quickStart = findQuickStartArchetype();
 
@@ -1091,6 +1125,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertNotNull(JavaCore.create(project)); // TODO more meaningful assertion 
   }
 
+  @Test
   public void testArchetypeProjectInExternalLocation() throws CoreException, IOException {
     Archetype quickStart = findQuickStartArchetype();
 
@@ -1150,12 +1185,14 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     return project;
   }
 
+  @Test
   public void testMNGECLIPSE_1047_localRepoPath() {
     IPath m2_repo = JavaCore.getClasspathVariable(BuildPathManager.M2_REPO);
     //Local repo set by the BuildManager was based on a cached version of MavenEmbedder, not the one configured in setup.
     assertEquals(repo.toString(), m2_repo.toOSString());
   }
 
+  @Test
   public void testMNGECLIPSE_696_compiler_includes_excludes() throws Exception {
     final String projectName = "MNGECLIPSE-696";
 
@@ -1193,6 +1230,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertEquals(new Path("org/apache/maven/tests/Excluded.java"), exclusionsTest[0]);
   }
 
+  @Test
   public void testMNGECLIPSE_2367_same_sources_resources() throws Exception {
     IProject project = importProject("projects/MNGECLIPSE-2367_sourcesResourcesOverlap/project01/pom.xml");
     waitForJobsToComplete();
@@ -1211,6 +1249,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertTrue(project.getFile("target/classes/test.properties").isAccessible());
   }
 
+  @Test
   public void testMNGECLIPSE_2367_sources_encloses_resources() throws Exception {
     IProject project = importProject("projects/MNGECLIPSE-2367_sourcesResourcesOverlap/project02/pom.xml");
     waitForJobsToComplete();
@@ -1229,6 +1268,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertTrue(project.getFile("target/classes/test.properties").isAccessible());
   }
 
+  @Test
   public void testMNGECLIPSE_2367_testSources_encloses_resources() throws Exception {
     IProject project = importProject("projects/MNGECLIPSE-2367_sourcesResourcesOverlap/project03/pom.xml");
     waitForJobsToComplete();
@@ -1242,6 +1282,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertTrue(project.getFile("target/classes/test.properties").isAccessible());
   }
 
+  @Test
   public void test486721_sourceAndResourceUnderSameNonDefaultFolder() throws Exception {
     IProject project = importProject("projects/MNGECLIPSE-2367_sourcesResourcesOverlap/project04/pom.xml");
     assertNoErrors(project);
@@ -1265,6 +1306,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertEquals(0, rawClasspath[2].getExclusionPatterns().length);
   }
 
+  @Test
   public void test486721_overlappingResourceFolders() throws Exception {
     IProject project = importProject("projects/MNGECLIPSE-2367_sourcesResourcesOverlap/project05/pom.xml");
     assertNoErrors(project);
@@ -1286,6 +1328,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertEquals("**", rawClasspath[1].getExclusionPatterns()[0].toString());
   }
 
+  @Test
   public void testMNGECLIPSE_2433_resourcesOutsideBasdir() throws Exception {
     IProject[] projects = importProjects("projects/MNGECLIPSE-2433_resourcesOutsideBasdir",
         new String[] {"project01/pom.xml", "project02/pom.xml"}, new ResolverConfiguration());
@@ -1306,6 +1349,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertEquals("org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER", cp[3].getPath().segment(0));
   }
 
+  @Test
   public void test359725_resourcesWorkspaceRoot() throws Exception {
     // m2e does not support resources outside of project basedir.
     // the point of this test is to verify m2e can import such unsupported projects
@@ -1318,6 +1362,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertNoErrors(project);
   }
 
+  @Test
   public void test431080_flatDirectoryLayout() throws Exception {
     IProject project = importProject("projects/431080_flatDirectoryLayout/pom.xml");
     waitForJobsToComplete();
@@ -1327,6 +1372,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertNoErrors(project);
   }
 
+  @Test
   public void test360962_forbiddenReferencePreference() throws Exception {
     IProject project = importProject("projects/360962_forbiddenReferencePreference/custom/pom.xml");
     waitForJobsToComplete();
@@ -1339,6 +1385,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertEquals("warning", jproject.getOption(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE, false));
   }
 
+  @Test
   public void test388596_expandedSnapshotDependency() throws Exception {
     IProject[] projects = importProjects("projects/388596_expandedSnapshotDependency",
         new String[] {"a/pom.xml", "b/pom.xml"}, new ResolverConfiguration());
@@ -1352,6 +1399,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     ClasspathHelpers.assertClasspathEntry(cp, projects[0].getFullPath());
   }
 
+  @Test
   public void test385391_keepCustomSourceEncoding() throws Exception {
     IProject project = createSimpleProject("simple-project", null);
 

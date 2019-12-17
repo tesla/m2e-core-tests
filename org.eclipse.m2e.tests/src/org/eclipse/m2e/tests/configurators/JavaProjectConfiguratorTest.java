@@ -16,6 +16,8 @@ package org.eclipse.m2e.tests.configurators;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
+import org.junit.Test;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -28,7 +30,7 @@ import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
 //TODO Re-enable it when we'll have support for secondary project configurators
 public abstract class JavaProjectConfiguratorTest extends AbstractMavenProjectTestCase {
-
+  @Test
   public void testMNGECLIPSE2313_markAllRawClasspathEntries() throws Exception {
     IProject project = importProject("projects/MNGECLIPSE-2313_markAllRawClasspathEntries/pom.xml");
     IJavaProject javaProject = JavaCore.create(project);

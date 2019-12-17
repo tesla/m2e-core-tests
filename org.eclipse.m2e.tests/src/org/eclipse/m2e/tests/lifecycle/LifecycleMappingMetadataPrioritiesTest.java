@@ -7,6 +7,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
+import org.junit.Test;
+
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 
@@ -23,6 +25,7 @@ import org.eclipse.m2e.tests.configurators.TestLifecycleMapping;
 public class LifecycleMappingMetadataPrioritiesTest extends AbstractLifecycleMappingTest {
 
   // Tests lifecycle mapping declared in default lifecycle mapping metadata
+  @Test
   public void testDefaultMetadataSource() throws Exception {
     LifecycleMappingMetadataSource defaultMetadata = loadLifecycleMappingMetadataSource("projects/lifecyclemapping/lifecycleMappingMetadata/LifecycleMappingMetadataPrioritiesTest/defaultMetadata.xml");
     LifecycleMappingFactory.setDefaultLifecycleMappingMetadataSource(defaultMetadata);
@@ -44,6 +47,7 @@ public class LifecycleMappingMetadataPrioritiesTest extends AbstractLifecycleMap
   }
 
   // Tests that a lifecycle mapping declared in an eclipse extension has priority over default lifecycle mapping metadata
+  @Test
   public void testEclipseExtension() throws Exception {
     LifecycleMappingMetadataSource defaultMetadata = loadLifecycleMappingMetadataSource("projects/lifecyclemapping/lifecycleMappingMetadata/LifecycleMappingMetadataPrioritiesTest/defaultMetadata.xml");
     LifecycleMappingFactory.setDefaultLifecycleMappingMetadataSource(defaultMetadata);
@@ -61,6 +65,7 @@ public class LifecycleMappingMetadataPrioritiesTest extends AbstractLifecycleMap
   }
 
   // Tests that a lifecycle mapping declared in a metadata source referenced from pom has priority over eclipse extension
+  @Test
   public void testReferencedFromPom() throws Exception {
     LifecycleMappingMetadataSource defaultMetadata = loadLifecycleMappingMetadataSource("projects/lifecyclemapping/lifecycleMappingMetadata/LifecycleMappingMetadataPrioritiesTest/defaultMetadata.xml");
     LifecycleMappingFactory.setDefaultLifecycleMappingMetadataSource(defaultMetadata);
@@ -82,6 +87,7 @@ public class LifecycleMappingMetadataPrioritiesTest extends AbstractLifecycleMap
   }
 
   // Tests that a lifecycle mapping embedded in pom has priority over lifecycle mapping declared in a metadata source referenced from pom
+  @Test
   public void testEmbeddedInPom() throws Exception {
     LifecycleMappingMetadataSource defaultMetadata = loadLifecycleMappingMetadataSource("projects/lifecyclemapping/lifecycleMappingMetadata/LifecycleMappingMetadataPrioritiesTest/defaultMetadata.xml");
     LifecycleMappingFactory.setDefaultLifecycleMappingMetadataSource(defaultMetadata);
@@ -102,6 +108,7 @@ public class LifecycleMappingMetadataPrioritiesTest extends AbstractLifecycleMap
         "no such lifecycle mapping for test-packaging-for-eclipse-extension - embedded in pom");
   }
 
+  @Test
   public void testParent() throws Exception {
     IMavenProjectFacade facade = importMavenProject(
         "projects/lifecyclemapping/lifecycleMappingMetadata/LifecycleMappingMetadataPrioritiesTest",

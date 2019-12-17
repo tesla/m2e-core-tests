@@ -9,6 +9,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
+import org.junit.Test;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
 
@@ -30,7 +32,7 @@ import org.eclipse.m2e.tests.common.RequireMavenExecutionContext;
 
 @RequireMavenExecutionContext
 public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
-
+  @Test
   public void testGetMojoExecution() throws Exception {
     IProject project = importProject("projects/getmojoexecution/pom.xml");
     assertNoErrors(project);
@@ -55,6 +57,7 @@ public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
     assertEquals("1.6", maven.getMojoParameterValue(mavenProject, compileMojo, "target", String.class, monitor));
   }
 
+  @Test
   public void testGetMojoExecutionAfterWorkspaceRestart() throws Exception {
     IProject project = importProject("projects/getmojoexecution/pom.xml");
     assertNoErrors(project);
@@ -80,6 +83,7 @@ public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
     assertEquals("1.6", maven.getMojoParameterValue(mavenProject, compileMojo, "target", String.class, monitor));
   }
 
+  @Test
   public void testGetMojoExecutions() throws Exception {
     IProject project = importProject("projects/getmojoexecution/pom.xml");
     assertNoErrors(project);
@@ -98,6 +102,7 @@ public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
   }
 
   @RequireMavenExecutionContext(require = false)
+  @Test
   public void testGetMojoExecutionsWithoutMavenExecutionContext() throws Exception {
     IProject project = importProject("projects/getmojoexecution/pom.xml");
     assertNoErrors(project);
@@ -112,6 +117,7 @@ public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
     assertSame(facade.getMavenProject(monitor), facade.getMavenProject(monitor));
   }
 
+  @Test
   public void testGetMojoExecutionsAfterWorkspaceRestart() throws Exception {
     IProject project = importProject("projects/getmojoexecution/pom.xml");
     assertNoErrors(project);
@@ -130,6 +136,7 @@ public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
     assertEquals("1.6", maven.getMojoParameterValue(mavenProject, executions.get(0), "target", String.class, monitor));
   }
 
+  @Test
   public void testGetProjectConfigurators() throws Exception {
     IProject project = importProject("projects/getmojoexecution/pom.xml");
     assertNoErrors(project);
@@ -144,6 +151,7 @@ public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
     assertEquals(1, projectConfigurators.size());
   }
 
+  @Test
   public void testGetProjectConfiguratorsAfterWorkspaceRestart() throws Exception {
     IProject project = importProject("projects/getmojoexecution/pom.xml");
     assertNoErrors(project);
@@ -160,6 +168,7 @@ public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
     assertEquals(1, projectConfigurators.size());
   }
 
+  @Test
   public void testIsStale() throws Exception {
     IProject project = importProject("projects/testIsStale/pom.xml");
     waitForJobsToComplete();
@@ -174,6 +183,7 @@ public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
     }
   }
 
+  @Test
   public void test436668_EclipseProjectMetadataNotStale() throws Exception {
     IProject project = importProject("projects/testIsStale/pom.xml");
     waitForJobsToComplete();

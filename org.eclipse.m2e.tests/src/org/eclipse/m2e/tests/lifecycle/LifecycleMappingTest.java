@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.Test;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -84,6 +86,7 @@ import org.eclipse.m2e.tests.configurators.TestProjectConfigurator2;
 
 @SuppressWarnings("restriction")
 public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
+  @Test
   public void testLifecycleMappingSpecifiedInMetadata() throws Exception {
     IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/lifecycleMappingMetadata",
         "testLifecycleMappingSpecifiedInMetadata/pom.xml");
@@ -96,6 +99,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertTrue(lifecycleMapping.getClass().getCanonicalName(), lifecycleMapping instanceof JarLifecycleMapping);
   }
 
+  @Test
   public void testMissingLifecycleMappingMetadata() throws Exception {
     IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/lifecycleMappingMetadata",
         "testMissingLifecycleMappingMetadata/pom.xml");
@@ -126,6 +130,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     return null;
   }
 
+  @Test
   public void testUseDefaultLifecycleMappingMetadataSource() throws Exception {
     LifecycleMappingFactory.setUseDefaultLifecycleMappingMetadataSource(false);
     assertNull(LifecycleMappingFactory.getDefaultLifecycleMappingMetadataSource());
@@ -136,6 +141,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertNotNull(LifecycleMappingFactory.getDefaultLifecycleMappingMetadataSource());
   }
 
+  @Test
   public void testGetLifecycleMappingMetadata() throws Exception {
     IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/lifecycleMappingMetadata",
         "testGetLifecycleMappingMetadata/pom.xml");
@@ -183,6 +189,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
         PluginExecutionAction.execute, null, pluginExecutions.get(2));
   }
 
+  @Test
   public void testGetLifecycleMappingMetadataOverride() throws Exception {
     IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/lifecycleMappingMetadata",
         "testGetLifecycleMappingMetadataOverride/pom.xml");
@@ -227,6 +234,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
         PluginExecutionAction.ignore, null, pluginExecutions.get(1));
   }
 
+  @Test
   public void testProfilesAndProperties() throws Exception {
     IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/lifecycleMappingMetadata",
         "testProfilesAndProperties/pom.xml");
@@ -258,6 +266,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertEquals("0.0.1", source2.getVersion());
   }
 
+  @Test
   public void testGetLifecycleMappingMetadataMerge() throws Exception {
     IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/lifecycleMappingMetadata",
         "testGetLifecycleMappingMetadataMerge/pom.xml");
@@ -301,6 +310,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     }
   }
 
+  @Test
   public void testDefaultJarLifecycleMapping() throws Exception {
     IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping", "default-jar/pom.xml");
     assertNotNull("Expected not null MavenProjectFacade", facade);
@@ -338,6 +348,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     }
   }
 
+  @Test
   public void testNotCoveredMojoExecutions() throws Exception {
     IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping", "notCoveredMojoExecutions/pom.xml");
     assertNotNull("Expected not null MavenProjectFacade", facade);
@@ -372,6 +383,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     WorkspaceHelpers.assertErrorMarkerAttributes(marker, notCoveredMojoExecutions.get(1));
   }
 
+  @Test
   public void testMissingMapping() throws Exception {
     IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping", "missing/pom.xml");
     assertNotNull("Expected not null MavenProjectFacade", facade);
@@ -397,6 +409,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     WorkspaceHelpers.assertLifecycleIdErrorMarkerAttributes(marker, "unknown-or-missing");
   }
 
+  @Test
   public void testUnknownPackagingType() throws Exception {
     IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping", "unknownPackagingType/pom.xml");
     assertNotNull("Expected not null MavenProjectFacade", facade);
@@ -411,6 +424,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     WorkspaceHelpers.assertNoErrors(project);
   }
 
+  @Test
   public void testNotInterestingPhaseConfigurator() throws Exception {
     IMavenProjectFacade facade = importMavenProject(
         "projects/lifecyclemapping/lifecycleMappingMetadata/testNotInterestingPhaseConfigurator", "pom.xml");
@@ -428,6 +442,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertTrue(buildParticipants.get(executionKey).get(0) instanceof MojoExecutionBuildParticipant);
   }
 
+  @Test
   public void testDuplicatePackagingTypeMetadata() throws Exception {
     MavenProjectFacade facade = newMavenProjectFacade(
         "projects/lifecyclemapping/lifecycleMappingMetadata/DuplicateMetadata/testDuplicatePackagingType", "pom.xml");
@@ -444,6 +459,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertNull(mappingResult.getLifecycleMapping());
   }
 
+  @Test
   public void testDuplicatePluginExecution1() throws Exception {
     MavenProjectFacade facade = newMavenProjectFacade(
         "projects/lifecyclemapping/lifecycleMappingMetadata/DuplicateMetadata/testDuplicatePluginExecution1", "pom.xml");
@@ -461,6 +477,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     // [3] Plugin execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-2 (execution: default-test-goal-2, phase: compile)
   }
 
+  @Test
   public void testDuplicatePluginExecution2() throws Exception {
     MavenProjectFacade facade = newMavenProjectFacade(
         "projects/lifecyclemapping/lifecycleMappingMetadata/DuplicateMetadata/testDuplicatePluginExecution2", "pom.xml");
@@ -483,6 +500,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     return newMavenProjectFacade(project.getFile(fileName));
   }
 
+  @Test
   public void testSecondaryConfiguratorsCustomizable() throws Exception {
     IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/secondaryConfigurators/customizable",
         "pom.xml");
@@ -495,6 +513,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertEquals(3, configurators.size());
   }
 
+  @Test
   public void testSecondaryConfiguratorsCustom() throws Exception {
     IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/secondaryConfigurators/custom",
         "pom.xml");
@@ -507,6 +526,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertEquals(3, configurators.size());
   }
 
+  @Test
   public void testCompatibleVersion() throws Exception {
     IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/lifecycleMappingMetadata",
         "testCompatibleVersion/pom.xml");
@@ -519,6 +539,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertTrue(lifecycleMapping.getClass().getCanonicalName(), lifecycleMapping instanceof JarLifecycleMapping);
   }
 
+  @Test
   public void testIncompatibleVersion() throws Exception {
     IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/lifecycleMappingMetadata",
         "testIncompatibleVersion/pom.xml");
@@ -537,6 +558,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertTrue(lifecycleMapping instanceof InvalidLifecycleMapping);
   }
 
+  @Test
   public void testPackagingTypeMismatch() throws Exception {
     IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping",
         "testPackagingTypeMismatch/pom/pom.xml");
@@ -562,6 +584,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertTrue(lifecycleMapping instanceof InvalidLifecycleMapping);
   }
 
+  @Test
   public void testSameConfiguratorUsedTwice() throws Exception {
     IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/lifecycleMappingMetadata",
         "testSameConfiguratorUsedTwice/pom.xml");
@@ -590,6 +613,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     }
   }
 
+  @Test
   public void testNonresolvableExecutionPlan() throws Exception {
     IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping",
         "testNonresolvableExecutionPlan/pom.xml");
@@ -603,6 +627,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertEquals(configurators.toString(), 0, configurators.size());
   }
 
+  @Test
   public void testNondeafaultLifecycles() throws Exception {
     MavenProjectFacade facade = (MavenProjectFacade) importMavenProject(
         "projects/lifecyclemapping/lifecycleMappingMetadata/PluginExecutionActionsTest/testNondefaultLifecycles",
@@ -634,6 +659,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertEquals(0, lifecycleMapping.getBuildParticipants(facade, monitor).size());
   }
 
+  @Test
   public void testPomPackagingType() throws Exception {
     IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping", "pomPackagingType/pom.xml");
     assertNotNull("Expected not null MavenProjectFacade", facade);
@@ -656,6 +682,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertEquals(0, buildParticipants.size());
   }
 
+  @Test
   public void testFailToGetPluginParameterValue() throws Exception {
     MavenProjectFacade facade = (MavenProjectFacade) importMavenProject("projects/lifecyclemapping",
         "testFailToGetPluginParameterValue/pom.xml");
@@ -677,6 +704,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     // [1] Plugin execution not covered by lifecycle configuration: missing:missing:1.0.0:run (execution: test, phase: compile))
   }
 
+  @Test
   public void testSetNoopMappingDuringImport() throws Exception {
     ResolverConfiguration resolverConfig = new ResolverConfiguration();
     resolverConfig.setLifecycleMappingId(NoopLifecycleMapping.LIFECYCLE_MAPPING_ID);
@@ -698,6 +726,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertTrue(LifecycleMappingFactory.getProjectConfigurators(facade).isEmpty());
   }
 
+  @Test
   public void testSetCustomizableMappingDuringImport() throws Exception {
     ResolverConfiguration resolverConfig = new ResolverConfiguration();
     resolverConfig.setLifecycleMappingId(TestLifecycleMapping.LIFECYCLE_MAPPING_ID);
@@ -719,6 +748,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertFalse(LifecycleMappingFactory.getProjectConfigurators(facade).isEmpty());
   }
 
+  @Test
   public void testMissingVersionRangeInPluginExecutionFilter() throws Exception {
     try {
       MavenProjectFacade facade = (MavenProjectFacade) importMavenProject("projects/lifecyclemapping",
@@ -729,6 +759,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     }
   }
 
+  @Test
   public void testNotCoveredMojoExecutionWarnings() throws Exception {
     String originalSeverity = mavenConfiguration.getNotCoveredMojoExecutionSeverity();
     try {
@@ -762,6 +793,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     }
   }
 
+  @Test
   public void testNotCoveredMojoExecutionIgnored() throws Exception {
     String originalSeverity = mavenConfiguration.getNotCoveredMojoExecutionSeverity();
     try {
@@ -783,6 +815,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
 
   }
 
+  @Test
   public void testOrder() throws Exception {
     IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/lifecycleMappingMetadata/sorting/",
         "testConfiguratorOrder/pom.xml");
@@ -794,6 +827,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertEquals("TEST_SECONDARY3,TEST_SECONDARY4,TEST_SECONDARY6,TEST_SECONDARY5", order);
   }
 
+  @Test
   public void test371618_NullLifecycleMappingPluginVersion() throws Exception {
     IProject[] projects = importProjects("projects/lifecyclemapping/371618",
         new String[] {"pom.xml", "testchild/pom.xml"}, new ResolverConfiguration());
@@ -801,6 +835,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     WorkspaceHelpers.assertNoErrors(projects[1]);
   }
 
+  @Test
   public void testConfiguratorsFollowPhaseOrder() throws Exception {
     MavenProjectFacade facade = (MavenProjectFacade) importMavenProject(
         "projects/lifecyclemapping/lifecycleMappingMetadata/PluginExecutionActionsTest/testConfiguratorsOrder",
@@ -816,6 +851,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertEquals(TestProjectConfigurator.class, configurators.get(1).getClass());
   }
 
+  @Test
   public void test494858ProcessingInstructions() throws Exception {
     MavenProjectFacade facade = (MavenProjectFacade) importMavenProject(
         "projects/lifecyclemapping/lifecycleMappingMetadata/ProcessingInstructions", "pom.xml");
@@ -875,6 +911,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
 
   }
 
+  @Test
   public void test387736_missingAction() throws Exception {
     IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/387736", "pom.xml");
     assertNotNull("Expected not null MavenProjectFacade", facade);

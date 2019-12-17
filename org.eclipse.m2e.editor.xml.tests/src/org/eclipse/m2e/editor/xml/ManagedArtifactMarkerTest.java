@@ -24,6 +24,7 @@ import org.eclipse.m2e.core.internal.preferences.MavenConfigurationImpl;
 import org.eclipse.m2e.core.internal.preferences.ProblemSeverity;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
+import org.junit.Test;
 
 
 /**
@@ -34,7 +35,7 @@ import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
  */
 
 public class ManagedArtifactMarkerTest extends AbstractMavenProjectTestCase {
-
+	 @Test
   public void testMNGEclipse2559() throws Exception {
     ResolverConfiguration config = new ResolverConfiguration();
     IProject[] projects = importProjects("projects/MNGECLIPSE-2559", new String[] {"pom.xml"}, config);
@@ -66,6 +67,7 @@ public class ManagedArtifactMarkerTest extends AbstractMavenProjectTestCase {
   }
 
   // splitted the test in two as both projects failed to load together!!!! why? shall I bother?
+  @Test 
   public void testMNGEclipse2559Second() throws Exception {
     ResolverConfiguration config = new ResolverConfiguration();
     config.setSelectedProfiles("plug,depend");
@@ -96,13 +98,13 @@ public class ManagedArtifactMarkerTest extends AbstractMavenProjectTestCase {
     copyContent(project, "pom_good.xml", "pom.xml");
     XmlEditorHelpers.assertNoEditorHintWarningMarkers(project);
   }
-  
+  @Test
   public void test355882_noMarkerOnDifferentClassifier() throws Exception {
 	    IProject project = importProject("projects/355882/test1/pom.xml");
 	    waitForJobsToComplete();
 	    XmlEditorHelpers.assertNoEditorHintWarningMarkers(project);
   }
-
+  @Test
   public void test355882_MarkerOnClassifierVersionOverride() throws Exception {
 	    IProject project = importProject("projects/355882/test2/pom.xml");
 	    waitForJobsToComplete();
@@ -116,6 +118,7 @@ public class ManagedArtifactMarkerTest extends AbstractMavenProjectTestCase {
 
   }
   
+  @Test
   public void test439309_errorOnManagedVersionOverride() throws Exception {
     String originalSeverity = mavenConfiguration.getOverridingManagedVersionExecutionSeverity();
     try {
@@ -138,6 +141,7 @@ public class ManagedArtifactMarkerTest extends AbstractMavenProjectTestCase {
     }
   }
 
+  @Test
   public void test439309_ignoreManagedVersionOverride() throws Exception {
     String originalSeverity = mavenConfiguration.getOverridingManagedVersionExecutionSeverity();
     try {
@@ -155,6 +159,7 @@ public class ManagedArtifactMarkerTest extends AbstractMavenProjectTestCase {
     }
   }
 
+  @Test
   public void test553839_noErrorCausedByPluginVersionFromSuperPom() throws Exception {
     IProject project = importProject("projects/553839/pom.xml");
     waitForJobsToComplete();

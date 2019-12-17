@@ -17,6 +17,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Test;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.ui.IEditorPart;
 
@@ -30,7 +32,7 @@ import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 
 
 public class OpenPomActionTest extends AbstractMavenProjectTestCase {
-
+  @Test
   public void test454759_openEditor() throws Exception {
     IProject project = importProject("projects/454759_openEditor/pom.xml");
 

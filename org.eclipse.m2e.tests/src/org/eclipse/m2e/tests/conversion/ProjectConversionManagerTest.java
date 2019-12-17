@@ -18,6 +18,8 @@ import static org.junit.Assert.fail;
 
 import java.util.List;
 
+import org.junit.Test;
+
 import org.eclipse.core.resources.IProject;
 
 import org.eclipse.m2e.core.MavenPlugin;
@@ -31,7 +33,7 @@ import org.eclipse.m2e.core.project.conversion.IProjectConversionManager;
  * @author Fred Bricon
  */
 public class ProjectConversionManagerTest extends AbstractProjectConversionTestCase {
-
+  @Test
   public void testConversionParticipantsPerProject() throws Exception {
     IProject p1 = createExisting("custom-layout", "projects/conversion/custom-layout");
     IProject p2 = createExisting("project-needs-test-participant", "projects/conversion/project-needs-test-participant");
@@ -52,6 +54,7 @@ public class ProjectConversionManagerTest extends AbstractProjectConversionTestC
 
   }
 
+  @Test
   public void testRestrictedPackagings() throws Exception {
     IProjectConversionManager manager = MavenPlugin.getProjectConversionManager();
     String packaging = "eclipse-plugin";
@@ -85,6 +88,7 @@ public class ProjectConversionManagerTest extends AbstractProjectConversionTestC
     }
   }
 
+  @Test
   public void test393613_SortConversionParticipants() throws Exception {
     IProject project = createExisting("project-needs-test-sort-participant",
         "projects/conversion/project-needs-test-sort-participant");

@@ -18,6 +18,7 @@ import static org.junit.Assert.assertEquals;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
+import org.junit.Test;
 
 
 /**
@@ -36,7 +37,7 @@ public class RelativePath3Test extends AbstractCompletionTest {
     waitForJobsToComplete();
     return (IFile) projects[1].findMember("pom.xml");
   }
-
+  @Test
   public void testRelativePath() throws Exception {
     assertEquals("../../parent2601/pom.xml",
         PomContentAssistProcessor.findRelativePath(sourceViewer, "org.eclipse.m2e", "parent2601", "0.0.1-SNAPSHOT"));

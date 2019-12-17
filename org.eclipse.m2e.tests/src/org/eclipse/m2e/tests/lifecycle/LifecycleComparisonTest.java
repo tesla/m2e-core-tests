@@ -4,6 +4,8 @@ package org.eclipse.m2e.tests.lifecycle;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Test;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 
@@ -16,7 +18,7 @@ import org.eclipse.m2e.tests.common.AbstractLifecycleMappingTest;
 
 @SuppressWarnings("restriction")
 public class LifecycleComparisonTest extends AbstractLifecycleMappingTest {
-
+  @Test
   public void testSameProject() throws Exception {
     IProject project = createExisting("LifecycleComparisonTest", "projects/lifecyclemapping/lifecyclecomparison");
     LifecycleMappingConfiguration facadeA = LifecycleMappingConfiguration.newLifecycleMappingConfiguration(
@@ -26,6 +28,7 @@ public class LifecycleComparisonTest extends AbstractLifecycleMappingTest {
     assertFalse(LifecycleMappingFactory.isLifecycleMappingChanged(facadeB, facadeA, monitor));
   }
 
+  @Test
   public void testPluginVersionChange() throws Exception {
     IProject project = createExisting("LifecycleComparisonTest", "projects/lifecyclemapping/lifecyclecomparison");
     LifecycleMappingConfiguration facadeA = LifecycleMappingConfiguration.newLifecycleMappingConfiguration(
@@ -35,6 +38,7 @@ public class LifecycleComparisonTest extends AbstractLifecycleMappingTest {
     assertTrue(LifecycleMappingFactory.isLifecycleMappingChanged(facadeB, facadeA, monitor));
   }
 
+  @Test
   public void testPluginConfigurationChange() throws Exception {
     IProject project = createExisting("LifecycleComparisonTest", "projects/lifecyclemapping/lifecyclecomparison");
     LifecycleMappingConfiguration facadeA = LifecycleMappingConfiguration.newLifecycleMappingConfiguration(

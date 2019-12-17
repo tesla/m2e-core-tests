@@ -18,6 +18,8 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.util.Collections;
 
+import org.junit.Test;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -36,6 +38,7 @@ public class MavenImportWizardTest extends AbstractMavenProjectTestCase {
    * 
    * @throws Exception
    */
+  @Test
   public void testNoRenameOnMavenImport() throws Exception {
     IWorkspaceRoot root = workspace.getRoot();
 
@@ -65,6 +68,7 @@ public class MavenImportWizardTest extends AbstractMavenProjectTestCase {
    * 
    * @throws Exception
    */
+  @Test
   public void testNoRenameOnMavenImportInWorkspaceRoot() throws Exception {
     IWorkspaceRoot root = workspace.getRoot();
 
@@ -94,6 +98,7 @@ public class MavenImportWizardTest extends AbstractMavenProjectTestCase {
    * 
    * @throws Exception
    */
+  @Test
   public void testRenameOnMavenImport() throws Exception {
     IWorkspaceRoot root = workspace.getRoot();
 

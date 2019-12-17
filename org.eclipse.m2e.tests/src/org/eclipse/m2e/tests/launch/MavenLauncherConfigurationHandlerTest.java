@@ -17,6 +17,8 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 
+import org.junit.Test;
+
 import org.eclipse.core.resources.IProject;
 
 import org.eclipse.m2e.core.MavenPlugin;
@@ -26,7 +28,7 @@ import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 
 
 public class MavenLauncherConfigurationHandlerTest extends AbstractMavenProjectTestCase {
-
+  @Test
   public void test421015_workspaceProjectLibraryClasspathEntries() throws Exception {
     IProject project = importProject("projects/421015_workspaceProjectLibraryClasspathEntries/pom.xml");
     IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().create(project, monitor);

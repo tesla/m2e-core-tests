@@ -21,6 +21,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
+import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;
@@ -55,7 +56,7 @@ public class PomTemplateContextTest extends AbstractMavenProjectTestCase {
     child.appendChild(text);
     return child;
   }
-
+  @Test
   public void testGetTemplatesPhase() throws Exception {
     Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
     Element phase = doc.createElement("phase");
@@ -70,7 +71,7 @@ public class PomTemplateContextTest extends AbstractMavenProjectTestCase {
     assertEquals(29, templates.length);
     assertContextTypeId(PREFIX + "phase", templates);
   }
-  
+  @Test
   public void testGetTemplatesDependencyScope() throws Exception {
     Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
     Element depElement = addNode(doc.createElement("dependencies"), "dependency");
@@ -86,7 +87,7 @@ public class PomTemplateContextTest extends AbstractMavenProjectTestCase {
     assertEquals(5, templates.length);
     assertContextTypeId(PREFIX + "scope", templates);
   }
-  
+  @Test
   public void testGetTemplatesDependencyManagementScope() throws Exception {
     Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
     Element depElement = addNode(addNode(doc.createElement("dependencyManagement"), "dependencies"), "dependency");
@@ -102,7 +103,7 @@ public class PomTemplateContextTest extends AbstractMavenProjectTestCase {
     assertEquals(6, templates.length);
     assertContextTypeId(PREFIX + "scope", templates);
   }
-
+  @Test
   public void testGetTemplatesPackaging() throws Exception {
     Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
     Element packaging = doc.createElement("packaging");
@@ -117,7 +118,7 @@ public class PomTemplateContextTest extends AbstractMavenProjectTestCase {
     assertEquals(7, templates.length);
     assertContextTypeId(PREFIX + "packaging", templates);
   }
-
+  @Test
   public void testGetTemplatesConfiguration() throws Exception {
     Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
     Element plugin = doc.createElement("plugin");
@@ -142,7 +143,7 @@ public class PomTemplateContextTest extends AbstractMavenProjectTestCase {
     assertEquals(10, templates.length);
     assertContextTypeId(PREFIX + "configuration", templates);
   }
-
+  @Test
   public void testGetTemplatesGoal() throws Exception {
     Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
     Element plugin = doc.createElement("plugin");
@@ -160,7 +161,7 @@ public class PomTemplateContextTest extends AbstractMavenProjectTestCase {
     assertEquals(2, templates.length);
     assertContextTypeId(PREFIX + "goal", templates);
   }
-
+  @Test
   public void testGetTemplatesArtifactId_WithGroupId() throws Exception {
     Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
     String groupId = "testGetTemplatesArtifactId_WithGroupId";
@@ -190,6 +191,7 @@ public class PomTemplateContextTest extends AbstractMavenProjectTestCase {
   }
 
   // Missing groupId should default to org.apache.maven.plugins
+  @Test
   public void testGetTemplatesArtifactId_WithoutGroupId() throws Exception {
     Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
     // String groupId = "testGetTemplatesArtifactId_WithGroupId";
@@ -217,7 +219,7 @@ public class PomTemplateContextTest extends AbstractMavenProjectTestCase {
       PomTemplateContext.setSearchEngineForTests(null);
     }
   }
-
+  @Test
   public void testGetTemplatesVersion_WithGroupId() throws Exception {
     Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
     String groupId = "testGetTemplatesVersion_WithGroupId";
@@ -249,6 +251,7 @@ public class PomTemplateContextTest extends AbstractMavenProjectTestCase {
   }
 
   // Missing groupId should default to org.apache.maven.plugins
+  @Test
   public void testGetTemplatesVersion_WithoutGroupId() throws Exception {
     Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
     String artifactId = "testGetTemplatesVersion_WithoutGroupId_artifact";
@@ -277,7 +280,7 @@ public class PomTemplateContextTest extends AbstractMavenProjectTestCase {
       PomTemplateContext.setSearchEngineForTests(null);
     }
   }
-  
+  @Test
   public void test439251_GetTemplatesConfigurationFromMojoWithEmptyParameters() throws Exception {
 	    Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
 	    Element plugin = doc.createElement("plugin");

@@ -21,6 +21,7 @@ import java.util.Hashtable;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -50,23 +51,27 @@ public class ProjectConversionTest extends AbstractProjectConversionTestCase {
     super.tearDown();
   }
 
+  @Test
   public void testMavenLayoutProjectConversion() throws Exception {
     //Checks a project with Maven layout doesn't create extra configuration 
     //for source and resource folders 
     testProjectConversion("maven-layout");
   }
 
+  @Test
   public void testJavaMixedWithResourcesProjectConversion() throws Exception {
     //Checks a source directory having mixed java and non-java files also 
     // generates a resource
     testProjectConversion("mixed-resources");
   }
 
+  @Test
   public void testNoCustomizationNeededProjectConversion() throws Exception {
     //Checks a project with maven layout and Java 1.5 produces a minimal pom.xml
     testProjectConversion("no-customization-needed");
   }
 
+  @Test
   public void testMultipleSourcesProjectConversion() throws Exception {
     //Checks a project having multiple source directories (main and test) 
     // only configures the first one (because the maven model, by default can only support
@@ -74,12 +79,14 @@ public class ProjectConversionTest extends AbstractProjectConversionTestCase {
     testProjectConversion("multiple-sources");
   }
 
+  @Test
   public void testOptionalSourceProjectConversion() throws Exception {
     //Checks a project having optional and missing source directories doesn't crash
     // during conversion
     testProjectConversion("missing-source-folder");
   }
 
+  @Test
   public void testInheritJavaSettingsDuringConversion() throws Exception {
     //Checks a project with no specific compiler settings inherits workspace compiler settings
     // during conversion
@@ -97,6 +104,7 @@ public class ProjectConversionTest extends AbstractProjectConversionTestCase {
     }
   }
 
+  @Test
   public void testProjectConversionWithSvn() throws Exception {
     //.svn folders are not copied with the default createExisting(...) method
     //so we add some extra boilerplate to check .svn folders are ignored during conversion
@@ -119,6 +127,7 @@ public class ProjectConversionTest extends AbstractProjectConversionTestCase {
     assertConvertsAndBuilds(project);
   }
 
+  @Test
   public IProject testProjectConversion(String projectName) throws Exception {
     deleteProject(projectName);
 

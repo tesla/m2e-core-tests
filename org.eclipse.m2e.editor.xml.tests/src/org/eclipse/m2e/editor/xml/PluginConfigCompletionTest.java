@@ -25,6 +25,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
+import org.junit.Test;
 
 
 /**
@@ -49,7 +50,7 @@ public class PluginConfigCompletionTest extends AbstractCompletionTest {
       assertNotNull(facade.getMavenProject(monitor));
       sourceViewer.setMavenProject(facade.getMavenProject());
   }
-
+  @Test
   public void testAllMojosCompletion() throws Exception {
       initViewer();
       
@@ -61,7 +62,7 @@ public class PluginConfigCompletionTest extends AbstractCompletionTest {
       // 32 parameter proposals, 2 = cdata and processing instr, 1 = wst xml editor thinks that you can also put <project> under <configuration>
       assertEquals("Proposal count", 32, proposals.size());
   }
-
+  @Test
   public void testSingleMojoCompletion() throws Exception {
       initViewer();
       
@@ -71,7 +72,7 @@ public class PluginConfigCompletionTest extends AbstractCompletionTest {
       List<ICompletionProposal> proposals = getProposals(offset);
       assertEquals("Proposal count", 4, proposals.size());
   }
-
+  @Test
   public void testNestedParameterCompletion() throws Exception {
       initViewer();
       
@@ -81,7 +82,7 @@ public class PluginConfigCompletionTest extends AbstractCompletionTest {
       List<ICompletionProposal> proposals = getProposals(offset);
       assertEquals("Proposal count", 10, proposals.size());
   }
-  
+  @Test
   public void testListItemNameCompletion() throws Exception {
       initViewer();
       
@@ -93,7 +94,7 @@ public class PluginConfigCompletionTest extends AbstractCompletionTest {
       
       assertEquals("List item proposal", "manifestSection", proposals.get(0).getDisplayString());
   }
-  
+  @Test
   public void testListItemParameterCompletion() throws Exception {
       initViewer();
       
@@ -106,7 +107,7 @@ public class PluginConfigCompletionTest extends AbstractCompletionTest {
       assertEquals("List item proposal", "manifestEntries", proposals.get(0).getDisplayString());
       assertEquals("List item proposal", "name", proposals.get(1).getDisplayString());
   }
-  
+  @Test
   public void testAnyListItemNameParameterCompletion() throws Exception {
       initViewer();
       
@@ -119,7 +120,7 @@ public class PluginConfigCompletionTest extends AbstractCompletionTest {
       assertEquals("List item proposal", "manifestEntries", proposals.get(0).getDisplayString());
       assertEquals("List item proposal", "name", proposals.get(1).getDisplayString());
   }
-  
+  @Test
   public void testUnknownContentCompletion() throws Exception {
       initViewer();
       
@@ -129,7 +130,7 @@ public class PluginConfigCompletionTest extends AbstractCompletionTest {
       List<ICompletionProposal> proposals = getProposals(offset);
       assertEquals("Proposal count", 0, proposals.size());
   }
-  
+  @Test
   public void testImplementationContentCompletion() throws Exception {
       initViewer();
       
@@ -139,7 +140,7 @@ public class PluginConfigCompletionTest extends AbstractCompletionTest {
       List<ICompletionProposal> proposals = getProposals(offset);
       assertEquals("Proposal count", 14, proposals.size());
   }
-  
+  @Test
   public void testImplementationListItemNameCompletion() throws Exception {
       initViewer();
       
@@ -151,7 +152,7 @@ public class PluginConfigCompletionTest extends AbstractCompletionTest {
       
       assertEquals("List item proposal", "availableVersion", proposals.get(0).getDisplayString());
   }
-  
+  @Test
   public void testSubclassListItems() throws Exception {
       initViewer();
       
@@ -174,7 +175,7 @@ public class PluginConfigCompletionTest extends AbstractCompletionTest {
       assertEquals("Subclass item", "webModule", proposals.get(10).getDisplayString());
       assertEquals("Subclass item", "wsrModule", proposals.get(11).getDisplayString());
   }
-  
+  @Test
   public void testM2ELifecycleMappingConfiguration() throws Exception {
       initViewer();
       
@@ -196,7 +197,7 @@ public class PluginConfigCompletionTest extends AbstractCompletionTest {
       assertEquals("Execute proposal", "runOnIncremental", proposals.get(1).getDisplayString());
 
   }
-  
+  @Test
   public void testMetadataExtension() throws Exception {
       initViewer();
       

@@ -3,6 +3,8 @@ package org.eclipse.m2e.tests.project;
 
 import static org.junit.Assert.assertEquals;
 
+import org.junit.Test;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -11,7 +13,7 @@ import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 
 
 public class CompilerSynonymTest extends AbstractMavenProjectTestCase {
-
+  @Test
   public void testSynonym() throws Exception {
     IProject project = importProject("projects/compilersynonym/pom.xml");
     assertNoErrors(project);

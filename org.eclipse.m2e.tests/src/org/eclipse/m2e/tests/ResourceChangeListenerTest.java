@@ -21,6 +21,7 @@ import java.io.InputStream;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -67,6 +68,7 @@ public class ResourceChangeListenerTest extends AbstractMavenProjectTestCase {
   }
 
   //TODO Does this test actually test anything?!
+  @Test
   public void testMarkerOnlyChange() throws Exception {
     // modify
     IFile pom = project.getFile("pom.xml");
@@ -76,6 +78,7 @@ public class ResourceChangeListenerTest extends AbstractMavenProjectTestCase {
     // ideally, I need to test that the container did not refresh
   }
 
+  @Test
   public void testPomChanges() throws Exception {
     // modify
     copyContent(project, new File("projects/resourcechange/pom001.xml"), "pom.xml");
@@ -86,6 +89,7 @@ public class ResourceChangeListenerTest extends AbstractMavenProjectTestCase {
     assertEquals("junit-4.1.jar", cp[0].getPath().lastSegment());
   }
 
+  @Test
   public void testPomMove001() throws Exception {
     // setup some more
     workspace.run(new IWorkspaceRunnable() {
@@ -110,6 +114,7 @@ public class ResourceChangeListenerTest extends AbstractMavenProjectTestCase {
     assertEquals("junit-4.1.jar", cp[0].getPath().lastSegment());
   }
 
+  @Test
   public void testPomMove002() throws Exception {
     // setup some more
     workspace.run(new IWorkspaceRunnable() {
@@ -135,6 +140,7 @@ public class ResourceChangeListenerTest extends AbstractMavenProjectTestCase {
     assertEquals("junit-4.1.jar", cp[0].getPath().lastSegment());
   }
 
+  @Test
   public void testPomDelete() throws Exception {
     // just in case, make sure we imported the right project
     IClasspathEntry[] cp = getMavenContainerEntries(project);
@@ -150,6 +156,7 @@ public class ResourceChangeListenerTest extends AbstractMavenProjectTestCase {
     assertEquals(0, getMavenContainerEntries(project).length);
   }
 
+  @Test
   public void testPomRename() throws Exception {
     // just in case, make sure we imported the right project
     IClasspathEntry[] cp = getMavenContainerEntries(project);
@@ -165,6 +172,7 @@ public class ResourceChangeListenerTest extends AbstractMavenProjectTestCase {
     assertEquals(0, getMavenContainerEntries(project).length);
   }
 
+  @Test
   public void testProjectDelete() throws Exception {
     IClasspathEntry[] cp = getMavenContainerEntries(project);
     assertEquals(1, cp.length);

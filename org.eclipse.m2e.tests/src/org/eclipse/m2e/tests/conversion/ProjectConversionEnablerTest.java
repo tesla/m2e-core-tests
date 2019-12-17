@@ -19,6 +19,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Test;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -34,7 +36,7 @@ import org.eclipse.m2e.core.project.conversion.IProjectConversionManager;
  * @author Roberto Sanchez
  */
 public class ProjectConversionEnablerTest extends AbstractProjectConversionTestCase {
-
+  @Test
   public void testProjectCanBeConverted() throws Exception {
     // Looks for a project conversion enabler for project called foo. There are three project conversion enablers
     // configured for this project, each with different weight. We have to retrieve the enabler with the highest weight.
@@ -58,6 +60,7 @@ public class ProjectConversionEnablerTest extends AbstractProjectConversionTestC
     assertArrayEquals(FooEnablerBase.PACKAGING, packagings);
   }
 
+  @Test
   public void testProjectCannotBeConverted() throws Exception {
     // Looks for a project conversion enabler for project called maven-layout. There are three project conversion enablers
     // configured for this project, each with different weight. We have to retrieve the enabler with the highest weight.
@@ -82,6 +85,7 @@ public class ProjectConversionEnablerTest extends AbstractProjectConversionTestC
     assertArrayEquals(FooEnablerBase.PACKAGING, packagings);
   }
 
+  @Test
   public void testEnablerNotFound() throws Exception {
     // Looks for a project conversion enabler for project called custom-layout. Since no enabler has been
     // configured for this project, the no enabler should be found.

@@ -19,6 +19,7 @@ import java.io.File;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -64,6 +65,7 @@ public class RepositoryRegistryTest extends AbstractMavenProjectTestCase {
     return server;
   }
 
+  @Test
   public void testSettingsDecryption() throws CoreException {
     Settings settings = new Settings();
     settings.addServer(newServer("test", "user", "{9k2z8UPSVlYHp1+h2s05Qe4Zzpx46wGmzlGqJPgL3lQ=}"));

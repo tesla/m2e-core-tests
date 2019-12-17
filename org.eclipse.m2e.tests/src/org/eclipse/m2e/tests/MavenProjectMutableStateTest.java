@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.junit.Test;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
@@ -40,7 +42,7 @@ import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 
 
 public class MavenProjectMutableStateTest extends AbstractMavenProjectTestCase {
-
+  @Test
   public void testImport() throws Exception {
     IProject project = importProject("projects/projectmodelchanges/projectimport/pom.xml");
     waitForJobsToComplete();
@@ -59,6 +61,7 @@ public class MavenProjectMutableStateTest extends AbstractMavenProjectTestCase {
     assertEquals("org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER", cp[5].getPath().toOSString());
   }
 
+  @Test
   public void testMavenBuilder() throws Exception {
     IProject project = importProject("projects/projectmodelchanges/workspacebuild/pom.xml");
     waitForJobsToComplete();
@@ -80,6 +83,7 @@ public class MavenProjectMutableStateTest extends AbstractMavenProjectTestCase {
     assertResourceDirectorues(Arrays.asList(location(project, "src/test/resources")), mavenProject.getTestResources());
   }
 
+  @Test
   public void testExecuteMojo() throws Exception {
     final IProject project = importProject("projects/projectmodelchanges/workspacebuild/pom.xml");
     waitForJobsToComplete();

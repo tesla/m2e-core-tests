@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.editor.xml.internal.XmlUtils;
+import org.junit.Test;
 
 
 /**
@@ -51,6 +52,7 @@ public class ExtractProject2Test extends AbstractCompletionTest {
   }
 
   // NOTE: this test is no extensive and doesn't cover scenario when the project is located outside of the workspace
+  @Test
   public void testExtractProject() throws Exception {
     IProject prj = XmlUtils.extractProject(sourceViewer);
     assertNotNull(prj);

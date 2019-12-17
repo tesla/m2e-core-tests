@@ -22,6 +22,7 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
+import org.junit.Test;
 
 
 /**
@@ -41,7 +42,7 @@ public class HoverDependencyManagedTest extends AbstractPOMEditorTestCase {
     return (IFile) projects[1].findMember("pom.xml");
 
   }
-
+  @Test
   public void testHasHover() throws CoreException {
     // Locate the area where we want to detect the hover
     String docString = sourceViewer.getDocument().get();

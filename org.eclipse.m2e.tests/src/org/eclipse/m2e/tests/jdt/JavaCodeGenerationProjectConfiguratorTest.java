@@ -18,6 +18,8 @@ import static org.eclipse.m2e.tests.common.ClasspathHelpers.getClasspathAttribut
 import static org.eclipse.m2e.tests.common.ClasspathHelpers.getClasspathEntry;
 import static org.junit.Assert.assertEquals;
 
+import org.junit.Test;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -30,7 +32,7 @@ import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 
 
 public class JavaCodeGenerationProjectConfiguratorTest extends AbstractMavenProjectTestCase {
-
+  @Test
   public void test368333_generatedSourcesFoldersAreNotRemovedDuringConfigurationUpdate() throws Exception {
     IProject project = importProject("368333_missingGeneratedSourceFolders",
         "projects/368333_missingGeneratedSourceFolders", new ResolverConfiguration());

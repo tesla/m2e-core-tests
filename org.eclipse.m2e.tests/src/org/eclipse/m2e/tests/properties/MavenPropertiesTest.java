@@ -17,6 +17,8 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Properties;
 
+import org.junit.Test;
+
 import org.eclipse.core.resources.IProject;
 
 import org.eclipse.m2e.core.MavenPlugin;
@@ -50,6 +52,7 @@ public class MavenPropertiesTest extends AbstractMavenProjectTestCase {
     configurationManager = MavenPlugin.getProjectConfigurationManager();
   }
 
+  @Test
   public void testBuildingProjectWithProperties() throws Exception {
     project = importProject("projects/properties_project/pom.xml");
     importProject("projects/properties_project/dependency/pom.xml");
@@ -71,6 +74,7 @@ public class MavenPropertiesTest extends AbstractMavenProjectTestCase {
     WorkspaceHelpers.assertNoErrors(project);
   }
 
+  @Test
   public void testReadResolverConfigurationProperties() throws Exception {
     project = createExisting("propertiesArDep", "projects/properties_project/dependency/");
 

@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.junit.Assert;
+import org.junit.Test;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -32,7 +33,7 @@ import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 
 
 public class LaunchingUtilsTest extends AbstractMavenProjectTestCase {
-
+  @Test
   public void testGenerateProjectLocationVariableExpression() throws IOException, CoreException {
     IProject project = createExisting("simpleproject", "projects/simple-pom");
     String projectLocationWithVariable = LaunchingUtils.generateProjectLocationVariableExpression(project);

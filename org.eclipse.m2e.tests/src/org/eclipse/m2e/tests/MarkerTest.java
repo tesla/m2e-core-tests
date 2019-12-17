@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.TestName;
 
 import org.eclipse.core.resources.IMarker;
@@ -56,6 +57,7 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
   @Rule
   public TestName name = new TestName();
 
+  @Test
   public void test() throws Exception {
     // Import a project with bad pom.xml
     IProject project = createExisting("markerTest", "projects/markers/testWorkflow");
@@ -156,6 +158,7 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     assertFalse(marker.getId() == newMarker.getId());
   }
 
+  @Test
   public void testManagedTransitive() throws Exception {
     // Import project with a managed transitive dependency problem
     IProject project = createExisting("markerTest", "projects/markers/testManagedTransitive");
@@ -184,6 +187,7 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
         project);
   }
 
+  @Test
   public void testBuildContextWithOneProjectConfigurator() throws Exception {
     IProject project = createExisting("markerTest", "projects/markers/testBuildContextWithOneProjectConfigurator");
     waitForJobsToComplete();
@@ -255,6 +259,7 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     WorkspaceHelpers.assertNoErrors(project);
   }
 
+  @Test
   public void testBuildContextWithTwoProjectConfigurators() throws Exception {
     IProject project = createExisting("markerTest", "projects/markers/testBuildContextWithTwoProjectConfigurators");
     waitForJobsToComplete();
@@ -302,6 +307,7 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
         AddMarkersProjectConfiguratorBar.FILE_NAME, project);
   }
 
+  @Test
   public void testBuildContextWithSameProjectConfiguratorTwice() throws Exception {
     IProject project = createExisting("markerTest",
         "projects/markers/testBuildContextWithSameProjectConfiguratorTwice");
@@ -364,6 +370,7 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     assertFalse(warningMarker1.getId() == newWarningMarker1.getId());
   }
 
+  @Test
   public void testMarkerResolutions() throws Exception {
     IProject project = importProject("projects/markers/testUncoveredPluginExecutionResolutions/pom.xml");
     waitForJobsToComplete();
@@ -379,6 +386,7 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     assertNotNull(getResolution(resolutions, WorkspaceLifecycleMappingResolution.class));
   }
 
+  @Test
   public void testNoDuplicateMarker() throws CoreException {
     final IProject p = workspace.getRoot().getProject(name.getMethodName());
     p.create(new NullProgressMonitor());
@@ -395,6 +403,7 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
         p.findMarkers(IMavenConstants.MARKER_CONFIGURATION_ID, false /*includeSubtypes*/, IResource.DEPTH_ZERO).length);
   }
 
+  @Test
   public void test361445_missingArtifactMarkerAttributes() throws Exception {
     IProject project = importProject("projects/markers/testArtifactNotFoundMarkerAttributes/pom.xml");
     waitForJobsToComplete();
@@ -424,6 +433,7 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
 
   }
 
+  @Test
   public void test512825_missingArtifactVersion() throws Exception {
     IProject project = importProject("projects/markers/testArtifactMissingVersion/pom.xml");
     waitForJobsToComplete();
@@ -438,6 +448,7 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     assertEquals(14, marker.getAttribute(IMavenConstants.MARKER_COLUMN_END));
   }
 
+  @Test
   public void testBuildCantReadPom() throws Exception {
     setAutoBuilding(true);
     IProject project = importProject("projects/markers/testBuildCantReadPom/pom.xml");

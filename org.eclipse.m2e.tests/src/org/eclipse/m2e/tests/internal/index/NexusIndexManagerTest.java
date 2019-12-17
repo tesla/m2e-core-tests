@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
+import org.junit.Test;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -110,6 +111,7 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
 
   }
 
+  @Test
   public void testDisableIndex() throws Exception {
     assertEquals("Local repo should default to min details", NexusIndex.DETAILS_MIN,
         indexManager.getIndexDetails(repositoryRegistry.getLocalRepository()));
@@ -127,6 +129,7 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
     }
   }
 
+  @Test
   public void testProjectIndexes() throws Exception {
     updateRepo("http://central", SETTINGS_NO_MIRROR);
     String projectName = "resourcefiltering-p009";
@@ -146,6 +149,7 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
     assertTrue(hasProjectRepo);
   }
 
+  @Test
   public void testProjectSpecificThenInSettings() throws Exception {
     mavenConfiguration.setUserSettingsFile("settings.xml");
     waitForJobsToComplete();
@@ -188,6 +192,7 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
     return customRepository;
   }
 
+  @Test
   public void testWorkspaceIndex() throws Exception {
     String projectName = "resourcefiltering-p005";
     deleteProject(projectName);
@@ -233,6 +238,7 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
   /**
    * Authentication was causing a failure for public (non-auth) repos. This test makes sure its ok.
    */
+  @Test
   public void testMngEclipse1621() throws Exception {
     final File mirroredRepoFile = new File(SETTINGS_ECLIPSE_REPO);
     assertTrue(mirroredRepoFile.exists());
@@ -268,7 +274,7 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
    * 
    * @throws Exception
    */
-
+  @Test
   public void testIndexedArtifactGroups() throws Exception {
     String publicName = "nexus";
     final File mirroredRepoFile = new File(SETTINGS_ECLIPSE_REPO);
@@ -296,6 +302,7 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
     assertNotNull(indexedArtifactFile);
   }
 
+  @Test
   public void testIndexedPublicArtifactGroups() throws Exception {
     // updateRepo(REPO_URL_PUBLIC, SETTINGS_PUBLIC_REPO);
     updateIndex(REPO_URL_ECLIPSE);
@@ -325,6 +332,7 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
 
   }
 
+  @Test
   public void testPublicMirror() throws Exception {
     updateIndex(REPO_URL_ECLIPSE);
 
@@ -355,6 +363,7 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
     assertTrue(junitArtifact.size() > 0);
   }
 
+  @Test
   public void testNoMirror() throws Exception {
 
     final File settingsFile = new File(SETTINGS_NO_MIRROR);
@@ -377,6 +386,7 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
     assertNotNull(localIndex);
   }
 
+  @Test
   public void testPublicNonMirrored() throws Exception {
     final File nonMirroredRepoFile = new File(SETTINGS_PUBLIC_JBOSS_NOTMIRRORED);
     assertTrue(nonMirroredRepoFile.exists());
@@ -408,7 +418,7 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
 //    NexusIndex index = indexManager.getIndex(repository);
 //    assertEquals(NexusIndex.DETAILS_FULL, index.getIndexDetails());
 //  }
-
+  @Test
   public void testMngEclipse1710() throws Exception {
     HttpServer httpServer = new HttpServer();
     httpServer.addResources("/", "");
@@ -433,6 +443,7 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
     }
   }
 
+  @Test
   public void testMngEclipse1907() throws Exception {
     mavenConfiguration.setUserSettingsFile(new File("settings.xml").getCanonicalPath());
 
@@ -451,6 +462,7 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
         new NullProgressMonitor());
   }
 
+  @Test
   public void testFetchIndexFromRepositoryWithAuthentication() throws Exception {
     HttpServer httpServer = new HttpServer();
     httpServer.addResources("/", "");
