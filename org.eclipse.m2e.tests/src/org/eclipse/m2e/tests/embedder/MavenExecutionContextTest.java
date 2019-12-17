@@ -24,6 +24,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 
 import org.junit.Before;
+import org.junit.Test;
 
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.transfer.TransferListener;
@@ -50,6 +51,7 @@ public class MavenExecutionContextTest extends AbstractMavenProjectTestCase {
     maven = (MavenImpl) MavenPlugin.getMaven();
   }
 
+  @Test
   public void testBasic() throws Exception {
     final MavenExecutionContext context = maven.createExecutionContext();
     context.execute(new ICallable<Void>() {
@@ -62,6 +64,7 @@ public class MavenExecutionContextTest extends AbstractMavenProjectTestCase {
     }, monitor);
   }
 
+  @Test
   public void testNested() throws Exception {
     final String outerProperty = "outer-property";
     final String nestedProperty = "nested-property";
@@ -92,6 +95,7 @@ public class MavenExecutionContextTest extends AbstractMavenProjectTestCase {
     }, monitor);
   }
 
+  @Test
   public void testReenterShortcut() throws Exception {
     final MavenExecutionContext context = maven.createExecutionContext();
     context.execute(new ICallable<Void>() {
@@ -115,6 +119,7 @@ public class MavenExecutionContextTest extends AbstractMavenProjectTestCase {
     }, monitor);
   }
 
+  @Test
   public void testIllegalState() throws Exception {
     final MavenExecutionContext context = maven.createExecutionContext();
 
@@ -148,6 +153,7 @@ public class MavenExecutionContextTest extends AbstractMavenProjectTestCase {
     }
   }
 
+  @Test
   public void testExecutionRequestContainsSystemProperties() throws Exception {
     maven.execute(new ICallable<Void>() {
       public Void call(IMavenExecutionContext context, IProgressMonitor monitor) throws CoreException {
@@ -161,6 +167,7 @@ public class MavenExecutionContextTest extends AbstractMavenProjectTestCase {
     }, monitor);
   }
 
+  @Test
   public void test496492_threadContextClassloaderLeak() throws Exception {
     ClassLoader tccl = Thread.currentThread().getContextClassLoader();
     maven.execute(new ICallable<Void>() {

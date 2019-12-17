@@ -18,6 +18,8 @@ import static org.junit.Assert.assertNotNull;
 
 import java.util.List;
 
+import org.junit.Test;
+
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 
@@ -36,7 +38,7 @@ import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
 
 public class MavenPluginMetadataSourceTest extends AbstractLifecycleMappingTest {
-
+  @Test
   public void testBasic() throws Exception {
     IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/mavenpluginsource/basic", "pom.xml");
     assertNotNull("Expected not null MavenProjectFacade", facade);
@@ -65,6 +67,7 @@ public class MavenPluginMetadataSourceTest extends AbstractLifecycleMappingTest 
     assertEquals(executionKey.getVersion(), artifact.getVersion());
   }
 
+  @Test
   public void test422135_mavenPluginSourceWorkspaceResolution() throws Exception {
     // the point of this test is to assert that workspace projects are not used as maven plugin metadata source
     // 'plugin' project shadows test-embeddedmapping-plugin plugin available from repositories

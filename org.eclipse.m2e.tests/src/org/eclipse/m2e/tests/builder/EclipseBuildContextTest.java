@@ -21,6 +21,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import org.junit.Test;
+
 import org.eclipse.core.resources.IProject;
 
 import org.codehaus.plexus.util.Scanner;
@@ -31,7 +33,7 @@ import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 
 @SuppressWarnings("restriction")
 public class EclipseBuildContextTest extends AbstractMavenProjectTestCase {
-
+  @Test
   public void testScanner() throws Exception {
     IProject project = importProject("projects/MNGECLIPSE-2144/pom.xml");
 
@@ -58,6 +60,7 @@ public class EclipseBuildContextTest extends AbstractMavenProjectTestCase {
     assertTrue(included.toString(), included.contains("sub" + File.separator + "dir" + File.separator + "file.txt"));
   }
 
+  @Test
   public void test361038_buildContext_scan_nonExistingFolder() throws Exception {
     IProject project = importProject("projects/361038_buildContext_scan_nonExistingFolder/pom.xml");
     assertNoErrors(project);

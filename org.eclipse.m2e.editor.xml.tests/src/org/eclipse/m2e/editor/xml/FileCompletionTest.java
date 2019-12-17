@@ -25,6 +25,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
+import org.junit.Test;
 
 
 /**
@@ -42,7 +43,7 @@ public class FileCompletionTest extends AbstractCompletionTest {
     waitForJobsToComplete();
     return (IFile) projects[0].findMember("pom.xml");
   }
-
+  @Test
   public void testModuleCompletion() throws Exception {
     // Get the location of the place where we want to start the completion
     String docString = sourceViewer.getDocument().get();
@@ -86,6 +87,7 @@ public class FileCompletionTest extends AbstractCompletionTest {
     }
   }
   
+  @Test
   public void testFilesAndDirsCompletion() throws Exception {
     // Get the location of the place where we want to start the completion
     String docString = sourceViewer.getDocument().get();

@@ -22,6 +22,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import org.junit.Ignore;
+import org.junit.Test;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -45,7 +48,7 @@ import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
 
 public class MavenBuilderTest extends AbstractMavenProjectTestCase {
-
+  @Test
   public void test001_standardLayout() throws Exception {
     deleteProject("resourcefiltering-p001");
     IProject project = createExisting("resourcefiltering-p001", "projects/resourcefiltering/p001");
@@ -85,6 +88,7 @@ public class MavenBuilderTest extends AbstractMavenProjectTestCase {
     return properties;
   }
 
+  @Test
   public void test002_customResourceLocation() throws Exception {
     deleteProject("resourcefiltering-p002");
     IProject project = createExisting("resourcefiltering-p002", "projects/resourcefiltering/p002");
@@ -111,6 +115,7 @@ public class MavenBuilderTest extends AbstractMavenProjectTestCase {
     assertEquals("0.0.1-SNAPSHOT", properties.getProperty("b.version"));
   }
 
+  @Test
   public void test004_useMavenOutputFolders() throws Exception {
     deleteProject("resourcefiltering-p004");
     IProject project = createExisting("resourcefiltering-p004", "projects/resourcefiltering/p004");
@@ -131,6 +136,7 @@ public class MavenBuilderTest extends AbstractMavenProjectTestCase {
     assertEquals("0.0.1-SNAPSHOT", properties.getProperty("a.version"));
   }
 
+  @Test
   public void test005_pomChanged() throws Exception {
     deleteProject("resourcefiltering-p005");
     IProject project = createExisting("resourcefiltering-p005", "projects/resourcefiltering/p005");
@@ -150,6 +156,8 @@ public class MavenBuilderTest extends AbstractMavenProjectTestCase {
     assertEquals("0.0.1-SNAPSHOT", properties.getProperty("a.version"));
   }
 
+  @Test
+  @Ignore
   public void _test006_testPluginProperties() throws Exception {
     deleteProject("resourcefiltering-p006");
     IProject project = createExisting("resourcefiltering-p006", "projects/resourcefiltering/p006");
@@ -177,6 +185,8 @@ public class MavenBuilderTest extends AbstractMavenProjectTestCase {
   }
 
   // the test is disabled due to http://jira.codehaus.org/browse/MNGECLIPSE-839
+  @Test
+  @Ignore
   public void _test008_classpathChange() throws Exception {
     deleteProject("resourcefiltering-p008");
     IProject project = createExisting("resourcefiltering-p008", "projects/resourcefiltering/p008");
@@ -193,6 +203,7 @@ public class MavenBuilderTest extends AbstractMavenProjectTestCase {
     assertTrue(aFile.isAccessible());
   }
 
+  @Test
   public void test010_properties() throws Exception {
     IProject project = createExisting("resourcefiltering-p010", "projects/resourcefiltering/p010");
     waitForJobsToComplete();
@@ -205,6 +216,7 @@ public class MavenBuilderTest extends AbstractMavenProjectTestCase {
     assertTrue(aFile.isAccessible());
   }
 
+  @Test
   public void test_crossproject() throws Exception {
     IProject[] projects = importProjects("projects/resourcefiltering/crossproject", new String[] {"module-a/pom.xml",
         "module-b/pom.xml"}, new ResolverConfiguration());
@@ -227,6 +239,7 @@ public class MavenBuilderTest extends AbstractMavenProjectTestCase {
     // TODO test warning marker
   }
 
+  @Test
   public void test013_refreshFixedPom() throws Exception {
     IProject project = createExisting("t013-p1", "resources/t013/t013-p1");
     waitForJobsToComplete();
@@ -252,6 +265,7 @@ public class MavenBuilderTest extends AbstractMavenProjectTestCase {
     }
   }
 
+  @Test
   public void test007_refreshChangedPom() throws Exception {
     IProject project = createExisting("t007-p2", "resources/t007/t007-p2");
     waitForJobsToComplete();
@@ -282,6 +296,7 @@ public class MavenBuilderTest extends AbstractMavenProjectTestCase {
     }
   }
 
+  @Test
   public void test368380_buildContextDeepRefreshFromLocal() throws Exception {
     IProject project = importProject("projects/368380_buildContextDeepRefreshFromLocal/pom.xml");
     waitForJobsToComplete();
@@ -295,6 +310,7 @@ public class MavenBuilderTest extends AbstractMavenProjectTestCase {
     assertTrue(folder.isSynchronized(IResource.DEPTH_INFINITE));
   }
 
+  @Test
   public void test380096_cleanProjectWithLifecycleMappingProblemsAfterWorkspaceRestart() throws Exception {
     IProject project = importProject("projects/380096_cleanProjectWithLifecycleMappingProblemsAfterWorkspaceRestart/pom.xml");
     waitForJobsToComplete();
@@ -309,6 +325,7 @@ public class MavenBuilderTest extends AbstractMavenProjectTestCase {
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, message, 23, project);
   }
 
+  @Test
   public void test397251_malformedPom() throws Exception {
     // validate build does not fail with exception for projects with malformed pom.xml files
     IProject project = createExisting("397251_malformedPom", "resources/397251_malformedPom");
@@ -317,6 +334,7 @@ public class MavenBuilderTest extends AbstractMavenProjectTestCase {
     WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_POM_LOADING_ID, message, 1, project);
   }
 
+  @Test
   public void test422106_legacyPlexusUtils() throws Exception {
     // validate build does not fail with exception for projects that use plexus-utils 2.x
     IProject project = importProject("projects/422106_legacyPlexusUtils/pom.xml");

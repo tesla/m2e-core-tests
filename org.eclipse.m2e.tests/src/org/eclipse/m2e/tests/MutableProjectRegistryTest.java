@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.TestName;
 
 import org.eclipse.core.resources.IFile;
@@ -59,6 +60,7 @@ public class MutableProjectRegistryTest extends AbstractMavenProjectTestCase {
   @Rule
   public TestName name = new TestName();
 
+  @Test
   public void testAddProject() throws Exception {
     IProject project = createExisting("dummy", "resources/dummy");
 
@@ -91,6 +93,7 @@ public class MutableProjectRegistryTest extends AbstractMavenProjectTestCase {
     assertSame(f2, events.get(0).getMavenProject());
   }
 
+  @Test
   public void testReplaceProject() throws Exception {
     IProject project = createExisting("dummy", "resources/dummy");
 
@@ -120,6 +123,7 @@ public class MutableProjectRegistryTest extends AbstractMavenProjectTestCase {
     assertSame(f2, events.get(0).getMavenProject());
   }
 
+  @Test
   public void testRemoveProject() throws Exception {
     IProject project = createExisting("dummy", "resources/dummy");
 
@@ -156,6 +160,7 @@ public class MutableProjectRegistryTest extends AbstractMavenProjectTestCase {
     return state.getWorkspaceArtifacts(artifact.getGroupId(), artifact.getArtifactId());
   }
 
+  @Test
   public void testRemoveUnknownProject() throws Exception {
     IProject project = createExisting("dummy", "resources/dummy");
 
@@ -176,6 +181,7 @@ public class MutableProjectRegistryTest extends AbstractMavenProjectTestCase {
     assertTrue(events.isEmpty());
   }
 
+  @Test
   public void testIllegalStateMerge() throws Exception {
     ProjectRegistry state = new ProjectRegistry();
     MutableProjectRegistry delta = new MutableProjectRegistry(state);
@@ -190,6 +196,7 @@ public class MutableProjectRegistryTest extends AbstractMavenProjectTestCase {
     }
   }
 
+  @Test
   public void testDetectNoLongerExistingProjectsInWorkspaceState() throws Exception {
     ProjectRegistry state = new ProjectRegistry();
     MutableProjectRegistry delta = new MutableProjectRegistry(state);
@@ -214,6 +221,7 @@ public class MutableProjectRegistryTest extends AbstractMavenProjectTestCase {
     tmpDir.delete();
   }
 
+  @Test
   public void testSaveParticipant() throws Exception {
     File stateLocationDir = MavenPluginActivator.getDefault().getStateLocation().toFile();
     File workspaceFile = new File(stateLocationDir, WORKSPACE_STATE_SER);
@@ -223,6 +231,7 @@ public class MutableProjectRegistryTest extends AbstractMavenProjectTestCase {
     workspaceFile.delete();
   }
 
+  @Test
   public void testForeignClassesInSerializedProjectRegistry() throws Exception {
     ProjectRegistry state = new ProjectRegistry();
     MutableProjectRegistry delta = new MutableProjectRegistry(state);

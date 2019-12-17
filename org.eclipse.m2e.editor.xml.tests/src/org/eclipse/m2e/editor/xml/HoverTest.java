@@ -17,11 +17,11 @@ import static org.junit.Assert.assertNotNull;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
+import org.junit.Test;
 
 
 /**
@@ -42,7 +42,7 @@ public class HoverTest extends AbstractPOMEditorTestCase {
     return (IFile) projects[1].findMember("pom.xml");
 
   }
-
+  @Test
   public void testHasHover() throws Exception {
     // Locate the area where we want to detect the hover
     String docString = sourceViewer.getDocument().get();

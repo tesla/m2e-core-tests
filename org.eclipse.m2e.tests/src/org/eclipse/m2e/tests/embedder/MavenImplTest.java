@@ -29,6 +29,9 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.junit.Ignore;
+import org.junit.Test;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -67,6 +70,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
 
   private IMavenConfiguration configuration = MavenPlugin.getMavenConfiguration();
 
+  @Test
   public void testGetMojoParameterValue() throws Exception {
     MavenExecutionResult result = readMavenProject(new File("projects/mojoparametervalue/pom.xml"), false);
     assertFalse(result.hasExceptions());
@@ -92,6 +96,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
     return null;
   }
 
+  @Test
   public void testGetRepositories() throws Exception {
     String origSettings = configuration.getUserSettingsFile();
     try {
@@ -115,6 +120,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
     }
   }
 
+  @Test
   public void testGetRepositoriesWithSettingsInjection() throws Exception {
     String origSettings = configuration.getUserSettingsFile();
     try {
@@ -132,6 +138,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
     }
   }
 
+  @Test
   public void testGetDefaultRepositories() throws Exception {
     String origSettings = configuration.getUserSettingsFile();
     try {
@@ -154,6 +161,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
     }
   }
 
+  @Test
   public void testGlobalSettings() throws Exception {
     String userSettings = configuration.getUserSettingsFile();
     String globalSettings = configuration.getGlobalSettingsFile();
@@ -173,6 +181,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
     }
   }
 
+  @Test
   public void testIsUnavailable() throws Exception {
     RepositorySystem repositorySystem = maven.getPlexusContainer().lookup(RepositorySystem.class);
 
@@ -222,6 +231,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
 
   }
 
+  @Test
   public void testLocalRepositoryListener() throws Exception {
     List<ArtifactRepository> repositories = maven.getArtifactRepositories(true);
     final ArtifactRepository localRepository = maven.getLocalRepository();
@@ -246,6 +256,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
 
   }
 
+  @Test
   public void testMissingArtifact() throws Exception {
     try {
       maven.resolve("missing", "missing", "0", "unknown", null, null, monitor);
@@ -255,6 +266,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
     }
   }
 
+  @Test
   public void testGetProxy() throws Exception {
     String origSettings = configuration.getUserSettingsFile();
     try {
@@ -272,6 +284,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
     }
   }
 
+  @Test
   public void testUnreadableSettings() throws Exception {
     String origSettings = configuration.getUserSettingsFile();
     try {
@@ -285,6 +298,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
     }
   }
 
+  @Test
   public void testReadProjectWithDependenciesFromMirror() throws Exception {
     String origSettings = configuration.getUserSettingsFile();
     try {
@@ -304,6 +318,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
     }
   }
 
+  @Test
   public void testProxySupport() throws Exception {
     FileHelpers.deleteDirectory(new File("target/localrepo/org/eclipse/m2e/test/mngeclipse-2126"));
 
@@ -347,6 +362,8 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
   // together with any other code that uses SSL, which is impractical. DISABLED the tests to avoid false
   // automated test failures, but we can still run the test manually if there are any concerns about
   // javax.net.ssl.keyStore/trustStore system properties support.
+  @Test
+  @Ignore
   public void DISABLED_testSslWithMutualHandshake() throws Exception {
     FileHelpers.deleteDirectory(new File("target/localrepo/org/eclipse/m2e/its/mngeclipse-2149"));
 
@@ -392,6 +409,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
     }
   }
 
+  @Test
   public void testReadLocalParent() throws Exception {
     MavenExecutionResult result = readMavenProject(new File("projects/readparent/local/module01/pom.xml"), false);
     assertFalse(result.hasExceptions());
@@ -401,6 +419,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
     assertEquals("local-parent", parent.getArtifactId());
   }
 
+  @Test
   public void testReadRemoteParent() throws Exception {
     MavenExecutionResult result = readMavenProject(new File("projects/readparent/remote/module02/pom.xml"), false);
     assertFalse(result.hasExceptions());
@@ -412,6 +431,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
     assertNotNull("remote-parent.artifact.file", parent.getArtifact().getFile());
   }
 
+  @Test
   public void testReadNoParent() throws Exception {
     MavenExecutionResult result = readMavenProject(new File("projects/readparent/noparent/pom.xml"), false);
     assertFalse(result.hasExceptions());
@@ -421,6 +441,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
     assertNull(parent);
   }
 
+  @Test
   public void testMNGECLIPSE2556_settingsSystemPropertiesSubstiution() throws Exception {
     String origSettings = configuration.getUserSettingsFile();
     try {
@@ -437,6 +458,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
     }
   }
 
+  @Test
   public void test358620_reparse_changed_user_settings() throws Exception {
     String origSettings = configuration.getUserSettingsFile();
     try {
@@ -455,6 +477,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
     }
   }
 
+  @Test
   public void test366839_userAgent() throws Exception {
     HttpServer httpServer = new HttpServer();
     httpServer.addResources("/", "");
@@ -512,6 +535,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
     }, monitor);
   }
 
+  @Test
   public void test386196_ParallelDownloads() throws Exception {
     IProgressMonitor monitor = new NullProgressMonitor() {
 
@@ -540,6 +564,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
     }
   }
 
+  @Test
   public void test438454_guiceScopedComponentInjection() throws Exception {
     // the point of this test is to verify that @MojoExecutionScoped component can be instantiated and injected
 

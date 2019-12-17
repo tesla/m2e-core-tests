@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 
 import org.eclipse.aether.graph.DependencyNode;
 import org.eclipse.aether.util.artifact.JavaScopes;
@@ -88,6 +89,7 @@ public class MavenModelManagerTest extends AbstractMavenProjectTestCase {
     }
   }
 
+  @Test
   public void testCreateMavenModel() throws Exception {
     testCreateMavenModel("<project xmlns=\"http://maven.apache.org/POM/4.0.0\" " + //
         "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " + // 
@@ -134,6 +136,7 @@ public class MavenModelManagerTest extends AbstractMavenProjectTestCase {
   }
 
   @RequireMavenExecutionContext
+  @Test
   public void test416882_dependencyTree() throws Exception {
     IProject[] projects = importProjects("projects/416882_dependencyTree", new String[] {"pom.xml",
         "direct-depA/pom.xml", "direct-depB/pom.xml"}, new ResolverConfiguration());

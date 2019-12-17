@@ -17,6 +17,8 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 
+import org.junit.Test;
+
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
@@ -30,7 +32,7 @@ import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
 
 public class CompilerSettingsWithEncodingConfiguratorTest extends AbstractMavenProjectTestCase {
-
+  @Test
   public void test001_shouldSetEncodingForBasicProject() throws Exception {
     IProject project = importProject("projects/compilerSettingsWithEncoding/p001/pom.xml");
     IJavaProject javaProject = JavaCore.create(project);
@@ -47,6 +49,7 @@ public class CompilerSettingsWithEncodingConfiguratorTest extends AbstractMavenP
     assertEquals("Encoding (changed) should match", "UTF-16", encodingChanged);
   }
 
+  @Test
   public void test002_shouldResetToContainerDefinedEncoding() throws Exception {
     IProject project = importProject("projects/compilerSettingsWithEncoding/p002/pom.xml");
     IJavaProject javaProject = JavaCore.create(project);

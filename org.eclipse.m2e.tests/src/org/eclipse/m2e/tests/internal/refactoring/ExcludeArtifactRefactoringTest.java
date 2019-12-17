@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.junit.After;
+import org.junit.Test;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -100,6 +101,7 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
   /*
    * A pom with no parent, told to exclude an artifact that does not exist
    */
+  @Test
   public void testSingleArtifactMissing() throws Exception {
     IProject project = importProjects(EXCLUDE_PATH, new String[] {"noParent/pom.xml"}, new ResolverConfiguration())[0];
     waitForJobsToComplete();
@@ -117,6 +119,7 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
   /*
    * A pom without a parent and a valid exclusion
    */
+  @Test
   public void testSingleArtifactNoParent() throws Exception {
     IProject project = importProjects(EXCLUDE_PATH, new String[] {"noParent/pom.xml"}, new ResolverConfiguration())[0];
     waitForJobsToComplete();
@@ -143,6 +146,7 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
   /*
    * A pom without a parent and a valid exclusion, but with inconsistent whitespace formatting
    */
+  @Test
   public void testSingleArtifactNoParentBadFormat() throws Exception {
     IProject project = importProjects(EXCLUDE_PATH, new String[] {"noParentBadFormat/pom.xml"},
         new ResolverConfiguration())[0];
@@ -170,6 +174,7 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
   /*
    * A pom with a workspace parent and a single valid exclude
    */
+  @Test
   public void testSingleArtifactKeyWorkspaceParent() throws Exception {
     IProject[] projects = importProjects(EXCLUDE_PATH + "/workspaceParent", new String[] {
         "workspaceParentProject/pom.xml", "workspaceParentModule/pom.xml"}, new ResolverConfiguration());
@@ -199,6 +204,7 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
    * A pom with a workspace parent and an exclude which takes place on the
    * parent.
    */
+  @Test
   public void testSingleArtifactKeyInWorkspaceParent() throws Exception {
     IProject[] projects = importProjects(EXCLUDE_PATH + "/workspaceParentWithDependency", new String[] {
         "workspaceParentWithDependencyProject/pom.xml", "workspaceParentWithDependencyModule/pom.xml"},
@@ -228,6 +234,7 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
   /*
    * A pom with a remote parent and a valid exclude
    */
+  @Test
   public void testSingleArtifactKeyRemoteParent() throws Exception {
     IProject project = importProjects(EXCLUDE_PATH, new String[] {"hasRemoteParent/pom.xml"},
         new ResolverConfiguration())[0];
@@ -255,6 +262,7 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
   /*
    * A pom without a parent, a missing dependency and a valid dependency
    */
+  @Test
   public void testMultipleArtifactWithMissing() throws Exception {
     IProject project = importProjects(EXCLUDE_PATH, new String[] {"noParent/pom.xml"}, new ResolverConfiguration())[0];
     waitForJobsToComplete();
@@ -287,6 +295,7 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
   /*
    * A pom with a workspace parent with exclusions in both
    */
+  @Test
   public void testArtifactsInMultiplePom() throws Exception {
     IProject[] projects = importProjects(EXCLUDE_PATH + "/workspaceParent2", new String[] {
         "workspaceParent2Module/pom.xml", "workspaceParent2Project/pom.xml"}, new ResolverConfiguration());
@@ -317,6 +326,7 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
   /*
    * A single pom with multiple exclusions
    */
+  @Test
   public void testMultipleArtifactKeySinglePom() throws Exception {
     IProject project = importProjects(EXCLUDE_PATH, new String[] {"noParent/pom.xml"}, new ResolverConfiguration())[0];
     waitForJobsToComplete();
@@ -345,6 +355,7 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
   /*
    * A pom with strange name
    */
+  @Test
   public void testStrangePomName() throws Exception {
     IProject project = importProjects(EXCLUDE_PATH, new String[] {"noParent/test-pom.xml"}, new ResolverConfiguration())[0];
     waitForJobsToComplete();
@@ -368,6 +379,7 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
     assertTrue("pom has exclusion set", hasExclusionSet(editor, ROOT, VALID));
   }
 
+  @Test
   public void testCopyDown() throws Exception {
     IProject[] projects = importProjects(EXCLUDE_PATH + "/workspaceParentWithDependency", new String[] {
         "workspaceParentWithDependencyProject/pom.xml", "workspaceParentWithDependencyModule/pom.xml"},
@@ -392,6 +404,7 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
     assertTrue("project has exclusion set", hasExclusionSet(module, ROOT, VALID));
   }
 
+  @Test
   public void testPullUp() throws Exception {
     IProject[] projects = importProjects(EXCLUDE_PATH + "/workspaceParent", new String[] {
         "workspaceParentProject/pom.xml", "workspaceParentModule/pom.xml"}, new ResolverConfiguration());

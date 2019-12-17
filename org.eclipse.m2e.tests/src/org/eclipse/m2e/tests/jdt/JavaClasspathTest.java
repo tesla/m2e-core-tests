@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.Assert;
+import org.junit.Test;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
@@ -56,7 +57,7 @@ import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
 
 public class JavaClasspathTest extends AbstractMavenProjectTestCase {
-
+  @Test
   public void testImport() throws Exception {
     IProject project = importProject("customclasspath-p001", "projects/customclasspath/p001",
         new ResolverConfiguration());
@@ -74,6 +75,7 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     assertEquals("/customclasspath-p001/src/test/java", cp[4].getPath().toPortableString()); // <= test sources
   }
 
+  @Test
   public void testStaleDerivedEntries() throws Exception {
     IProject project = importProject("customclasspath-p001", "projects/customclasspath/p001",
         new ResolverConfiguration());
@@ -99,6 +101,7 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     assertEquals("/customclasspath-p001/src/main/java3", cp[4].getPath().toPortableString()); // <= main sources
   }
 
+  @Test
   public void testClasspathContainers() throws Exception {
     IProject project = importProject("customclasspath-classpath-containers",
         "projects/customclasspath/classpath-containers", new ResolverConfiguration());
@@ -120,6 +123,7 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
         .assertNull(getClasspathAttribute(getClasspathEntry(cp, "container1"), IClasspathManager.POMDERIVED_ATTRIBUTE));
   }
 
+  @Test
   public void test370685_PreserveResourcesOnUpdate() throws Exception {
     IProject project = importProject("projects/370685_missingResources/pom.xml");
     //assertNoErrors(project);
@@ -144,6 +148,7 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     }
   }
 
+  @Test
   public void test486739_PreserveExportedOnUpdate() throws Exception {
     IProject project = importProject("projects/486739_exportedContainer/pom.xml");
     //assertNoErrors(project);
@@ -167,6 +172,7 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     assertTrue(updatedCp[4].isExported());
   }
 
+  @Test
   public void test398121_PreserveOrderOfClasspathContainersOnUpdate() throws Exception {
     IProject project = importProject("orderOf-classpath-containers", "projects/customclasspath/classpath-containers",
         new ResolverConfiguration());
@@ -226,8 +232,7 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
 
   }
 
-
-
+  @Test
   public void test394042_ClasspathEntry4() throws Exception {
     IProject project = importProject("projects/394042_ClasspathEntry4/pom.xml");
     assertNoErrors(project);
@@ -259,6 +264,7 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     assertEquals("foo/bar/**", junit.getAccessRules()[0].getPattern().toPortableString());
   }
 
+  @Test
   public void test466518_classpathJREOrder() throws Exception {
     IProject project = importProject("projects/466518_classpathJREOrder/pom.xml");
     WorkspaceHelpers.assertNoErrors(project);
@@ -286,6 +292,7 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     }, cp);
   }
 
+  @Test
   public void test388541_KeepClasspathAttributes() throws Exception {
     IProject project = importProject("projects/388541/pom.xml");
     assertNoErrors(project);
@@ -316,6 +323,7 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
 
   }
 
+  @Test
   public void test480137_addingResourceFoldersAreNotRemovedDuringConfigurationUpdate() throws Exception {
     IProject project = importProject("480137_addingResourceFoldersUnstable",
         "projects/480137_addingResourceFoldersUnstable", new ResolverConfiguration());
@@ -346,6 +354,7 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
         javaProject.getRawClasspath());
   }
 
+  @Test
   public void test525880_JavaAccessRulesArePreservedOnUpdate() throws Exception {
     IProject project = importProject("projects/525880_java_pom_with_access_rules/pom.xml");
     addAccessRulesToClasspathContainers(JavaCore.create(project));
@@ -356,14 +365,17 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     assertContainersHaveAccessRules(JavaCore.create(project));
   }
 
+  @Test
   public void test518218_configureMethodParametersGenerationWithParameters() throws Exception {
     testMethodParametersGeneration("projects/518218/parameters/pom.xml");
   }
 
+  @Test
   public void test518218_configureMethodParametersGenerationWithCompilerArgs() throws Exception {
     testMethodParametersGeneration("projects/518218/compilerArgs/pom.xml");
   }
 
+  @Test
   public void test518218_configureMethodParametersGenerationWithCompilerArgument() throws Exception {
     testMethodParametersGeneration("projects/518218/compilerArgument/pom.xml");
   }
@@ -374,6 +386,7 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     assertEquals(JavaCore.GENERATE, javaProject.getOption(JavaCore.COMPILER_CODEGEN_METHOD_PARAMETERS_ATTR, false));
   }
 
+  @Test
   public void test534049_SetReleaseFlag() throws Exception {
     IProject project = importProject("projects/release-flag/pom.xml");
     IJavaProject javaProject = JavaCore.create(project);
@@ -385,6 +398,7 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     assertEquals(JavaCore.ENABLED, javaProject.getOption(JavaCore.COMPILER_RELEASE, false));
   }
 
+  @Test
   public void test526858_TestClasspathAttributeOnJar() throws Exception {
     IProject project = importProject("projects/526858-test-classpath/jar-dependencies/pom.xml");
 
@@ -420,6 +434,7 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     assertTest(classpathEntries[4]);
   }
 
+  @Test
   public void test526858_TestClasspathAttributeOnProject() throws Exception {
     IProject[] projects = importProjects("projects/526858-test-classpath/",
         new String[] {"jar-dependencies/pom.xml", "project-dependencies-1/pom.xml"}, new ResolverConfiguration());
@@ -439,6 +454,7 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     assertTest(classpathEntries[1]);
   }
 
+  @Test
   public void test414645_TestClasspathAttributeOnRuntimeJarDependencies() throws Exception {
     IProject project = importProject("projects/414645-no-runtime-scope-in-main/runtime-jar-dependencies/pom.xml");
 
@@ -456,6 +472,7 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     assertTest(classpathEntries[2]);
   }
 
+  @Test
   public void test414645_TestClasspathAttributeOnRuntimeProjectDependencies() throws Exception {
     IProject[] projects = importProjects("projects/414645-no-runtime-scope-in-main/",
         new String[] {"runtime-jar-dependencies/pom.xml", "runtime-project-dependencies/pom.xml"},
@@ -479,6 +496,8 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     assertEquals("commons-collections-2.0.jar", classpathEntries[3].getPath().lastSegment());
     assertTest(classpathEntries[3]);
   }
+
+  @Test
   public void test526858_ProjectExportingTests() throws Exception {
     IProject[] projects = importProjects("projects/526858-test-classpath/",
         new String[] {"jar-dependencies/pom.xml", "project-dependencies-2/pom.xml"}, new ResolverConfiguration());
@@ -498,6 +517,7 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     assertNotTest(classpathEntries[1]);
   }
 
+  @Test
   public void test537851_DisableTestClasspathFlag() throws Exception {
     IProject[] projects = importProjects("projects/537851-test-jar-in-compile-scope/",
         new String[] {"test-jar/pom.xml", "project-consuming-test-jar/pom.xml"}, new ResolverConfiguration());
@@ -534,6 +554,7 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     assertNotTest(classpathEntries[0]);
   }
 
+  @Test
   public void test549312_fallbackToLatestEE() throws Exception {
     IProject project = importProject("projects/549312-fallbackToLatestEE/pom.xml");
     String expectedCompliance = getLatestExecutionEnvironment().getComplianceOptions()

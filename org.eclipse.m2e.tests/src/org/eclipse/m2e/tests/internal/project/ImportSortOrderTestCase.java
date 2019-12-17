@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.Test;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 
@@ -85,6 +87,7 @@ public class ImportSortOrderTestCase extends AbstractMavenProjectTestCase {
     return facades;
   }
 
+  @Test
   public void testCollectionSortProject() throws Exception {
     ProjectConfigurationManager manager = (ProjectConfigurationManager) MavenPlugin.getProjectConfigurationManager();
 

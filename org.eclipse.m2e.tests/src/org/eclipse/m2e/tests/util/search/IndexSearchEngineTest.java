@@ -10,6 +10,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.Test;
+
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.m2e.core.embedder.ArtifactKey;
@@ -23,7 +25,7 @@ import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 
 
 public class IndexSearchEngineTest extends AbstractMavenProjectTestCase {
-
+  @Test
   public void testGroupIDProposal() throws Exception {
     IndexSearchEngine engine = new IndexSearchEngine(new TestIndex());
     Collection<String> results = engine.findGroupIds("group", Packaging.ALL, null);

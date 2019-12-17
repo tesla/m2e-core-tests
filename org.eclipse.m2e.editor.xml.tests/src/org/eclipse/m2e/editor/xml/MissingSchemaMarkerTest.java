@@ -9,9 +9,11 @@ import org.eclipse.m2e.core.internal.IMavenConstants;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
+import org.junit.Test;
 
 
 public class MissingSchemaMarkerTest extends AbstractMavenProjectTestCase {
+	 @Test
   public void testMissingSchemaMarker() throws Exception {
     ResolverConfiguration config = new ResolverConfiguration();
     IProject[] projects = importProjects("projects/MissingSchemaMarker", new String[] {"pom.xml"}, config);

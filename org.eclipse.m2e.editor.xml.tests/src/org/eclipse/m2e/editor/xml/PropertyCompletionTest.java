@@ -27,6 +27,7 @@ import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.wst.sse.ui.internal.contentassist.ContentAssistUtils;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
+import org.junit.Test;
 
 
 /**
@@ -47,7 +48,7 @@ public class PropertyCompletionTest extends AbstractCompletionTest {
     waitForJobsToComplete();
     return (IFile) projects[1].findMember("pom.xml");
   }
-
+  @Test
   public void testCompletion() throws Exception {
     // Get the location of the place where we want to start the completion
     String docString = sourceViewer.getDocument().get();

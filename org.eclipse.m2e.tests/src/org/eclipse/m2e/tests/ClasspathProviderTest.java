@@ -25,6 +25,8 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import org.junit.Test;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
@@ -50,7 +52,7 @@ import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
 
 public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
-
+  @Test
   public void test() throws Exception {
     IProject cptest = createExisting("cptest", "projects/MNGECLIPSE-369/cptest");
     createExisting("cptest2", "projects/MNGECLIPSE-369/cptest2");
@@ -79,6 +81,7 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     assertEquals(new Path("/cptest2/target/classes"), userClasspath[3].getPath());
   }
 
+  @Test
   public void testNonDefaultTestSource() throws Exception {
     deleteProject("515398");
     IProject project = createExisting("515398", "projects/515398");
@@ -102,6 +105,7 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     assertEquals(new Path("/515398/target/classes"), userClasspath[1].getPath());
   }
 
+  @Test
   public void testSourcePath() throws Exception {
     IProject cptest = createExisting("cptest", "projects/MNGECLIPSE-369/cptest");
     createExisting("cptest2", "projects/MNGECLIPSE-369/cptest2");
@@ -140,6 +144,7 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     return result.toArray(new IRuntimeClasspathEntry[result.size()]);
   }
 
+  @Test
   public void testNoFilterResources() throws Exception {
     IProject cptest = createExisting("runtimeclasspath-nofilterresources",
         "projects/runtimeclasspath/nofilterresources");
@@ -157,6 +162,7 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     assertEquals(new Path("/runtimeclasspath-nofilterresources/target/classes"), userClasspath[0].getPath());
   }
 
+  @Test
   public void testNotMavenProject() throws Exception {
     IProject project = createExisting("runtimeclasspath-notmaven", "projects/runtimeclasspath/notmaven");
     waitForJobsToComplete();
@@ -172,6 +178,7 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     assertEquals(Arrays.asList(userClasspath).toString(), 0, userClasspath.length);
   }
 
+  @Test
   public void testJunitClasspathOrder() throws Exception {
     IProject cptest = createExisting("runtimeclasspath-junit", "projects/runtimeclasspath/junit");
     waitForJobsToComplete();
@@ -213,7 +220,7 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
 //    assertEquals("testng-5.8-jdk15.jar", userClasspath[2].getPath().lastSegment());
 //    assertEquals("junit-3.8.1.jar", userClasspath[3].getPath().lastSegment());
 //  }
-
+  @Test
   public void testProvidedScopeApp() throws Exception {
     IProject project = createExisting("runtimeclasspath-providedscope", "projects/runtimeclasspath/providedscope");
     waitForJobsToComplete();
@@ -231,6 +238,7 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     assertEquals("junit-3.8.1.jar", userClasspath[1].getPath().lastSegment());
   }
 
+  @Test
   public void testProvidedScopeTestApp() throws Exception {
     IProject project = createExisting("runtimeclasspath-providedscope", "projects/runtimeclasspath/providedscope");
     waitForJobsToComplete();
@@ -249,6 +257,7 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     assertEquals("junit-3.8.1.jar", userClasspath[2].getPath().lastSegment());
   }
 
+  @Test
   public void testProvidedScopeAppTest() throws Exception {
     IProject project = createExisting("runtimeclasspath-providedscope", "projects/runtimeclasspath/providedscope");
     waitForJobsToComplete();
@@ -267,6 +276,7 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     assertEquals("junit-3.8.1.jar", userClasspath[2].getPath().lastSegment());
   }
 
+  @Test
   public void testSystemScope() throws Exception {
     IProject project = createExisting("runtimeclasspath-systemscope", "projects/runtimeclasspath/systemscope");
 
@@ -307,6 +317,7 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     assertEquals("log4j-1.2.13.jar", userClasspath[1].getPath().lastSegment());
   }
 
+  @Test
   public void testCustomClasspath() throws Exception {
     IProject project = createExisting("runtimeclasspath-customentries", "projects/runtimeclasspath/customentries");
     waitForJobsToComplete();
@@ -323,6 +334,7 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     assertEquals("custom.jar", userClasspath[0].getPath().lastSegment());
   }
 
+  @Test
   public void testCustomProjectEntry() throws Exception {
     IProject project = createExisting("runtimeclasspath-customentries", "projects/runtimeclasspath/customentries");
     IProject javaproject = createExisting("runtimeclasspath-javaproject", "projects/runtimeclasspath/javaproject");
@@ -340,6 +352,7 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     assertEquals(javaproject.getFullPath(), userClasspath[0].getPath());
   }
 
+  @Test
   public void testCustomBuildpath() throws Exception {
     IProject project = createExisting("runtimeclasspath-custombuildpath", "projects/runtimeclasspath/custombuildpath");
     IProject javaproject = createExisting("runtimeclasspath-javaproject", "projects/runtimeclasspath/javaproject");
@@ -361,6 +374,7 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     assertEquals("custom.jar", userClasspath[2].getPath().lastSegment());
   }
 
+  @Test
   public void testTestClassesDefaultClassifier() throws Exception {
     createExisting("runtimeclasspath-testscope01", "projects/runtimeclasspath/testscope01");
     IProject p02 = createExisting("runtimeclasspath-testscope02", "projects/runtimeclasspath/testscope02");
@@ -382,6 +396,7 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     assertEquals(new Path("/runtimeclasspath-testscope01/target/classes"), userClasspath[2].getPath());
   }
 
+  @Test
   public void testTestClassesTestsClassifier() throws Exception {
     createExisting("runtimeclasspath-testscope01", "projects/runtimeclasspath/testscope01");
     IProject p03 = createExisting("runtimeclasspath-testscope03", "projects/runtimeclasspath/testscope03");
@@ -403,6 +418,7 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     assertEquals(new Path("/runtimeclasspath-testscope01/target/test-classes"), userClasspath[2].getPath());
   }
 
+  @Test
   public void testTestClassesDefaultAndTestsClassifier() throws Exception {
     createExisting("runtimeclasspath-testscope01", "projects/runtimeclasspath/testscope01");
     IProject p04 = createExisting("runtimeclasspath-testscope04", "projects/runtimeclasspath/testscope04");
@@ -425,6 +441,7 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     assertEquals(new Path("/runtimeclasspath-testscope01/target/test-classes"), userClasspath[3].getPath());
   }
 
+  @Test
   public void testTestClassesTestScopeAndTestType() throws Exception {
     createExisting("runtimeclasspath-testscope01", "projects/runtimeclasspath/testscope01");
     IProject p05 = createExisting("runtimeclasspath-testscope05", "projects/runtimeclasspath/testscope05");
@@ -447,6 +464,7 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     assertEquals(new Path("/runtimeclasspath-testscope01/target/test-classes"), userClasspath[3].getPath());
   }
 
+  @Test
   public void testLaunchConfigListener() throws Exception {
     IProject p01 = createExisting("runtimeclasspath-configlistener01", "projects/runtimeclasspath/configlistener01");
     IProject p02 = createExisting("runtimeclasspath-configlistener02", "projects/runtimeclasspath/configlistener02");
@@ -485,6 +503,7 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     return MavenRuntimeClasspathProvider.MAVEN_CLASSPATH_PROVIDER.equals(provider);
   }
 
+  @Test
   public void test368230_FancyClassifier() throws Exception {
     createExisting("runtimeclasspath-testscope01", "projects/runtimeclasspath/testscope01");
     IProject p06 = createExisting("runtimeclasspath-testscope06", "projects/runtimeclasspath/testscope06");
@@ -524,6 +543,7 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     }
   }
 
+  @Test
   public void test368230_unknownClassifier() throws Exception {
     createExisting("runtimeclasspath-testscope01", "projects/runtimeclasspath/testscope01");
     IProject p07 = createExisting("runtimeclasspath-testscope07", "projects/runtimeclasspath/testscope07");

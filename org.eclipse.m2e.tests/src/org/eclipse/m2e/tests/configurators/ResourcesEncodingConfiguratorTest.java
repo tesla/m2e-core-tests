@@ -17,6 +17,8 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 
+import org.junit.Test;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IJavaProject;
@@ -32,7 +34,7 @@ import org.eclipse.m2e.tests.common.WorkspaceHelpers;
  * maven-resources-plugin.
  */
 public class ResourcesEncodingConfiguratorTest extends AbstractMavenProjectTestCase {
-
+  @Test
   public void test001_shouldConfigureEncodingForBasicProject() throws Exception {
     IProject project = importProject("projects/resourcesEncoding/p001/pom.xml");
     IJavaProject javaProject = JavaCore.create(project);
@@ -57,6 +59,7 @@ public class ResourcesEncodingConfiguratorTest extends AbstractMavenProjectTestC
     assertEquals("Encoding configured for plugin not set on folder", "UTF-16", testResourceEncodingChanged);
   }
 
+  @Test
   public void test002_shouldConfigureEncodingForProjectWithSeveralResourceFolders() throws Exception {
     IProject project = importProject("projects/resourcesEncoding/p002/pom.xml");
     IJavaProject javaProject = JavaCore.create(project);
@@ -92,6 +95,7 @@ public class ResourcesEncodingConfiguratorTest extends AbstractMavenProjectTestC
     assertEquals("Encoding configured for plugin not set on folder", "UTF-16", testResource2EncodingChanged);
   }
 
+  @Test
   public void test003_shouldResetToContainerDefinedEncoding() throws Exception {
     IProject project = importProject("projects/resourcesEncoding/p003/pom.xml");
     IJavaProject javaProject = JavaCore.create(project);

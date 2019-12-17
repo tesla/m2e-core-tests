@@ -28,12 +28,14 @@ import org.eclipse.wst.xml.core.internal.XMLCorePlugin;
 import org.eclipse.wst.xml.core.internal.preferences.XMLCorePreferenceNames;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
+import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 
 @SuppressWarnings("restriction")
 public class PomEditsTest extends AbstractMavenProjectTestCase {
+	 @Test
   public void test371438_insertAt_insideEmptyElement() throws Exception {
     IProject project = importProject("projects/insertat_insideemptyelement/pom.xml");
 
@@ -52,7 +54,7 @@ public class PomEditsTest extends AbstractMavenProjectTestCase {
       model.releaseFromRead();
     }
   }
-  
+	 @Test
   public void test467590_emptyPom() throws Exception {
     
     // default config for xml formatter

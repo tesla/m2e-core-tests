@@ -24,6 +24,7 @@ import java.util.Arrays;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 
 import org.eclipse.core.internal.events.ResourceChangeEvent;
 import org.eclipse.core.resources.IFile;
@@ -97,6 +98,7 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
     }
   }
 
+  @Test
   public void testUpdateNotForced() throws Exception {
     // import project
     project = importProject("projects/updateProject/simple/pom.xml");
@@ -114,6 +116,7 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
     assertEquals(338, LOCAL_ARTIFACT.length()); // still from updateRepo1
   }
 
+  @Test
   public void testUpdateForced() throws Exception {
     // import project
     project = importProject("projects/updateProject/simple/pom.xml");
@@ -134,6 +137,7 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
   /*
    * Adding a new dependency should not force an update of the original
    */
+  @Test
   public void testDependencyAdded_NoUpdate() throws Exception {
     // import project
     project = importProject("projects/updateProject/simple/pom.xml");
@@ -149,6 +153,7 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
     assertEquals(338, LOCAL_ARTIFACT.length());
   }
 
+  @Test
   public void testMultiProject() throws Exception {
     // import project
     IProject[] projects = importProjects("projects/updateProject/multiProject/", new String[] {"projectA/pom.xml",
@@ -170,6 +175,7 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
     assertEquals(338, LOCAL_ARTIFACT.length());
   }
 
+  @Test
   public void testRefreshAfterOpen() throws Exception {
     setAutoBuilding(true);
     ProjectRegistryManager manager = MavenPluginActivator.getDefault().getMavenProjectManagerImpl();
@@ -187,6 +193,7 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
     assertNotNull(manager.getProject(p1));
   }
 
+  @Test
   public void test436679_NoRefreshWhenImport() throws Exception {
     IProject p1 = importProject("projects/updateProject/simple/pom.xml");
     waitForJobsToComplete();
@@ -195,6 +202,7 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
     assertEquals(1, events.size());
   }
 
+  @Test
   public void test437493_NoRefreshWhenInitClasspathContainer() throws Exception {
 
     String origSettings = mavenConfiguration.getUserSettingsFile();
@@ -217,6 +225,7 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
 
   }
 
+  @Test
   public void test416050_ignoreNonMavenProjectChanges() throws Exception {
     // import project
     project = createExisting("416050_ignoreNonMavenProjectChanges", "projects/416050_ignoreNonMavenProjectChanges");
@@ -244,6 +253,7 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
     assertTrue(projectRefreshJob.isEmpty());
   }
 
+  @Test
   public void test445675_autobuild() throws Exception {
     // import with autobuild off
     project = importProject("projects/updateProject/simple/pom.xml");
@@ -278,6 +288,7 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
     assertContainsOnly(getProjectsFromEvents(events), project);
   }
 
+  @Test
   public void testXXXX_projectRenameRefresh() throws Exception {
     IProject[] projects = importProjects("projects/updateProject/multiProject/", new String[] {"projectA/pom.xml",
         "projectB/pom.xml"}, new ResolverConfiguration());

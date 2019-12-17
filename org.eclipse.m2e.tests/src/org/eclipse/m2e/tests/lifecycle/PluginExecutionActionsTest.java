@@ -8,6 +8,8 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.Test;
+
 import org.eclipse.core.resources.IProject;
 
 import org.eclipse.m2e.core.internal.IMavenConstants;
@@ -23,6 +25,7 @@ import org.eclipse.m2e.tests.configurators.TestProjectConfigurator;
 
 
 public class PluginExecutionActionsTest extends AbstractLifecycleMappingTest {
+  @Test
   public void testMojoExecutionIgnore() throws Exception {
     IMavenProjectFacade facade = importMavenProject(
         "projects/lifecyclemapping/lifecycleMappingMetadata/PluginExecutionActionsTest",
@@ -44,6 +47,7 @@ public class PluginExecutionActionsTest extends AbstractLifecycleMappingTest {
     assertEquals(0, buildParticipants.values().iterator().next().size()); // no build participants
   }
 
+  @Test
   public void testMojoExecutionIgnoreWithMessage() throws Exception {
     IMavenProjectFacade facade = importMavenProject(
         "projects/lifecyclemapping/lifecycleMappingMetadata/PluginExecutionActionsTest",
@@ -67,6 +71,7 @@ public class PluginExecutionActionsTest extends AbstractLifecycleMappingTest {
         "Ignore plugin execution test message", 17 /*lineNumber*/, "pom.xml", project);
   }
 
+  @Test
   public void testMojoExecutionExecute() throws Exception {
     IMavenProjectFacade facade = importMavenProject(
         "projects/lifecyclemapping/lifecycleMappingMetadata/PluginExecutionActionsTest",
@@ -89,6 +94,7 @@ public class PluginExecutionActionsTest extends AbstractLifecycleMappingTest {
     assertTrue(buildParticipants.values().iterator().next().get(0) instanceof MojoExecutionBuildParticipant);
   }
 
+  @Test
   public void testMojoExecutionExecuteWithMessage() throws Exception {
     IMavenProjectFacade facade = importMavenProject(
         "projects/lifecyclemapping/lifecycleMappingMetadata/PluginExecutionActionsTest",
@@ -113,6 +119,7 @@ public class PluginExecutionActionsTest extends AbstractLifecycleMappingTest {
         "Execute plugin execution test message", 18 /*lineNumber*/, "pom.xml", project);
   }
 
+  @Test
   public void testMojoExecutionConfigurator() throws Exception {
     IMavenProjectFacade facade = importMavenProject(
         "projects/lifecyclemapping/lifecycleMappingMetadata/PluginExecutionActionsTest",
@@ -130,6 +137,7 @@ public class PluginExecutionActionsTest extends AbstractLifecycleMappingTest {
     assertTrue(configurators.get(0) instanceof TestProjectConfigurator);
   }
 
+  @Test
   public void testMojoExecutionError() throws Exception {
     IMavenProjectFacade facade = importMavenProject(
         "projects/lifecyclemapping/lifecycleMappingMetadata/PluginExecutionActionsTest",
@@ -156,6 +164,7 @@ public class PluginExecutionActionsTest extends AbstractLifecycleMappingTest {
             18 /*lineNumber*/, "pom.xml", project);
   }
 
+  @Test
   public void testMojoExecutionErrorWithMessage() throws Exception {
     IMavenProjectFacade facade = importMavenProject(
         "projects/lifecyclemapping/lifecycleMappingMetadata/PluginExecutionActionsTest",

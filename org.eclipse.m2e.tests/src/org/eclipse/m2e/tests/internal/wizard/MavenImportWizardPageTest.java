@@ -23,6 +23,7 @@ import java.util.Arrays;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.wizard.Wizard;
@@ -74,24 +75,28 @@ public class MavenImportWizardPageTest extends AbstractMavenProjectTestCase {
     page.scanProjects();
   }
 
+  @Test
   public void test408042_simpleProject() throws Exception {
     scanProjects("projects/408042_importWorkingSet/simple");
     assertFalse(page.shouldCreateWorkingSet());
     assertEquals("simple", page.getWorkingSetName());
   }
 
+  @Test
   public void test408042_multimoduleProject() throws Exception {
     scanProjects("projects/408042_importWorkingSet/multimodule");
     assertTrue(page.shouldCreateWorkingSet());
     assertEquals("multimodule-parent", page.getWorkingSetName());
   }
 
+  @Test
   public void test408042_noRootProject() throws Exception {
     scanProjects("projects/408042_importWorkingSet");
     assertFalse(page.shouldCreateWorkingSet());
     assertEquals("", page.getWorkingSetName());
   }
 
+  @Test
   public void test408042_nestedproject() throws Exception {
     IProject outer = importProject("projects/408042_importWorkingSet/nestedproject/pom.xml");
     WorkingSets.addToWorkingSet(new IProject[] {outer}, "testworkingset");
@@ -100,6 +105,7 @@ public class MavenImportWizardPageTest extends AbstractMavenProjectTestCase {
     assertEquals("testworkingset", page.getWorkingSetName());
   }
 
+  @Test
   public void test422008_preselectedWorkingSet() throws Exception {
     String workingSetName = "preselected";
     WorkingSets.getOrCreateWorkingSet(workingSetName);
@@ -112,6 +118,7 @@ public class MavenImportWizardPageTest extends AbstractMavenProjectTestCase {
     assertEquals(workingSetName, page.getWorkingSetName());
   }
 
+  @Test
   public void test533463_noArtifactId() throws Exception {
     scanProjects("projects/533463_noArtifactId");
     assertFalse(page.shouldCreateWorkingSet());

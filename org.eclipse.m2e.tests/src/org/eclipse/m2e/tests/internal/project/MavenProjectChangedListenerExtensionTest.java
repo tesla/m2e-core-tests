@@ -15,10 +15,13 @@ package org.eclipse.m2e.tests.internal.project;
 
 import static org.junit.Assert.assertFalse;
 
+import org.junit.Test;
+
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 
 
 public class MavenProjectChangedListenerExtensionTest extends AbstractMavenProjectTestCase {
+  @Test
   public void testExtension() throws Exception {
     TestMavenProjectChangedListener.events.clear();
     TestMavenProjectChangedListener.record = true;

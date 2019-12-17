@@ -32,6 +32,7 @@ import java.util.Set;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.TestName;
 
 import org.eclipse.aether.repository.RepositoryPolicy;
@@ -129,6 +130,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     return mavenProject.getArtifacts();
   }
 
+  @Test
   public void test000_simple() throws Exception {
     IProject p1 = createExisting("t000-p1");
     waitForJobsToComplete();
@@ -141,6 +143,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertEquals("0.0.1-SNAPSHOT", f1.getMavenProject(monitor).getVersion());
   }
 
+  @Test
   public void test000_eventMerge() throws Exception {
     IProject p1 = createExisting("t000-p1");
     waitForJobsToComplete();
@@ -158,6 +161,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertEquals(MavenProjectChangedEvent.KIND_CHANGED, events.get(0).getKind());
   }
 
+  @Test
   public void test000_pom_simple() throws Exception {
     IProject p1 = createExisting("t000-p1");
     waitForJobsToComplete();
@@ -172,6 +176,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertEquals("0.0.1-SNAPSHOT", f1.getMavenProject(monitor).getVersion());
   }
 
+  @Test
   public void test000_removeClosed() throws Exception {
     IProject p1 = createExisting("t000-p1");
     waitForJobsToComplete();
@@ -201,6 +206,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertNull(event.getMavenProject());
   }
 
+  @Test
   public void test000_removeDeleted() throws Exception {
     IProject p1 = createExisting("t000-p1");
     waitForJobsToComplete();
@@ -214,6 +220,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertNull(manager.create(p1, monitor));
   }
 
+  @Test
   public void test000_deletePom() throws Exception {
     IProject p1 = createExisting("t000-p1");
     waitForJobsToComplete();
@@ -259,6 +266,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertNotNull(event.getMavenProject());
   }
 
+  @Test
   public void test001_missingParent() throws Exception {
     FileUtils.deleteDirectory(new File(repo, "t001"));
 
@@ -286,6 +294,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertNull(manager.create(p2, monitor));
   }
 
+  @Test
   public void test001_dependencyOnModuleWithInheritedGroupAndVersion() throws Exception {
     IProject p1 = createExisting("t001-p1");
     IProject p2 = createExisting("t001-p2");
@@ -306,10 +315,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertNotNull(f3);
   }
 
-  public void _test003_projectsWithDuplicateGroupArtifactVersion() throws Exception {
-    fail("Implement me");
-  }
-
+  @Test
   public void test005_dependencyAvailableFromLocalRepoAndWorkspace() throws Exception {
     IProject p1 = createExisting("t005-p1");
     IProject p2 = createExisting("t005-p2");
@@ -338,6 +344,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     }
   }
 
+  @Test
   public void test005_snapshotAvailableFromLocalRepoAndWorkspace() throws Exception {
     IProject p1 = createExisting("t005-p3");
     waitForJobsToComplete();
@@ -366,6 +373,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
   }
 
   @RequireMavenExecutionContext
+  @Test
   public void test006_parentAvailableFromLocalRepoAndWorkspace() throws Exception {
     IProject p1 = createExisting("t006-p1");
     IProject p2 = createExisting("t006-p2");
@@ -387,6 +395,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertEquals("repository", f1.getMavenProject(monitor).getProperties().get("property"));
   }
 
+  @Test
   public void test006_parentAvailableFromLocalRepoAndWorkspace01() throws Exception {
     boolean oldSuspended = Job.getJobManager().isSuspended();
 
@@ -425,6 +434,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
         monitor);
   }
 
+  @Test
   public void test007_staleDependencies() throws Exception {
     // p1 depends on p2
     IProject p1 = createExisting("t007-p1");
@@ -452,6 +462,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertEquals(MavenProjectChangedEvent.KIND_REMOVED, event.getKind());
   }
 
+  @Test
   public void test007_newTransitiveDependency() throws Exception {
     // p1 depends on p2
     IProject p1 = createExisting("t007-p1");
@@ -475,6 +486,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertContainsOnly(getProjectsFromEvents(events), p1, p2);
   }
 
+  @Test
   public void test007_changedVersion() throws Exception {
     // p1 depends on p2
     IProject p1 = createExisting("t007-p1");
@@ -501,6 +513,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertEquals(p2.getFile(IMavenConstants.POM_FILE_NAME).getLocation().toFile(), a1.get(0).getFile());
   }
 
+  @Test
   public void test007_dependentRefreshAfterWorkspaceRestart() throws Exception {
     // p1 depends on p2
     IProject p1 = createExisting("t007-p1");
@@ -538,6 +551,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     }
   }
 
+  @Test
   public void test008_staleMissingParent() throws Exception {
     // p1 does not have parent
     IProject p1 = createExisting("t008-p1");
@@ -565,6 +579,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertEquals(MavenProjectChangedEvent.KIND_ADDED, event.getKind());
   }
 
+  @Test
   public void test008_staleMissingParent2() throws Exception {
     // p1 does not have parent
     IProject p1 = createExisting("t008-p1");
@@ -586,6 +601,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertEquals(MavenProjectChangedEvent.KIND_ADDED, event.getKind());
   }
 
+  @Test
   public void test009_noworkspaceResolution() throws Exception {
     IProject p1 = createExisting("t009-p1");
     IProject p2 = createExisting("t009-p2");
@@ -656,6 +672,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertEquals(p1.getFile(IMavenConstants.POM_FILE_NAME), events[1].getSource());
   }
 
+  @Test
   public void test012_downloadExternalDependency() throws Exception {
     IProject p1 = createExisting("t012-p1");
     waitForJobsToComplete();
@@ -677,6 +694,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertTrue(jar.exists());
   }
 
+  @Test
   public void test013_cantParsePomMarker() throws Exception {
     IProject project = createExisting("t013-p1");
     waitForJobsToComplete();
@@ -691,6 +709,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertNotNull(manager.create(project, monitor));
   }
 
+  @Test
   public void test013_missingDependencyMarker() throws Exception {
     IProject project = createExisting("t013-p2");
     waitForJobsToComplete();
@@ -716,6 +735,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
   }
 
   @RequireMavenExecutionContext
+  @Test
   public void test015_refreshOffline() throws Exception {
     // XXX fix this test on Windows and remove this condition 
     if(System.getProperty("os.name", "").toLowerCase().indexOf("windows") > -1) {
@@ -751,6 +771,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     }
   }
 
+  @Test
   public void test017_moduleRefresh() throws Exception {
     IProject p2 = createExisting("t017-p2");
     IProject p3 = createExisting("t017-p3");
@@ -772,6 +793,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertFalse(a.isResolved());
   }
 
+  @Test
   public void testOptionalDependencies() throws Exception {
     IProject p1 = createExisting("optionaldependency-p01");
     IProject p2 = createExisting("optionaldependency-p02");
@@ -801,6 +823,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
   /**
    * This test disabled until https://issues.sonatype.org/browse/MNGECLIPSE-1448 is resolved
    */
+  @Test
   public void _testExtensionPluginResolution() throws Exception {
     IProject p1 = createExisting("MNGECLIPSE380-plugin", "resources/MNGECLIPSE380/plugin");
     IProject p2 = createExisting("MNGECLIPSE380-project", "resources/MNGECLIPSE380/project");
@@ -818,6 +841,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertNotNull(manager.create(pom2, false, null));
   }
 
+  @Test
   public void testPropertiesSubstitution() throws Exception {
     IProject p1 = createExisting("t019-p1");
     waitForJobsToComplete();
@@ -836,6 +860,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertTrue("Expected to start with " + expected + " but got " + actual, actual.startsWith(expected));
   }
 
+  @Test
   public void test020_moduleWithPomErrors() throws Exception {
     IProject p1 = createExisting("t020-p1");
     IProject p1m1 = createExisting("t020-p1-m1");
@@ -850,6 +875,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertEquals("3.8.1", a.getVersion());
   }
 
+  @Test
   public void testDependencyScopeChanged() throws Exception {
     //Changing the scope of a dependency should trigger a project update
     IProject p1 = createExisting("changedscope-p01");
@@ -877,6 +903,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     }
   }
 
+  @Test
   public void testJdkProfileActivation() throws Exception {
     IProject[] projects = importProjects("projects/jdkprofileactivation",
         new String[] {"p001/pom.xml", "p002/pom.xml"}, new ResolverConfiguration());
@@ -888,6 +915,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertEquals("p002", a1.get(0).getArtifactId());
   }
 
+  @Test
   public void testWorkspaceDependencyVersionRange() throws Exception {
     IProject[] projects = importProjects("projects/versionrange", new String[] {"p001/pom.xml", "p002/pom.xml"},
         new ResolverConfiguration());
@@ -901,6 +929,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertEquals(projects[1].getLocation().append("target/classes").toFile(), a1.get(0).getFile());
   }
 
+  @Test
   public void testRepositoryMetadataCacheUsed() throws Exception {
     FileUtils.deleteDirectory(new File(repo, "mngeclipse1996"));
     String oldSettings = mavenConfiguration.getUserSettingsFile();
@@ -935,6 +964,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     }
   }
 
+  @Test
   public void testEnvironmentVariablesConsidered() throws Exception {
     String tmpDir = System.getenv("TEMP");
     assertTrue("This test requires the environment variable TEMP to be set", tmpDir != null);
@@ -956,6 +986,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertTrue(file.toString(), file.isFile());
   }
 
+  @Test
   public void testWorkspaceResolutionApi() throws Exception {
     IProject[] projects = importProjects("projects/simple-pom", new String[] {"pom.xml"}, new ResolverConfiguration());
     assertEquals(1, projects.length);
@@ -967,6 +998,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertEquals(projects[0].getFile("pom.xml").getLocation().toFile(), artifact.getFile());
   }
 
+  @Test
   public void testPluginMainArtifactNotResolvedFromWorkspace() throws Exception {
     IProject[] projects = importProjects("projects/MNGECLIPSE-2116",
         new String[] {"plugin/pom.xml", "project/pom.xml"}, new ResolverConfiguration());
@@ -977,6 +1009,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
   }
 
   @RequireMavenExecutionContext
+  @Test
   public void test021_dependencyVersionRange() throws Exception {
     IProject p1 = importProject("resources/t021_dependencyVersionRange/t021-p1/pom.xml");
     waitForJobsToComplete();
@@ -995,6 +1028,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertEquals(p2.getFile(IMavenConstants.POM_FILE_NAME).getLocation().toFile(), a1.get(0).getFile());
   }
 
+  @Test
   public void testGlobalUpdatePolicyNever() throws Exception {
     // clean local repo
     FileUtils.deleteDirectory(new File(repo, "updateTest/b"));
@@ -1038,6 +1072,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     }
   }
 
+  @Test
   public void testCorrelatedMissingDependency() throws Exception {
     // clean local repo
     FileUtils.deleteDirectory(new File(repo, "updateTest/b"));
@@ -1081,6 +1116,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertTrue(a2.get(0).isResolved());
   }
 
+  @Test
   public void test022_noChangeReloadWithUnrelatedRemoveProject() throws Exception {
     IProject[] p = importProjects("resources/t022/", new String[] {"t022-p1/pom.xml", "t022-p2/pom.xml"},
         new ResolverConfiguration());
@@ -1129,6 +1165,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
         p);
   }
 
+  @Test
   public void test356645_redundantSnapshotResolution() throws Exception {
     FileUtils.deleteDirectory(new File("target/356645localrepo"));
 
@@ -1148,6 +1185,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertEquals(3, FilexWagon.getRequests().size());
   }
 
+  @Test
   public void test405090_staleBuildExtensionsResolutionError() throws Exception {
     FileUtils.deleteDirectory(new File("target/405090localrepo"));
 
@@ -1173,6 +1211,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertNoErrors(project);
   }
 
+  @Test
   public void test418674_ChecksumPolicyFail() throws Exception {
     // clean local repo
     FileUtils.deleteDirectory(new File(repo, "org/eclipse/m2e/test/bad-checksum"));
@@ -1216,6 +1255,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     fail("Expected markers not found, found messages " + toString(markers));
   }
 
+  @Test
   public void test418674_ChecksumPolicyWarn() throws Exception {
     // clean local repo
     FileUtils.deleteDirectory(new File(repo, "org/eclipse/m2e/test/bad-checksum"));
@@ -1253,6 +1293,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     ((MavenConfigurationImpl) mavenConfiguration).setGlobalChecksumPolicy(value);
   }
 
+  @Test
   public void test435692_affected_changes() throws Exception {
 
     // parent 1.0
@@ -1300,6 +1341,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
 
   }
 
+  @Test
   public void test436929_import_refresh() throws Exception {
 
     IProject[] projects = importProjects("projects/436929_import_refresh", new String[] {"p1/pom.xml", "deps/pom.xml",
@@ -1364,6 +1406,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertContainsOnly(getProjectsFromEvents(events), p1 /* self */, p2);
   }
 
+  @Test
   public void test441257_stalePluginRealms() throws Exception {
     IProject project = importProject("projects/441257_stalePluginRealms/basic/pom.xml");
     project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
@@ -1391,6 +1434,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
         world.getRealm("extension>org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0"));
   }
 
+  @Test
   public void test441257_stalePluginRealms_withParent() throws Exception {
     IProject project = importProject("projects/441257_stalePluginRealms/with-parent/pom.xml");
     project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
@@ -1418,6 +1462,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
         world.getRealm("extension>org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0"));
   }
 
+  @Test
   public void test453995_dependencyManagementVersionless() throws Exception {
     IProject project = importProject("projects/453995_dependencyManagementVersionless/pom.xml");
     waitForJobsToComplete();
@@ -1433,6 +1478,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
 
   }
 
+  @Test
   public void test460983_parentVersionRange() throws Exception {
     mavenConfiguration.setUserSettingsFile(new File("settings-filex.xml").getCanonicalPath());
     injectFilexWagon();
@@ -1454,6 +1500,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertTrue(FilexWagon.getRequests().isEmpty());
   }
 
+  @Test
   public void test463075_extensionAndPluginRealm() throws Exception {
     IProject[] projects = importProjects("projects/463075_extensionAndPluginRealm", new String[] {
         "extension-and-plugin/pom.xml", "extension-only/pom.xml"}, new ResolverConfiguration());

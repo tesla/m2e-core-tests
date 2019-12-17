@@ -20,6 +20,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import org.junit.Test;
+
 import org.eclipse.core.resources.IProject;
 
 import org.codehaus.plexus.util.Scanner;
@@ -31,7 +33,7 @@ import org.eclipse.m2e.tests.mocks.ResourceDeltaStub;
 
 @SuppressWarnings("restriction")
 public class EclipseIncrementalBuildContextTest extends AbstractMavenProjectTestCase {
-
+  @Test
   public void testScanner() throws Exception {
     IProject project = importProject("projects/MNGECLIPSE-2144/pom.xml");
 

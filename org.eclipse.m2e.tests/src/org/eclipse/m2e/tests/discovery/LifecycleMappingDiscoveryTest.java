@@ -19,6 +19,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.Test;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
@@ -91,6 +93,7 @@ public class LifecycleMappingDiscoveryTest extends AbstractLifecycleMappingTest 
     return item;
   }
 
+  @Test
   public void testPackagingPom() throws Exception {
     LifecycleMappingDiscoveryRequest request = loadLifecycleMappingDiscoveryRequest("projects/discovery/packagingPom/pom.xml");
 
@@ -99,6 +102,7 @@ public class LifecycleMappingDiscoveryTest extends AbstractLifecycleMappingTest 
     assertTrue("Expected a complete mapping", request.isMappingComplete());
   }
 
+  @Test
   public void testNoProposals() throws Exception {
     LifecycleMappingDiscoveryRequest request = loadLifecycleMappingDiscoveryRequest("projects/discovery/mojoExecutions/pom.xml");
 
@@ -113,6 +117,7 @@ public class LifecycleMappingDiscoveryTest extends AbstractLifecycleMappingTest 
     assertTrue("Didn't expect discovery proposals", proposals.isEmpty());
   }
 
+  @Test
   public void testProposalMatching() throws Exception {
     LifecycleMappingDiscoveryRequest request = loadLifecycleMappingDiscoveryRequest("projects/discovery/twoMojoExecutions/pom.xml");
 
@@ -153,6 +158,7 @@ public class LifecycleMappingDiscoveryTest extends AbstractLifecycleMappingTest 
     assertInstallCatalogItemProposal(items.get(1), proposals.get(goal2));
   }
 
+  @Test
   public void testPreselectedProposals() throws Exception {
     LifecycleMappingDiscoveryRequest request = loadLifecycleMappingDiscoveryRequest("projects/discovery/mojoExecutions/pom.xml");
 
@@ -172,6 +178,7 @@ public class LifecycleMappingDiscoveryTest extends AbstractLifecycleMappingTest 
     assertEquals(2, proposals.size());
   }
 
+  @Test
   public void testIsMappingComplete() throws Exception {
     LifecycleMappingDiscoveryRequest request = loadLifecycleMappingDiscoveryRequest("projects/discovery/twoMojoExecutions/pom.xml");
 
@@ -197,6 +204,7 @@ public class LifecycleMappingDiscoveryTest extends AbstractLifecycleMappingTest 
     assertTrue(request.isMappingComplete());
   }
 
+  @Test
   public void testAutomaticSelectionOfSingleProposal() throws Exception {
     LifecycleMappingDiscoveryRequest request = loadLifecycleMappingDiscoveryRequest("projects/discovery/twoMojoExecutions/pom.xml");
 
@@ -246,6 +254,7 @@ public class LifecycleMappingDiscoveryTest extends AbstractLifecycleMappingTest 
     assertTrue(request.isMappingComplete());
   }
 
+  @Test
   public void testAutomaticSelectionWithAmbiguousProposals() throws Exception {
     LifecycleMappingDiscoveryRequest request = loadLifecycleMappingDiscoveryRequest("projects/discovery/twoMojoExecutions/pom.xml");
 
@@ -284,6 +293,7 @@ public class LifecycleMappingDiscoveryTest extends AbstractLifecycleMappingTest 
     assertNull(request.getSelectedProposal(goal1));
   }
 
+  @Test
   public void testDiscoverProjectConfigurators() throws Exception {
     LifecycleMappingDiscoveryRequest request = loadLifecycleMappingDiscoveryRequest("projects/discovery/projectConfigurator/pom.xml");
 
@@ -322,6 +332,7 @@ public class LifecycleMappingDiscoveryTest extends AbstractLifecycleMappingTest 
         ((InstallCatalogItemMavenDiscoveryProposal) proposals.get(configurator).get(0)).getCatalogItem());
   }
 
+  @Test
   public void testDiscoverLifecycleMappingStrategy() throws Exception {
     LifecycleMappingDiscoveryRequest request = loadLifecycleMappingDiscoveryRequest("projects/discovery/lifecycleId/pom.xml");
 
@@ -352,6 +363,7 @@ public class LifecycleMappingDiscoveryTest extends AbstractLifecycleMappingTest 
   /*
    * Different behavior from {@link LifecycleMappingDiscoveryTest#testProposalToReplaceDefaultMapping()}, as no Lifecycle Mapping errors are found on the project.
    */
+  @Test
   public void testProposalToReplaceDefaultMapping() throws Exception {
     LifecycleMappingMetadataSource defaultMetadata = loadLifecycleMappingMetadataSource("projects/discovery/default-test-packaging-a.xml");
     LifecycleMappingFactory.setDefaultLifecycleMappingMetadataSource(defaultMetadata);
@@ -367,6 +379,7 @@ public class LifecycleMappingDiscoveryTest extends AbstractLifecycleMappingTest 
   /*
    * Different behavior from {@link LifecycleMappingDiscoveryTest#testDefaultNonConfiguratorMapping()}, as no Lifecycle Mapping errors are found on the project.
    */
+  @Test
   public void testDefaultNonConfiguratorMapping() throws Exception {
     LifecycleMappingMetadataSource defaultMetadata = loadLifecycleMappingMetadataSource("projects/discovery/match-test-goal-1-and-2.xml");
     LifecycleMappingFactory.setDefaultLifecycleMappingMetadataSource(defaultMetadata);

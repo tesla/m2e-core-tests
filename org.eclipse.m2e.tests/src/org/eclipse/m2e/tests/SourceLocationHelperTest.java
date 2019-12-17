@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 
 import org.eclipse.aether.graph.Dependency;
 import org.eclipse.aether.util.artifact.DefaultArtifactTypeRegistry;
@@ -56,6 +57,7 @@ public class SourceLocationHelperTest extends AbstractMavenProjectTestCase {
     }
   }
 
+  @Test
   public void testPackagingLocation() throws Exception {
     IMavenProjectFacade facade = importMavenProject("projects/markers/SourceLocationHelperTest/testPackagingLocation",
         "pom.xml");
@@ -67,6 +69,7 @@ public class SourceLocationHelperTest extends AbstractMavenProjectTestCase {
     assertSourceLocation(new SourceLocation(7, 3, 13), sourceLocation);
   }
 
+  @Test
   public void testPluginAttributeLocation() throws Exception {
     IMavenProjectFacade facade = importMavenProject(
         "projects/markers/SourceLocationHelperTest/testPluginAttributeLocation", "pom.xml");
@@ -84,6 +87,7 @@ public class SourceLocationHelperTest extends AbstractMavenProjectTestCase {
   }
 
   @RequireMavenExecutionContext
+  @Test
   public void testMojoExecutionLocationWithExecutions() throws Exception {
     IMavenProjectFacade facade = importMavenProject(
         "projects/markers/SourceLocationHelperTest/testMojoExecutionLocationWithExecutions", "parent1/pom.xml");
@@ -126,6 +130,7 @@ public class SourceLocationHelperTest extends AbstractMavenProjectTestCase {
   }
 
   @RequireMavenExecutionContext
+  @Test
   public void testMojoExecutionLocation() throws Exception {
     IMavenProjectFacade facade = importMavenProject(
         "projects/markers/SourceLocationHelperTest/testMojoExecutionLocation", "parent/pom.xml");
@@ -169,6 +174,7 @@ public class SourceLocationHelperTest extends AbstractMavenProjectTestCase {
         sourceLocation);
   }
 
+  @Test
   public void testDependencyLocation() throws Exception {
     IMavenProjectFacade facade = importMavenProject("projects/markers/SourceLocationHelperTest/testDependencyLocation",
         "parent/pom.xml");

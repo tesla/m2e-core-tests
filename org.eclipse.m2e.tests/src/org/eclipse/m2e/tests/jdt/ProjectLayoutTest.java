@@ -13,6 +13,8 @@
 
 package org.eclipse.m2e.tests.jdt;
 
+import org.junit.Test;
+
 import org.eclipse.core.resources.IProject;
 
 import org.eclipse.m2e.core.MavenPlugin;
@@ -21,7 +23,7 @@ import org.eclipse.m2e.tests.common.ClasspathHelpers;
 
 
 public class ProjectLayoutTest extends AbstractMavenProjectTestCase {
-
+  @Test
   public void test472726_basedirResources() throws Exception {
     IProject project = importProject("projects/472726_basedirResources/pom.xml");
     waitForJobsToComplete();

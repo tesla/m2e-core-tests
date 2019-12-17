@@ -20,6 +20,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.m2e.core.internal.IMavenConstants;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
+import org.junit.Test;
 
 
 /**
@@ -31,7 +32,7 @@ import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 
 @SuppressWarnings("restriction")
 public class WarnIfGroupSameThanParentTest extends AbstractMavenProjectTestCase {
-
+	 @Test
   public void testMNGEclipse2552() throws Exception {
     IProject[] projects = importProjects("projects/MNGECLIPSE-2552", new String[] {
         "child2552withDuplicateGroupAndVersion/pom.xml", "child2552withDuplicateGroup/pom.xml",

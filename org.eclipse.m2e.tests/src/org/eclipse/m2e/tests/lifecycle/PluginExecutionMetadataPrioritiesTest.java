@@ -10,6 +10,7 @@ import java.io.StringReader;
 import java.util.List;
 
 import org.junit.After;
+import org.junit.Test;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -37,6 +38,7 @@ public class PluginExecutionMetadataPrioritiesTest extends AbstractLifecycleMapp
     LifecycleMappingFactory.writeWorkspaceMetadata(new LifecycleMappingMetadataSource());
   }
 
+  @Test
   public void testDefaultMetadataSource() throws Exception {
     LifecycleMappingMetadataSource defaultMetadata = loadLifecycleMappingMetadataSource("projects/lifecyclemapping/lifecycleMappingMetadata/PluginExecutionMetadataPrioritiesTest/defaultMetadata.xml");
     LifecycleMappingFactory.setDefaultLifecycleMappingMetadataSource(defaultMetadata);
@@ -61,6 +63,7 @@ public class PluginExecutionMetadataPrioritiesTest extends AbstractLifecycleMapp
    * This test verifies that pluginExecution mapping metadata contributed via eclipse extension point takes preference
    * over default metadata.
    */
+  @Test
   public void testEclipseExtension() throws Exception {
     LifecycleMappingMetadataSource defaultMetadata = loadLifecycleMappingMetadataSource("projects/lifecyclemapping/lifecycleMappingMetadata/PluginExecutionMetadataPrioritiesTest/defaultMetadata.xml");
     LifecycleMappingFactory.setDefaultLifecycleMappingMetadataSource(defaultMetadata);
@@ -78,6 +81,7 @@ public class PluginExecutionMetadataPrioritiesTest extends AbstractLifecycleMapp
   }
 
   // Referenced metadata has priority over eclipse extensions
+  @Test
   public void testReferencedFromPom() throws Exception {
     LifecycleMappingMetadataSource defaultMetadata = loadLifecycleMappingMetadataSource("projects/lifecyclemapping/lifecycleMappingMetadata/PluginExecutionMetadataPrioritiesTest/defaultMetadata.xml");
     LifecycleMappingFactory.setDefaultLifecycleMappingMetadataSource(defaultMetadata);
@@ -101,6 +105,7 @@ public class PluginExecutionMetadataPrioritiesTest extends AbstractLifecycleMapp
   }
 
   // Embedded metadata has priority over referenced metadata
+  @Test
   public void testEmbeddedInPom() throws Exception {
     LifecycleMappingMetadataSource defaultMetadata = loadLifecycleMappingMetadataSource("projects/lifecyclemapping/lifecycleMappingMetadata/PluginExecutionMetadataPrioritiesTest/defaultMetadata.xml");
     LifecycleMappingFactory.setDefaultLifecycleMappingMetadataSource(defaultMetadata);
@@ -122,6 +127,7 @@ public class PluginExecutionMetadataPrioritiesTest extends AbstractLifecycleMapp
             "no such project configurator id for test-lifecyclemapping-plugin:test-goal-for-eclipse-extension2 - embedded from pom");
   }
 
+  @Test
   public void testParent() throws Exception {
     IMavenProjectFacade parentFacade = importMavenProject(
         "projects/lifecyclemapping/lifecycleMappingMetadata/PluginExecutionMetadataPrioritiesTest",
@@ -160,6 +166,7 @@ public class PluginExecutionMetadataPrioritiesTest extends AbstractLifecycleMapp
   }
 
   // Workspace mappings override plugin mappings
+  @Test
   public void testWorkspace() throws Exception {
 
     // now set the lifecycle mapping in the workspace.
@@ -189,6 +196,7 @@ public class PluginExecutionMetadataPrioritiesTest extends AbstractLifecycleMapp
   }
 
   // Embedded metadata should override Workspace mappings
+  @Test
   public void testPomOverridesWorkspace() throws Exception {
 
     // now set the lifecycle mapping in the workspace.
@@ -236,6 +244,7 @@ public class PluginExecutionMetadataPrioritiesTest extends AbstractLifecycleMapp
   }
 
   // metadata from workspace should override eclipse extension metadata
+  @Test
   public void testWorkspaceOverridesEclipseExtensions() throws Exception {
     // now set the lifecycle mapping in the workspace.
     setWorkspaceLifecycleMappingMetadataSource("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"

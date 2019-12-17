@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.junit.Test;
+
 import org.eclipse.core.externaltools.internal.model.BuilderCoreUtils;
 import org.eclipse.core.externaltools.internal.model.ExternalToolBuilder;
 import org.eclipse.core.resources.IFolder;
@@ -79,7 +81,7 @@ import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
 
 public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCase {
-
+  @Test
   public void testBasedirRenameRequired() throws Exception {
     testBasedirRename(MavenProjectInfo.RENAME_REQUIRED);
 
@@ -92,6 +94,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     assertEquals(project, facade.getProject());
   }
 
+  @Test
   public void testBasedirRenameNo() throws Exception {
     testBasedirRename(MavenProjectInfo.RENAME_NO);
 
@@ -124,6 +127,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
         MavenPlugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
   }
 
+  @Test
   public void testWorkspaceResolutionOfInterModuleDependenciesDuringImport() throws Exception {
     String oldSettings = mavenConfiguration.getUserSettingsFile();
     try {
@@ -153,6 +157,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     }
   }
 
+  @Test
   public void testResolutionOfArchetypeFromRepository() throws Exception {
     String oldSettings = mavenConfiguration.getUserSettingsFile();
     try {
@@ -171,6 +176,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     }
   }
 
+  @Test
   public void testExtractionOfCompilerSettingsDespiteErrorsInExecutionPlan() throws Exception {
     IProject[] projects = importProjects("projects/compilerSettingsPluginError", new String[] {"pom.xml"},
         new ResolverConfiguration());
@@ -185,6 +191,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     assertEquals("1.5", javaProject.getOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, true));
   }
 
+  @Test
   public void testStaleProjectConfigurationMarker() throws Exception {
     IProject project = importProject("projects/staleconfiguration/basic/pom.xml");
     assertNoErrors(project);
@@ -200,6 +207,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     assertNoErrors(project);
   }
 
+  @Test
   public void testStaleProjectConfigurationMarkerAfterWorkspaceRestart() throws Exception {
     IProject project = importProject("projects/staleconfiguration/basic/pom.xml");
     assertNoErrors(project);
@@ -217,6 +225,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     assertNoErrors(project);
   }
 
+  @Test
   public void testAutomaticUpdateProjectConfigurationMarker() throws Exception {
     setAutoBuilding(true);
     setAutomaticallyUpdateConfiguration(true);
@@ -228,6 +237,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     assertNoErrors(project);
   }
 
+  @Test
   public void testStaleProjectConfigurationMarkerAfterFixingMissingBuildExtension() throws Exception {
     IProject project = importProjects("projects/staleconfiguration/missingextension", new String[] {"pom.xml"},
         new ResolverConfiguration(), true)[0];
@@ -246,6 +256,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     assertNoErrors(project);
   }
 
+  @Test
   public void testImportJavaProjectWithUnknownPackaging() throws Exception {
     IProject project = importProject("projects/detectJavaProject/default/pom.xml");
     assertTrue("default compilerId", project.hasNature(JavaCore.NATURE_ID));
@@ -257,6 +268,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     assertFalse("compilerId=jikes", project.hasNature(JavaCore.NATURE_ID));
   }
 
+  @Test
   public void testAddRemoveMavenBuilder() throws Exception {
     IProject project = createExisting("testAddRemoveMavenBuilder",
         "projects/AddRemoveMavenBuilder/testAddRemoveMavenBuilder");
@@ -290,6 +302,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     assertNotSame(IMavenConstants.BUILDER_ID, projectDescription.getBuildSpec()[0].getBuilderName());
   }
 
+  @Test
   public void testAddRemoveMavenBuilderDisabled() throws Exception {
     IProject project = createExisting("testAddRemoveMavenDisabled",
         "projects/AddRemoveMavenBuilder/testAddRemoveMavenBuilderDisabled");
@@ -323,6 +336,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     assertEquals(ExternalToolBuilder.ID, projectDescription.getBuildSpec()[1].getBuilderName());
   }
 
+  @Test
   public void testBasicUpdateConfiguration() throws Exception {
     IProject project = importProject("projects/projectimport/p001/pom.xml");
     IProjectConfigurationManager manager = MavenPlugin.getProjectConfigurationManager();
@@ -330,6 +344,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     manager.updateProjectConfiguration(new MavenUpdateRequest(project, true, false), monitor);
   }
 
+  @Test
   public void test447460MultipleUpdateConfiguration() throws Exception {
     // the project import already performs a configuration !!!
     IProject project = importProject("projects/447460_MultipleUpdateConfiguration/pom.xml");
@@ -367,6 +382,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     return result;
   }
 
+  @Test
   public void testConfigureProjectEncodingForBasicProject() throws Exception {
     IProject project = importProject("projects/projectEncoding/p001/pom.xml");
     WorkspaceHelpers.assertNoErrors(project);
@@ -386,6 +402,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     assertEquals("Encoding for folder should have been inherited from project", "UTF-16", testfolderEncodingChanged);
   }
 
+  @Test
   public void testRevertToContainerDefinedEncoding() throws Exception {
     IProject project = importProject("projects/projectEncoding/p002/pom.xml");
     WorkspaceHelpers.assertNoErrors(project);
@@ -413,6 +430,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
         testfolderEncodingReverted);
   }
 
+  @Test
   public void testKeepEncodingSetByUserForSubfoldersAndFiles() throws Exception {
     IProject project = importProject("projects/projectEncoding/p003/pom.xml");
     WorkspaceHelpers.assertNoErrors(project);
@@ -428,6 +446,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     assertEquals("File encoding set by user not kept", "UTF-16", testfileEncoding);
   }
 
+  @Test
   public void test397251_forcePluginResolutionUpdate() throws Exception {
     FileUtils.deleteDirectory(new File("target/397251localrepo"));
 
@@ -464,14 +483,17 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     assertFalse(mapping.get(key).isEmpty());
   }
 
+  @Test
   public void testStaleProjectConfigurationWarningMarker() throws Exception {
     testStaleProjectConfigurationMarker(ProblemSeverity.warning);
   }
 
+  @Test
   public void testIgnoreStaleProjectConfiguration() throws Exception {
     testStaleProjectConfigurationMarker(ProblemSeverity.ignore);
   }
 
+  @Test
   public void testHiddenFolderForSimpleModule() throws Exception {
 
     IProject parentProject = createSimplePomProject("parent001");
@@ -542,6 +564,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     return model;
   }
 
+  @Test
   public void testHiddenFolderForArchetypeModule() throws Exception {
     IProject parentProject = createSimplePomProject("parent002");
     assertTrue(parentProject.isAccessible());
@@ -570,6 +593,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     }
   }
 
+  @Test
   public void test473953_ProjectCreationListener() throws Exception {
     boolean[] listenerCalled = new boolean[1];
     IProjectCreationListener l = project -> listenerCalled[0] = true;

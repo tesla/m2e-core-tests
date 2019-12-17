@@ -3,6 +3,8 @@ package org.eclipse.m2e.tests.project;
 
 import static org.junit.Assert.assertEquals;
 
+import org.junit.Test;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -11,7 +13,7 @@ import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 
 
 public class CompilerSettings18Test extends AbstractMavenProjectTestCase {
-
+  @Test
   public void testCompilerSettings18() throws Exception {
     // this test is meaningless on java 7 (and we don't support 6 and earlier)
     // sadly, junit 3 does not support junit4's "Assume", have to make test pass

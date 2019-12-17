@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.junit.After;
+import org.junit.Test;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -46,11 +47,13 @@ public class MappingDiscoveryJobTest extends AbstractMavenProjectTestCase {
     super.tearDown();
   }
 
+  @Test
   public void testOpensMappingDiscoveryWizard() throws Exception {
     IProject project = importProject("projects/discovery/projectConfigurator/pom.xml");
     checkOpensMappingDiscoveryWizard(project, true);
   }
 
+  @Test
   public void testDontOpenMappingDiscoveryWizard() throws Exception {
     IProject project = importProject("projects/projectimport/p001/pom.xml");
     checkOpensMappingDiscoveryWizard(project, false);
