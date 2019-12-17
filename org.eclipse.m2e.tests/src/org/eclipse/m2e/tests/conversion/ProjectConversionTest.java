@@ -127,7 +127,6 @@ public class ProjectConversionTest extends AbstractProjectConversionTestCase {
     assertConvertsAndBuilds(project);
   }
 
-  @Test
   public IProject testProjectConversion(String projectName) throws Exception {
     deleteProject(projectName);
 
