@@ -11,9 +11,15 @@ import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.VERSION;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.childEquals;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.findChild;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.performOnDOMDocument;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.HashMap;
 import java.util.List;
+
+import org.junit.After;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -80,11 +86,7 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
   private MavenPomEditor editor = null;
 
   @Override
-  protected void setUp() throws Exception {
-    super.setUp();
-  }
-
-  @Override
+  @After
   public void tearDown() throws Exception {
     try {
       if(editor != null) {

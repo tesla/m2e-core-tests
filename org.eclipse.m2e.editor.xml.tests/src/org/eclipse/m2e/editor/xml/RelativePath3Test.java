@@ -13,6 +13,8 @@
 
 package org.eclipse.m2e.editor.xml;
 
+import static org.junit.Assert.assertEquals;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.m2e.core.project.ResolverConfiguration;

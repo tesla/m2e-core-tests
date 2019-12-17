@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 
+import org.junit.Assert;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -82,15 +84,15 @@ public abstract class AbstractProjectConversionTestCase extends AbstractMavenPro
   /**
    * Asserts the contents of the file is identical to the expectedFile
    */
-  protected void assertEquals(String message, IFile expectedFile, IFile file) throws Exception {
-    assertEquals(message, getAsString(expectedFile), getAsString(file));
+  public void assertFileContentEquals(String message, IFile expectedFile, IFile file) throws Exception {
+    Assert.assertEquals(message, getAsString(expectedFile), getAsString(file));
   }
 
   /**
    * Asserts the generated pom.xml is identical to &lt;project&gt;/expectedPom.xml
    */
   protected void verifyGeneratedPom(IProject project) throws Exception {
-    assertEquals("pom.xml comparison failed", project.getFile("expectedPom.xml"),
+    assertFileContentEquals("pom.xml comparison failed", project.getFile("expectedPom.xml"),
         project.getFile(IMavenConstants.POM_FILE_NAME));
   }
 

@@ -13,9 +13,17 @@
 
 package org.eclipse.m2e.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import org.junit.After;
+import org.junit.Before;
 
 import org.eclipse.core.internal.events.ResourceChangeEvent;
 import org.eclipse.core.resources.IFile;
@@ -64,6 +72,7 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
   IMavenProjectChangedListener listener = (event, monitor) -> events.addAll(Arrays.asList(event));
 
   @Override
+  @Before
   public void setUp() throws Exception {
     super.setUp();
     // clear local repo
@@ -76,7 +85,8 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
     manager.addMavenProjectChangedListener(listener);
   }
 
-  protected void tearDown() throws Exception {
+  @After
+  public void tearDown() throws Exception {
     try {
       manager.removeMavenProjectChangedListener(listener);
       listener = null;

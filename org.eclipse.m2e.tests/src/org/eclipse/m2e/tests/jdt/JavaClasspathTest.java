@@ -16,6 +16,11 @@ package org.eclipse.m2e.tests.jdt;
 import static org.eclipse.m2e.tests.common.ClasspathHelpers.assertClasspath;
 import static org.eclipse.m2e.tests.common.ClasspathHelpers.getClasspathAttribute;
 import static org.eclipse.m2e.tests.common.ClasspathHelpers.getClasspathEntry;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;

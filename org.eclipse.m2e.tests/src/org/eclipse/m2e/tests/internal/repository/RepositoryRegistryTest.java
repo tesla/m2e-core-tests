@@ -13,7 +13,12 @@
 
 package org.eclipse.m2e.tests.internal.repository;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
+
+import org.junit.After;
+import org.junit.Before;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -30,7 +35,8 @@ public class RepositoryRegistryTest extends AbstractMavenProjectTestCase {
 
   private RepositoryRegistry repositoryRegistry;
 
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     super.setUp();
 
     File securityFile = new File("src/org/eclipse/m2e/tests/internal/repository/settings-security.xml");
@@ -39,7 +45,8 @@ public class RepositoryRegistryTest extends AbstractMavenProjectTestCase {
     repositoryRegistry = (RepositoryRegistry) MavenPlugin.getRepositoryRegistry();
   }
 
-  protected void tearDown() throws Exception {
+  @After
+  public void tearDown() throws Exception {
     try {
       repositoryRegistry = null;
     } finally {

@@ -13,6 +13,10 @@
 
 package org.eclipse.m2e.editor.xml;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;

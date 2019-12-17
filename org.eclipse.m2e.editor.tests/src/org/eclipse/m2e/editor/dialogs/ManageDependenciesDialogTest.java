@@ -23,6 +23,10 @@ import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.childEquals;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.findChild;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.findChilds;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.getTextValue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
 import java.util.LinkedList;

@@ -16,6 +16,7 @@ package org.eclipse.m2e.tests.jdt;
 import static org.eclipse.m2e.tests.common.ClasspathHelpers.assertClasspath;
 import static org.eclipse.m2e.tests.common.ClasspathHelpers.getClasspathAttribute;
 import static org.eclipse.m2e.tests.common.ClasspathHelpers.getClasspathEntry;
+import static org.junit.Assert.assertEquals;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IClasspathAttribute;

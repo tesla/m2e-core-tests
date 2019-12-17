@@ -1,6 +1,9 @@
 
 package org.eclipse.m2e.tests.lifecycle;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 
@@ -13,11 +16,6 @@ import org.eclipse.m2e.tests.common.AbstractLifecycleMappingTest;
 
 @SuppressWarnings("restriction")
 public class LifecycleComparisonTest extends AbstractLifecycleMappingTest {
-
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
-  }
 
   public void testSameProject() throws Exception {
     IProject project = createExisting("LifecycleComparisonTest", "projects/lifecyclemapping/lifecyclecomparison");

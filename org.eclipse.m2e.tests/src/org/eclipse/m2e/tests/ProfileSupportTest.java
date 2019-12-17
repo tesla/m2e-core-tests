@@ -13,6 +13,8 @@
 
 package org.eclipse.m2e.tests;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
 import java.util.List;
 

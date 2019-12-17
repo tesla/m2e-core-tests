@@ -13,6 +13,8 @@
 
 package org.eclipse.m2e.editor.xml;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.List;
 
 import org.eclipse.core.resources.IMarker;

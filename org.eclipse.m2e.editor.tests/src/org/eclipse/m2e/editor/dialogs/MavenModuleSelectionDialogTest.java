@@ -13,22 +13,27 @@
 
 package org.eclipse.m2e.editor.dialogs;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.util.HashSet;
 import java.util.Set;
+
+import org.junit.Test;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.m2e.core.project.ResolverConfiguration;
-import org.eclipse.m2e.editor.AbstractMavenProjectTestJunit4;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TreeItem;
-import org.junit.Test;
+
+import org.eclipse.m2e.core.project.ResolverConfiguration;
+import org.eclipse.m2e.editor.AbstractMavenProjectTestJunit4;
 
 
 public class MavenModuleSelectionDialogTest extends AbstractMavenProjectTestJunit4 {
@@ -45,9 +50,9 @@ public class MavenModuleSelectionDialogTest extends AbstractMavenProjectTestJuni
   public void testModuleSelection() throws Exception {
     final IProject[] projects = importProjects("projects/modules", new String[] {//
         PROJECT1 + "/pom.xml", //
-            PROJECT2 + "/pom.xml", //
-            PROJECT3 + "/pom.xml", //
-            PROJECT1 + "/" + MODULE1 + "/pom.xml"}, new ResolverConfiguration());
+        PROJECT2 + "/pom.xml", //
+        PROJECT3 + "/pom.xml", //
+        PROJECT1 + "/" + MODULE1 + "/pom.xml"}, new ResolverConfiguration());
 
     waitForJobsToComplete();
 

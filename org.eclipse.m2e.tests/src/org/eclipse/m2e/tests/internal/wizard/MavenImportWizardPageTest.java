@@ -13,9 +13,16 @@
 
 package org.eclipse.m2e.tests.internal.wizard;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+
+import org.junit.After;
+import org.junit.Before;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.wizard.Wizard;
@@ -37,7 +44,8 @@ public class MavenImportWizardPageTest extends AbstractMavenProjectTestCase {
 
   private MavenImportWizardPage page;
 
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     super.setUp();
 
     Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
@@ -54,7 +62,8 @@ public class MavenImportWizardPageTest extends AbstractMavenProjectTestCase {
     dialog.setBlockOnOpen(false);
   }
 
-  protected void tearDown() throws Exception {
+  @After
+  public void tearDown() throws Exception {
     dialog.close();
     super.tearDown();
   }

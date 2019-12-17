@@ -13,6 +13,8 @@
 
 package org.eclipse.m2e.tests.internal.wizard;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 import java.util.Collections;
 

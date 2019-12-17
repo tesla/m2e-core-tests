@@ -13,12 +13,22 @@
 
 package org.eclipse.m2e.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.File;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.junit.Rule;
+import org.junit.rules.TestName;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -45,6 +55,9 @@ public class MutableProjectRegistryTest extends AbstractMavenProjectTestCase {
 
   private static final String WORKSPACE_STATE_SER = "workspaceState.ser";
   private IMaven maven = MavenPlugin.getMaven();
+
+  @Rule
+  public TestName name = new TestName();
 
   public void testAddProject() throws Exception {
     IProject project = createExisting("dummy", "resources/dummy");
@@ -186,7 +199,7 @@ public class MutableProjectRegistryTest extends AbstractMavenProjectTestCase {
     delta.setProject(pom, newProjectFacade(pom));
     state.apply(delta);
 
-    File tmpDir = File.createTempFile("m2e-" + getName(), "dir");
+    File tmpDir = File.createTempFile("m2e-" + name.getMethodName(), "dir");
     tmpDir.delete();
     tmpDir.mkdir();
     ProjectRegistryReader reader = new ProjectRegistryReader(tmpDir);
@@ -222,7 +235,7 @@ public class MutableProjectRegistryTest extends AbstractMavenProjectTestCase {
     delta.setCapabilities(pom, capabilities);
     state.apply(delta);
 
-    File tmpDir = File.createTempFile("m2e-" + getName(), "dir");
+    File tmpDir = File.createTempFile("m2e-" + name.getMethodName(), "dir");
     tmpDir.delete();
     tmpDir.mkdir();
     ProjectRegistryReader reader = new ProjectRegistryReader(tmpDir);

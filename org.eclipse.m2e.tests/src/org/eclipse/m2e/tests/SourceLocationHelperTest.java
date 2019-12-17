@@ -1,7 +1,14 @@
 
 package org.eclipse.m2e.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
 import java.util.List;
+
+import org.junit.After;
+import org.junit.Before;
 
 import org.eclipse.aether.graph.Dependency;
 import org.eclipse.aether.util.artifact.DefaultArtifactTypeRegistry;
@@ -30,7 +37,8 @@ public class SourceLocationHelperTest extends AbstractMavenProjectTestCase {
   private IMavenProjectRegistry mavenProjectManager;
 
   @Override
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     super.setUp();
 
     mavenProjectManager = MavenPlugin.getMavenProjectRegistry();
@@ -38,7 +46,8 @@ public class SourceLocationHelperTest extends AbstractMavenProjectTestCase {
   }
 
   @Override
-  protected void tearDown() throws Exception {
+  @After
+  public void tearDown() throws Exception {
     try {
       //projectConfigurationManager = null;
       mavenProjectManager = null;

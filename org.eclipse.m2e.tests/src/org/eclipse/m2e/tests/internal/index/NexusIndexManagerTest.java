@@ -13,12 +13,18 @@
 
 package org.eclipse.m2e.tests.internal.index;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
-import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import org.junit.Before;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -41,7 +47,6 @@ import org.eclipse.m2e.core.internal.index.UserInputSearchExpression;
 import org.eclipse.m2e.core.internal.index.nexus.IndexedArtifactGroup;
 import org.eclipse.m2e.core.internal.index.nexus.NexusIndex;
 import org.eclipse.m2e.core.internal.index.nexus.NexusIndexManager;
-import org.eclipse.m2e.core.internal.project.registry.MavenProjectFacade;
 import org.eclipse.m2e.core.internal.repository.RepositoryInfo;
 import org.eclipse.m2e.core.internal.repository.RepositoryRegistry;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
@@ -75,7 +80,8 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
 
   private RepositoryRegistry repositoryRegistry = (RepositoryRegistry) MavenPlugin.getRepositoryRegistry();
 
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     super.setUp();
     updateRepo(REPO_URL_ECLIPSE, SETTINGS_ECLIPSE_REPO);
   }

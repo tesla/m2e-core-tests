@@ -13,6 +13,8 @@
 
 package org.eclipse.m2e.tests.internal.project;
 
+import static org.junit.Assert.assertFalse;
+
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 
 

@@ -13,8 +13,12 @@
 
 package org.eclipse.m2e.tests.internal.wizard;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.Collection;
 import java.util.Collections;
+
+import org.junit.After;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -36,7 +40,8 @@ public class MappingDiscoveryJobTest extends AbstractMavenProjectTestCase {
 
   MappingDiscoveryJobNoUI discoveryJob;
 
-  protected void tearDown() throws Exception {
+  @After
+  public void tearDown() throws Exception {
     discoveryJob = null;
     super.tearDown();
   }

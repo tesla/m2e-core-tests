@@ -13,6 +13,9 @@
 
 package org.eclipse.m2e.tests.ui;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 
