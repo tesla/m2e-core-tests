@@ -40,6 +40,7 @@ public class MavenRuntimeManagerTest extends TestCase {
 
   private MavenRuntimeManagerImpl runtimeManager;
 
+  @Override
   protected void setUp() throws Exception {
     super.setUp();
     runtimeManager = MavenPluginActivator.getDefault().getMavenRuntimeManager();
@@ -150,23 +151,27 @@ public class MavenRuntimeManagerTest extends TestCase {
 
     public String mainRealm;
 
-    public LinkedHashMap<String, List<String>> realms = new LinkedHashMap<String, List<String>>();
+    public LinkedHashMap<String, List<String>> realms = new LinkedHashMap<>();
 
     public ArrayList<String> curRealm;
 
+    @Override
     public void addArchiveEntry(String entry) {
       curRealm.add(entry);
     }
 
+    @Override
     public void addProjectEntry(IMavenProjectFacade facade) {
       curRealm.add(facade.getProject().getName());
     }
 
+    @Override
     public void addRealm(String realm) {
-      curRealm = new ArrayList<String>();
+      curRealm = new ArrayList<>();
       realms.put(realm, curRealm);
     }
 
+    @Override
     public void setMainType(String type, String realm) {
       this.mainType = type;
       this.mainRealm = realm;

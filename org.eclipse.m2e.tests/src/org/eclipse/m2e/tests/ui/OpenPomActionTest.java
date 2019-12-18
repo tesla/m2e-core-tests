@@ -42,6 +42,7 @@ public class OpenPomActionTest extends AbstractMavenProjectTestCase {
     MavenProject mavenProject = facade.getMavenProject(monitor);
 
     OpenPomAction action = new OpenPomAction() {
+      @Override
       protected void openDialog(String msg) {
         // don't open any dialogs
       }

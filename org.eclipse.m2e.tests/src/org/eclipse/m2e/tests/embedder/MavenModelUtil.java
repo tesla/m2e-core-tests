@@ -17,9 +17,9 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 
-import org.codehaus.plexus.util.IOUtil;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
@@ -30,6 +30,9 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
+
+import org.codehaus.plexus.util.IOUtil;
+
 import org.eclipse.m2e.model.edit.pom.util.PomResourceFactoryImpl;
 import org.eclipse.m2e.model.edit.pom.util.PomResourceImpl;
 
@@ -40,7 +43,7 @@ public class MavenModelUtil {
   public static PomResourceImpl createResource(IProject project, String pomFileName, String content) throws Exception {
     IProgressMonitor monitor = new NullProgressMonitor();
 
-    ByteArrayInputStream is = new ByteArrayInputStream(content.getBytes("UTF-8"));
+    ByteArrayInputStream is = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
     IFile pomFile = project.getFile(pomFileName);
     if(!pomFile.exists()) {
       pomFile.create(is, true, monitor);
@@ -72,11 +75,8 @@ public class MavenModelUtil {
 
     StringWriter sw = new StringWriter();
 
-    InputStream is = file.getContents(true);
-    try {
+    try (InputStream is = file.getContents(true)) {
       IOUtil.copy(is, sw, "UTF-8");
-    } finally {
-      is.close();
     }
 
     // XXX fix hack with tabs

@@ -23,6 +23,7 @@ import org.eclipse.core.resources.IProject;
  */
 public class TestSortProjectConversionParticipant extends TestProjectConversionParticipant {
 
+  @Override
   public boolean accept(IProject project) {
     return project != null && project.getName().endsWith("-test-sort-participant");
   }

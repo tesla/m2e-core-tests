@@ -96,12 +96,14 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
 
   private ProjectRegistryManager manager;
 
+  @Override
   @Before
   public void setUp() throws Exception {
     super.setUp();
     manager = MavenPluginActivator.getDefault().getMavenProjectManagerImpl();
   }
 
+  @Override
   @After
   public void tearDown() throws Exception {
     manager = null;
@@ -497,18 +499,22 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     BuildPathManager buildpathManager = getBuildPathManager();
 
     IClasspathContainer containerSuggestion = new IClasspathContainer() {
+      @Override
       public IClasspathEntry[] getClasspathEntries() {
         return new IClasspathEntry[] {entry};
       }
 
+      @Override
       public String getDescription() {
         return container.getDescription();
       }
 
+      @Override
       public int getKind() {
         return container.getKind();
       }
 
+      @Override
       public IPath getPath() {
         return container.getPath();
       }
@@ -1420,18 +1426,22 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     BuildPathManager buildpathManager = getBuildPathManager();
 
     IClasspathContainer containerSuggestion = new IClasspathContainer() {
+      @Override
       public IClasspathEntry[] getClasspathEntries() {
         return new IClasspathEntry[] {entry};
       }
 
+      @Override
       public String getDescription() {
         return container.getDescription();
       }
 
+      @Override
       public int getKind() {
         return container.getKind();
       }
 
+      @Override
       public IPath getPath() {
         return container.getPath();
       }

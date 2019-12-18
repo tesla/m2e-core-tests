@@ -82,10 +82,11 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
     waitForJobsToComplete();
 
     manager = MavenPluginActivator.getDefault().getMavenProjectManagerImpl();
-    events = new ArrayList<MavenProjectChangedEvent>();
+    events = new ArrayList<>();
     manager.addMavenProjectChangedListener(listener);
   }
 
+  @Override
   @After
   public void tearDown() throws Exception {
     try {
@@ -245,6 +246,7 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
 
     event = new ResourceChangeEvent(project, IResourceChangeEvent.PRE_CLOSE, IncrementalProjectBuilder.FULL_BUILD,
         delta) {
+      @Override
       public IResource getResource() {
         return project;
       }

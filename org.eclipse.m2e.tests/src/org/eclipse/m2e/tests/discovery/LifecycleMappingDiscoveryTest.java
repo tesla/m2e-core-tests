@@ -77,8 +77,8 @@ public class LifecycleMappingDiscoveryTest extends AbstractLifecycleMappingTest 
     item.setSiteUrl(Integer.toString(item.hashCode()));
     item.setInstallableUnits(Arrays.asList(Integer.toString(item.hashCode())));
 
-    List<String> mappingStrategies = new ArrayList<String>();
-    List<String> configurators = new ArrayList<String>();
+    List<String> mappingStrategies = new ArrayList<>();
+    List<String> configurators = new ArrayList<>();
     if(pluginxmlPath != null) {
       FileInputStream is = new FileInputStream(pluginxmlPath);
       try {
@@ -145,7 +145,7 @@ public class LifecycleMappingDiscoveryTest extends AbstractLifecycleMappingTest 
 
     MavenDiscoveryService srv = new MavenDiscoveryService();
 
-    List<CatalogItem> items = new ArrayList<CatalogItem>();
+    List<CatalogItem> items = new ArrayList<>();
     items.add(newCatalogItem(srv, "projects/discovery/match-test-packaging-a.xml"));
     items.add(newCatalogItem(srv, "projects/discovery/match-test-goal-1-and-2.xml"));
 
@@ -192,7 +192,7 @@ public class LifecycleMappingDiscoveryTest extends AbstractLifecycleMappingTest 
     item.setInstallableUnits(Arrays.asList("iu"));
     IMavenDiscoveryProposal proposal = new InstallCatalogItemMavenDiscoveryProposal(item);
 
-    Map<ILifecycleMappingRequirement, List<IMavenDiscoveryProposal>> allproposals = new LinkedHashMap<ILifecycleMappingRequirement, List<IMavenDiscoveryProposal>>();
+    Map<ILifecycleMappingRequirement, List<IMavenDiscoveryProposal>> allproposals = new LinkedHashMap<>();
     for(ILifecycleMappingRequirement requirement : request.getRequirements()) {
       allproposals.put(requirement, Arrays.asList(proposal));
     }
@@ -232,7 +232,7 @@ public class LifecycleMappingDiscoveryTest extends AbstractLifecycleMappingTest 
 
     MavenDiscoveryService srv = new MavenDiscoveryService();
 
-    List<CatalogItem> items = new ArrayList<CatalogItem>();
+    List<CatalogItem> items = new ArrayList<>();
     items.add(newCatalogItem(srv, "projects/discovery/match-test-packaging-a.xml"));
     items.add(newCatalogItem(srv, "projects/discovery/match-test-goal-1-and-2.xml"));
 
@@ -266,7 +266,7 @@ public class LifecycleMappingDiscoveryTest extends AbstractLifecycleMappingTest 
     MavenDiscoveryService srv = new MavenDiscoveryService();
 
     // can't choose between match and another-match automatically
-    List<CatalogItem> items = new ArrayList<CatalogItem>();
+    List<CatalogItem> items = new ArrayList<>();
     items.add(newCatalogItem(srv, "projects/discovery/match-test-goal-1.xml"));
     items.add(newCatalogItem(srv, "projects/discovery/another-match-test-goal-1.xml"));
     Map<ILifecycleMappingRequirement, List<IMavenDiscoveryProposal>> proposals = srv.discover(
@@ -284,7 +284,7 @@ public class LifecycleMappingDiscoveryTest extends AbstractLifecycleMappingTest 
     request.autoCompleteMapping();
     assertFalse(request.isMappingComplete());
 
-    List<ILifecycleMappingRequirement> elementKeys = new ArrayList<ILifecycleMappingRequirement>(proposals.keySet());
+    List<ILifecycleMappingRequirement> elementKeys = new ArrayList<>(proposals.keySet());
 
     MojoExecutionMappingRequirement goal1 = (MojoExecutionMappingRequirement) elementKeys.get(0);
 
@@ -304,7 +304,7 @@ public class LifecycleMappingDiscoveryTest extends AbstractLifecycleMappingTest 
 
     MavenDiscoveryService srv = new MavenDiscoveryService();
 
-    List<CatalogItem> items = new ArrayList<CatalogItem>();
+    List<CatalogItem> items = new ArrayList<>();
     items.add(newCatalogItem(srv, null, "projects/discovery/projectConfigurator.pluginxml"));
     ProjectConfiguratorMappingRequirement configurator = null;
     for(ILifecycleMappingRequirement req : request.getRequirements()) {
@@ -348,7 +348,7 @@ public class LifecycleMappingDiscoveryTest extends AbstractLifecycleMappingTest 
 
     MavenDiscoveryService srv = new MavenDiscoveryService();
 
-    List<CatalogItem> items = new ArrayList<CatalogItem>();
+    List<CatalogItem> items = new ArrayList<>();
     items.add(newCatalogItem(srv, null, "projects/discovery/lifecycleId.pluginxml"));
 
     Map<ILifecycleMappingRequirement, List<IMavenDiscoveryProposal>> proposals = srv.discover(

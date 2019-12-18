@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.eclipse.m2e.core.project.IMavenProjectChangedListener;
 import org.eclipse.m2e.core.project.MavenProjectChangedEvent;
 
@@ -26,8 +27,9 @@ public class TestMavenProjectChangedListener implements IMavenProjectChangedList
 
   public static volatile boolean record = false;
 
-  public final static List<MavenProjectChangedEvent> events = new ArrayList<MavenProjectChangedEvent>();
+  public final static List<MavenProjectChangedEvent> events = new ArrayList<>();
 
+  @Override
   public void mavenProjectChanged(MavenProjectChangedEvent[] events, IProgressMonitor monitor) {
     if(record) {
       TestMavenProjectChangedListener.events.addAll(Arrays.asList(events));

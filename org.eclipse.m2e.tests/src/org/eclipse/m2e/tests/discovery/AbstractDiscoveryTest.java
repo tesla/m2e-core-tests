@@ -12,13 +12,13 @@ import org.eclipse.equinox.internal.p2.discovery.DiscoveryCore;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.IShellProvider;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.internal.Workbench;
 
 import org.eclipse.m2e.core.project.configurator.MojoExecutionKey;
 import org.eclipse.m2e.internal.discovery.MavenDiscovery;
 import org.eclipse.m2e.internal.discovery.wizards.MavenCatalogConfiguration;
 import org.eclipse.m2e.internal.discovery.wizards.MavenCatalogViewer;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.internal.Workbench;
 
 
 public abstract class AbstractDiscoveryTest extends TestCase implements IShellProvider {
@@ -52,6 +52,7 @@ public abstract class AbstractDiscoveryTest extends TestCase implements IShellPr
     shell = new Shell(Workbench.getInstance().getDisplay());
   }
 
+  @Override
   public void tearDown() throws Exception {
     shell.dispose();
     shell = null;
@@ -67,12 +68,14 @@ public abstract class AbstractDiscoveryTest extends TestCase implements IShellPr
     public RunnableContext() {
     }
 
+    @Override
     public void run(boolean fork, boolean cancelable, IRunnableWithProgress runnable) throws InvocationTargetException,
         InterruptedException {
       runnable.run(new NullProgressMonitor());
     }
   }
 
+  @Override
   public Shell getShell() {
     return shell;
   }

@@ -22,6 +22,7 @@ import org.eclipse.jdt.launching.VMRunnerConfiguration;
 public class MockVMRunner implements IVMRunner {
   private VMRunnerConfiguration configuration;
 
+  @Override
   public void run(VMRunnerConfiguration configuration, ILaunch launch, IProgressMonitor monitor) {
     this.configuration = configuration;
   }

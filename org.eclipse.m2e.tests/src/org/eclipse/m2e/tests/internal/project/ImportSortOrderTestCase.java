@@ -39,6 +39,7 @@ import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 
 public class ImportSortOrderTestCase extends AbstractMavenProjectTestCase {
 
+  @Override
   protected IProject createProject(String projectName, String projectLocation) throws CoreException {
     IProject project = super.createProject(projectName, projectLocation);
     AbstractProjectConfigurator.addNature(project, IMavenConstants.NATURE_ID, monitor);
@@ -47,12 +48,12 @@ public class ImportSortOrderTestCase extends AbstractMavenProjectTestCase {
 
   private List<IMavenProjectFacade> createFacades() throws Exception {
 
-    List<IMavenProjectFacade> facades = new ArrayList<IMavenProjectFacade>();
+    List<IMavenProjectFacade> facades = new ArrayList<>();
 
     ProjectRegistryManager manager = new ProjectRegistryManager((MavenImpl) MavenPlugin.getMaven(), null, false,
         MavenPluginActivator.getDefault().getMavenMarkerManager());
 
-    List<IProject> projects = new ArrayList<IProject>();
+    List<IProject> projects = new ArrayList<>();
 
     projects.add(createProject("Pos", "projects/MNGECLIPSE-1028/pom.xml"));
     projects.add(createProject("PosServers", "projects/MNGECLIPSE-1028/PosServers/pom.xml"));
@@ -94,7 +95,7 @@ public class ImportSortOrderTestCase extends AbstractMavenProjectTestCase {
     List<IMavenProjectFacade> facades = createFacades();
     manager.sortProjects(facades, monitor);
 
-    Map<String, Integer> aMap = new HashMap<String, Integer>();
+    Map<String, Integer> aMap = new HashMap<>();
     for(int i = 0; i < facades.size(); i++ ) {
       aMap.put(facades.get(i).getArtifactKey().getArtifactId(), Integer.valueOf(i));
     }

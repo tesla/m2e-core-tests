@@ -22,6 +22,7 @@ public class MavenDiscoveryInstallOperationTest extends AbstractDiscoveryTest {
 
   private static final IProgressMonitor monitor = new NullProgressMonitor();
 
+  @Override
   public void setUp() throws Exception {
     super.setUp();
     httpServer = new HttpServer();
@@ -31,6 +32,7 @@ public class MavenDiscoveryInstallOperationTest extends AbstractDiscoveryTest {
     updateMavenCatalog();
   }
 
+  @Override
   public void tearDown() throws Exception {
     try {
       if(httpServer != null) {

@@ -28,10 +28,12 @@ import org.eclipse.m2e.core.project.conversion.AbstractProjectConversionParticip
  */
 public class TestProjectConversionParticipant extends AbstractProjectConversionParticipant {
 
+  @Override
   public boolean accept(IProject project) {
     return project != null && project.getName().endsWith("-needs-test-participant");
   }
 
+  @Override
   public void convert(IProject project, Model model, IProgressMonitor monitor) {
   }
 

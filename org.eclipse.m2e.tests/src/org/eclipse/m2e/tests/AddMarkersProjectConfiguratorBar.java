@@ -41,6 +41,7 @@ public class AddMarkersProjectConfiguratorBar extends AbstractProjectConfigurato
   public AbstractBuildParticipant getBuildParticipant(IMavenProjectFacade projectFacade, MojoExecution execution,
       IPluginExecutionMetadata executionMetadata) {
     return new AbstractBuildParticipant() {
+      @Override
       public Set<IProject> build(int kind, IProgressMonitor monitor) throws Exception {
         Exception error = doBuild(FILE_NAME);
         Exception error1 = doBuild(FILE_NAME1);

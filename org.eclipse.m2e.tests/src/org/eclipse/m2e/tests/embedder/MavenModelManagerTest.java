@@ -62,6 +62,7 @@ public class MavenModelManagerTest extends AbstractMavenProjectTestCase {
 
   private PomResourceImpl resource = null;
 
+  @Override
   @Before
   public void setUp() throws Exception {
     super.setUp();
@@ -78,6 +79,7 @@ public class MavenModelManagerTest extends AbstractMavenProjectTestCase {
     }
   }
 
+  @Override
   @After
   public void tearDown() throws Exception {
     try {
@@ -117,11 +119,8 @@ public class MavenModelManagerTest extends AbstractMavenProjectTestCase {
 
     StringWriter sw = new StringWriter();
 
-    InputStream is = pomFile.getContents();
-    try {
+    try (InputStream is = pomFile.getContents()) {
       IOUtil.copy(is, sw, "UTF-8");
-    } finally {
-      is.close();
     }
 
     assertEquals("<project xmlns=\"http://maven.apache.org/POM/4.0.0\" " //

@@ -79,11 +79,8 @@ public class MavenBuilderTest extends AbstractMavenProjectTestCase {
 
   private Properties loadProperties(IPath aPath) throws CoreException, IOException {
     Properties properties = new Properties();
-    InputStream contents = workspace.getRoot().getFile(aPath).getContents();
-    try {
+    try (InputStream contents = workspace.getRoot().getFile(aPath).getContents()) {
       properties.load(contents);
-    } finally {
-      contents.close();
     }
     return properties;
   }

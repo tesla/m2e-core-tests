@@ -27,10 +27,12 @@ import org.eclipse.m2e.jdt.AbstractClassifierClasspathProvider;
 
 public class TestFancyClassifierClasspathProvider extends AbstractClassifierClasspathProvider {
 
+  @Override
   public boolean applies(IMavenProjectFacade mavenProjectFacade, String classifier) {
     return getClassifier().endsWith(classifier);
   }
 
+  @Override
   public String getClassifier() {
     return "fancy";
   }
@@ -39,7 +41,7 @@ public class TestFancyClassifierClasspathProvider extends AbstractClassifierClas
   @Override
   public void setRuntimeClasspath(Set<IRuntimeClasspathEntry> runtimeClasspath, IMavenProjectFacade mavenProjectFacade,
       IProgressMonitor monitor) {
-    Set<IPath> folders = new LinkedHashSet<IPath>();
+    Set<IPath> folders = new LinkedHashSet<>();
     folders.add(new Path("src/main/java"));
     folders.add(new Path("src/main/resources"));
     addFolders(runtimeClasspath, mavenProjectFacade.getProject(), folders);
@@ -49,7 +51,7 @@ public class TestFancyClassifierClasspathProvider extends AbstractClassifierClas
   @Override
   public void setTestClasspath(Set<IRuntimeClasspathEntry> testClasspath, IMavenProjectFacade mavenProjectFacade,
       IProgressMonitor monitor) {
-    Set<IPath> folders = new LinkedHashSet<IPath>();
+    Set<IPath> folders = new LinkedHashSet<>();
     folders.add(new Path("src/test/java"));
     folders.add(new Path("src/test/resources"));
     addFolders(testClasspath, mavenProjectFacade.getProject(), folders);

@@ -84,6 +84,7 @@ public class MavenDiscoveryTest extends TestCase implements IShellProvider {
     shell = new Shell(Workbench.getInstance().getDisplay());
   }
 
+  @Override
   public void tearDown() throws Exception {
     try {
       shell.dispose();
@@ -194,12 +195,14 @@ public class MavenDiscoveryTest extends TestCase implements IShellProvider {
     public RunnableContext() {
     }
 
+    @Override
     public void run(boolean fork, boolean cancelable, IRunnableWithProgress runnable) throws InvocationTargetException,
         InterruptedException {
       runnable.run(new NullProgressMonitor());
     }
   }
 
+  @Override
   public Shell getShell() {
     return shell;
   }
@@ -271,7 +274,7 @@ public class MavenDiscoveryTest extends TestCase implements IShellProvider {
     item.setName("name");
     item.setId("id");
 
-    List<String> configurators = new ArrayList<String>();
+    List<String> configurators = new ArrayList<>();
     MavenDiscovery.getProvidedProjectConfigurators(item, configurators, new ArrayList<String>());
 
     assertEquals(1, configurators.size());

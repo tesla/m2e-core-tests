@@ -57,6 +57,7 @@ import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 @RunWith(MavenRunner.class)
 public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
 
+  @Override
   @Before
   public void setUp() throws Exception {
     super.setUp();
@@ -145,7 +146,7 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
   }
 
   IRuntimeClasspathEntry[] getUserClasspathEntries(IRuntimeClasspathEntry[] entries) {
-    ArrayList<IRuntimeClasspathEntry> result = new ArrayList<IRuntimeClasspathEntry>();
+    ArrayList<IRuntimeClasspathEntry> result = new ArrayList<>();
     for(IRuntimeClasspathEntry entry : entries) {
       if(IRuntimeClasspathEntry.USER_CLASSES == entry.getClasspathProperty()) {
         result.add(entry);
@@ -291,12 +292,10 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     IProject project = createExisting("runtimeclasspath-systemscope", "projects/runtimeclasspath/systemscope");
 
     MavenXpp3Reader reader = new MavenXpp3Reader();
-    InputStream is = project.getFile("pom-orig.xml").getContents();
+
     Model model;
-    try {
+    try (InputStream is = project.getFile("pom-orig.xml").getContents()) {
       model = reader.read(is);
-    } finally {
-      is.close();
     }
 
     Dependency d = model.getDependencies().get(0);

@@ -34,12 +34,15 @@ public class MNGECLIPSE2313MarkAllRawClasspathEntriesConfigurator extends Abstra
   public MNGECLIPSE2313MarkAllRawClasspathEntriesConfigurator() {
   }
 
+  @Override
   public void configure(ProjectConfigurationRequest request, IProgressMonitor monitor) {
   }
 
+  @Override
   public void configureClasspath(IMavenProjectFacade facade, IClasspathDescriptor classpath, IProgressMonitor monitor) {
   }
 
+  @Override
   public void configureRawClasspath(ProjectConfigurationRequest request, IClasspathDescriptor classpath,
       IProgressMonitor monitor) {
 

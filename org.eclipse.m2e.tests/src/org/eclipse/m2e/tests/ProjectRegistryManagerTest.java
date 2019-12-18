@@ -95,16 +95,18 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
   @Rule
   public TestName name = new TestName();
 
+  @Override
   @Before
   public void setUp() throws Exception {
     super.setUp();
 
     manager = MavenPluginActivator.getDefault().getMavenProjectManagerImpl();
 
-    events = new ArrayList<MavenProjectChangedEvent>();
+    events = new ArrayList<>();
     manager.addMavenProjectChangedListener(listener);
   }
 
+  @Override
   @After
   public void tearDown() throws Exception {
     try {
@@ -481,7 +483,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     copyContent(p2, "pom_newDependency.xml", "pom.xml");
 
     f1 = manager.create(p1, monitor);
-    List<Artifact> a1 = new ArrayList<Artifact>(f1.getMavenProject(monitor).getArtifacts());
+    List<Artifact> a1 = new ArrayList<>(f1.getMavenProject(monitor).getArtifacts());
     assertEquals(2, a1.size());
     assertEquals("t007-p2", a1.get(0).getArtifactId());
     assertEquals("junit", a1.get(1).getArtifactId());
@@ -497,21 +499,21 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     waitForJobsToComplete();
 
     IMavenProjectFacade f1 = manager.create(p1, monitor);
-    List<Artifact> a1 = new ArrayList<Artifact>(f1.getMavenProject(monitor).getArtifacts());
+    List<Artifact> a1 = new ArrayList<>(f1.getMavenProject(monitor).getArtifacts());
     assertEquals(1, f1.getMavenProject(monitor).getArtifacts().size());
     assertEquals(p2.getFile(IMavenConstants.POM_FILE_NAME).getLocation().toFile(), a1.get(0).getFile());
 
     // update p2 to have new version
     copyContent(p2, "pom_newVersion.xml", "pom.xml");
     f1 = manager.create(p1, monitor);
-    a1 = new ArrayList<Artifact>(f1.getMavenProject(monitor).getArtifacts());
+    a1 = new ArrayList<>(f1.getMavenProject(monitor).getArtifacts());
     assertEquals(1, f1.getMavenProject(monitor).getArtifacts().size());
     assertStartWith(repo.getAbsolutePath(), a1.get(0).getFile().getAbsolutePath());
 
     // update p2 back to the original version
     copyContent(p2, "pom_original.xml", "pom.xml");
     f1 = manager.create(p1, monitor);
-    a1 = new ArrayList<Artifact>(f1.getMavenProject(monitor).getArtifacts());
+    a1 = new ArrayList<>(f1.getMavenProject(monitor).getArtifacts());
     assertEquals(1, f1.getMavenProject(monitor).getArtifacts().size());
     assertEquals(p2.getFile(IMavenConstants.POM_FILE_NAME).getLocation().toFile(), a1.get(0).getFile());
   }
@@ -529,7 +531,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     try {
       // sanity check
       MavenProjectFacade f1 = manager.create(p1, monitor);
-      List<Artifact> a1 = new ArrayList<Artifact>(f1.getMavenProject(monitor).getArtifacts());
+      List<Artifact> a1 = new ArrayList<>(f1.getMavenProject(monitor).getArtifacts());
       assertEquals(1, a1.size());
       assertEquals("t007-p2", a1.get(0).getArtifactId());
 
@@ -543,7 +545,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
 
       // assert p1 got refreshed
       f1 = manager.create(p1, monitor);
-      a1 = new ArrayList<Artifact>(f1.getMavenProject(monitor).getArtifacts());
+      a1 = new ArrayList<>(f1.getMavenProject(monitor).getArtifacts());
       assertEquals(2, a1.size());
       assertEquals("t007-p2", a1.get(0).getArtifactId());
       assertEquals("junit", a1.get(1).getArtifactId());
@@ -589,9 +591,9 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     waitForJobsToComplete();
 
     // update p1 to have p3 parent
-    InputStream contents = p1.getFile("pom_updated.xml").getContents();
-    p1.getFile("pom.xml").setContents(contents, IResource.FORCE, monitor);
-    contents.close();
+    try (InputStream contents = p1.getFile("pom_updated.xml").getContents()) {
+      p1.getFile("pom.xml").setContents(contents, IResource.FORCE, monitor);
+    }
     waitForJobsToComplete();
 
     events.clear();
@@ -758,7 +760,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
 
     {
       IMavenProjectFacade f1 = manager.create(p1, monitor);
-      List<Artifact> a1 = new ArrayList<Artifact>(getMavenProjectArtifacts(f1));
+      List<Artifact> a1 = new ArrayList<>(getMavenProjectArtifacts(f1));
       assertEquals(false, a1.get(0).isResolved());
     }
 
@@ -769,7 +771,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
 
     {
       IMavenProjectFacade f1 = manager.create(p1, monitor);
-      List<Artifact> a1 = new ArrayList<Artifact>(getMavenProjectArtifacts(f1));
+      List<Artifact> a1 = new ArrayList<>(getMavenProjectArtifacts(f1));
       assertEquals(true, a1.get(0).isResolved());
     }
   }
@@ -914,7 +916,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     waitForJobsToComplete();
 
     IMavenProjectFacade f1 = manager.create(projects[0], monitor);
-    ArrayList<ArtifactRef> a1 = new ArrayList<ArtifactRef>(f1.getMavenProjectArtifacts());
+    ArrayList<ArtifactRef> a1 = new ArrayList<>(f1.getMavenProjectArtifacts());
     assertEquals(2, a1.size());
     assertEquals("p002", a1.get(0).getArtifactId());
   }
@@ -927,7 +929,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
 
     IMavenProjectFacade f1 = manager.create(projects[0], monitor);
     MavenProject p1 = f1.getMavenProject(monitor);
-    ArrayList<Artifact> a1 = new ArrayList<Artifact>(p1.getArtifacts());
+    ArrayList<Artifact> a1 = new ArrayList<>(p1.getArtifacts());
     assertEquals(1, a1.size());
 
     assertEquals(projects[1].getLocation().append("target/classes").toFile(), a1.get(0).getFile());
@@ -940,6 +942,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     try {
       injectFilexWagon();
       IJobChangeListener jobChangeListener = new JobChangeAdapter() {
+        @Override
         public void scheduled(IJobChangeEvent event) {
           if(event.getJob() instanceof ProjectRegistryRefreshJob) {
             // cancel all those concurrent refresh jobs, we want to monitor the main thread only
@@ -1019,7 +1022,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     waitForJobsToComplete();
 
     MavenProjectFacade f1 = manager.create(p1, monitor);
-    List<Artifact> a1 = new ArrayList<Artifact>(f1.getMavenProject(monitor).getArtifacts());
+    List<Artifact> a1 = new ArrayList<>(f1.getMavenProject(monitor).getArtifacts());
     assertEquals(1, a1.size());
     assertStartWith(repo.getAbsolutePath(), a1.get(0).getFile().getAbsolutePath());
 
@@ -1027,7 +1030,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     waitForJobsToComplete();
 
     f1 = manager.create(p1, monitor);
-    a1 = new ArrayList<Artifact>(f1.getMavenProject(monitor).getArtifacts());
+    a1 = new ArrayList<>(f1.getMavenProject(monitor).getArtifacts());
     assertEquals(1, a1.size());
     assertEquals(p2.getFile(IMavenConstants.POM_FILE_NAME).getLocation().toFile(), a1.get(0).getFile());
   }
@@ -1050,7 +1053,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
       waitForJobsToComplete();
 
       MavenProjectFacade f1 = manager.create(p1, monitor);
-      List<Artifact> a1 = new ArrayList<Artifact>(f1.getMavenProject(monitor).getArtifacts());
+      List<Artifact> a1 = new ArrayList<>(f1.getMavenProject(monitor).getArtifacts());
       assertEquals(1, a1.size());
       assertEquals("1.0-20110411.112213-72", a1.get(0).getVersion());
 
@@ -1060,7 +1063,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
 
       // assert dependency version did not change
       f1 = manager.create(p1, monitor);
-      a1 = new ArrayList<Artifact>(f1.getMavenProject(monitor).getArtifacts());
+      a1 = new ArrayList<>(f1.getMavenProject(monitor).getArtifacts());
       assertEquals(1, a1.size());
       assertEquals("1.0-20110411.112213-72", a1.get(0).getVersion());
 
@@ -1068,7 +1071,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
 
       manager.refresh(new MavenUpdateRequest(p1, false, false), monitor);
       f1 = manager.create(p1, monitor);
-      a1 = new ArrayList<Artifact>(f1.getMavenProject(monitor).getArtifacts());
+      a1 = new ArrayList<>(f1.getMavenProject(monitor).getArtifacts());
       assertEquals(1, a1.size());
       assertEquals("1.0-20110411.112327-73", a1.get(0).getVersion());
     } finally {
@@ -1091,12 +1094,12 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
         "p02/pom.xml"}, new ResolverConfiguration());
 
     MavenProjectFacade f1 = manager.create(projects[0], monitor);
-    List<Artifact> a1 = new ArrayList<Artifact>(f1.getMavenProject(monitor).getArtifacts());
+    List<Artifact> a1 = new ArrayList<>(f1.getMavenProject(monitor).getArtifacts());
     assertEquals(1, a1.size());
     assertFalse(a1.get(0).isResolved());
 
     MavenProjectFacade f2 = manager.create(projects[1], monitor);
-    List<Artifact> a2 = new ArrayList<Artifact>(f2.getMavenProject(monitor).getArtifacts());
+    List<Artifact> a2 = new ArrayList<>(f2.getMavenProject(monitor).getArtifacts());
     assertEquals(1, a2.size());
     assertFalse(a2.get(0).isResolved());
 
@@ -1110,12 +1113,12 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     // both projects should now have resolved the missing dependency
 
     f1 = manager.create(projects[0], monitor);
-    a1 = new ArrayList<Artifact>(f1.getMavenProject(monitor).getArtifacts());
+    a1 = new ArrayList<>(f1.getMavenProject(monitor).getArtifacts());
     assertEquals(1, a1.size());
     assertTrue(a1.get(0).isResolved());
 
     f2 = manager.create(projects[1], monitor);
-    a2 = new ArrayList<Artifact>(f2.getMavenProject(monitor).getArtifacts());
+    a2 = new ArrayList<>(f2.getMavenProject(monitor).getArtifacts());
     assertEquals(1, a2.size());
     assertTrue(a2.get(0).isResolved());
   }
@@ -1157,7 +1160,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     IProject p = importProject("projects/343568_missingAndAvailableDependencies/pom.xml");
     waitForJobsToComplete();
     MavenProjectFacade f = manager.create(p, monitor);
-    List<Artifact> a = new ArrayList<Artifact>(f.getMavenProject(monitor).getArtifacts());
+    List<Artifact> a = new ArrayList<>(f.getMavenProject(monitor).getArtifacts());
     assertEquals(1, a.size());
     assertTrue(a.get(0).isResolved());
     assertEquals("junit", a.get(0).getArtifactId());
@@ -1380,7 +1383,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertNoErrors(p2);
 
     IMavenProjectFacade f2 = manager.create(p2, monitor);
-    List<Artifact> a2 = new ArrayList<Artifact>(f2.getMavenProject(monitor).getArtifacts());
+    List<Artifact> a2 = new ArrayList<>(f2.getMavenProject(monitor).getArtifacts());
     assertEquals(1, a2.size());
     assertEquals("436929-p1", a2.get(0).getArtifactId());
     assertEquals("1.0", a2.get(0).getVersion());

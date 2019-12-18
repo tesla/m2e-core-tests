@@ -45,12 +45,14 @@ public class MavenImportWizardPageTest extends AbstractMavenProjectTestCase {
 
   private MavenImportWizardPage page;
 
+  @Override
   @Before
   public void setUp() throws Exception {
     super.setUp();
 
     Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
     wizard = new Wizard() {
+      @Override
       public boolean performFinish() {
         return false;
       }
@@ -63,6 +65,7 @@ public class MavenImportWizardPageTest extends AbstractMavenProjectTestCase {
     dialog.setBlockOnOpen(false);
   }
 
+  @Override
   @After
   public void tearDown() throws Exception {
     dialog.close();

@@ -231,6 +231,7 @@ public class ProjectConfigurationElementSorterTest extends TestCase {
       return mock;
     }
 
+    @Override
     public String getAttribute(String attrName) {
       switch(attrName) {
         case "runsAfter":
@@ -244,6 +245,7 @@ public class ProjectConfigurationElementSorterTest extends TestCase {
       }
     }
 
+    @Override
     public String toString() {
       return id;
     }

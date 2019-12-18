@@ -38,17 +38,20 @@ public class IndexSearchEngineTest extends AbstractMavenProjectTestCase {
     public TestIndex() {
     }
 
+    @Override
     public IndexedArtifactFile getIndexedArtifactFile(ArtifactKey artifact) {
       return null;
     }
 
+    @Override
     public IndexedArtifactFile identify(File file) {
       return null;
     }
 
+    @Override
     public Collection<IndexedArtifact> find(SearchExpression groupId, SearchExpression artifactId,
         SearchExpression version, SearchExpression packaging) {
-      Set<IndexedArtifact> results = new HashSet<IndexedArtifact>();
+      Set<IndexedArtifact> results = new HashSet<>();
       for(String entry : entries) {
         if(entry.startsWith(groupId.getStringValue())) {
           IndexedArtifact artifact = new IndexedArtifact(entry, null, null, null, null);
@@ -58,14 +61,17 @@ public class IndexSearchEngineTest extends AbstractMavenProjectTestCase {
       return results;
     }
 
+    @Override
     public Map<String, IndexedArtifact> search(SearchExpression expression, String searchType) {
       return null;
     }
 
+    @Override
     public Map<String, IndexedArtifact> search(SearchExpression expression, String searchType, int classifier) {
       return null;
     }
 
+    @Override
     public Collection<IndexedArtifact> find(Collection<SearchExpression> groupId,
         Collection<SearchExpression> artifactId, Collection<SearchExpression> version,
         Collection<SearchExpression> packaging) {

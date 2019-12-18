@@ -30,6 +30,7 @@ public class DeleteFooBarAttributesConfigurator extends AbstractProjectConfigura
 
   public static String ATTR_ID = "foobar";
 
+  @Override
   public void configureRawClasspath(ProjectConfigurationRequest request, IClasspathDescriptor classpath,
       IProgressMonitor monitor) {
 
@@ -39,9 +40,11 @@ public class DeleteFooBarAttributesConfigurator extends AbstractProjectConfigura
 
   }
 
+  @Override
   public void configureClasspath(IMavenProjectFacade facade, IClasspathDescriptor classpath, IProgressMonitor monitor) {
   }
 
+  @Override
   public void configure(ProjectConfigurationRequest request, IProgressMonitor monitor) {
   }
 

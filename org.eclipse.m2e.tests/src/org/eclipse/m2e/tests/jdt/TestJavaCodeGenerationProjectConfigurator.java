@@ -31,9 +31,11 @@ import org.eclipse.m2e.jdt.AbstractSourcesGenerationProjectConfigurator;
 
 public class TestJavaCodeGenerationProjectConfigurator extends AbstractSourcesGenerationProjectConfigurator {
 
+  @Override
   public AbstractBuildParticipant getBuildParticipant(IMavenProjectFacade projectFacade, MojoExecution execution,
       IPluginExecutionMetadata executionMetadata) {
     return new AbstractBuildParticipant() {
+      @Override
       public Set<IProject> build(int kind, IProgressMonitor monitor) throws Exception {
         MavenProject mavenProject = getMavenProjectFacade().getMavenProject(monitor);
 

@@ -20,6 +20,8 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.util.Arrays;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import org.eclipse.core.resources.IProject;
@@ -36,12 +38,16 @@ public class ConfigurationUpdateStartupTest extends AbstractLifecycleMappingTest
 
   private static final String BASE_DIR = "projects/updateConfigurationStartupTest/";
 
+  @Override
+  @Before
   public void setUp() throws Exception {
     super.setUp();
     UpdateConfigurationStartup.enableStartup();
     UpdateConfigurationStartup.clearSavedProjects();
   }
 
+  @Override
+  @After
   public void tearDown() throws Exception {
     super.tearDown();
     UpdateConfigurationStartup.clearSavedProjects();

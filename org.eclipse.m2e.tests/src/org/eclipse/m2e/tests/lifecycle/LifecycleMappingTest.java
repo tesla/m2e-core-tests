@@ -171,19 +171,19 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     // Assert mojo/plugin executions
     List<PluginExecutionMetadata> pluginExecutions = source.getPluginExecutions();
     assertEquals(3, pluginExecutions.size());
-    Set<String> goals = new LinkedHashSet<String>();
+    Set<String> goals = new LinkedHashSet<>();
 
     goals.add("compile");
     goals.add("testCompile");
     assertPluginExecutionMetadata("org.apache.maven.plugins", "maven-compiler-plugin", "[2.0,)", goals,
         PluginExecutionAction.configurator, "org.eclipse.m2e.jdt.javaConfigurator", pluginExecutions.get(0));
 
-    goals = new LinkedHashSet<String>();
+    goals = new LinkedHashSet<>();
     goals.add("jar");
     assertPluginExecutionMetadata("org.apache.maven.plugins", "maven-jar-plugin", "[2.0,)", goals,
         PluginExecutionAction.ignore, null, pluginExecutions.get(1));
 
-    goals = new LinkedHashSet<String>();
+    goals = new LinkedHashSet<>();
     goals.add("resources");
     assertPluginExecutionMetadata("org.apache.maven.plugins", "maven-resources-plugin", "[2.0,)", goals,
         PluginExecutionAction.execute, null, pluginExecutions.get(2));
@@ -221,14 +221,14 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
 
     List<PluginExecutionMetadata> pluginExecutions = source1.getPluginExecutions();
     assertEquals(2, pluginExecutions.size());
-    Set<String> goals = new LinkedHashSet<String>();
+    Set<String> goals = new LinkedHashSet<>();
 
     goals.add("compile");
     goals.add("testCompile");
     assertPluginExecutionMetadata("org.apache.maven.plugins", "maven-compiler-plugin", "[3.0,)", goals,
         PluginExecutionAction.configurator, "org.eclipse.m2e.jdt.javaConfigurator", pluginExecutions.get(0));
 
-    goals = new LinkedHashSet<String>();
+    goals = new LinkedHashSet<>();
     goals.add("jar");
     assertPluginExecutionMetadata("org.apache.maven.plugins", "maven-jar-plugin", "[3.0,)", goals,
         PluginExecutionAction.ignore, null, pluginExecutions.get(1));
@@ -634,7 +634,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
         "pom.xml");
     assertNotNull("Expected not null MavenProjectFacade", facade);
 
-    List<Map.Entry<MojoExecutionKey, List<IPluginExecutionMetadata>>> executionMapping = new ArrayList<Map.Entry<MojoExecutionKey, List<IPluginExecutionMetadata>>>(
+    List<Map.Entry<MojoExecutionKey, List<IPluginExecutionMetadata>>> executionMapping = new ArrayList<>(
         facade.getMojoExecutionMapping().entrySet());
     assertEquals(4, executionMapping.size());
     assertEquals(0, executionMapping.get(0).getValue().size()); // maven-clean-plugin

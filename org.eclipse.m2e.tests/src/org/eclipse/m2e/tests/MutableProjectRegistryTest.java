@@ -239,7 +239,7 @@ public class MutableProjectRegistryTest extends AbstractMavenProjectTestCase {
     IProject project = createExisting("dummy", "resources/dummy");
     IFile pom = project.getFile("p1.xml");
     delta.setProject(pom, newProjectFacade(pom));
-    Set<Capability> capabilities = new HashSet<Capability>();
+    Set<Capability> capabilities = new HashSet<>();
     capabilities.add(new TestCapability("test", "test", "1"));
     delta.setCapabilities(pom, capabilities);
     state.apply(delta);
