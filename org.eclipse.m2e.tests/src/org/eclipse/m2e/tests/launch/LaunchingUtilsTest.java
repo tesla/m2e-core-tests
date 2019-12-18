@@ -25,7 +25,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.m2e.internal.launch.LaunchingUtils;
@@ -61,17 +60,15 @@ public class LaunchingUtilsTest extends AbstractMavenProjectTestCase {
   protected void moveExistingProjectLocation(IProject project, File projectTargetFolder)
       throws CoreException, IOException {
     copyDir(project.getLocation().toFile(), projectTargetFolder);
-    workspace.run(new IWorkspaceRunnable() {
-      public void run(IProgressMonitor monitor) throws CoreException {
-        // delete old project
-        project.delete(true, monitor);
-        // create new project with same name but in a different location
-        IProjectDescription projectDescription = workspace.newProjectDescription(project.getName());
-        IPath location = Path.fromOSString(projectTargetFolder.getAbsolutePath());
-        projectDescription.setLocation(location);
-        project.create(projectDescription, monitor);
-        project.open(IResource.NONE, monitor);
-      }
+    workspace.run((IWorkspaceRunnable) monitor -> {
+      // delete old project
+      project.delete(true, monitor);
+      // create new project with same name but in a different location
+      IProjectDescription projectDescription = workspace.newProjectDescription(project.getName());
+      IPath location = Path.fromOSString(projectTargetFolder.getAbsolutePath());
+      projectDescription.setLocation(location);
+      project.create(projectDescription, monitor);
+      project.open(IResource.NONE, monitor);
     }, null);
   }
 }

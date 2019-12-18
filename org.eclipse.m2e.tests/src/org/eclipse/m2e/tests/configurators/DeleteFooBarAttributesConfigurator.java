@@ -13,7 +13,6 @@
 
 package org.eclipse.m2e.tests.configurators;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
@@ -40,11 +39,10 @@ public class DeleteFooBarAttributesConfigurator extends AbstractProjectConfigura
 
   }
 
-  public void configureClasspath(IMavenProjectFacade facade, IClasspathDescriptor classpath, IProgressMonitor monitor)
-      throws CoreException {
+  public void configureClasspath(IMavenProjectFacade facade, IClasspathDescriptor classpath, IProgressMonitor monitor) {
   }
 
-  public void configure(ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException {
+  public void configure(ProjectConfigurationRequest request, IProgressMonitor monitor) {
   }
 
 }

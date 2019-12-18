@@ -20,7 +20,6 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.ILaunch;
@@ -43,319 +42,167 @@ public class MockLaunchConfiguration implements ILaunchConfiguration {
     this.attributes = attributes;
   }
 
-  public Object getAdapter(Class adapter) {
-    // TODO Auto-generated method getAdapter
+  public <T> T getAdapter(Class<T> adapter) {
     return null;
   }
 
-  /* (non-Javadoc)
-   * @see org.eclipse.debug.core.ILaunchConfiguration#contentsEqual(org.eclipse.debug.core.ILaunchConfiguration)
-   */
   public boolean contentsEqual(ILaunchConfiguration configuration) {
-    // TODO Auto-generated method contentsEqual
     return false;
   }
 
-  /* (non-Javadoc)
-   * @see org.eclipse.debug.core.ILaunchConfiguration#copy(java.lang.String)
-   */
-  public ILaunchConfigurationWorkingCopy copy(String name) throws CoreException {
-    // TODO Auto-generated method copy
+  public ILaunchConfigurationWorkingCopy copy(String name) {
     return null;
   }
 
-  /* (non-Javadoc)
-   * @see org.eclipse.debug.core.ILaunchConfiguration#delete()
-   */
-  public void delete() throws CoreException {
-    // TODO Auto-generated method delete
-
+  public void delete() {
   }
 
-  /* (non-Javadoc)
-   * @see org.eclipse.debug.core.ILaunchConfiguration#exists()
-   */
   public boolean exists() {
-    // TODO Auto-generated method exists
     return false;
   }
 
-  /* (non-Javadoc)
-   * @see org.eclipse.debug.core.ILaunchConfiguration#getAttribute(java.lang.String, boolean)
-   */
-  public boolean getAttribute(String attributeName, boolean defaultValue) throws CoreException {
+  public boolean getAttribute(String attributeName, boolean defaultValue) {
     Boolean attr = (Boolean) attributes.get(attributeName);
     return attr == null ? defaultValue : attr;
   }
 
-  /* (non-Javadoc)
-   * @see org.eclipse.debug.core.ILaunchConfiguration#getAttribute(java.lang.String, int)
-   */
-  public int getAttribute(String attributeName, int defaultValue) throws CoreException {
+  public int getAttribute(String attributeName, int defaultValue) {
     Integer attr = (Integer) attributes.get(attributeName);
     return attr == null ? defaultValue : attr;
   }
 
-  /* (non-Javadoc)
-   * @see org.eclipse.debug.core.ILaunchConfiguration#getAttribute(java.lang.String, java.util.List)
-   */
-  public List<String> getAttribute(String attributeName, List<String> defaultValue) throws CoreException {
+  public List<String> getAttribute(String attributeName, List<String> defaultValue) {
     List<String> attr = (List<String>) attributes.get(attributeName);
     return attr == null ? defaultValue : attr;
   }
 
-  /* (non-Javadoc)
-   * @see org.eclipse.debug.core.ILaunchConfiguration#getAttribute(java.lang.String, java.util.Set)
-   */
-  public Set<String> getAttribute(String attributeName, Set<String> defaultValue) throws CoreException {
+  public Set<String> getAttribute(String attributeName, Set<String> defaultValue) {
     Set<String> attr = (Set<String>) attributes.get(attributeName);
     return attr == null ? defaultValue : attr;
   }
 
-  /* (non-Javadoc)
-   * @see org.eclipse.debug.core.ILaunchConfiguration#getAttribute(java.lang.String, java.util.Map)
-   */
-  public Map<String, String> getAttribute(String attributeName, Map<String, String> defaultValue) throws CoreException {
+  public Map<String, String> getAttribute(String attributeName, Map<String, String> defaultValue) {
     Map<String, String> attr = (Map<String, String>) attributes.get(attributeName);
     return attr == null ? defaultValue : attr;
   }
 
-  /* (non-Javadoc)
-   * @see org.eclipse.debug.core.ILaunchConfiguration#getAttribute(java.lang.String, java.lang.String)
-   */
-  public String getAttribute(String attributeName, String defaultValue) throws CoreException {
+  public String getAttribute(String attributeName, String defaultValue) {
     Object attr = attributes.get(attributeName);
     return attr == null ? defaultValue : attr.toString();
   }
 
-  /* (non-Javadoc)
-   * @see org.eclipse.debug.core.ILaunchConfiguration#getAttributes()
-   */
-  public Map<String, Object> getAttributes() throws CoreException {
+  public Map<String, Object> getAttributes() {
     return (Map<String, Object>) attributes;
   }
 
-  /* (non-Javadoc)
-   * @see org.eclipse.debug.core.ILaunchConfiguration#getCategory()
-   */
-  public String getCategory() throws CoreException {
-    // TODO Auto-generated method getCategory
+  public String getCategory() {
     return null;
   }
 
-  /* (non-Javadoc)
-   * @see org.eclipse.debug.core.ILaunchConfiguration#getFile()
-   */
   public IFile getFile() {
-    // TODO Auto-generated method getFile
     return null;
   }
 
-  /* (non-Javadoc)
-   * @see org.eclipse.debug.core.ILaunchConfiguration#getLocation()
-   */
+  @Deprecated
   public IPath getLocation() {
-    // TODO Auto-generated method getLocation
     return null;
   }
 
-  /* (non-Javadoc)
-   * @see org.eclipse.debug.core.ILaunchConfiguration#getMappedResources()
-   */
-  public IResource[] getMappedResources() throws CoreException {
-    // TODO Auto-generated method getMappedResources
+  public IResource[] getMappedResources() {
     return null;
   }
 
-  /* (non-Javadoc)
-   * @see org.eclipse.debug.core.ILaunchConfiguration#getMemento()
-   */
-  public String getMemento() throws CoreException {
-    // TODO Auto-generated method getMemento
+  public String getMemento() {
     return null;
   }
 
-  /* (non-Javadoc)
-   * @see org.eclipse.debug.core.ILaunchConfiguration#getName()
-   */
   public String getName() {
-    // TODO Auto-generated method getName
     return null;
   }
 
-  /* (non-Javadoc)
-   * @see org.eclipse.debug.core.ILaunchConfiguration#getModes()
-   */
-  public Set<String> getModes() throws CoreException {
-    // TODO Auto-generated method getModes
+  public Set<String> getModes() {
     return null;
   }
 
-  /* (non-Javadoc)
-   * @see org.eclipse.debug.core.ILaunchConfiguration#getPreferredDelegate(java.util.Set)
-   */
-  public ILaunchDelegate getPreferredDelegate(Set<String> modes) throws CoreException {
-    // TODO Auto-generated method getPreferredDelegate
+  public ILaunchDelegate getPreferredDelegate(Set<String> modes) {
     return null;
   }
 
-  /* (non-Javadoc)
-   * @see org.eclipse.debug.core.ILaunchConfiguration#getType()
-   */
-  public ILaunchConfigurationType getType() throws CoreException {
-    // TODO Auto-generated method getType
+  public ILaunchConfigurationType getType() {
     return null;
   }
 
-  /* (non-Javadoc)
-   * @see org.eclipse.debug.core.ILaunchConfiguration#getWorkingCopy()
-   */
-  public ILaunchConfigurationWorkingCopy getWorkingCopy() throws CoreException {
-    // TODO Auto-generated method getWorkingCopy
+  public ILaunchConfigurationWorkingCopy getWorkingCopy() {
     return null;
   }
 
-  /* (non-Javadoc)
-   * @see org.eclipse.debug.core.ILaunchConfiguration#hasAttribute(java.lang.String)
-   */
-  public boolean hasAttribute(String attributeName) throws CoreException {
+  public boolean hasAttribute(String attributeName) {
     return attributes.containsKey(attributeName);
   }
 
-  /* (non-Javadoc)
-   * @see org.eclipse.debug.core.ILaunchConfiguration#isLocal()
-   */
   public boolean isLocal() {
-    // TODO Auto-generated method isLocal
     return false;
   }
 
-  /* (non-Javadoc)
-   * @see org.eclipse.debug.core.ILaunchConfiguration#isMigrationCandidate()
-   */
-  public boolean isMigrationCandidate() throws CoreException {
-    // TODO Auto-generated method isMigrationCandidate
+  public boolean isMigrationCandidate() {
     return false;
   }
 
-  /* (non-Javadoc)
-   * @see org.eclipse.debug.core.ILaunchConfiguration#isWorkingCopy()
-   */
   public boolean isWorkingCopy() {
-    // TODO Auto-generated method isWorkingCopy
     return false;
   }
 
-  /* (non-Javadoc)
-   * @see org.eclipse.debug.core.ILaunchConfiguration#launch(java.lang.String, org.eclipse.core.runtime.IProgressMonitor)
-   */
-  public ILaunch launch(String mode, IProgressMonitor monitor) throws CoreException {
-    // TODO Auto-generated method launch
+  public ILaunch launch(String mode, IProgressMonitor monitor) {
     return null;
   }
 
-  /* (non-Javadoc)
-   * @see org.eclipse.debug.core.ILaunchConfiguration#launch(java.lang.String, org.eclipse.core.runtime.IProgressMonitor, boolean)
-   */
-  public ILaunch launch(String mode, IProgressMonitor monitor, boolean build) throws CoreException {
-    // TODO Auto-generated method launch
+  public ILaunch launch(String mode, IProgressMonitor monitor, boolean build) {
     return null;
   }
 
-  /* (non-Javadoc)
-   * @see org.eclipse.debug.core.ILaunchConfiguration#launch(java.lang.String, org.eclipse.core.runtime.IProgressMonitor, boolean, boolean)
-   */
-  public ILaunch launch(String mode, IProgressMonitor monitor, boolean build, boolean register) throws CoreException {
-    // TODO Auto-generated method launch
+  public ILaunch launch(String mode, IProgressMonitor monitor, boolean build, boolean register) {
     return null;
   }
 
-  /* (non-Javadoc)
-   * @see org.eclipse.debug.core.ILaunchConfiguration#migrate()
-   */
-  public void migrate() throws CoreException {
-    // TODO Auto-generated method migrate
-
+  public void migrate() {
   }
 
-  /* (non-Javadoc)
-   * @see org.eclipse.debug.core.ILaunchConfiguration#supportsMode(java.lang.String)
-   */
-  public boolean supportsMode(String mode) throws CoreException {
-    // TODO Auto-generated method supportsMode
+  public boolean supportsMode(String mode) {
     return false;
   }
 
-  /* (non-Javadoc)
-   * @see org.eclipse.debug.core.ILaunchConfiguration#isReadOnly()
-   */
   public boolean isReadOnly() {
-    // TODO Auto-generated method isReadOnly
     return false;
   }
 
-  /* (non-Javadoc)
-   * @see org.eclipse.debug.core.ILaunchConfiguration#delete(int)
-   */
-  public void delete(int flag) throws CoreException {
-    // TODO Auto-generated method delete
-
+  public void delete(int flag) {
   }
 
-  /* (non-Javadoc)
-   * @see org.eclipse.debug.core.ILaunchConfiguration#getPrototype()
-   */
-  public ILaunchConfiguration getPrototype() throws CoreException {
-    // TODO Auto-generated method getPrototype
+  public ILaunchConfiguration getPrototype() {
     return null;
   }
 
-  /* (non-Javadoc)
-   * @see org.eclipse.debug.core.ILaunchConfiguration#isAttributeModified(java.lang.String)
-   */
-  public boolean isAttributeModified(String attribute) throws CoreException {
-    // TODO Auto-generated method isAttributeModified
+  public boolean isAttributeModified(String attribute) {
     return false;
   }
 
-  /* (non-Javadoc)
-   * @see org.eclipse.debug.core.ILaunchConfiguration#isPrototype()
-   */
   public boolean isPrototype() {
-    // TODO Auto-generated method isPrototype
     return false;
   }
 
-  /* (non-Javadoc)
-   * @see org.eclipse.debug.core.ILaunchConfiguration#getPrototypeChildren()
-   */
-  public Collection<ILaunchConfiguration> getPrototypeChildren() throws CoreException {
-    // TODO Auto-generated method getPrototypeChildren
+  public Collection<ILaunchConfiguration> getPrototypeChildren() {
     return null;
   }
 
-  /* (non-Javadoc)
-   * @see org.eclipse.debug.core.ILaunchConfiguration#getKind()
-   */
-  public int getKind() throws CoreException {
-    // TODO Auto-generated method getKind
+  public int getKind() {
     return 0;
   }
 
-  /* (non-Javadoc)
-   * @see org.eclipse.debug.core.ILaunchConfiguration#getPrototypeVisibleAttributes()
-   */
-  public Set<String> getPrototypeVisibleAttributes() throws CoreException {
-    // TODO Auto-generated method getPrototypeVisibleAttributes
+  public Set<String> getPrototypeVisibleAttributes() {
     return null;
   }
 
-  /* (non-Javadoc)
-   * @see org.eclipse.debug.core.ILaunchConfiguration#setPrototypeAttributeVisibility(java.lang.String, boolean)
-   */
-  public void setPrototypeAttributeVisibility(String attribute, boolean visible) throws CoreException {
-    // TODO Auto-generated method setPrototypeAttributeVisibility
-
+  public void setPrototypeAttributeVisibility(String attribute, boolean visible) {
   }
 
 }

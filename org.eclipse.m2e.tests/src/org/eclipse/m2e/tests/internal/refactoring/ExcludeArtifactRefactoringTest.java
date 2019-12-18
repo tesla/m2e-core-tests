@@ -22,7 +22,6 @@ import java.util.List;
 import org.junit.After;
 import org.junit.Test;
 
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import org.eclipse.core.resources.IFile;
@@ -53,7 +52,6 @@ import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.ArtifactKey;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
-import org.eclipse.m2e.core.ui.internal.editing.PomEdits.Operation;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits.OperationTuple;
 import org.eclipse.m2e.core.ui.internal.util.ParentGatherer;
 import org.eclipse.m2e.core.ui.internal.util.ParentHierarchyEntry;
@@ -548,17 +546,15 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
       final ArtifactKey excluded) throws Exception {
     final boolean[] found = new boolean[1];
     found[0] = false;
-    performOnDOMDocument(new OperationTuple(editor.getDocument(), new Operation() {
-      public void process(Document document) {
-        Element dep = findChild(findChild(document.getDocumentElement(), DEPENDENCIES), DEPENDENCY,
-            childEquals(GROUP_ID, dependencyKey.getGroupId()), childEquals(ARTIFACT_ID, dependencyKey.getArtifactId()),
-            childEquals(VERSION, dependencyKey.getVersion()));
-        if(dep != null) {
-          Element exclusion = findChild(findChild(dep, EXCLUSIONS), EXCLUSION,
-              childEquals(GROUP_ID, excluded.getGroupId()), childEquals(ARTIFACT_ID, excluded.getArtifactId()));
-          found[0] = exclusion != null;
+    performOnDOMDocument(new OperationTuple(editor.getDocument(), document -> {
+      Element dep = findChild(findChild(document.getDocumentElement(), DEPENDENCIES), DEPENDENCY,
+          childEquals(GROUP_ID, dependencyKey.getGroupId()), childEquals(ARTIFACT_ID, dependencyKey.getArtifactId()),
+          childEquals(VERSION, dependencyKey.getVersion()));
+      if(dep != null) {
+        Element exclusion = findChild(findChild(dep, EXCLUSIONS), EXCLUSION,
+            childEquals(GROUP_ID, excluded.getGroupId()), childEquals(ARTIFACT_ID, excluded.getArtifactId()));
+        found[0] = exclusion != null;
 
-        }
       }
     }, true));
 

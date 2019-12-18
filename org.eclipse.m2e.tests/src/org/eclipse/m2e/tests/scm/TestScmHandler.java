@@ -16,8 +16,8 @@ package org.eclipse.m2e.tests.scm;
 import java.io.File;
 import java.io.InputStream;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.eclipse.m2e.scm.MavenProjectScmInfo;
 import org.eclipse.m2e.scm.spi.ScmHandler;
 
@@ -27,12 +27,11 @@ import org.eclipse.m2e.scm.spi.ScmHandler;
  */
 public class TestScmHandler extends ScmHandler {
 
-  public InputStream open(String url, String revision) throws CoreException {
+  public InputStream open(String url, String revision) {
     return null;
   }
 
-  public void checkoutProject(MavenProjectScmInfo info, File dest, IProgressMonitor monitor) throws CoreException,
-      InterruptedException {
+  public void checkoutProject(MavenProjectScmInfo info, File dest, IProgressMonitor monitor) {
   }
 
 }

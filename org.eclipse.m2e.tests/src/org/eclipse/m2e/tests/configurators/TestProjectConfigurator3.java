@@ -16,6 +16,7 @@ package org.eclipse.m2e.tests.configurators;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Objects;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -27,7 +28,6 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 
 import org.codehaus.plexus.util.IOUtil;
-import org.codehaus.plexus.util.StringUtils;
 
 import org.apache.maven.plugin.MojoExecution;
 
@@ -59,7 +59,7 @@ public class TestProjectConfigurator3 extends AbstractProjectConfigurator {
         throw new CoreException(new Status(IStatus.ERROR, "org.eclipse.m2e.tests", ex.getLocalizedMessage()));
       }
     }
-    text = StringUtils.defaultString(text) + getName();
+    text = Objects.toString(text, "") + getName();
     InputStream contents = new ByteArrayInputStream(text.getBytes());
     if(!file.exists()) {
       file.create(contents, IResource.FORCE, monitor);

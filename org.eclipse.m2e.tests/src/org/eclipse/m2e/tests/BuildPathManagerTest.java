@@ -43,7 +43,6 @@ import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IAccessRule;
@@ -1057,36 +1056,34 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
   private IProject createSimpleProject(final String projectName, final IPath location) throws CoreException {
     final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 
-    workspace.run(new IWorkspaceRunnable() {
-      public void run(IProgressMonitor monitor) throws CoreException {
-        Model model = new Model();
-        model.setGroupId(projectName);
-        model.setArtifactId(projectName);
-        model.setVersion("0.0.1-SNAPSHOT");
-        model.setModelVersion("4.0.0");
+    workspace.run((IWorkspaceRunnable) monitor -> {
+      Model model = new Model();
+      model.setGroupId(projectName);
+      model.setArtifactId(projectName);
+      model.setVersion("0.0.1-SNAPSHOT");
+      model.setModelVersion("4.0.0");
 
-        Dependency dependency = new Dependency();
-        dependency.setGroupId("junit");
-        dependency.setArtifactId("junit");
-        dependency.setVersion("3.8.1");
+      Dependency dependency = new Dependency();
+      dependency.setGroupId("junit");
+      dependency.setArtifactId("junit");
+      dependency.setVersion("3.8.1");
 
-        model.addDependency(dependency);
+      model.addDependency(dependency);
 
-        // used to derive the source/target options so lock it down
-        Plugin buildPlugin = new Plugin();
-        buildPlugin.setArtifactId("maven-compiler-plugin");
-        buildPlugin.setVersion("2.3");
+      // used to derive the source/target options so lock it down
+      Plugin buildPlugin = new Plugin();
+      buildPlugin.setArtifactId("maven-compiler-plugin");
+      buildPlugin.setVersion("2.3");
 
-        model.setBuild(new Build());
-        model.getBuild().addPlugin(buildPlugin);
+      model.setBuild(new Build());
+      model.getBuild().addPlugin(buildPlugin);
 
-        String[] directories = {"src/main/java", "src/test/java", "src/main/resources", "src/test/resources"};
+      String[] directories = {"src/main/java", "src/test/java", "src/main/resources", "src/test/resources"};
 
-        ProjectImportConfiguration config = new ProjectImportConfiguration();
+      ProjectImportConfiguration config = new ProjectImportConfiguration();
 
-        MavenPlugin.getProjectConfigurationManager().createSimpleProject(project, location, model, directories, config,
-            monitor);
-      }
+      MavenPlugin.getProjectConfigurationManager().createSimpleProject(project, location, model, directories, config,
+          monitor);
     }, MavenPlugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
 
     return project;
@@ -1098,7 +1095,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     tmp.delete(); //deleting a tmp file so we can use the name for a folder
 
     final String projectName1 = "external-simple-project-1";
-    IProject project1 = createSimpleProject(projectName1, new Path(tmp.getAbsolutePath()).append(projectName1));
+    createSimpleProject(projectName1, new Path(tmp.getAbsolutePath()).append(projectName1));
 
     final String projectName2 = "external-simple-project-2";
     File existingFolder = new File(tmp, projectName2);
@@ -1152,9 +1149,6 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
   }
 
   private Archetype findQuickStartArchetype() throws CoreException {
-    final MavenPluginActivator plugin = MavenPluginActivator.getDefault();
-
-    @SuppressWarnings("unchecked")
     List<Archetype> archetypes = MavenPluginActivator.getDefault().getArchetypeManager()
         .getArchetypeCatalogFactory("internal").getArchetypeCatalog().getArchetypes();
     for(Archetype archetype : archetypes) {
@@ -1172,14 +1166,12 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
       throws CoreException {
     final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 
-    workspace.run(new IWorkspaceRunnable() {
-      public void run(IProgressMonitor monitor) throws CoreException {
-        ResolverConfiguration resolverConfiguration = new ResolverConfiguration();
-        ProjectImportConfiguration pic = new ProjectImportConfiguration(resolverConfiguration);
+    workspace.run((IWorkspaceRunnable) monitor -> {
+      ResolverConfiguration resolverConfiguration = new ResolverConfiguration();
+      ProjectImportConfiguration pic = new ProjectImportConfiguration(resolverConfiguration);
 
-        MavenPlugin.getProjectConfigurationManager().createArchetypeProject(project, location, archetype, //
-            projectName, projectName, "0.0.1-SNAPSHOT", "jar", new Properties(), pic, monitor);
-      }
+      MavenPlugin.getProjectConfigurationManager().createArchetypeProject(project, location, archetype, //
+          projectName, projectName, "0.0.1-SNAPSHOT", "jar", new Properties(), pic, monitor);
     }, MavenPlugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
 
     return project;

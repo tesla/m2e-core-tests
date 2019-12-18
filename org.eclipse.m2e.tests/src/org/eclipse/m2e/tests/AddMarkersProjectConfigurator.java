@@ -5,7 +5,6 @@ import java.io.File;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -34,7 +33,7 @@ public class AddMarkersProjectConfigurator extends AbstractProjectConfigurator {
   public static final int WARNING_LINE_NUMBER = 3;
 
   @Override
-  public void configure(ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException {
+  public void configure(ProjectConfigurationRequest request, IProgressMonitor monitor) {
   }
 
   @Override

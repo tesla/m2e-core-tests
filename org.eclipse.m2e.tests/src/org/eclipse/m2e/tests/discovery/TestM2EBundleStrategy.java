@@ -1,7 +1,6 @@
 
 package org.eclipse.m2e.tests.discovery;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IContributor;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
@@ -12,6 +11,7 @@ import org.eclipse.equinox.internal.p2.discovery.AbstractCatalogSource;
 import org.eclipse.equinox.internal.p2.discovery.Policy;
 import org.eclipse.equinox.internal.p2.discovery.compatibility.BundleDiscoverySource;
 import org.eclipse.equinox.internal.p2.discovery.compatibility.ConnectorDiscoveryExtensionReader;
+
 import org.eclipse.m2e.internal.discovery.strategy.M2ERemoteBundleDiscoveryStrategy;
 
 
@@ -19,7 +19,7 @@ import org.eclipse.m2e.internal.discovery.strategy.M2ERemoteBundleDiscoveryStrat
 public class TestM2EBundleStrategy extends M2ERemoteBundleDiscoveryStrategy {
 
   @Override
-  public void performDiscovery(IProgressMonitor monitor) throws CoreException {
+  public void performDiscovery(IProgressMonitor monitor) {
     if(items == null || categories == null) {
       throw new IllegalStateException();
     }

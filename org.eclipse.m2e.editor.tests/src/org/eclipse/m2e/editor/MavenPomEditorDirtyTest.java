@@ -32,12 +32,13 @@ import org.eclipse.ui.part.FileEditorInput;
 
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.core.ui.internal.actions.OpenPomAction;
+import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 
 
 /**
  * @author atanasenko
  */
-public class MavenPomEditorDirtyTest extends AbstractMavenProjectTestJunit4 {
+public class MavenPomEditorDirtyTest extends AbstractMavenProjectTestCase {
 
   @Test
   public void test358656_dirtyStateAfterFSModification() throws Exception {

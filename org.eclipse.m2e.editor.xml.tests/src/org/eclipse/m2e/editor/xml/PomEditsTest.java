@@ -18,6 +18,7 @@ import static org.junit.Assert.assertEquals;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits;
+import org.eclipse.m2e.core.ui.internal.editing.PomEdits.Operation;
 import org.eclipse.m2e.editor.pom.ElementValueProvider;
 import org.eclipse.m2e.editor.xml.internal.XmlUtils;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
@@ -29,7 +30,6 @@ import org.eclipse.wst.xml.core.internal.preferences.XMLCorePreferenceNames;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
 import org.junit.Test;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 
@@ -63,23 +63,19 @@ public class PomEditsTest extends AbstractMavenProjectTestCase {
     
     IProject project = importProject("projects/467590_emptyPom/pom.xml");
     
-    PomEdits.performOnDOMDocument(new PomEdits.OperationTuple(project.getFile("test1/pom.xml"), new PomEdits.Operation() {
-      public void process(Document document) {
+    PomEdits.performOnDOMDocument(new PomEdits.OperationTuple(project.getFile("test1/pom.xml"), (Operation) document -> {
         ElementValueProvider provider = new ElementValueProvider(PomEdits.GROUP_ID);
         Element el = provider.get(document);
         PomEdits.setText(el, "test1");
-      }
-    }));
+      }));
     
     assertContentsEqual(project.getFile("test1/result_pom.xml"), project.getFile("test1/pom.xml"));
     
-    PomEdits.performOnDOMDocument(new PomEdits.OperationTuple(project.getFile("test2/pom.xml"), new PomEdits.Operation() {
-      public void process(Document document) {
+    PomEdits.performOnDOMDocument(new PomEdits.OperationTuple(project.getFile("test2/pom.xml"), (Operation) document -> {
         ElementValueProvider provider = new ElementValueProvider(PomEdits.GROUP_ID);
         Element el = provider.get(document);
         PomEdits.setText(el, "test2");
-      }
-    }));
+      }));
     
     assertContentsEqual(project.getFile("test2/result_pom.xml"), project.getFile("test2/pom.xml"));
   }

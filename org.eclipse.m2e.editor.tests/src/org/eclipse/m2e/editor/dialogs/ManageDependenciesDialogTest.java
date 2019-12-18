@@ -57,11 +57,11 @@ import org.eclipse.m2e.core.project.IMavenProjectRegistry;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits.CompoundOperation;
-import org.eclipse.m2e.editor.AbstractMavenProjectTestJunit4;
+import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 
 
 @SuppressWarnings("restriction")
-public class ManageDependenciesDialogTest extends AbstractMavenProjectTestJunit4 {
+public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
   private static final String TEST_VERSION = "1.0.0";
 
   public static String TEST_GROUP_ID = "org.eclipse.m2e.tests";
