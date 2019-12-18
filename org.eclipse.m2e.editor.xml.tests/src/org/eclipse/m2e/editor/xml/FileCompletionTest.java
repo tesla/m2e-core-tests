@@ -36,7 +36,8 @@ public class FileCompletionTest extends AbstractCompletionTest {
 
   IProject[] projects;
 
-  protected IFile loadProjectsAndFiles() throws Exception {
+  @Override
+protected IFile loadProjectsAndFiles() throws Exception {
     // deliberately import only a subset of projects
     projects = importProjects("projects/489755_file_content_assist", new String[] {"parent1/pom.xml", "parent2/pom.xml", "parent1/module1/pom.xml"},
         new ResolverConfiguration());

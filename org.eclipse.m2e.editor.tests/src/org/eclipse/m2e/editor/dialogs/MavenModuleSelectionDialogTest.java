@@ -62,7 +62,7 @@ public class MavenModuleSelectionDialogTest extends AbstractMavenProjectTestCase
     assertEquals(PROJECT3, projects[2].getName());
     assertEquals(MODULE1, projects[3].getName());
 
-    final Set<Object> excludedProjects = new HashSet<Object>();
+    final Set<Object> excludedProjects = new HashSet<>();
     excludedProjects.add(projects[0].getLocation());
     excludedProjects.add(projects[3].getLocation());
 
@@ -71,11 +71,13 @@ public class MavenModuleSelectionDialogTest extends AbstractMavenProjectTestCase
 
       protected Color disabledColor;
 
+      @Override
       public void run() {
         disabledColor = Display.getDefault().getSystemColor(SWT.COLOR_GRAY);
 
         MavenModuleSelectionDialog dialog = new MavenModuleSelectionDialog(Display.getDefault().getActiveShell(),
             excludedProjects) {
+          @Override
           protected Control createDialogArea(Composite parent) {
             Control control = super.createDialogArea(parent);
             viewer = getViewer();

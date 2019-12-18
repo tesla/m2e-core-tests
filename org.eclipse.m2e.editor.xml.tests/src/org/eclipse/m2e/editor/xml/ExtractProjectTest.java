@@ -41,7 +41,8 @@ public class ExtractProjectTest extends AbstractCompletionTest {
 
   private IProject[] projects;
 
-  protected IFile loadProjectsAndFiles() throws Exception {
+  @Override
+protected IFile loadProjectsAndFiles() throws Exception {
     // Create the projects
     projects = importProjects("projects/extractProject", new String[] {"parent/pom.xml", "parent/Anested1/pom.xml",
         "parent/Znested2/pom.xml"
@@ -59,7 +60,8 @@ public class ExtractProjectTest extends AbstractCompletionTest {
     assertEquals(projects[1], prj);
     Job job = new Job("XXX") {
 
-      protected IStatus run(IProgressMonitor monitor) {
+      @Override
+	protected IStatus run(IProgressMonitor monitor) {
         try {
           projects[1].delete(false, true, monitor);
         } catch(CoreException ex) {

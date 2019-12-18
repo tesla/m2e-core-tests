@@ -27,18 +27,21 @@ import org.junit.Before;
 public abstract class AbstractCompletionTest extends AbstractPOMEditorTestCase {
   protected ICompletionProposalComputer xmlContentAssistProcessor = null;
 
-  protected IFile loadProjectsAndFiles() throws Exception {
+  @Override
+protected IFile loadProjectsAndFiles() throws Exception {
     return null;
   }
 
-  @Before
+  @Override
+@Before
 public void setUp() throws Exception {
     super.setUp();
     xmlContentAssistProcessor = new PomContentAssistProcessor();
     xmlContentAssistProcessor.sessionStarted();
   }
 
-  @After
+  @Override
+@After
 	public void tearDown() throws Exception {
     try {
       xmlContentAssistProcessor.sessionEnded();

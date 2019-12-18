@@ -34,7 +34,8 @@ import org.junit.Test;
 public class HoverTest extends AbstractPOMEditorTestCase {
   IProject[] projects;
 
-  public IFile loadProjectsAndFiles() throws Exception {
+  @Override
+public IFile loadProjectsAndFiles() throws Exception {
     projects = importProjects("projects/Hyperlink", new String[] {"hyperlinkParent/pom.xml", "hyperlinkChild/pom.xml"},
         new ResolverConfiguration());
     waitForJobsToComplete();

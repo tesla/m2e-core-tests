@@ -35,7 +35,8 @@ public class PluginConfigCompletionTest extends AbstractCompletionTest {
 
   IProject project;
 
-  protected IFile loadProjectsAndFiles() throws Exception {
+  @Override
+protected IFile loadProjectsAndFiles() throws Exception {
     // Create the projects
     setAutoBuilding(true);
     project = importProjects("projects/442560_plugin_content_assist", new String[] {"project/pom.xml"},

@@ -34,7 +34,8 @@ import org.junit.Test;
 public class HoverDependencyManagedTest extends AbstractPOMEditorTestCase {
   private IProject[] projects;
 
-  public IFile loadProjectsAndFiles() throws Exception {
+  @Override
+public IFile loadProjectsAndFiles() throws Exception {
     projects = importProjects("projects/MNGECLIPSE-2541", new String[] {"parent2541/pom.xml", "child2541/pom.xml"},
         new ResolverConfiguration());
     waitForJobsToComplete();

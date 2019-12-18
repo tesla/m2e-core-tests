@@ -12,20 +12,21 @@ import org.eclipse.m2e.core.ui.internal.search.util.SearchEngine;
 
 
 class SearchEngineMock implements SearchEngine {
-  private Set<ArtifactInfo> artifacts = new LinkedHashSet<ArtifactInfo>();
+  private Set<ArtifactInfo> artifacts = new LinkedHashSet<>();
 
   void addArtifact(String groupId, String artifactId, String version, String classfier, String type) {
     artifacts.add(new ArtifactInfo(groupId, artifactId, version, classfier, type));
   }
 
-  public Collection<String> findGroupIds(String searchExpression, Packaging packaging, ArtifactInfo containingArtifact) {
-    // TODO Auto-generated method stub
+  @Override
+public Collection<String> findGroupIds(String searchExpression, Packaging packaging, ArtifactInfo containingArtifact) {
     return null;
   }
 
-  public Collection<String> findArtifactIds(String groupId, String searchExpression, Packaging packaging,
+  @Override
+public Collection<String> findArtifactIds(String groupId, String searchExpression, Packaging packaging,
       ArtifactInfo containingArtifact) {
-    Collection<String> result = new ArrayList<String>();
+    Collection<String> result = new ArrayList<>();
     for(ArtifactInfo artifact : artifacts) {
       if(artifact.getGroupId().equals(groupId) && artifact.getArtifactId().startsWith(searchExpression)) {
         result.add(artifact.getArtifactId());
@@ -34,8 +35,9 @@ class SearchEngineMock implements SearchEngine {
     return result;
   }
 
-  public Collection<String> findVersions(String groupId, String artifactId, String searchExpression, Packaging packaging) {
-    Collection<String> result = new ArrayList<String>();
+  @Override
+public Collection<String> findVersions(String groupId, String artifactId, String searchExpression, Packaging packaging) {
+    Collection<String> result = new ArrayList<>();
     for(ArtifactInfo artifact : artifacts) {
       if(artifact.getGroupId().equals(groupId) && artifact.getArtifactId().equals(artifactId)
           && artifact.getVersion().startsWith(searchExpression)) {
@@ -45,13 +47,15 @@ class SearchEngineMock implements SearchEngine {
     return result;
   }
 
-  public Collection<String> findClassifiers(String groupId, String artifactId, String version, String prefix,
+  @Override
+public Collection<String> findClassifiers(String groupId, String artifactId, String version, String prefix,
       Packaging packaging) {
     // TODO Auto-generated method stub
     return null;
   }
 
-  public Collection<String> findTypes(String groupId, String artifactId, String version, String prefix,
+  @Override
+public Collection<String> findTypes(String groupId, String artifactId, String version, String prefix,
       Packaging packaging) {
     // TODO Auto-generated method stub
     return null;
