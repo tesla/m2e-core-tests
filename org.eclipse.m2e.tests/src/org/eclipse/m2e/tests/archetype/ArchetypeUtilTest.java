@@ -13,7 +13,11 @@
 
 package org.eclipse.m2e.tests.archetype;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Test;
 
 import org.apache.maven.archetype.catalog.Archetype;
 
@@ -25,8 +29,8 @@ import org.eclipse.m2e.core.archetype.ArchetypeUtil;
  * 
  * @author Fred Bricon
  */
-public class ArchetypeUtilTest extends TestCase {
-
+public class ArchetypeUtilTest {
+  @Test
   public void testAreEqual() {
 
     Archetype one = null, another = null;
@@ -55,6 +59,7 @@ public class ArchetypeUtilTest extends TestCase {
     return a;
   }
 
+  @Test
   public void testGetHashCode() {
     assertEquals(-1, ArchetypeUtil.getHashCode(null));
 

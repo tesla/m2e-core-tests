@@ -13,6 +13,8 @@
 
 package org.eclipse.m2e.tests.internal.index.filter;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,7 +23,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IStatus;
@@ -37,7 +39,7 @@ import org.eclipse.m2e.core.internal.index.filter.IArtifactFilter;
 import org.eclipse.m2e.core.ui.internal.views.nodes.IndexedArtifactFileNode;
 
 
-public class IndexFilterTest extends TestCase {
+public class IndexFilterTest {
 
   private static final String ARTIFACT = "artifact";
 
@@ -118,6 +120,7 @@ public class IndexFilterTest extends TestCase {
 
   }
 
+  @Test
   public void testIndexedArtifactFileNodeAdapter() {
     IndexedArtifactFile file = new IndexedArtifactFile("repo", "group", "artifact", "version", "type", "classifier",
         "fname", 1, new Date(), 0, 0, null, null);
@@ -128,6 +131,7 @@ public class IndexFilterTest extends TestCase {
     assertEquals(file, node.getAdapter(IndexedArtifactFile.class));
   }
 
+  @Test
   public void testFilteredIndex_nonEmptyResult() throws Exception {
     IndexedArtifact a = new IndexedArtifact(GROUP, ARTIFACT, "package", "classname", "packaging");
     addIndexedArtifactFile(a, KEY_STATUS_NULL);
@@ -147,6 +151,7 @@ public class IndexFilterTest extends TestCase {
     assertEquals(4, result.get(0).getFiles().size()); // error got filtered out
   }
 
+  @Test
   public void testFilteredIndex_emptyResult() throws Exception {
     IndexedArtifact a = new IndexedArtifact(GROUP, ARTIFACT, "package", "classname", "packaging");
     addIndexedArtifactFile(a, KEY_STATUS_ERROR);

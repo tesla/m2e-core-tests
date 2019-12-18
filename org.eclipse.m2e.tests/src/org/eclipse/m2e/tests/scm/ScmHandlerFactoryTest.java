@@ -13,18 +13,17 @@
 
 package org.eclipse.m2e.tests.scm;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
 
 import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.m2e.scm.internal.ScmHandlerFactory;
 import org.eclipse.m2e.scm.spi.ScmHandler;
 
-
-/**
- * @author Eugene Kuleshov
- */
-public class ScmHandlerFactoryTest extends TestCase {
-
+public class ScmHandlerFactoryTest {
+  @Test
   public void testScmHandlerFactory() throws CoreException {
     ScmHandler handler = ScmHandlerFactory.getHandler("scm:test:foo");
     assertEquals(TestScmHandler.class.getName(), handler.getClass().getName());

@@ -1,7 +1,14 @@
 
 package org.eclipse.m2e.tests.discovery;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import java.util.Collections;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -23,6 +30,7 @@ public class MavenDiscoveryInstallOperationTest extends AbstractDiscoveryTest {
   private static final IProgressMonitor monitor = new NullProgressMonitor();
 
   @Override
+  @Before
   public void setUp() throws Exception {
     super.setUp();
     httpServer = new HttpServer();
@@ -33,6 +41,7 @@ public class MavenDiscoveryInstallOperationTest extends AbstractDiscoveryTest {
   }
 
   @Override
+  @After
   public void tearDown() throws Exception {
     try {
       if(httpServer != null) {
@@ -43,6 +52,7 @@ public class MavenDiscoveryInstallOperationTest extends AbstractDiscoveryTest {
     }
   }
 
+  @Test
   public void testMatchNoVersion() throws Exception {
     MavenDiscoveryInstallOperation operation = new MavenDiscoveryInstallOperation(
         Collections.singletonList(getCatalogItem("iu.with.no.version")), null, false, true, null);
@@ -52,6 +62,7 @@ public class MavenDiscoveryInstallOperationTest extends AbstractDiscoveryTest {
     assertEquals("IU version", Version.parseVersion("2.0.0.201102231450"), ius[0].getVersion());
   }
 
+  @Test
   public void testMatchHighestVersion() throws Exception {
     MavenDiscoveryInstallOperation operation = new MavenDiscoveryInstallOperation(
         Collections.singletonList(getCatalogItem("iu.with.highest.version")), null, false, true, null);
@@ -61,6 +72,7 @@ public class MavenDiscoveryInstallOperationTest extends AbstractDiscoveryTest {
     assertEquals("IU version", Version.parseVersion("2.0.0.201102231450"), ius[0].getVersion());
   }
 
+  @Test
   public void testMatchLowestVersion() throws Exception {
     MavenDiscoveryInstallOperation operation = new MavenDiscoveryInstallOperation(
         Collections.singletonList(getCatalogItem("iu.with.lowest.version")), null, false, true, null);
@@ -70,6 +82,7 @@ public class MavenDiscoveryInstallOperationTest extends AbstractDiscoveryTest {
     assertEquals("IU version", Version.parseVersion("1.0.0.201102231450"), ius[0].getVersion());
   }
 
+  @Test
   public void testMissingRepository() throws Exception {
     MavenDiscoveryInstallOperation operation = new MavenDiscoveryInstallOperation(
         Collections.singletonList(getCatalogItem("missing.repository")), null, false, true, null);
@@ -89,6 +102,7 @@ public class MavenDiscoveryInstallOperationTest extends AbstractDiscoveryTest {
     fail("Expected CoreException");
   }
 
+  @Test
   public void testMissingIU() throws Exception {
     MavenDiscoveryInstallOperation operation = new MavenDiscoveryInstallOperation(
         Collections.singletonList(getCatalogItem("missing.iu")), null, false, true, null);

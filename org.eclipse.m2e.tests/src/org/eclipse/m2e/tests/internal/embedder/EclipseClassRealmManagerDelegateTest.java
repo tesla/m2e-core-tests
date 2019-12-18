@@ -13,12 +13,15 @@
 
 package org.eclipse.m2e.tests.internal.embedder;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import junit.framework.TestCase;
+import org.junit.Before;
 
 import org.codehaus.plexus.classworlds.realm.ClassRealm;
 
@@ -31,14 +34,12 @@ import org.eclipse.m2e.core.internal.embedder.EclipseClassRealmManagerDelegate;
 import org.eclipse.m2e.core.internal.embedder.MavenImpl;
 
 
-public class EclipseClassRealmManagerDelegateTest extends TestCase {
+public class EclipseClassRealmManagerDelegateTest {
 
   private EclipseClassRealmManagerDelegate delegate;
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
-
+  @Before
+  public void setUp() throws Exception {
     delegate = (EclipseClassRealmManagerDelegate) ((MavenImpl) MavenPlugin.getMaven()).getPlexusContainer().lookup(
         ClassRealmManagerDelegate.class, EclipseClassRealmManagerDelegate.ROLE_HINT);
   }
@@ -55,6 +56,7 @@ public class EclipseClassRealmManagerDelegateTest extends TestCase {
         return constituents;
       }
 
+      @Deprecated
       @Override
       public List<String> getImports() {
         return new ArrayList<>();
@@ -72,13 +74,11 @@ public class EclipseClassRealmManagerDelegateTest extends TestCase {
 
       @Override
       public Map<String, ClassLoader> getForeignImports() {
-        // TODO Auto-generated method stub
         return null;
       }
 
       @Override
       public List<String> getParentImports() {
-        // TODO Auto-generated method stub
         return null;
       }
 

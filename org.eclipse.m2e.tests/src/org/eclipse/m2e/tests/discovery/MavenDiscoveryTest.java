@@ -13,6 +13,12 @@
 
 package org.eclipse.m2e.tests.discovery;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
@@ -21,9 +27,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
-
-import junit.framework.TestCase;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.equinox.internal.p2.discovery.AbstractCatalogSource;
@@ -42,7 +48,7 @@ import org.eclipse.m2e.internal.discovery.wizards.MavenCatalogConfiguration;
 import org.eclipse.m2e.internal.discovery.wizards.MavenCatalogViewer;
 
 
-public class MavenDiscoveryTest extends TestCase implements IShellProvider {
+public class MavenDiscoveryTest implements IShellProvider {
   private static final String TYCHO_PACKAGE_TYPE = "eclipse-plugin";
 
   private static final String ONE_ID = "com.sonatype.m2e.lifecycle.one";
@@ -59,10 +65,8 @@ public class MavenDiscoveryTest extends TestCase implements IShellProvider {
 
   private MavenCatalogConfiguration configuration;
 
-  @Override
+  @Before
   public void setUp() throws Exception {
-    super.setUp();
-
     catalog = new Catalog();
     catalog.setEnvironment(DiscoveryCore.createEnvironment());
     catalog.setVerifyUpdateSiteAvailability(false);
@@ -84,14 +88,10 @@ public class MavenDiscoveryTest extends TestCase implements IShellProvider {
     shell = new Shell(Workbench.getInstance().getDisplay());
   }
 
-  @Override
+  @After
   public void tearDown() throws Exception {
-    try {
       shell.dispose();
       shell = null;
-    } finally {
-      super.tearDown();
-    }
   }
 
   @Test
@@ -224,6 +224,7 @@ public class MavenDiscoveryTest extends TestCase implements IShellProvider {
     return new MojoExecutionKey(groupId, artifactId, version, goal, "compile", executionId);
   }
 
+  @Test
   public void testCatalogItemWithoutMappingMetadata() throws Exception {
     final File emptydir = new File("target/emptydir").getCanonicalFile();
     emptydir.mkdirs();
@@ -250,6 +251,7 @@ public class MavenDiscoveryTest extends TestCase implements IShellProvider {
     assertNull(MavenDiscovery.getLifecycleMappingMetadataSource(item));
   }
 
+  @Test
   public void testCatalogItemExtensionsMetadata() throws Exception {
     final File pluginxml = new File("projects/discovery/projectConfigurator.pluginxml").getCanonicalFile();
 

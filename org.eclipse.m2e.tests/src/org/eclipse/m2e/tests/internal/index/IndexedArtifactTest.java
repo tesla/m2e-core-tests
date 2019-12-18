@@ -13,23 +13,28 @@
 
 package org.eclipse.m2e.tests.internal.index;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Test;
 
 import org.eclipse.m2e.core.internal.index.IndexedArtifact;
 
 
-public class IndexedArtifactTest extends TestCase {
-
+public class IndexedArtifactTest {
+  @Test
   public void testEquals() {
     doTest(true);
   }
 
   //this was throwing an NPE, test to prevent regression
+  @Test
   public void testPackageName() {
     IndexedArtifact nullArt = getNullArtifact();
     assertTrue("Package name is null", nullArt.getPackageName() == null);
   }
 
+  @Test
   public void testHash() {
     doTest(false);
   }

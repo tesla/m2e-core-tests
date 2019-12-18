@@ -13,13 +13,15 @@
 
 package org.eclipse.m2e.tests.embedder;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
 
 import org.eclipse.m2e.core.embedder.ArtifactKey;
 
 
-public class ArtifactKeyTest extends TestCase {
-
+public class ArtifactKeyTest {
+  @Test
   public void testPortableString() {
     ArtifactKey k1 = new ArtifactKey("g", "a", "v", "c");
     assertEquals(k1, ArtifactKey.fromPortableString(k1.toPortableString()));

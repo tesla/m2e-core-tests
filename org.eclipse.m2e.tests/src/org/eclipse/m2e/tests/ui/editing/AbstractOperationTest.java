@@ -15,8 +15,6 @@ package org.eclipse.m2e.tests.ui.editing;
 
 import org.w3c.dom.Element;
 
-import junit.framework.TestCase;
-
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
 
 import org.apache.maven.model.Dependency;
@@ -27,7 +25,7 @@ import org.eclipse.m2e.core.ui.internal.editing.PomHelper;
 
 
 @SuppressWarnings("restriction")
-public abstract class AbstractOperationTest extends TestCase {
+public abstract class AbstractOperationTest {
 
   protected static int dependencyCount(IDOMModel model, Dependency dependency) {
     int count = 0;

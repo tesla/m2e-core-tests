@@ -14,33 +14,38 @@
 package org.eclipse.m2e.tests.ui.editing;
 
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.findChild;
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import org.w3c.dom.Element;
+
+import org.eclipse.wst.sse.core.StructuredModelManager;
+import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
 
 import org.apache.maven.model.Dependency;
+
 import org.eclipse.m2e.core.embedder.ArtifactKey;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits;
 import org.eclipse.m2e.core.ui.internal.editing.PomHelper;
-import org.eclipse.wst.sse.core.StructuredModelManager;
-import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
-import org.w3c.dom.Element;
 
 
 @SuppressWarnings("restriction")
-public class PomHelperTest extends TestCase {
+public class PomHelperTest {
 
   private IDOMModel tempModel;
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see junit.framework.TestCase#setUp()
-   */
-  @Override
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     tempModel = (IDOMModel) StructuredModelManager.getModelManager().createUnManagedStructuredModelFor(
         "org.eclipse.m2e.core.pomFile");
   }
 
+  @Test
   public void testFindDependencies() {
     tempModel.getStructuredDocument().setText(StructuredModelManager.getModelManager(), //
         "<project><dependencies>" + //
@@ -51,6 +56,7 @@ public class PomHelperTest extends TestCase {
     assertNotNull(PomHelper.findDependencies(tempModel.getDocument().getDocumentElement()));
   }
 
+  @Test
   public void testFindDependenciesMissing() {
     tempModel.getStructuredDocument().setText(StructuredModelManager.getModelManager(), //
         "<project><adependencies>" + //
@@ -61,6 +67,7 @@ public class PomHelperTest extends TestCase {
     assertTrue(PomHelper.findDependencies(tempModel.getDocument().getDocumentElement()).isEmpty());
   }
 
+  @Test
   public void testFindDependency() {
     tempModel.getStructuredDocument().setText(StructuredModelManager.getModelManager(), //
         "<project><dependencies>" + //
@@ -78,6 +85,7 @@ public class PomHelperTest extends TestCase {
     assertDependencyChild("Dependency", "AAA", "BBB", "1.0", depElement);
   }
 
+  @Test
   public void testCreateDependency() {
     tempModel.getStructuredDocument().setText(StructuredModelManager.getModelManager(), //
         "<project><dependencies>" + //
@@ -97,6 +105,7 @@ public class PomHelperTest extends TestCase {
     assertNotNull(PomHelper.findDependency(tempModel.getDocument(), dep));
   }
 
+  @Test
   public void testCreateDependencyInEmptyList() {
     tempModel.getStructuredDocument().setText(StructuredModelManager.getModelManager(),
         "<project><dependencies/></project>");
@@ -112,6 +121,7 @@ public class PomHelperTest extends TestCase {
     assertNotNull(PomHelper.findDependency(tempModel.getDocument(), dep));
   }
 
+  @Test
   public void testCreatePlugin() {
     tempModel.getStructuredDocument().setText(StructuredModelManager.getModelManager(), //
         "<project><plugins>" + //
@@ -128,6 +138,7 @@ public class PomHelperTest extends TestCase {
     assertNotNull(findPlugin(findChild(tempModel.getDocument().getDocumentElement(), "plugins"), dep));
   }
 
+  @Test
   public void testCreatePluginInEmptyList() {
     tempModel.getStructuredDocument()
         .setText(StructuredModelManager.getModelManager(), "<project><plugins/></project>");

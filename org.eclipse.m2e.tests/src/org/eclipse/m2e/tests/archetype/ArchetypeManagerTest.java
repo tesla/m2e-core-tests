@@ -13,14 +13,19 @@
 
 package org.eclipse.m2e.tests.archetype;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
 import java.io.File;
 import java.net.URL;
 import java.util.Collection;
 import java.util.List;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
-
-import junit.framework.TestCase;
 
 import org.eclipse.core.runtime.Platform;
 
@@ -45,7 +50,7 @@ import org.eclipse.m2e.tests.common.HttpServer;
 /**
  * @author Eugene Kuleshov
  */
-public class ArchetypeManagerTest extends TestCase {
+public class ArchetypeManagerTest {
 
   private static final String M2E_TEST_PLUGIN_ID = "org.eclipse.m2e.tests";
 
@@ -53,13 +58,12 @@ public class ArchetypeManagerTest extends TestCase {
 
   private ArchetypeManager archetypeManager;
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
-
+  @Before
+  public void setUp() throws Exception {
     archetypeManager = MavenPluginActivator.getDefault().getArchetypeManager();
   }
 
+  @Test
   public void testArchetypeManager() throws Exception {
     {
       ArchetypeCatalogFactory catalog = archetypeManager.getArchetypeCatalogFactory(NexusIndexerCatalogFactory.ID);
@@ -109,6 +113,7 @@ public class ArchetypeManagerTest extends TestCase {
     assertEquals("" + catalogs.toString(), 5, catalogs.size());
   }
 
+  @Test
   public void testLocalArchetypeCatalogFactory() throws Exception {
     LocalCatalogFactory catalogFactory = new LocalCatalogFactory("archetype-catalog.xml", "local", true);
     ArchetypeCatalog catalog = catalogFactory.getArchetypeCatalog();
@@ -116,6 +121,7 @@ public class ArchetypeManagerTest extends TestCase {
     assertEquals(2, catalog.getArchetypes().size());
   }
 
+  @Test
   public void testEmbeddedLocalArchetypeCatalogFactory() throws Exception {
     Bundle bundle = Platform.getBundle(M2E_TEST_PLUGIN_ID);
     assertNotNull(bundle);
@@ -126,6 +132,7 @@ public class ArchetypeManagerTest extends TestCase {
     assertEquals(1, catalog.getArchetypes().size());
   }
 
+  @Test
   public void testBadLocalArchetypeCatalogFactory() throws Exception {
     asserEmptyCatalog("crap://nope", "bad-local");
     asserEmptyCatalog("bundleentry://nooope", "missing-embedded");
@@ -138,6 +145,7 @@ public class ArchetypeManagerTest extends TestCase {
     assertEquals(0, catalog.getArchetypes().size());
   }
 
+  @Test
   public void testRemoteArchetypeCatalogFactory() throws Exception {
     assertEquals("http://server/repo",
         new RemoteCatalogFactory("http://server/repo/archetype-catalog.xml", null, true).getRepositoryUrl());
@@ -159,6 +167,7 @@ public class ArchetypeManagerTest extends TestCase {
     assertEquals(null, new RemoteCatalogFactory(null, null, true).getRepositoryUrl());
   }
 
+  @Test
   public void testArchetypeManagerSaveRestore() throws Exception {
 
     ArchetypeCatalogFactory catalogFactory = new RemoteCatalogFactory("http://www.sonatype.org/", "test", true);
@@ -182,6 +191,7 @@ public class ArchetypeManagerTest extends TestCase {
     assertNull(archetypeManager.getArchetypeCatalogFactory(catalogFactory.getId()));
   }
 
+  @Test
   public void testActiveArchetypeCatalogs() throws Exception {
     Collection<ArchetypeCatalogFactory> catalogs = archetypeManager.getArchetypeCatalogs();
     //disable catalogs
@@ -206,6 +216,7 @@ public class ArchetypeManagerTest extends TestCase {
 
   }
 
+  @Test
   public void testAddRemoteCatalog() throws Exception {
     HttpServer httpServer = new HttpServer();
     httpServer.addResources("/", "");
@@ -220,6 +231,7 @@ public class ArchetypeManagerTest extends TestCase {
     }
   }
 
+  @Test
   public void test371775_archetypeRepoAuthentication() throws Exception {
 
     IMavenConfiguration configuration = MavenPlugin.getMavenConfiguration();
@@ -246,6 +258,7 @@ public class ArchetypeManagerTest extends TestCase {
     assertEquals("371775", repo.getAuthentication().getPassword());
   }
 
+  @Test
   public void test359855_localArchetypeWithProperties() throws Exception {
     File sourceFolder = new File("resources/359855_localArchetype/");
 
@@ -281,6 +294,7 @@ public class ArchetypeManagerTest extends TestCase {
 
   }
 
+  @Test
   public void test387784_remoteArchetypeWithProperties() throws Exception {
 
     File localRepo = new File("target/localrepo-archetypes");
@@ -316,6 +330,7 @@ public class ArchetypeManagerTest extends TestCase {
 
   }
 
+  @Test
   public void testRepositoryUrlFromRemoteArchetypeCatalogs() throws Exception {
 
     HttpServer httpServer = new HttpServer();

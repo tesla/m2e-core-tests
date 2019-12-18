@@ -13,7 +13,10 @@
 
 package org.eclipse.m2e.tests.internal.embedder;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+
+import org.junit.Test;
 
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.MavenRuntime;
@@ -22,7 +25,8 @@ import org.eclipse.m2e.core.internal.Messages;
 
 
 @SuppressWarnings("restriction")
-public class MavenEmbeddedRuntimeTest extends TestCase {
+public class MavenEmbeddedRuntimeTest {
+  @Test
   public void testGetVersion() throws Exception {
     MavenRuntimeManager runtimeManager = MavenPlugin.getMavenRuntimeManager();
     MavenRuntime embeddedRuntime = runtimeManager.getRuntime(MavenRuntimeManager.EMBEDDED);
