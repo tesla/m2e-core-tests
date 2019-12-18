@@ -41,7 +41,8 @@ public class PropertyCompletionTest extends AbstractCompletionTest {
 
   IProject[] projects;
 
-  protected IFile loadProjectsAndFiles() throws Exception {
+  @Override
+protected IFile loadProjectsAndFiles() throws Exception {
     // Create the projects
     projects = importProjects("projects/MNGECLIPSE-2576", new String[] {"parent2576/pom.xml", "child2576/pom.xml"},
         new ResolverConfiguration());

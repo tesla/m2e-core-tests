@@ -115,10 +115,10 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
     MavenProject project = facade.getMavenProject(monitor);
     assertEquals(project.getArtifactId(), "child");
 
-    LinkedList<MavenProject> hierarchy = new LinkedList<MavenProject>();
+    LinkedList<MavenProject> hierarchy = new LinkedList<>();
     hierarchy.add(project);
 
-    LinkedList<Dependency> dependencies = new LinkedList<Dependency>();
+    LinkedList<Dependency> dependencies = new LinkedList<>();
     assertNotNull(project.getOriginalModel().getDependencies().get(0));
     dependencies.add(project.getOriginalModel().getDependencies().get(0));
 
@@ -176,11 +176,11 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
     MavenProject childProject = getMavenProject(TEST_GROUP_ID + ".diff", "child-diff", TEST_VERSION);
     MavenProject parentProject = getMavenProject(TEST_GROUP_ID + ".diff", "parent-diff", TEST_VERSION);
 
-    LinkedList<MavenProject> hierarchy = new LinkedList<MavenProject>();
+    LinkedList<MavenProject> hierarchy = new LinkedList<>();
     hierarchy.addFirst(childProject);
     hierarchy.addLast(parentProject);
 
-    LinkedList<Dependency> selectedDeps = new LinkedList<Dependency>();
+    LinkedList<Dependency> selectedDeps = new LinkedList<>();
     List<Dependency> dependencies = childProject.getOriginalModel().getDependencies();
     assertNotNull(dependencies);
     assertEquals(dependencies.size(), 1);
@@ -224,10 +224,10 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
         TEST_VERSION);
     MavenProject project = facade.getMavenProject(monitor);
 
-    LinkedList<MavenProject> hierarchy = new LinkedList<MavenProject>();
+    LinkedList<MavenProject> hierarchy = new LinkedList<>();
     hierarchy.add(project);
 
-    LinkedList<Dependency> dependencies = new LinkedList<Dependency>();
+    LinkedList<Dependency> dependencies = new LinkedList<>();
     dependencies.add(project.getOriginalModel().getDependencies().get(0));
 
     IDOMModel temp = createTempModel(model);
@@ -267,10 +267,10 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
         "dep_exists_diff_version", TEST_VERSION);
     MavenProject project = facade.getMavenProject(monitor);
 
-    LinkedList<MavenProject> hierarchy = new LinkedList<MavenProject>();
+    LinkedList<MavenProject> hierarchy = new LinkedList<>();
     hierarchy.add(project);
 
-    LinkedList<Dependency> dependencies = new LinkedList<Dependency>();
+    LinkedList<Dependency> dependencies = new LinkedList<>();
     assertNotNull(project.getOriginalModel().getDependencies().get(0));
     assertEquals(project.getOriginalModel().getDependencies().get(0).getVersion(), "0.1");
     dependencies.add(project.getOriginalModel().getDependencies().get(0));
@@ -318,11 +318,11 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
     MavenProject childProject = getMavenProject(TEST_GROUP_ID, ARTIFACT_ID_CHILD, TEST_VERSION);
     MavenProject parentProject = getMavenProject(TEST_GROUP_ID, ARTIFACT_ID_PARENT, TEST_VERSION);
 
-    LinkedList<MavenProject> hierarchy = new LinkedList<MavenProject>();
+    LinkedList<MavenProject> hierarchy = new LinkedList<>();
     hierarchy.addFirst(childProject);
     hierarchy.addLast(parentProject);
 
-    LinkedList<Dependency> selectedDeps = new LinkedList<Dependency>();
+    LinkedList<Dependency> selectedDeps = new LinkedList<>();
     List<Dependency> dependencies = childProject.getOriginalModel().getDependencies();
     assertNotNull(dependencies);
     assertEquals(dependencies.size(), 1);
@@ -402,11 +402,11 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
     MavenProject childProject = getMavenProject(TEST_GROUP_ID, ARTIFACT_CHILD, TEST_VERSION);
     MavenProject parentProject = getMavenProject(TEST_GROUP_ID, ARTIFACT_PARENT, TEST_VERSION);
 
-    final LinkedList<MavenProject> hierarchy = new LinkedList<MavenProject>();
+    final LinkedList<MavenProject> hierarchy = new LinkedList<>();
     hierarchy.addFirst(childProject);
     hierarchy.addLast(parentProject);
 
-    LinkedList<Dependency> selectedDeps = new LinkedList<Dependency>();
+    LinkedList<Dependency> selectedDeps = new LinkedList<>();
     List<Dependency> dependencies = childProject.getOriginalModel().getDependencies();
 
     assertNotNull(dependencies);
@@ -488,7 +488,7 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
    */
   protected Map<String, IStructuredModel> loadModels(String baseDir, String[] poms) throws Exception {
     IProject[] projects = importProjects(baseDir, poms, new ResolverConfiguration());
-    HashMap<String, IStructuredModel> models = new HashMap<String, IStructuredModel>(poms.length);
+    HashMap<String, IStructuredModel> models = new HashMap<>(poms.length);
 
     for(int i = 0; i < poms.length; i++ ) {
       IProject project = projects[i];

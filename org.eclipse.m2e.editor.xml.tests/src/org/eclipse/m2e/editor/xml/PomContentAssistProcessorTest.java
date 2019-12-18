@@ -74,15 +74,18 @@ public class PomContentAssistProcessorTest {
       value = val;
     }
 
-    public char getChar(int pos) throws BadLocationException {
+    @Override
+	public char getChar(int pos) throws BadLocationException {
       return value.charAt(pos);
     }
 
-    public String get(int pos, int length) throws BadLocationException {
+    @Override
+	public String get(int pos, int length) throws BadLocationException {
       return value.substring(pos, pos + length);
     }
 
-    public int getLength() {
+    @Override
+	public int getLength() {
       return value.length();
     }
   }
@@ -91,141 +94,182 @@ public class PomContentAssistProcessorTest {
 
     public IDocument doc;
 
-    public void activatePlugins() {
+    @Override
+	public void activatePlugins() {
     }
 
-    public void addTextInputListener(ITextInputListener listener) {
+    @Override
+	public void addTextInputListener(ITextInputListener listener) {
     }
 
-    public void addTextListener(ITextListener listener) {
+    @Override
+	public void addTextListener(ITextListener listener) {
     }
 
-    public void addViewportListener(IViewportListener listener) {
+    @Override
+	public void addViewportListener(IViewportListener listener) {
     }
 
-    public void changeTextPresentation(TextPresentation presentation, boolean controlRedraw) {
+    @Override
+	public void changeTextPresentation(TextPresentation presentation, boolean controlRedraw) {
     }
 
-    public int getBottomIndex() {
+    @Override
+	public int getBottomIndex() {
       return 0;
     }
 
-    public int getBottomIndexEndOffset() {
+    @Override
+	public int getBottomIndexEndOffset() {
       return 0;
     }
 
-    public IDocument getDocument() {
+    @Override
+	public IDocument getDocument() {
       return doc;
     }
 
-    public IFindReplaceTarget getFindReplaceTarget() {
+    @Override
+	public IFindReplaceTarget getFindReplaceTarget() {
       return null;
     }
 
-    public ITextOperationTarget getTextOperationTarget() {
+    @Override
+	public ITextOperationTarget getTextOperationTarget() {
       return null;
     }
 
-    public int getTopIndex() {
+    @Override
+	public int getTopIndex() {
       return 0;
     }
 
-    public int getTopIndexStartOffset() {
+    @Override
+	public int getTopIndexStartOffset() {
       return 0;
     }
 
-    public int getTopInset() {
+    @Override
+	public int getTopInset() {
       return 0;
     }
 
-    public IRegion getVisibleRegion() {
+    @Override
+	public IRegion getVisibleRegion() {
       return null;
     }
 
-    public void invalidateTextPresentation() {
+    @Override
+	public void invalidateTextPresentation() {
     }
 
-    public boolean isEditable() {
+    @Override
+	public boolean isEditable() {
       return false;
     }
 
-    public boolean overlapsWithVisibleRegion(int offset, int length) {
+    @Override
+	public boolean overlapsWithVisibleRegion(int offset, int length) {
       return false;
     }
 
-    public void removeTextInputListener(ITextInputListener listener) {
+    @Override
+	public void removeTextInputListener(ITextInputListener listener) {
     }
 
-    public void removeTextListener(ITextListener listener) {
+    @Override
+	public void removeTextListener(ITextListener listener) {
     }
 
-    public void removeViewportListener(IViewportListener listener) {
+    @Override
+	public void removeViewportListener(IViewportListener listener) {
     }
 
-    public void resetPlugins() {
+    @Override
+	public void resetPlugins() {
     }
 
-    public void resetVisibleRegion() {
+    @Override
+	public void resetVisibleRegion() {
     }
 
-    public void revealRange(int offset, int length) {
+    @Override
+	public void revealRange(int offset, int length) {
     }
 
-    public void setAutoIndentStrategy(IAutoIndentStrategy strategy, String contentType) {
+    @Override
+	public void setAutoIndentStrategy(IAutoIndentStrategy strategy, String contentType) {
     }
 
-    public void setDefaultPrefixes(String[] defaultPrefixes, String contentType) {
+    @Override
+	public void setDefaultPrefixes(String[] defaultPrefixes, String contentType) {
     }
 
-    public void setDocument(IDocument document) {
+    @Override
+	public void setDocument(IDocument document) {
     }
 
-    public void setDocument(IDocument document, int modelRangeOffset, int modelRangeLength) {
+    @Override
+	public void setDocument(IDocument document, int modelRangeOffset, int modelRangeLength) {
     }
 
-    public void setEditable(boolean editable) {
+    @Override
+	public void setEditable(boolean editable) {
     }
 
-    public void setEventConsumer(IEventConsumer consumer) {
+    @Override
+	public void setEventConsumer(IEventConsumer consumer) {
     }
 
-    public void setIndentPrefixes(String[] indentPrefixes, String contentType) {
+    @Override
+	public void setIndentPrefixes(String[] indentPrefixes, String contentType) {
     }
 
-    public void setSelectedRange(int offset, int length) {
+    @Override
+	public void setSelectedRange(int offset, int length) {
     }
 
-    public void setTextDoubleClickStrategy(ITextDoubleClickStrategy strategy, String contentType) {
+    @Override
+	public void setTextDoubleClickStrategy(ITextDoubleClickStrategy strategy, String contentType) {
     }
 
-    public void setTextHover(ITextHover textViewerHover, String contentType) {
+    @Override
+	public void setTextHover(ITextHover textViewerHover, String contentType) {
     }
 
-    public void setTopIndex(int index) {
+    @Override
+	public void setTopIndex(int index) {
     }
 
-    public void setUndoManager(IUndoManager undoManager) {
+    @Override
+	public void setUndoManager(IUndoManager undoManager) {
     }
 
-    public void setVisibleRegion(int offset, int length) {
+    @Override
+	public void setVisibleRegion(int offset, int length) {
     }
 
-    public ISelectionProvider getSelectionProvider() {
+    @Override
+	public ISelectionProvider getSelectionProvider() {
       return null;
     }
 
-    public Point getSelectedRange() {
+    @Override
+	public Point getSelectedRange() {
       return null;
     }
 
-    public StyledText getTextWidget() {
+    @Override
+	public StyledText getTextWidget() {
       return null;
     }
 
-    public void setTextColor(Color color) {
+    @Override
+	public void setTextColor(Color color) {
     }
 
-    public void setTextColor(Color color, int offset, int length, boolean controlRedraw) {
+    @Override
+	public void setTextColor(Color color, int offset, int length, boolean controlRedraw) {
     }
   }
 }

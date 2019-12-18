@@ -13,10 +13,15 @@
 
 package org.eclipse.m2e.editor.xml;
 
+import static org.junit.Assert.fail;
+
+import org.apache.maven.project.MavenProject;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.text.source.IOverviewRuler;
 import org.eclipse.jface.text.source.IVerticalRuler;
+import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
+import org.eclipse.m2e.tests.common.RequireMavenExecutionContext;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -30,12 +35,6 @@ import org.eclipse.wst.sse.ui.internal.StructuredTextViewer;
 import org.eclipse.wst.xml.ui.StructuredTextViewerConfigurationXML;
 import org.junit.After;
 import org.junit.Before;
-
-import static org.junit.Assert.fail;
-
-import org.apache.maven.project.MavenProject;
-import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
-import org.eclipse.m2e.tests.common.RequireMavenExecutionContext;
 
 
 @SuppressWarnings("restriction")
@@ -109,7 +108,8 @@ public abstract class AbstractPOMEditorTestCase extends AbstractMavenProjectTest
       this.mavenProject = mp;
     }
 
-    public <T> T getAdapter(Class<T> adapter) {
+    @Override
+	public <T> T getAdapter(Class<T> adapter) {
       if(MavenProject.class.equals(adapter)) {
         return adapter.cast(mavenProject);
       }

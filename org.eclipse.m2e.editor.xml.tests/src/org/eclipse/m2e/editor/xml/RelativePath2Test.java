@@ -30,7 +30,8 @@ import org.junit.Test;
 
 public class RelativePath2Test extends AbstractCompletionTest {
 
-  protected IFile loadProjectsAndFiles() throws Exception {
+  @Override
+protected IFile loadProjectsAndFiles() throws Exception {
     // Create the projects
     IProject[] projects = importProjects("projects/MNGECLIPSE-2601", new String[] {"parent2601/pom.xml",
         "parent2601/child2/pom.xml"}, new ResolverConfiguration());
