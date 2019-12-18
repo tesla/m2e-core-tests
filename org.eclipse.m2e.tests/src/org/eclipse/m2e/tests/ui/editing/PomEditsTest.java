@@ -24,13 +24,18 @@ import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.childMissingOrEq
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.findChild;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.findChilds;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.removeIfNoChildElement;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
+import org.junit.Before;
+import org.junit.Test;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import junit.framework.TestCase;
 
 import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
@@ -39,15 +44,16 @@ import org.eclipse.m2e.core.ui.internal.editing.PomEdits;
 
 
 @SuppressWarnings("restriction")
-public class PomEditsTest extends TestCase {
+public class PomEditsTest {
   private IDOMModel tempModel;
 
-  @Override
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     tempModel = (IDOMModel) StructuredModelManager.getModelManager().createUnManagedStructuredModelFor(
         "org.eclipse.m2e.core.pomFile");
   }
 
+  @Test
   public void testRemoveChild() {
     assertEquals("<project></project>", removeChild("<project><build></build></project>"));
     assertEquals("<project>a</project>", removeChild("<project>a\nb<build></build></project>"));
@@ -70,6 +76,7 @@ public class PomEditsTest extends TestCase {
     return tempModel.getStructuredDocument().getText();
   }
 
+  @Test
   public void testRemoveIfNoChildElement() {
     tempModel.getStructuredDocument().setText(
         StructuredModelManager.getModelManager(),
@@ -95,6 +102,7 @@ public class PomEditsTest extends TestCase {
 
   }
 
+  @Test
   public void testMatchers() {
     tempModel.getStructuredDocument().setText(
         StructuredModelManager.getModelManager(),
@@ -121,6 +129,7 @@ public class PomEditsTest extends TestCase {
     assertNotNull(findChild(el, "tag3"));
   }
 
+  @Test
   public void testFindChild() {
     tempModel.getStructuredDocument().setText(StructuredModelManager.getModelManager(), //
         "<dependencies>" + //
@@ -140,6 +149,7 @@ public class PomEditsTest extends TestCase {
     assertDependencyChild(null, "AAA", "BBB", "tag1", dep);
   }
 
+  @Test
   public void testFindChildren() {
     tempModel.getStructuredDocument().setText(StructuredModelManager.getModelManager(), //
         "<dependencies>" + //

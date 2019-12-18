@@ -13,16 +13,15 @@
 
 package org.eclipse.m2e.tests;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
 
 import org.eclipse.m2e.core.ui.internal.wizards.MavenProjectWizardArchetypeParametersPage;
 
 
-/**
- * @author @author Eugene Kuleshov
- */
-public class JavaUtilTest extends TestCase {
-
+public class JavaUtilTest {
+  @Test
   public void testGetDefaultJavaPackage() {
     assertEquals("", MavenProjectWizardArchetypeParametersPage.getDefaultJavaPackage("", ""));
     assertEquals("aaa.bbb", MavenProjectWizardArchetypeParametersPage.getDefaultJavaPackage("aaa", "bbb"));

@@ -13,6 +13,12 @@
 
 package org.eclipse.m2e.tests.ui.editing;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Before;
+import org.junit.Test;
+
 import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
@@ -35,13 +41,8 @@ public class AddExclusionOperationTest extends AbstractOperationTest {
 
   private ArtifactKey e;
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see junit.framework.TestCase#setUp()
-   */
-  @Override
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     tempModel = (IDOMModel) StructuredModelManager.getModelManager().createUnManagedStructuredModelFor(
         "org.eclipse.m2e.core.pomFile");
     document = tempModel.getStructuredDocument();
@@ -54,6 +55,7 @@ public class AddExclusionOperationTest extends AbstractOperationTest {
     e = new ArtifactKey("g", "a", "1.0", null);
   }
 
+  @Test
   public void testMissingDependency_noDependenciesElement() throws Exception {
     document.setText(StructuredModelManager.getModelManager(), //
         "<project></project>");
@@ -62,6 +64,7 @@ public class AddExclusionOperationTest extends AbstractOperationTest {
         dependencyCount(tempModel, d));
   }
 
+  @Test
   public void testMissingDependency_emptyDependenciesElement() throws Exception {
     document.setText(StructuredModelManager.getModelManager(), //
         "<project><dependencies>" + //
@@ -71,6 +74,7 @@ public class AddExclusionOperationTest extends AbstractOperationTest {
         dependencyCount(tempModel, d));
   }
 
+  @Test
   public void testMissingDependency_withDependencies() throws Exception {
     document.setText(StructuredModelManager.getModelManager(), //
         "<project><dependencies>" + //
@@ -83,6 +87,7 @@ public class AddExclusionOperationTest extends AbstractOperationTest {
     assertEquals("Dependency Count: \n" + document.getText(), 2, getDependencyCount(tempModel));
   }
 
+  @Test
   public void testAddExclusion() throws Exception {
     document.setText(StructuredModelManager.getModelManager(), //
         "<project><dependencies>" + //
@@ -98,6 +103,7 @@ public class AddExclusionOperationTest extends AbstractOperationTest {
     assertEquals("Dependency Count: \n" + document.getText(), 3, getDependencyCount(tempModel));
   }
 
+  @Test
   public void testAddExclusion_duplicateExclusion() throws Exception {
     document
         .setText(
@@ -121,6 +127,7 @@ public class AddExclusionOperationTest extends AbstractOperationTest {
     assertEquals("Dependency Count: \n" + document.getText(), 3, getDependencyCount(tempModel));
   }
 
+  @Test
   public void testAddExclusion_existingExclusion() throws Exception {
     document
         .setText(

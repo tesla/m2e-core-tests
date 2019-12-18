@@ -13,14 +13,17 @@
 
 package org.eclipse.m2e.tests.project;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import org.eclipse.m2e.core.project.MavenProjectInfo;
 
 
-public class MavenProjectInfoTest extends TestCase {
+public class MavenProjectInfoTest {
+  @Test
   public void testTwoChildProjectInfosWithSameLabel() throws Exception {
     File baseDir = new File("projects/mavenprojectinfo/twochildrensamelabel");
     MavenProjectInfo parent = new MavenProjectInfo("parent", new File(baseDir, "pom.xml"), null /*model*/, null /*parent*/);

@@ -13,13 +13,19 @@
 
 package org.eclipse.m2e.tests.internal.lifecyclemapping;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 
@@ -32,8 +38,8 @@ import org.eclipse.m2e.core.lifecyclemapping.model.IPluginExecutionMetadata;
 /**
  * Sorts a list of {@link IPluginExecutionMetadata}s
  */
-public class ProjectConfigurationElementSorterTest extends TestCase {
-
+public class ProjectConfigurationElementSorterTest {
+  @Test
   public void testSortConfigurators_HappyPath() throws Exception {
 
     ConfiguratorMock c0 = ConfiguratorMock.create("c0", "c1, c2", "c4,");
@@ -62,6 +68,7 @@ public class ProjectConfigurationElementSorterTest extends TestCase {
     assertEquals(0, sorter.getIncompleteConfigurators().size());
   }
 
+  @Test
   public void testSortConfigurators_CycleDetected() throws Exception {
 
     ConfiguratorMock c0 = ConfiguratorMock.create("c0", "c1, c2", "c4");
@@ -82,6 +89,7 @@ public class ProjectConfigurationElementSorterTest extends TestCase {
     }
   }
 
+  @Test
   public void testSortConfigurators_MissingFollowingConfigurator() throws Exception {
 
     ConfiguratorMock c0 = ConfiguratorMock.create("c0");
@@ -113,6 +121,7 @@ public class ProjectConfigurationElementSorterTest extends TestCase {
     assertTrue(c2.id + " is missing from " + result, incompleteMetadatas.contains(c2.id));
   }
 
+  @Test
   public void testSortConfigurators_MissingPreviousConfigurator() throws Exception {
 
     ConfiguratorMock c0 = ConfiguratorMock.create("c0", "optional?");
@@ -152,6 +161,7 @@ public class ProjectConfigurationElementSorterTest extends TestCase {
     assertTrue(c6.id + " is missing from " + result, incompleteMetadatas.contains(c6.id));
   }
 
+  @Test
   public void testSortConfigurators_isRoot() throws Exception {
 
     ConfiguratorMock jdt = ConfiguratorMock.create("jdt");
@@ -172,6 +182,7 @@ public class ProjectConfigurationElementSorterTest extends TestCase {
     assertTrue(android.id + " should be found as root configurator", sorter.isRootConfigurator(android.id));
   }
 
+  @Test
   public void testSortConfigurators_471840() throws Exception {
 
     ConfiguratorMock jdt = ConfiguratorMock.create("jdt");

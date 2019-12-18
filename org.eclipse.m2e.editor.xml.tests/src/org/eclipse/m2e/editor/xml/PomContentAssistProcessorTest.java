@@ -13,7 +13,7 @@
 
 package org.eclipse.m2e.editor.xml;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
 
 import org.eclipse.jface.text.AbstractDocument;
 import org.eclipse.jface.text.BadLocationException;
@@ -35,6 +35,7 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
+import org.junit.Test;
 
 
 /**
@@ -44,8 +45,9 @@ import org.eclipse.swt.graphics.Point;
  * @author mkleint
  */
 
-public class PomContentAssistProcessorTest extends TestCase {
+public class PomContentAssistProcessorTest {
 
+	@Test
   public void testExtractPrefix() throws Exception {
     MockTextViewer v = new MockTextViewer();
     v.doc = new StringDocument("<module>abc</module>");

@@ -13,6 +13,11 @@
 
 package org.eclipse.m2e.tests.embedder;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -20,7 +25,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.IMavenLauncherConfiguration;
@@ -36,17 +42,17 @@ import org.eclipse.m2e.core.project.IMavenProjectFacade;
  * @author Eugene Kuleshov
  */
 @SuppressWarnings("deprecation")
-public class MavenRuntimeManagerTest extends TestCase {
+public class MavenRuntimeManagerTest {
 
   private MavenRuntimeManagerImpl runtimeManager;
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
+  @Before
+  public void setUp() throws Exception {
     runtimeManager = MavenPluginActivator.getDefault().getMavenRuntimeManager();
     runtimeManager.reset();
   }
 
+  @Test
   public void testGetRuntime() throws Exception {
     assertEquals(MavenRuntimeManagerImpl.EMBEDDED, runtimeManager.getRuntime(null).getName());
     assertEquals(MavenRuntimeManagerImpl.EMBEDDED, runtimeManager.getRuntime("").getName());
@@ -59,6 +65,7 @@ public class MavenRuntimeManagerTest extends TestCase {
         .getLocation());
   }
 
+  @Test
   public void testSetDefaultRuntime() throws Exception {
     assertEquals(MavenRuntimeManagerImpl.EMBEDDED, runtimeManager.getRuntime(MavenRuntimeManagerImpl.DEFAULT).getName());
 
@@ -71,6 +78,7 @@ public class MavenRuntimeManagerTest extends TestCase {
     assertFalse(runtimeManager.getMavenRuntimes().isEmpty());
   }
 
+  @Test
   public void testDefaultRuntime() throws Exception {
     AbstractMavenRuntime runtime = runtimeManager.getRuntime(MavenRuntimeManagerImpl.DEFAULT);
     assertFalse(runtime.isEditable());
@@ -116,6 +124,7 @@ public class MavenRuntimeManagerTest extends TestCase {
     assertTrue("slf4j-api bundle is missing from the classpath", foundSlf4j);
   }
 
+  @Test
   public void testExternalRuntime() throws Exception {
     String location = new File("resources/testRuntime").getCanonicalPath();
     AbstractMavenRuntime runtime = new MavenExternalRuntime(location);

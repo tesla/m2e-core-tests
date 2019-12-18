@@ -13,10 +13,12 @@
 
 package org.eclipse.m2e.tests.jdt.internal;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IAccessRule;
@@ -29,14 +31,11 @@ import org.eclipse.m2e.jdt.IClasspathManager;
 import org.eclipse.m2e.jdt.internal.MavenClasspathContainer;
 import org.eclipse.m2e.jdt.internal.MavenClasspathContainerSaveHelper;
 
-
-/**
- * @author Eugene Kuleshov
- */
-public class MavenClasspathContainerSaveHelperTest extends TestCase {
+public class MavenClasspathContainerSaveHelperTest {
 
   private MavenClasspathContainerSaveHelper helper = new MavenClasspathContainerSaveHelper();
 
+  @Test
   public void testClasspathContainerSace() throws Exception {
     IClasspathEntry[] entries = new IClasspathEntry[2];
 

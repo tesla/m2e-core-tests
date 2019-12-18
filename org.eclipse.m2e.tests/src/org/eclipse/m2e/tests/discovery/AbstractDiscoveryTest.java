@@ -4,7 +4,8 @@ package org.eclipse.m2e.tests.discovery;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.equinox.internal.p2.discovery.Catalog;
@@ -21,7 +22,7 @@ import org.eclipse.m2e.internal.discovery.wizards.MavenCatalogConfiguration;
 import org.eclipse.m2e.internal.discovery.wizards.MavenCatalogViewer;
 
 
-public abstract class AbstractDiscoveryTest extends TestCase implements IShellProvider {
+public abstract class AbstractDiscoveryTest implements IShellProvider {
 
   protected Catalog catalog;
 
@@ -29,7 +30,7 @@ public abstract class AbstractDiscoveryTest extends TestCase implements IShellPr
 
   private Shell shell;
 
-  @Override
+  @Before
   public void setUp() throws Exception {
     catalog = new Catalog();
     catalog.setEnvironment(DiscoveryCore.createEnvironment());
@@ -52,7 +53,7 @@ public abstract class AbstractDiscoveryTest extends TestCase implements IShellPr
     shell = new Shell(Workbench.getInstance().getDisplay());
   }
 
-  @Override
+  @After
   public void tearDown() throws Exception {
     shell.dispose();
     shell = null;
