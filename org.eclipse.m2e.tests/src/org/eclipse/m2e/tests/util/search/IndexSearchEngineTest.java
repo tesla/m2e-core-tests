@@ -12,8 +12,6 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.m2e.core.embedder.ArtifactKey;
 import org.eclipse.m2e.core.internal.index.IIndex;
 import org.eclipse.m2e.core.internal.index.IndexedArtifact;
@@ -40,16 +38,16 @@ public class IndexSearchEngineTest extends AbstractMavenProjectTestCase {
     public TestIndex() {
     }
 
-    public IndexedArtifactFile getIndexedArtifactFile(ArtifactKey artifact) throws CoreException {
+    public IndexedArtifactFile getIndexedArtifactFile(ArtifactKey artifact) {
       return null;
     }
 
-    public IndexedArtifactFile identify(File file) throws CoreException {
+    public IndexedArtifactFile identify(File file) {
       return null;
     }
 
     public Collection<IndexedArtifact> find(SearchExpression groupId, SearchExpression artifactId,
-        SearchExpression version, SearchExpression packaging) throws CoreException {
+        SearchExpression version, SearchExpression packaging) {
       Set<IndexedArtifact> results = new HashSet<IndexedArtifact>();
       for(String entry : entries) {
         if(entry.startsWith(groupId.getStringValue())) {
@@ -60,21 +58,17 @@ public class IndexSearchEngineTest extends AbstractMavenProjectTestCase {
       return results;
     }
 
-    public Map<String, IndexedArtifact> search(SearchExpression expression, String searchType) throws CoreException {
-      // TODO Auto-generated method stub
+    public Map<String, IndexedArtifact> search(SearchExpression expression, String searchType) {
       return null;
     }
 
-    public Map<String, IndexedArtifact> search(SearchExpression expression, String searchType, int classifier)
-        throws CoreException {
-      // TODO Auto-generated method stub
+    public Map<String, IndexedArtifact> search(SearchExpression expression, String searchType, int classifier) {
       return null;
     }
 
     public Collection<IndexedArtifact> find(Collection<SearchExpression> groupId,
         Collection<SearchExpression> artifactId, Collection<SearchExpression> version,
-        Collection<SearchExpression> packaging) throws CoreException {
-      // TODO Auto-generated method stub
+        Collection<SearchExpression> packaging) {
       return null;
     }
 

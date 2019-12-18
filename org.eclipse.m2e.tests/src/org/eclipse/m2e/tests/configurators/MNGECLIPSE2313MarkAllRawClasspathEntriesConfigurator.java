@@ -13,10 +13,10 @@
 
 package org.eclipse.m2e.tests.configurators;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.JavaCore;
+
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.configurator.AbstractProjectConfigurator;
 import org.eclipse.m2e.core.project.configurator.ProjectConfigurationRequest;
@@ -34,15 +34,14 @@ public class MNGECLIPSE2313MarkAllRawClasspathEntriesConfigurator extends Abstra
   public MNGECLIPSE2313MarkAllRawClasspathEntriesConfigurator() {
   }
 
-  public void configure(ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException {
+  public void configure(ProjectConfigurationRequest request, IProgressMonitor monitor) {
   }
 
-  public void configureClasspath(IMavenProjectFacade facade, IClasspathDescriptor classpath, IProgressMonitor monitor)
-      throws CoreException {
+  public void configureClasspath(IMavenProjectFacade facade, IClasspathDescriptor classpath, IProgressMonitor monitor) {
   }
 
   public void configureRawClasspath(ProjectConfigurationRequest request, IClasspathDescriptor classpath,
-      IProgressMonitor monitor) throws CoreException {
+      IProgressMonitor monitor) {
 
     for(IClasspathEntryDescriptor entry : classpath.getEntryDescriptors()) {
       entry.setClasspathAttribute(ATTR.getName(), ATTR.getValue());

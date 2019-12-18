@@ -16,7 +16,6 @@ package org.eclipse.m2e.tests;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
@@ -36,18 +35,20 @@ public class TestFancyClassifierClasspathProvider extends AbstractClassifierClas
     return "fancy";
   }
 
+  @Deprecated
   @Override
   public void setRuntimeClasspath(Set<IRuntimeClasspathEntry> runtimeClasspath, IMavenProjectFacade mavenProjectFacade,
-      IProgressMonitor monitor) throws CoreException {
+      IProgressMonitor monitor) {
     Set<IPath> folders = new LinkedHashSet<IPath>();
     folders.add(new Path("src/main/java"));
     folders.add(new Path("src/main/resources"));
     addFolders(runtimeClasspath, mavenProjectFacade.getProject(), folders);
   }
 
+  @Deprecated
   @Override
   public void setTestClasspath(Set<IRuntimeClasspathEntry> testClasspath, IMavenProjectFacade mavenProjectFacade,
-      IProgressMonitor monitor) throws CoreException {
+      IProgressMonitor monitor) {
     Set<IPath> folders = new LinkedHashSet<IPath>();
     folders.add(new Path("src/test/java"));
     folders.add(new Path("src/test/resources"));

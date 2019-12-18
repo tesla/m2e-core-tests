@@ -4,7 +4,6 @@ package org.eclipse.m2e.tests;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.apache.maven.plugin.MojoExecution;
@@ -20,7 +19,7 @@ public class ThrowBuildExceptionProjectConfigurator extends AbstractProjectConfi
   public static final String ERROR_MESSAGE = "ThrowBuildExceptionProjectConfigurator exception ";
 
   @Override
-  public void configure(ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException {
+  public void configure(ProjectConfigurationRequest request, IProgressMonitor monitor) {
   }
 
   @Override

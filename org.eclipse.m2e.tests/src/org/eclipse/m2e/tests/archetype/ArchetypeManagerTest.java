@@ -325,7 +325,7 @@ public class ArchetypeManagerTest extends TestCase {
       RemoteCatalogFactory remoteFactory = new RemoteCatalogFactory(url, null, true);
       archetypeManager.addArchetypeCatalogFactory(remoteFactory);
 
-      List<Archetype> archetypes = (List<Archetype>) remoteFactory.getArchetypeCatalog().getArchetypes();
+      List<Archetype> archetypes = remoteFactory.getArchetypeCatalog().getArchetypes();
       assertEquals(2, archetypes.size());
       Archetype appfuse = archetypes.get(0);
       assertEquals("appfuse-basic-jsf", appfuse.getArtifactId());

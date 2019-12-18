@@ -23,13 +23,11 @@ import org.junit.Test;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.m2e.core.internal.lifecyclemapping.discovery.LifecycleMappingDiscoveryRequest;
 import org.eclipse.m2e.core.ui.internal.wizards.MappingDiscoveryJob;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.m2e.tests.common.JobHelpers;
-import org.eclipse.m2e.tests.common.JobHelpers.IJobMatcher;
 
 
 /**
@@ -62,11 +60,7 @@ public class MappingDiscoveryJobTest extends AbstractMavenProjectTestCase {
   private void checkOpensMappingDiscoveryWizard(IProject project, boolean expectedResult) throws Exception {
     discoveryJob = new MappingDiscoveryJobNoUI(Collections.singleton(project));
     discoveryJob.schedule();
-    JobHelpers.waitForJobs(new IJobMatcher() {
-      public boolean matches(Job job) {
-        return discoveryJob == job;
-      }
-    }, 100);
+    JobHelpers.waitForJobs(job -> discoveryJob == job, 100);
     assertEquals("MappingDiscoveryJob was " + (expectedResult ? "" : "not ") + "supposed to open", expectedResult,
         discoveryJob.openedMappingWizard);
   }

@@ -168,7 +168,7 @@ public class NexusIndexManagerSearchTest extends AbstractNexusIndexManagerTest {
   @Test
   public void testSearchGroups() throws CoreException {
     try {
-      Collection<IndexedArtifact> result = indexManager.getIndex((IProject) null).find(new SourcedSearchExpression(""),
+      indexManager.getIndex((IProject) null).find(new SourcedSearchExpression(""),
           null, null, null);
 //      assertTrue(String.format("Wrong result set returned! (size=%s)", new Object[] {result.size()}),
 //          result.size() == 0);

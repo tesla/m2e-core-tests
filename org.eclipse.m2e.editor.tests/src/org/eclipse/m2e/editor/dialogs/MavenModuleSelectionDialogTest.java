@@ -33,10 +33,10 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TreeItem;
 
 import org.eclipse.m2e.core.project.ResolverConfiguration;
-import org.eclipse.m2e.editor.AbstractMavenProjectTestJunit4;
+import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 
 
-public class MavenModuleSelectionDialogTest extends AbstractMavenProjectTestJunit4 {
+public class MavenModuleSelectionDialogTest extends AbstractMavenProjectTestCase {
 
   private static final String PROJECT1 = "project1";
 

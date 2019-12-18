@@ -16,7 +16,6 @@ package org.eclipse.m2e.tests.conversion;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.util.Hashtable;
 
 import org.junit.After;
@@ -116,11 +115,7 @@ public class ProjectConversionTest extends AbstractProjectConversionTestCase {
     assertTrue(projectName + " was not created!", project.exists());
     assertNoErrors(project);
     String svnDir = "JavaSource/foo/.svn";
-    FileHelpers.copyDir(new File(srcDir, svnDir), project.getFolder(svnDir).getLocation().toFile(), new FileFilter() {
-      public boolean accept(File pathname) {
-        return true;
-      }
-    });
+    FileHelpers.copyDir(new File(srcDir, svnDir), project.getFolder(svnDir).getLocation().toFile(), pathname -> true);
     project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
     waitForJobsToComplete();
     assertTrue(project.getFolder(svnDir).getFile("hidden/index.properties").exists());

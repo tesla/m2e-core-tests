@@ -69,11 +69,7 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
 
   private static final String SETTINGS_ECLIPSE_REPO = "src/org/eclipse/m2e/tests/internal/index/public_mirror_repo_settings.xml";
 
-  private static final String SETTINGS_PUBLIC_REPO = "src/org/eclipse/m2e/tests/internal/index/public_settings.xml";
-
   private static final String REPO_URL_ECLIPSE = "http://repository.sonatype.org/content/repositories/eclipse";
-
-  private static final String REPO_URL_PUBLIC = "http://repository.sonatype.org/content/groups/public/";
 
   private IMavenConfiguration mavenConfiguration = MavenPlugin.getMavenConfiguration();
 
@@ -276,7 +272,6 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
    */
   @Test
   public void testIndexedArtifactGroups() throws Exception {
-    String publicName = "nexus";
     final File mirroredRepoFile = new File(SETTINGS_ECLIPSE_REPO);
 
     assertTrue(mirroredRepoFile.exists());
