@@ -6,8 +6,9 @@ import static org.junit.Assert.fail;
 
 import java.util.Collections;
 
-import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import org.eclipse.core.runtime.CoreException;
@@ -25,31 +26,30 @@ import org.eclipse.m2e.tests.common.HttpServer;
 @SuppressWarnings("restriction")
 public class MavenDiscoveryInstallOperationTest extends AbstractDiscoveryTest {
 
-  private HttpServer httpServer;
+  private static HttpServer httpServer;
 
   private static final IProgressMonitor monitor = new NullProgressMonitor();
+
+  @BeforeClass
+  public static void prep() throws Exception {
+    httpServer = new HttpServer();
+    httpServer.addResources("/", "resources/p2discoveryRepo");
+    httpServer.setHttpPort(10123);
+    httpServer.start();
+  }
 
   @Override
   @Before
   public void setUp() throws Exception {
     super.setUp();
-    httpServer = new HttpServer();
-    httpServer.addResources("/", "resources/p2discoveryRepo");
-    httpServer.setHttpPort(10123);
-    httpServer.start();
     updateMavenCatalog();
   }
 
-  @Override
-  @After
-  public void tearDown() throws Exception {
-    try {
+  @AfterClass
+  public static void tear() throws Exception {
       if(httpServer != null) {
         httpServer.stop();
       }
-    } finally {
-      super.tearDown();
-    }
   }
 
   @Test
