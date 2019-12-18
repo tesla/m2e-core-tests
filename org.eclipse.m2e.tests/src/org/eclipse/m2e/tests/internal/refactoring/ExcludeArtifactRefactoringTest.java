@@ -478,6 +478,7 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
       return editor;
     }
 
+    @Override
     public void run() {
       try {
         editor = (MavenPomEditor) getActivePage()

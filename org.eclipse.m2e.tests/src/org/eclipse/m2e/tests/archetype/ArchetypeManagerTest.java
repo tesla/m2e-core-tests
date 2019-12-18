@@ -53,6 +53,7 @@ public class ArchetypeManagerTest extends TestCase {
 
   private ArchetypeManager archetypeManager;
 
+  @Override
   protected void setUp() throws Exception {
     super.setUp();
 

@@ -34,7 +34,7 @@ public class ResourceDeltaStub extends PlatformObject implements IResourceDelta 
 
   private int flags;
 
-  private List<IResourceDelta> children = new ArrayList<IResourceDelta>();
+  private List<IResourceDelta> children = new ArrayList<>();
 
   public ResourceDeltaStub(IResource resource) {
     this.resource = resource;
@@ -47,14 +47,17 @@ public class ResourceDeltaStub extends PlatformObject implements IResourceDelta 
     return child;
   }
 
+  @Override
   public void accept(IResourceDeltaVisitor visitor) throws CoreException {
     accept(visitor, 0);
   }
 
+  @Override
   public void accept(IResourceDeltaVisitor visitor, boolean includePhantoms) throws CoreException {
     accept(visitor, includePhantoms ? IContainer.INCLUDE_PHANTOMS : 0);
   }
 
+  @Override
   public void accept(IResourceDeltaVisitor visitor, int memberFlags) throws CoreException {
     if(!visitor.visit(this)) {
       return;
@@ -64,6 +67,7 @@ public class ResourceDeltaStub extends PlatformObject implements IResourceDelta 
     }
   }
 
+  @Override
   public IResourceDelta findMember(IPath path) {
     int segmentCount = path.segmentCount();
     if(segmentCount == 0) {
@@ -80,16 +84,19 @@ public class ResourceDeltaStub extends PlatformObject implements IResourceDelta 
     return null;
   }
 
+  @Override
   public IResourceDelta[] getAffectedChildren() {
     return getAffectedChildren(ADDED | REMOVED | CHANGED, IResource.NONE);
   }
 
+  @Override
   public IResourceDelta[] getAffectedChildren(int kindMask) {
     return getAffectedChildren(kindMask, IResource.NONE);
   }
 
+  @Override
   public IResourceDelta[] getAffectedChildren(int kindMask, int memberFlags) {
-    List<IResourceDelta> result = new ArrayList<IResourceDelta>();
+    List<IResourceDelta> result = new ArrayList<>();
     for(IResourceDelta child : children) {
       if((child.getKind() & kindMask) != 0) {
         result.add(child);
@@ -98,34 +105,42 @@ public class ResourceDeltaStub extends PlatformObject implements IResourceDelta 
     return result.toArray(new IResourceDelta[result.size()]);
   }
 
+  @Override
   public int getKind() {
     return kind;
   }
 
+  @Override
   public int getFlags() {
     return flags;
   }
 
+  @Override
   public IPath getFullPath() {
     return resource.getFullPath();
   }
 
+  @Override
   public IPath getProjectRelativePath() {
     return resource.getProjectRelativePath();
   }
 
+  @Override
   public IMarkerDelta[] getMarkerDeltas() {
     return new IMarkerDelta[0];
   }
 
+  @Override
   public IPath getMovedFromPath() {
     return null;
   }
 
+  @Override
   public IPath getMovedToPath() {
     return null;
   }
 
+  @Override
   public IResource getResource() {
     return resource;
   }

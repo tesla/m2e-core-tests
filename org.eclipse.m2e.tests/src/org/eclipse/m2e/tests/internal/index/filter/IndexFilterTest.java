@@ -55,6 +55,7 @@ public class IndexFilterTest extends TestCase {
 
   public static class TestIndexFilter implements IArtifactFilter {
 
+    @Override
     public IStatus filter(IProject project, ArtifactKey artifact) {
       if(KEY_STATUS_NULL.equals(artifact)) {
         return null;
@@ -75,36 +76,42 @@ public class IndexFilterTest extends TestCase {
 
   static class MockIndex implements IIndex {
 
-    private Map<String, IndexedArtifact> artifacts = new LinkedHashMap<String, IndexedArtifact>();
+    private Map<String, IndexedArtifact> artifacts = new LinkedHashMap<>();
 
     public void addIndexedArtifact(IndexedArtifact artifact) {
       String key = artifact.getGroupId() + ":" + artifact.getArtifactId();
       artifacts.put(key, artifact);
     }
 
+    @Override
     public IndexedArtifactFile getIndexedArtifactFile(ArtifactKey artifact) {
       throw new UnsupportedOperationException();
     }
 
+    @Override
     public IndexedArtifactFile identify(File file) {
       throw new UnsupportedOperationException();
     }
 
+    @Override
     public Collection<IndexedArtifact> find(SearchExpression groupId, SearchExpression artifactId,
         SearchExpression version, SearchExpression packaging) {
       return artifacts.values();
     }
 
+    @Override
     public Collection<IndexedArtifact> find(Collection<SearchExpression> groupId,
         Collection<SearchExpression> artifactId, Collection<SearchExpression> version,
         Collection<SearchExpression> packaging) {
       return artifacts.values();
     }
 
+    @Override
     public Map<String, IndexedArtifact> search(SearchExpression expression, String searchType) {
       return artifacts;
     }
 
+    @Override
     public Map<String, IndexedArtifact> search(SearchExpression expression, String searchType, int classifier) {
       return artifacts;
     }
@@ -134,7 +141,7 @@ public class IndexFilterTest extends TestCase {
 
     IIndex filtered = new FilteredIndex(null, index);
 
-    List<IndexedArtifact> result = new ArrayList<IndexedArtifact>(filtered.find((Collection<SearchExpression>) null,
+    List<IndexedArtifact> result = new ArrayList<>(filtered.find((Collection<SearchExpression>) null,
         null, null, null));
     assertEquals(1, result.size());
     assertEquals(4, result.get(0).getFiles().size()); // error got filtered out
@@ -149,7 +156,8 @@ public class IndexFilterTest extends TestCase {
 
     IIndex filtered = new FilteredIndex(null, index);
 
-    List<IndexedArtifact> result = new ArrayList<IndexedArtifact>(filtered.find((Collection<SearchExpression>) null,
+    List<IndexedArtifact> result = new ArrayList<>(
+        filtered.find((Collection<SearchExpression>) null,
         null, null, null));
     assertEquals(0, result.size());
   }

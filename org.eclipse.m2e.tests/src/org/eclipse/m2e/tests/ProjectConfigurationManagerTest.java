@@ -84,11 +84,13 @@ import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
 public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCase {
 
+  @Override
   @Before
   public void setUp() throws Exception {
     super.setUp();
   }
 
+  @Override
   @After
   public void tearDown() throws Exception {
     super.tearDown();
@@ -128,7 +130,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     File dst = new File(root.getLocation().toFile(), src.getName());
     copyDir(src, dst);
 
-    final ArrayList<MavenProjectInfo> projectInfos = new ArrayList<MavenProjectInfo>();
+    final ArrayList<MavenProjectInfo> projectInfos = new ArrayList<>();
     projectInfos.add(new MavenProjectInfo("label", new File(dst, "pom.xml"), null, null));
     projectInfos.get(0).setBasedirRename(renameRequired);
 
@@ -147,6 +149,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
       injectFilexWagon();
       FilexWagon.setRequestFilterPattern("test/.*", true);
       IJobChangeListener jobChangeListener = new JobChangeAdapter() {
+        @Override
         public void scheduled(IJobChangeEvent event) {
           if(event.getJob() instanceof ProjectRegistryRefreshJob) {
             // cancel all those concurrent refresh jobs, we want to monitor the main thread only

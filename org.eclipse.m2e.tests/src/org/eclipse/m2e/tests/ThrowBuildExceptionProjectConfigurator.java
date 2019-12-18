@@ -26,6 +26,7 @@ public class ThrowBuildExceptionProjectConfigurator extends AbstractProjectConfi
   public AbstractBuildParticipant getBuildParticipant(IMavenProjectFacade projectFacade, MojoExecution execution,
       IPluginExecutionMetadata executionMetadata) {
     return new AbstractBuildParticipant() {
+      @Override
       public Set<IProject> build(int kind, IProgressMonitor monitor) throws Exception {
         throw new Exception(ERROR_MESSAGE + System.currentTimeMillis() + System.nanoTime());
       }

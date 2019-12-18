@@ -58,6 +58,7 @@ public class MavenLaunchDelegateTest {
     runner = new MockVMRunner();
 
     launcher = new MavenLaunchDelegate() {
+      @Override
       public IVMRunner getVMRunner(ILaunchConfiguration configuration, String mode) {
         return runner;
       }

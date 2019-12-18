@@ -109,23 +109,17 @@ public class ProjectConversionEnablerTest extends AbstractProjectConversionTestC
 
     public static final String[] PACKAGING = {"jar", "war", "rar"};
 
-    /* (non-Javadoc)
-     * @see org.eclipse.m2e.core.project.conversion.IProjectConversionEnabler#accept(org.eclipse.core.resources.IProject)
-     */
+    @Override
     public boolean accept(IProject project) {
       return (project != null && project.getName().equals("foo"));
     }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.m2e.core.project.conversion.IProjectConversionEnabler#canBeConverted(org.eclipse.core.resources.IProject)
-     */
+    @Override
     public IStatus canBeConverted(IProject project) {
       return Status.OK_STATUS;
     }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.m2e.core.project.conversion.IProjectConversionEnabler#getPackagingTypes(org.eclipse.core.resources.IProject)
-     */
+    @Override
     public String[] getPackagingTypes(IProject project) {
       return PACKAGING;
     }
@@ -144,16 +138,12 @@ public class ProjectConversionEnablerTest extends AbstractProjectConversionTestC
 
     public static final String ERR_MSG = "This project cannot be converted to Maven.";
 
-    /* (non-Javadoc)
-     * @see org.eclipse.m2e.core.project.conversion.IProjectConversionEnabler#accept(org.eclipse.core.resources.IProject)
-     */
+    @Override
     public boolean accept(IProject project) {
       return (project != null && project.getName().equals("maven-layout"));
     }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.m2e.core.project.conversion.IProjectConversionEnabler#canBeConverted(org.eclipse.core.resources.IProject)
-     */
+    @Override
     public IStatus canBeConverted(IProject project) {
       return new Status(IStatus.ERROR, "org.eclipse.m2e.tests", ERR_MSG);
 

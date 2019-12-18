@@ -38,12 +38,14 @@ import org.eclipse.m2e.tests.common.FileHelpers;
  */
 public class ProjectConversionTest extends AbstractProjectConversionTestCase {
 
+  @Override
   @Before
   public void setUp() throws Exception {
     super.setUp();
     System.setProperty("org.eclipse.m2e.jdt.conversion.compiler.version", "2.3.2");
   }
 
+  @Override
   @After
   public void tearDown() throws Exception {
     System.clearProperty("org.eclipse.m2e.jdt.conversion.compiler.version");

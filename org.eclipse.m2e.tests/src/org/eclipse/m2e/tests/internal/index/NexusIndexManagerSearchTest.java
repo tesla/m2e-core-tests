@@ -60,6 +60,7 @@ public class NexusIndexManagerSearchTest extends AbstractNexusIndexManagerTest {
 
   private RepositoryRegistry repositoryRegistry = (RepositoryRegistry) MavenPlugin.getRepositoryRegistry();
 
+  @Override
   @Before
   public void setUp() throws Exception {
     super.setUp();

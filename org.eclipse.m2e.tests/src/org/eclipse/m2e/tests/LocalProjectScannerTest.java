@@ -13,6 +13,10 @@
 
 package org.eclipse.m2e.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -25,7 +29,8 @@ import java.util.Random;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -37,16 +42,17 @@ import org.eclipse.m2e.core.project.LocalProjectScanner;
 import org.eclipse.m2e.core.project.MavenProjectInfo;
 
 
-public class LocalProjectScannerTest extends TestCase {
+public class LocalProjectScannerTest {
 
   private MavenModelManager modelManager;
 
-  protected void setUp() throws Exception {
-    super.setUp();
+  @Before
+  public void setUp() throws Exception {
 
     modelManager = MavenPlugin.getMavenModelManager();
   }
 
+  @Test
   public void testDeepNesting() throws Exception {
     File baseDir = new File("projects/localprojectscanner/deepnesting/parent").getCanonicalFile();
 
@@ -60,14 +66,14 @@ public class LocalProjectScannerTest extends TestCase {
     assertEquals("/pom.xml", parent.getLabel());
     assertEquals(new File(baseDir, "pom.xml"), parent.getPomFile());
 
-    List<MavenProjectInfo> modules = new ArrayList<MavenProjectInfo>(parent.getProjects());
+    List<MavenProjectInfo> modules = new ArrayList<>(parent.getProjects());
     assertEquals(1, modules.size());
 
     MavenProjectInfo module = modules.get(0);
     assertEquals("module/pom.xml", module.getLabel());
     assertEquals(new File(baseDir, "module/pom.xml"), module.getPomFile());
 
-    List<MavenProjectInfo> submodules = new ArrayList<MavenProjectInfo>(module.getProjects());
+    List<MavenProjectInfo> submodules = new ArrayList<>(module.getProjects());
     assertEquals(1, submodules.size());
 
     MavenProjectInfo submodule = submodules.get(0);
@@ -80,6 +86,7 @@ public class LocalProjectScannerTest extends TestCase {
    * 
    * @throws Exception
    */
+  @Test
   public void testModuleReferencedByFile() throws Exception {
     File baseDir = new File("projects/localprojectscanner/module_referenced_by_file/parent").getCanonicalFile();
 
@@ -93,7 +100,7 @@ public class LocalProjectScannerTest extends TestCase {
     assertEquals("/pom.xml", parent.getLabel());
     assertEquals(new File(baseDir, "pom.xml"), parent.getPomFile());
 
-    List<MavenProjectInfo> modules = new ArrayList<MavenProjectInfo>(parent.getProjects());
+    List<MavenProjectInfo> modules = new ArrayList<>(parent.getProjects());
     assertEquals(1, modules.size());
 
     MavenProjectInfo module = modules.get(0);
@@ -109,6 +116,7 @@ public class LocalProjectScannerTest extends TestCase {
    * 
    * @throws Exception
    */
+  @Test
   public void testSkipNested() throws Exception {
     File baseDir = new File("projects/localprojectscanner/skip_nested").getCanonicalFile();
 
@@ -125,7 +133,7 @@ public class LocalProjectScannerTest extends TestCase {
   }
 
   private Map<File, MavenProjectInfo> toPathMap(List<MavenProjectInfo> projects) throws IOException {
-    SortedMap<File, MavenProjectInfo> result = new TreeMap<File, MavenProjectInfo>();
+    SortedMap<File, MavenProjectInfo> result = new TreeMap<>();
     addPathMap(result, projects);
     return result;
   }
@@ -140,6 +148,7 @@ public class LocalProjectScannerTest extends TestCase {
     }
   }
 
+  @Test
   public void testDeepNesting002() throws Exception {
     File baseDir = new File("projects/localprojectscanner/deepnesting/parent").getCanonicalFile();
 
@@ -154,14 +163,14 @@ public class LocalProjectScannerTest extends TestCase {
     assertEquals("/parent/pom.xml", parent.getLabel());
     assertEquals(new File(baseDir, "pom.xml"), parent.getPomFile());
 
-    List<MavenProjectInfo> modules = new ArrayList<MavenProjectInfo>(parent.getProjects());
+    List<MavenProjectInfo> modules = new ArrayList<>(parent.getProjects());
     assertEquals(1, modules.size());
 
     MavenProjectInfo module = modules.get(0);
     assertEquals("module/pom.xml", module.getLabel());
     assertEquals(new File(baseDir, "module/pom.xml"), module.getPomFile());
 
-    List<MavenProjectInfo> submodules = new ArrayList<MavenProjectInfo>(module.getProjects());
+    List<MavenProjectInfo> submodules = new ArrayList<>(module.getProjects());
     assertEquals(1, submodules.size());
 
     MavenProjectInfo submodule = submodules.get(0);
@@ -169,6 +178,7 @@ public class LocalProjectScannerTest extends TestCase {
     assertEquals(new File(baseDir, "module/submodule/pom.xml"), submodule.getPomFile());
   }
 
+  @Test
   public void testModuleCorrelationInverse() throws Exception {
     /*
      * Currently, we do NOT correlate modules to "top-level" project.
@@ -176,7 +186,7 @@ public class LocalProjectScannerTest extends TestCase {
      */
     File baseDir = new File("projects/localprojectscanner/modulecorrelation/parent").getCanonicalFile();
 
-    List<String> folders = new ArrayList<String>();
+    List<String> folders = new ArrayList<>();
     folders.add(new File(baseDir, "submodule").getAbsolutePath());
     folders.add(new File(baseDir, "module").getAbsolutePath());
 
@@ -195,7 +205,7 @@ public class LocalProjectScannerTest extends TestCase {
     assertEquals(new File(baseDir, "module/pom.xml").getCanonicalFile(), module.getPomFile().getCanonicalFile());
 
     // inverse order gives better result
-    folders = new ArrayList<String>();
+    folders = new ArrayList<>();
     folders.add(new File(baseDir, "module").getAbsolutePath());
     folders.add(new File(baseDir, "submodule").getAbsolutePath());
 
@@ -210,6 +220,7 @@ public class LocalProjectScannerTest extends TestCase {
     assertEquals(new File(baseDir, "module/pom.xml").getCanonicalFile(), module.getPomFile().getCanonicalFile());
   }
 
+  @Test
   public void testMNGECLIPSE614_ImportModulesOutsideOfParent() throws Exception {
     File baseDir = new File("projects/localprojectscanner/MNGECLIPSE-614/very-important-parent").getCanonicalFile();
 
@@ -223,7 +234,7 @@ public class LocalProjectScannerTest extends TestCase {
     assertEquals("/pom.xml", parent.getLabel());
     assertEquals(new File(baseDir, "pom.xml"), parent.getPomFile());
 
-    List<MavenProjectInfo> modules = new ArrayList<MavenProjectInfo>(parent.getProjects());
+    List<MavenProjectInfo> modules = new ArrayList<>(parent.getProjects());
     assertEquals(1, modules.size());
 
     MavenProjectInfo module = modules.get(0);
@@ -231,6 +242,7 @@ public class LocalProjectScannerTest extends TestCase {
     assertEquals(new File(baseDir, "../module/pom.xml").getCanonicalFile(), module.getPomFile());
   }
 
+  @Test
   public void testCircleRefs() throws Exception {
     File baseDir = new File("projects/localprojectscanner/circlerefs").getCanonicalFile();
 
@@ -242,6 +254,7 @@ public class LocalProjectScannerTest extends TestCase {
     assertEquals(1, projects.size());
   }
 
+  @Test
   public void testRenameInWorkspace() throws Exception {
     File baseDir = new File("projects/localprojectscanner/rename/mavenNNNNNNNN").getCanonicalFile();
 
@@ -261,6 +274,7 @@ public class LocalProjectScannerTest extends TestCase {
 
   }
 
+  @Test
   public void testStackOverflow() throws Exception {
     File tempDirectory = new File(System.getProperty("java.io.tmpdir"), "/testlink-" + new Random().nextInt(10000));
     tempDirectory.mkdirs();
@@ -284,6 +298,7 @@ public class LocalProjectScannerTest extends TestCase {
     assertFalse(tempDirectory.exists());
   }
 
+  @Test
   public void testNoMetadata() throws Exception {
     File baseDir = new File("projects/localprojectscanner/nometadata").getCanonicalFile();
 
@@ -295,6 +310,7 @@ public class LocalProjectScannerTest extends TestCase {
     assertEquals(1, projects.size());
   }
 
+  @Test
   public void testOutsideWorkspace() throws Exception {
 
     File baseDir = new File("projects/localprojectscanner/341038_projectsOutsideWorkspaceNotRenamed")

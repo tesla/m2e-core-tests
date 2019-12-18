@@ -42,6 +42,8 @@ import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 public class MavenExecutionContextTest extends AbstractMavenProjectTestCase {
 
   MavenImpl maven;
+
+  @Override
 @Before
   public void setUp() throws Exception {
     super.setUp();

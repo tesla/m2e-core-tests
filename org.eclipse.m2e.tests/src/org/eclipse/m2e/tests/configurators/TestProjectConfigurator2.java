@@ -29,6 +29,7 @@ import org.eclipse.m2e.core.project.configurator.ProjectConfigurationRequest;
  * @author Eugene Kuleshov
  */
 public class TestProjectConfigurator2 extends AbstractProjectConfigurator {
+  @Override
   public void configure(ProjectConfigurationRequest request, IProgressMonitor monitor) {
     // do nothing
   }

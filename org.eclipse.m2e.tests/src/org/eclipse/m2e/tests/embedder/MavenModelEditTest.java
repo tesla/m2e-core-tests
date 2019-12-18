@@ -15,16 +15,19 @@ package org.eclipse.m2e.tests.embedder;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 import junit.framework.TestCase;
 
-import org.codehaus.plexus.util.IOUtil;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.emf.common.util.EList;
+
+import org.codehaus.plexus.util.IOUtil;
+
 import org.eclipse.m2e.model.edit.pom.Dependency;
 import org.eclipse.m2e.model.edit.pom.Model;
 import org.eclipse.m2e.model.edit.pom.Parent;
@@ -38,6 +41,7 @@ public class MavenModelEditTest extends TestCase {
 
   private IProject project;
 
+  @Override
   protected void setUp() throws Exception {
     super.setUp();
 
@@ -248,24 +252,8 @@ public class MavenModelEditTest extends TestCase {
   }
 
   private String loadFile(String name) throws IOException {
-    InputStream is = null;
-    try {
-      is = MavenModelEditTest.class.getResourceAsStream(name);
-      return new String(IOUtil.toByteArray(is), "UTF-8").replaceAll("\r\n", "\n");
-    } finally {
-      is.close();
+    try (InputStream is = MavenModelEditTest.class.getResourceAsStream(name)) {
+      return new String(IOUtil.toByteArray(is), StandardCharsets.UTF_8).replaceAll("\r\n", "\n");
     }
   }
-
-//  private String toString(ProjectDocument document) throws IOException {
-//    XmlOptions options = new XmlOptions();
-//    options.setSaveImplicitNamespaces(Collections.singletonMap("", URI));
-//    options.remove(XmlOptions.SAVE_NO_XML_DECL);
-//    
-//    ByteArrayOutputStream os = new ByteArrayOutputStream();
-//    document.save(os, options);
-//  
-//    return new String(os.toByteArray(), "UTF-8").replaceAll("\r\n", "\n");
-//  }
-
 }

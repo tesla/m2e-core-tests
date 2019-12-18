@@ -195,7 +195,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
     assertTrue(maven.isUnavailable(a.getGroupId(), a.getArtifactId(), a.getBaseVersion(), a.getType(),
         a.getClassifier(), null));
 
-    ArrayList<ArtifactRepository> repositories = new ArrayList<ArtifactRepository>();
+    ArrayList<ArtifactRepository> repositories = new ArrayList<>();
     repositories.add(repositorySystem.createDefaultRemoteRepository());
 
     // don't know yet if the artifact is available from defaultRepository
@@ -541,6 +541,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
 
       private Pattern pattern = Pattern.compile("(\\d*)%");
 
+      @Override
       public void subTask(String name) {
         Matcher m = pattern.matcher(name);
         if(m.find()) {

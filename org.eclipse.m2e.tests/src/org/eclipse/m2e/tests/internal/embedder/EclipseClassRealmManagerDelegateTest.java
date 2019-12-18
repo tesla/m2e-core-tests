@@ -35,6 +35,7 @@ public class EclipseClassRealmManagerDelegateTest extends TestCase {
 
   private EclipseClassRealmManagerDelegate delegate;
 
+  @Override
   protected void setUp() throws Exception {
     super.setUp();
 
@@ -45,31 +46,37 @@ public class EclipseClassRealmManagerDelegateTest extends TestCase {
   public void testRealmSetup() throws Exception {
     DummyRealm realm = new DummyRealm();
 
-    final List<ClassRealmConstituent> constituents = new ArrayList<ClassRealmConstituent>();
+    final List<ClassRealmConstituent> constituents = new ArrayList<>();
 
     ClassRealmRequest request = new ClassRealmRequest() {
 
+      @Override
       public List<ClassRealmConstituent> getConstituents() {
         return constituents;
       }
 
+      @Override
       public List<String> getImports() {
-        return new ArrayList<String>();
+        return new ArrayList<>();
       }
 
+      @Override
       public ClassLoader getParent() {
         return null;
       }
 
+      @Override
       public RealmType getType() {
         return RealmType.Plugin;
       }
 
+      @Override
       public Map<String, ClassLoader> getForeignImports() {
         // TODO Auto-generated method stub
         return null;
       }
 
+      @Override
       public List<String> getParentImports() {
         // TODO Auto-generated method stub
         return null;
@@ -98,12 +105,13 @@ public class EclipseClassRealmManagerDelegateTest extends TestCase {
 
   static class DummyRealm extends ClassRealm {
 
-    public List<String> imports = new ArrayList<String>();
+    public List<String> imports = new ArrayList<>();
 
     public DummyRealm() {
       super(null, "test-" + System.currentTimeMillis(), null);
     }
 
+    @Override
     public void importFrom(ClassLoader classLoader, String packageName) {
       imports.add(packageName);
     }
@@ -118,26 +126,32 @@ public class EclipseClassRealmManagerDelegateTest extends TestCase {
       this.version = version;
     }
 
+    @Override
     public String getGroupId() {
       return "org.sonatype.plexus";
     }
 
+    @Override
     public String getArtifactId() {
       return "plexus-build-api";
     }
 
+    @Override
     public String getType() {
       return "jar";
     }
 
+    @Override
     public String getClassifier() {
       return "";
     }
 
+    @Override
     public String getVersion() {
       return version;
     }
 
+    @Override
     public File getFile() {
       return new File("");
     }

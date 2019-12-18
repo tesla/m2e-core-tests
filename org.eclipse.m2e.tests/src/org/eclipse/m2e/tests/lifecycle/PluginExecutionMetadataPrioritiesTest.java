@@ -31,6 +31,7 @@ import org.eclipse.m2e.tests.configurators.TestLifecycleMapping;
 
 @SuppressWarnings("restriction")
 public class PluginExecutionMetadataPrioritiesTest extends AbstractLifecycleMappingTest {
+  @Override
   @After
   public void tearDown() throws Exception {
     super.tearDown();

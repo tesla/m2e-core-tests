@@ -43,6 +43,7 @@ public class ResourceChangeListenerTest extends AbstractMavenProjectTestCase {
 
   IProject project;
 
+  @Override
   @Before
   public void setUp() throws Exception {
     super.setUp();
@@ -57,6 +58,7 @@ public class ResourceChangeListenerTest extends AbstractMavenProjectTestCase {
     waitForJobsToComplete();
   }
 
+  @Override
   @After
   public void tearDown() throws Exception {
     try {

@@ -39,6 +39,7 @@ public class MappingDiscoveryJobTest extends AbstractMavenProjectTestCase {
 
   MappingDiscoveryJobNoUI discoveryJob;
 
+  @Override
   @After
   public void tearDown() throws Exception {
     discoveryJob = null;
@@ -73,10 +74,12 @@ public class MappingDiscoveryJobTest extends AbstractMavenProjectTestCase {
       super(projects);
     }
 
+    @Override
     protected void openProposalWizard(Collection<IProject> projects, LifecycleMappingDiscoveryRequest discoveryRequest) {
       openedMappingWizard = true;
     }
 
+    @Override
     protected void discoverProposals(LifecycleMappingDiscoveryRequest discoveryRequest, IProgressMonitor monitor) {
       //keep it between us
     }

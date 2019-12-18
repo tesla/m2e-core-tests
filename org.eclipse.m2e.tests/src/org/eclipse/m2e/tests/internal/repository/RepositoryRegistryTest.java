@@ -36,6 +36,7 @@ public class RepositoryRegistryTest extends AbstractMavenProjectTestCase {
 
   private RepositoryRegistry repositoryRegistry;
 
+  @Override
   @Before
   public void setUp() throws Exception {
     super.setUp();
@@ -46,6 +47,7 @@ public class RepositoryRegistryTest extends AbstractMavenProjectTestCase {
     repositoryRegistry = (RepositoryRegistry) MavenPlugin.getRepositoryRegistry();
   }
 
+  @Override
   @After
   public void tearDown() throws Exception {
     try {

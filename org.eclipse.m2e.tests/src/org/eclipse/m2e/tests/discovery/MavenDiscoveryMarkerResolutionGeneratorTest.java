@@ -33,6 +33,7 @@ public class MavenDiscoveryMarkerResolutionGeneratorTest extends AbstractLifecyc
 
   IMarkerResolutionGenerator2 generator;
 
+  @Override
   public void setUp() throws Exception {
     super.setUp();
     generator = new MavenDiscoveryMarkerResolutionGenerator();
@@ -105,7 +106,7 @@ public class MavenDiscoveryMarkerResolutionGeneratorTest extends AbstractLifecyc
         "lifecycleId/pom.xml", "mojoExecutions/pom.xml"}, configuration);
     waitForJobsToComplete();
 
-    List<IMarker> errorMarkers = new ArrayList<IMarker>();
+    List<IMarker> errorMarkers = new ArrayList<>();
     for(IProject project : projects) {
       IMavenProjectFacade facade = mavenProjectManager.create(project, monitor);
       IProject p = facade.getProject();

@@ -44,6 +44,7 @@ import org.eclipse.m2e.core.project.configurator.ProjectConfigurationRequest;
  */
 public class TestProjectConfigurator3 extends AbstractProjectConfigurator {
 
+  @Override
   public void configure(ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException {
 
     System.err.println("running " + getName());

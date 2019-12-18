@@ -13,10 +13,15 @@
 
 package org.eclipse.m2e.tests.internal.conversion;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.fail;
+
 import java.util.Arrays;
 import java.util.List;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -36,8 +41,9 @@ import org.eclipse.m2e.core.project.conversion.AbstractProjectConversionParticip
  * @author Fred Bricon
  */
 @SuppressWarnings("restriction")
-public class ProjectConversionParticipantSorterTest extends TestCase {
+public class ProjectConversionParticipantSorterTest {
 
+  @Test
   public void testSortConverters_After() throws Exception {
 
     AbstractProjectConversionParticipant c0 = new MockConverter("c0", "c1, c2");
@@ -60,6 +66,7 @@ public class ProjectConversionParticipantSorterTest extends TestCase {
     assertSame(msg, c4, sortedConverters.get(4));
   }
 
+  @Test
   public void testSortConverters_After2() throws Exception {
 
     AbstractProjectConversionParticipant c0 = new MockConverter("c0", "c2, c1, c2");
@@ -78,6 +85,7 @@ public class ProjectConversionParticipantSorterTest extends TestCase {
     assertSame(msg, c0, sortedConverters.get(2));
   }
 
+  @Test
   public void testSortConverters_AfterBefore() throws Exception {
     AbstractProjectConversionParticipant c0 = new MockConverter("c0", "c1, c2", "c3");
     AbstractProjectConversionParticipant c1 = new MockConverter("c1", " ", " ");
@@ -97,6 +105,7 @@ public class ProjectConversionParticipantSorterTest extends TestCase {
     assertSame(msg, c3, sortedConverters.get(3));
   }
 
+  @Test
   public void testSortConverters_Cycle_After() throws Exception {
 
     AbstractProjectConversionParticipant c0 = new MockConverter("c0", "c1, c2");
@@ -111,6 +120,7 @@ public class ProjectConversionParticipantSorterTest extends TestCase {
     }
   }
 
+  @Test
   public void testSortConverters_Cycle_Before() throws Exception {
 
     AbstractProjectConversionParticipant c0 = new MockConverter("c0", null, "c1");
@@ -124,6 +134,7 @@ public class ProjectConversionParticipantSorterTest extends TestCase {
     }
   }
 
+  @Test
   public void testSortConverters_DuplicateConverters() throws Exception {
 
     AbstractProjectConversionParticipant c0 = new MockConverter("c0");
@@ -160,14 +171,17 @@ public class ProjectConversionParticipantSorterTest extends TestCase {
       this.before = before;
     }
 
+    @Override
     public String getId() {
       return id;
     }
 
+    @Override
     public boolean accept(IProject project) {
       return true;
     }
 
+    @Override
     public void convert(IProject project, Model model, IProgressMonitor monitor) {
     }
 
@@ -181,6 +195,7 @@ public class ProjectConversionParticipantSorterTest extends TestCase {
       return split(before);
     }
 
+    @Override
     public String toString() {
       return getId();
     }

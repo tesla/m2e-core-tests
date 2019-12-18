@@ -92,6 +92,7 @@ public class MavenProjectMutableStateTest extends AbstractMavenProjectTestCase {
     final IMaven maven = MavenPlugin.getMaven();
 
     maven.createExecutionContext().execute(new AbstractRunnable() {
+      @Override
       public void run(IMavenExecutionContext context, IProgressMonitor monitor) throws CoreException {
         IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().create(project, monitor);
         MavenProject mavenProject = facade.getMavenProject(monitor);
@@ -109,7 +110,7 @@ public class MavenProjectMutableStateTest extends AbstractMavenProjectTestCase {
   }
 
   private void assertResourceDirectorues(List<String> expected, List<Resource> actual) {
-    List<String> directories = new ArrayList<String>();
+    List<String> directories = new ArrayList<>();
     for(Resource resource : actual) {
       directories.add(resource.getDirectory());
     }

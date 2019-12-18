@@ -27,10 +27,12 @@ import org.eclipse.m2e.scm.spi.ScmHandler;
  */
 public class TestScmHandler extends ScmHandler {
 
+  @Override
   public InputStream open(String url, String revision) {
     return null;
   }
 
+  @Override
   public void checkoutProject(MavenProjectScmInfo info, File dest, IProgressMonitor monitor) {
   }
 
