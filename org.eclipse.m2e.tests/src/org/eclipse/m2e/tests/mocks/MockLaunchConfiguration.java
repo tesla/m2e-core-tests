@@ -38,8 +38,15 @@ public class MockLaunchConfiguration implements ILaunchConfiguration {
 
   private Map<String, ?> attributes;
 
-  public MockLaunchConfiguration(Map<String, ?> attributes) {
+  private ILaunchConfigurationType type;
+
+  public MockLaunchConfiguration(Map<String, ?> attributes, ILaunchConfigurationType type) {
     this.attributes = attributes;
+    this.type = type;
+  }
+
+  public MockLaunchConfiguration(Map<String, ?> attributes) {
+    this(attributes, null);
   }
 
   @Override
@@ -150,7 +157,7 @@ public class MockLaunchConfiguration implements ILaunchConfiguration {
 
   @Override
   public ILaunchConfigurationType getType() {
-    return null;
+    return this.type;
   }
 
   @Override
