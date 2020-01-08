@@ -438,6 +438,29 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
       httpServer.stop();
     }
   }
+  
+  @Test
+  public void test512006_nonProxyHost() throws Exception {
+    HttpServer httpServer = new HttpServer();
+    httpServer.addResources("/", "");
+    httpServer.start();
+    try {
+      final File settingsFile = new File("target/settings-512006_nonProxyHost.xml");
+      FileHelpers.filterXmlFile(new File("src/org/eclipse/m2e/tests/internal/index/nonProxyHosts_settings.xml"),
+          settingsFile, Collections.singletonMap("@port.http@", Integer.toString(httpServer.getHttpPort())));
+      assertTrue(settingsFile.exists());
+
+      mavenConfiguration.setUserSettingsFile(settingsFile.getCanonicalPath());
+      waitForJobsToComplete();
+
+      String repoUrl = httpServer.getHttpUrl() + "/repositories/remoterepo";
+      updateIndex(repoUrl);
+      IndexedArtifactGroup[] rootGroups = indexManager.getRootIndexedArtifactGroups(getRepository(repoUrl));
+      assertTrue(rootGroups.length > 0);
+    } finally {
+      httpServer.stop();
+    }
+  }
 
   @Test
   public void testMngEclipse1907() throws Exception {
