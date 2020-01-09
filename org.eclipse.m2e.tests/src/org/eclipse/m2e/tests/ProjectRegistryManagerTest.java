@@ -682,7 +682,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     IProject p1 = createExisting("t012-p1");
     waitForJobsToComplete();
 
-    File jar = new File(repo + "/log4j/log4j/1.2.13", "log4j-1.2.13.jar").getAbsoluteFile();
+    File jar = new File(repo + "/org/apache/logging/log4j/log4j-core/2.13.0", "log4-core-2.13-0.jar").getAbsoluteFile();
 //    assertTrue(jar.exists());
 
     jar.delete();
