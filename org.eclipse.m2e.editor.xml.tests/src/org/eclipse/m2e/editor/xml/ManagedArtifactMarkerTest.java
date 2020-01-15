@@ -14,16 +14,30 @@
 package org.eclipse.m2e.editor.xml;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.TextSelection;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.m2e.core.internal.IMavenConstants;
 import org.eclipse.m2e.core.internal.preferences.MavenConfigurationImpl;
 import org.eclipse.m2e.core.internal.preferences.ProblemSeverity;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
+import org.eclipse.m2e.editor.pom.MavenPomEditor;
+import org.eclipse.m2e.editor.xml.internal.markers.OpenManagedVersionDefinitionResolution;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IMarkerResolution;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.ide.IDE;
+import org.eclipse.wst.sse.ui.StructuredTextEditor;
+import org.junit.Assert;
 import org.junit.Test;
 
 
@@ -46,10 +60,10 @@ public class ManagedArtifactMarkerTest extends AbstractMavenProjectTestCase {
     assertEquals(2, markers.length);
     XmlEditorHelpers.assertEditorHintWarningMarker(IMavenConstants.MARKER_POM_LOADING_ID,
         IMavenConstants.EDITOR_HINT_MANAGED_DEPENDENCY_OVERRIDE, null /* message */, 18 /* lineNumber */,
-        2 /* resolutions */, markers[0]);
+        3 /* resolutions */, markers[0]);
     XmlEditorHelpers.assertEditorHintWarningMarker(IMavenConstants.MARKER_POM_LOADING_ID,
         IMavenConstants.EDITOR_HINT_MANAGED_PLUGIN_OVERRIDE, null /* message */, 47 /* lineNumber */,
-        2 /* resolutions */, markers[1]);
+        3 /* resolutions */, markers[1]);
 
     assertEquals("org.apache.maven.plugins", markers[1].getAttribute("groupId"));
     assertEquals("maven-compiler-plugin", markers[1].getAttribute("artifactId"));
@@ -81,10 +95,10 @@ public class ManagedArtifactMarkerTest extends AbstractMavenProjectTestCase {
 
     XmlEditorHelpers.assertEditorHintWarningMarker(IMavenConstants.MARKER_POM_LOADING_ID,
         IMavenConstants.EDITOR_HINT_MANAGED_DEPENDENCY_OVERRIDE, null /* message */, 21 /* lineNumber */,
-        2 /* resolutions */, markers[0]);
+        3 /* resolutions */, markers[0]);
     XmlEditorHelpers.assertEditorHintWarningMarker(IMavenConstants.MARKER_POM_LOADING_ID,
         IMavenConstants.EDITOR_HINT_MANAGED_PLUGIN_OVERRIDE, null /* message */, 41 /* lineNumber */,
-        2 /* resolutions */, markers[1]);
+        3 /* resolutions */, markers[1]);
 
     assertEquals("org.apache.maven.plugins", markers[1].getAttribute("groupId"));
     assertEquals("maven-compiler-plugin", markers[1].getAttribute("artifactId"));
@@ -114,7 +128,7 @@ public class ManagedArtifactMarkerTest extends AbstractMavenProjectTestCase {
 
 	    XmlEditorHelpers.assertEditorHintWarningMarker(IMavenConstants.MARKER_POM_LOADING_ID,
 	        IMavenConstants.EDITOR_HINT_MANAGED_DEPENDENCY_OVERRIDE, null /* message */, 12 /* lineNumber */,
-	        2 /* resolutions */, markers[0]);
+	        3 /* resolutions */, markers[0]);
 
   }
   
@@ -132,15 +146,37 @@ public class ManagedArtifactMarkerTest extends AbstractMavenProjectTestCase {
     assertEquals(2, markers.size());
     XmlEditorHelpers.assertEditorHintErrorMarker(IMavenConstants.MARKER_POM_LOADING_ID,
         IMavenConstants.EDITOR_HINT_MANAGED_DEPENDENCY_OVERRIDE, null /* message */, 18 /* lineNumber */,
-        2 /* resolutions */, markers.get(0));
+        3 /* resolutions */, markers.get(0));
     XmlEditorHelpers.assertEditorHintErrorMarker(IMavenConstants.MARKER_POM_LOADING_ID,
         IMavenConstants.EDITOR_HINT_MANAGED_PLUGIN_OVERRIDE, null /* message */, 47 /* lineNumber */,
-        2 /* resolutions */, markers.get(1));
+        3 /* resolutions */, markers.get(1));
+	verifyOpenManagedResolution(markers.get(0), "1.6.3");
+	verifyOpenManagedResolution(markers.get(1), "2.3.2");
+
     } finally {
        ((MavenConfigurationImpl) mavenConfiguration).setOverridingManagedVersionExecutionSeverity(originalSeverity);
     }
   }
 
+	private void verifyOpenManagedResolution(IMarker marker, String expected) throws BadLocationException {
+		IMarkerResolution[] resolutions = IDE.getMarkerHelpRegistry().getResolutions(marker);
+		for (IMarkerResolution resolution : resolutions) {
+			if (resolution instanceof OpenManagedVersionDefinitionResolution) {
+				resolution.run(marker);
+				IEditorPart editor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
+						.getActiveEditor();
+				assertTrue(editor instanceof MavenPomEditor);
+				StructuredTextEditor sourcePage = ((MavenPomEditor) editor).getSourcePage();
+				TextSelection selection = (TextSelection) sourcePage.getSelectionProvider().getSelection();
+				String string = sourcePage.getTextViewer().getDocument().get(selection.getOffset(), expected.length());
+				assertEquals(expected, string);
+				((MavenPomEditor) editor).close(false);
+				return;
+			}
+		}
+		Assert.fail("OpenManagedVersionDefinitionResolution not found");
+	}
+	
   @Test
   public void test439309_ignoreManagedVersionOverride() throws Exception {
     String originalSeverity = mavenConfiguration.getOverridingManagedVersionExecutionSeverity();
