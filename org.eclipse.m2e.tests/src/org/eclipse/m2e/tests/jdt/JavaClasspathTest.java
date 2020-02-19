@@ -563,6 +563,34 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     assertEquals(expectedCompliance, javaTestJar.getOptions(false).get(JavaCore.COMPILER_COMPLIANCE));
   }
 
+  @Test
+  public void test560165_SetModuleAttributeOnUsedProviders() throws Exception {
+    //Dependencies
+    importProject("projects/560165_usedProviders/service-api/pom.xml");
+    importProject("projects/560165_usedProviders/service-impl/pom.xml");
+    importProject("projects/560165_usedProviders/other-service-impl/pom.xml");
+
+    IProject project = importProject("projects/560165_usedProviders/application/pom.xml");
+    assertNoErrors(project);
+
+    IJavaProject javaProject = JavaCore.create(project);
+
+    IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
+        .getClasspathEntries();
+
+    assertEquals(3, classpathEntries.length);
+    IClasspathEntry serviceImplEntry = classpathEntries[1];
+    IClasspathEntry otherServiceImplEntry = classpathEntries[2];
+    assertEquals("service-impl", serviceImplEntry.getPath().lastSegment());
+    assertEquals("other-service-impl", otherServiceImplEntry.getPath().lastSegment());
+
+    //service-impl is "used" by the application module (transitively)
+    assertModule(serviceImplEntry);
+
+    //other-service-impl is NOT "used" by the application module
+    assertNotModule(otherServiceImplEntry);
+  }
+
   private void assertTest(IClasspathEntry entry) {
     IClasspathAttribute cpAttr = getClasspathAttribute(entry, IClasspathManager.TEST_ATTRIBUTE);
     assertNotNull(entry.getPath().lastSegment() + " is missing the test attribute", cpAttr);
@@ -584,6 +612,17 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     assertNotNull(entry.getPath().lastSegment() + " is missing the without_test_code attribute", cpAttr);
     assertEquals(entry.getPath().lastSegment() + " is missing the without_test_code attribute", "true",
         cpAttr.getValue());
+  }
+
+  private static void assertModule(IClasspathEntry entry) {
+    IClasspathAttribute cpAttr = getClasspathAttribute(entry, IClasspathAttribute.MODULE);
+    assertNotNull(entry.getPath().lastSegment() + " is missing the module attribute", cpAttr);
+    assertEquals(entry.getPath().lastSegment() + " is missing the module attribute", "true", cpAttr.getValue());
+  }
+
+  private static void assertNotModule(IClasspathEntry entry) {
+    IClasspathAttribute cpAttr = getClasspathAttribute(entry, IClasspathAttribute.MODULE);
+    assertNull(entry.getPath().lastSegment() + " should not have the module attribute", cpAttr);
   }
 
   private void updateProjectConfiguration(IProject project) throws CoreException, InterruptedException {
