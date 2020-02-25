@@ -1,4 +1,5 @@
-module service.impl
-{
-  provides service.api.AnInterface with service.impl.AnImpl;
+module service.impl {
+  requires service.api;
+
+  provides service.api.IService with service.impl.ServiceImpl;
 }

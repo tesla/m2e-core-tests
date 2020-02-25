@@ -1,4 +1,3 @@
-module application
-{
+module application {
   requires service.api;
 }

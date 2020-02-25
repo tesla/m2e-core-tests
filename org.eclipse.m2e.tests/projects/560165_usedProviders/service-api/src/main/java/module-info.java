@@ -1,4 +1,5 @@
-module service.api
-{
-  uses service.api.AnInterface;
+module service.api {
+  exports service.api;
+
+  uses service.api.IService;
 }
