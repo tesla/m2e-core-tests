@@ -148,6 +148,8 @@ public class MavenExecutionContextTest extends AbstractMavenProjectTestCase {
       assertNotNull(request.getSystemProperties());
       assertNotNull(request.getSystemProperties().getProperty("java.version"));
       assertNotNull(request.getSystemProperties().getProperty("java.home"));
+      assertNotNull(request.getSystemProperties().getProperty("maven.version"));
+      assertNotNull(request.getSystemProperties().getProperty("maven.build.version"));
       return null;
     }, monitor);
   }
