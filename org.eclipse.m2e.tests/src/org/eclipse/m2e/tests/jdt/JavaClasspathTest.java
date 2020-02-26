@@ -568,6 +568,7 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     //Dependencies
     importProject("projects/560165_usedProviders/service-api/pom.xml");
     importProject("projects/560165_usedProviders/service-impl/pom.xml");
+    importProject("projects/560165_usedProviders/other-service-api/pom.xml");
     importProject("projects/560165_usedProviders/other-service-impl/pom.xml");
 
     IProject project = importProject("projects/560165_usedProviders/application/pom.xml");
@@ -578,9 +579,9 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
         .getClasspathEntries();
 
-    assertEquals(3, classpathEntries.length);
+    assertEquals(4, classpathEntries.length);
     IClasspathEntry serviceImplEntry = classpathEntries[1];
-    IClasspathEntry otherServiceImplEntry = classpathEntries[2];
+    IClasspathEntry otherServiceImplEntry = classpathEntries[3];
     assertEquals("service-impl", serviceImplEntry.getPath().lastSegment());
     assertEquals("other-service-impl", otherServiceImplEntry.getPath().lastSegment());
 
