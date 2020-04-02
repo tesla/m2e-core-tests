@@ -21,9 +21,7 @@ import java.util.List;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.TextSelection;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.m2e.core.internal.IMavenConstants;
 import org.eclipse.m2e.core.internal.preferences.MavenConfigurationImpl;
 import org.eclipse.m2e.core.internal.preferences.ProblemSeverity;
@@ -33,10 +31,9 @@ import org.eclipse.m2e.editor.xml.internal.markers.OpenManagedVersionDefinitionR
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMarkerResolution;
-import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
-import org.eclipse.wst.sse.ui.StructuredTextEditor;
+import org.eclipse.ui.texteditor.ITextEditor;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -166,9 +163,10 @@ public class ManagedArtifactMarkerTest extends AbstractMavenProjectTestCase {
 				IEditorPart editor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
 						.getActiveEditor();
 				assertTrue(editor instanceof MavenPomEditor);
-				StructuredTextEditor sourcePage = ((MavenPomEditor) editor).getSourcePage();
+				ITextEditor sourcePage = ((MavenPomEditor) editor).getSourcePage();
 				TextSelection selection = (TextSelection) sourcePage.getSelectionProvider().getSelection();
-				String string = sourcePage.getTextViewer().getDocument().get(selection.getOffset(), expected.length());
+				String string = sourcePage.getDocumentProvider().getDocument(sourcePage.getEditorInput())
+						.get(selection.getOffset(), expected.length());
 				assertEquals(expected, string);
 				((MavenPomEditor) editor).close(false);
 				return;
