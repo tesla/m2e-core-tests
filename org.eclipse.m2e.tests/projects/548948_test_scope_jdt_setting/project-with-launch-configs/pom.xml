@@ -1,0 +1,185 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.eclipse.m2e</groupId>
+		<artifactId>548948_test_scope_jdt_setting</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>project-with-launch-configs</artifactId>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.eclipse.m2e</groupId>
+			<artifactId>project-with-shared-runtime-code</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.m2e</groupId>
+			<artifactId>project-with-shared-test-code</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<profiles>
+		<profile>
+			<id>
+				exec-scenarios
+			</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>exec-maven-plugin</artifactId>
+						<version>1.6.0</version>
+
+						<executions>
+							<!-- Run "mvn clean verify" to see all combinations of accessible 
+								classpath -->
+							<execution>
+								<id>main-class-in-regular-with-test-scope</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+								<configuration>
+									<classpathScope>test</classpathScope>
+									<executable>java</executable>
+									<arguments>
+										<argument>-classpath</argument>
+										<classpath />
+										<argument>main.sources.LaunchRegularMain</argument>
+										<!-- parameters for main class above -->
+										<argument>main.sources.LaunchRegularMain</argument>
+										<argument>test.sources.LaunchTestMain</argument>
+										<argument>main.sources.DepRegularMain</argument>
+										<argument>test.sources.DepTestMain</argument>
+									</arguments>
+								</configuration>
+								<!-- [DEBUG] Executing command line: [java, -classpath, -->
+								<!-- .../548948_test_scope_jdt_setting/project-with-launch-configs/target/test-classes: -->
+								<!-- .../548948_test_scope_jdt_setting/project-with-launch-configs/target/classes: -->
+								<!-- .../548948_test_scope_jdt_setting/project-with-shared-test-code/target/project-with-shared-test-code-0.0.1-SNAPSHOT.jar: -->
+								<!-- .../548948_test_scope_jdt_setting/project-with-shared-test-code/target/project-with-shared-test-code-0.0.1-SNAPSHOT-tests.jar, -->
+								<!-- main.sources.LaunchRegularMain, -->
+								<!-- main.sources.LaunchRegularMain, test.sources.LaunchTestMain, 
+									main.sources.DepRegularMain, test.sources.DepTestMain] -->
+								<!-- Expected output: -->
+								<!-- LaunchRegularMain loading main.sources.LaunchRegularMain: OK! -->
+								<!-- LaunchRegularMain loading test.sources.LaunchTestMain: OK! -->
+								<!-- LaunchRegularMain loading main.sources.DepRegularMain: OK! -->
+								<!-- LaunchRegularMain loading test.sources.DepTestMain: OK! -->
+							</execution>
+
+							<execution>
+								<id>main-class-in-regular-with-runtime-scope</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+								<configuration>
+									<classpathScope>runtime</classpathScope>
+									<executable>java</executable>
+									<arguments>
+										<argument>-classpath</argument>
+										<classpath />
+										<argument>main.sources.LaunchRegularMain</argument>
+										<!-- parameters for main class above -->
+										<argument>main.sources.LaunchRegularMain</argument>
+										<argument>test.sources.LaunchTestMain</argument>
+										<argument>main.sources.DepRegularMain</argument>
+										<argument>test.sources.DepTestMain</argument>
+									</arguments>
+								</configuration>
+								<!-- [DEBUG] Executing command line: [java, -classpath, -->
+								<!-- /home/karypid/d/wc.git/git.eclipse.org/m2e/548948_test_scope_jdt_setting/project-with-launch-configs/target/classes: -->
+								<!-- /home/karypid/d/wc.git/git.eclipse.org/m2e/548948_test_scope_jdt_setting/project-with-shared-test-code/target/project-with-shared-test-code-0.0.1-SNAPSHOT.jar, -->
+								<!-- main.sources.LaunchRegularMain, -->
+								<!-- main.sources.LaunchRegularMain, test.sources.LaunchTestMain, 
+									main.sources.DepRegularMain, test.sources.DepTestMain] -->
+								<!-- Expected output: -->
+								<!-- LaunchRegularMain loading main.sources.LaunchRegularMain: OK! -->
+								<!-- LaunchRegularMain loading test.sources.LaunchTestMain: OK! -->
+								<!-- LaunchRegularMain loading main.sources.DepRegularMain: OK! -->
+								<!-- LaunchRegularMain loading test.sources.DepTestMain: OK! -->
+							</execution>
+
+							<execution>
+								<id>main-class-in-test-with-test-scope</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+								<configuration>
+									<classpathScope>test</classpathScope>
+									<executable>java</executable>
+									<arguments>
+										<argument>-classpath</argument>
+										<classpath />
+										<argument>test.sources.LaunchTestMain</argument>
+										<!-- parameters for main class above -->
+										<argument>main.sources.LaunchRegularMain</argument>
+										<argument>test.sources.LaunchTestMain</argument>
+										<argument>main.sources.DepRegularMain</argument>
+										<argument>test.sources.DepTestMain</argument>
+									</arguments>
+								</configuration>
+
+								<!-- [DEBUG] Executing command line: [java, -classpath, -->
+								<!-- .../548948_test_scope_jdt_setting/project-with-launch-configs/target/test-classes: -->
+								<!-- .../548948_test_scope_jdt_setting/project-with-launch-configs/target/classes: -->
+								<!-- .../548948_test_scope_jdt_setting/project-with-shared-test-code/target/project-with-shared-test-code-0.0.1-SNAPSHOT.jar: -->
+								<!-- .../548948_test_scope_jdt_setting/project-with-shared-test-code/target/project-with-shared-test-code-0.0.1-SNAPSHOT-tests.jar, -->
+								<!-- test.sources.LaunchTestMain, -->
+								<!-- main.sources.LaunchRegularMain, test.sources.LaunchTestMain, 
+									main.sources.DepRegularMain, test.sources.DepTestMain] -->
+								<!-- Expected output: -->
+								<!-- LaunchTestMain loading main.sources.LaunchRegularMain: OK! -->
+								<!-- LaunchTestMain loading test.sources.LaunchTestMain: OK! -->
+								<!-- LaunchTestMain loading main.sources.DepRegularMain: OK! -->
+								<!-- LaunchTestMain loading test.sources.DepTestMain: OK! -->
+							</execution>
+
+							<execution>
+								<id>main-class-in-test-with-runtime-scope</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+								<configuration>
+									<classpathScope>runtime</classpathScope>
+									<!-- expect this to fail; main class not in classpath -->
+									<successCodes>1</successCodes>
+									<executable>java</executable>
+									<arguments>
+										<argument>-classpath</argument>
+										<classpath />
+										<argument>test.sources.LaunchTestMain</argument>
+										<!-- parameters for main class above -->
+										<argument>main.sources.LaunchRegularMain</argument>
+										<argument>test.sources.LaunchTestMain</argument>
+										<argument>main.sources.DepRegularMain</argument>
+										<argument>test.sources.DepTestMain</argument>
+									</arguments>
+								</configuration>
+								<!-- [DEBUG] Executing command line: [java, -classpath, -->
+								<!-- .../548948_test_scope_jdt_setting/project-with-launch-configs/target/classes: -->
+								<!-- .../548948_test_scope_jdt_setting/project-with-shared-test-code/target/project-with-shared-test-code-0.0.1-SNAPSHOT.jar, -->
+								<!-- test.sources.LaunchTestMain, -->
+								<!--main.sources.LaunchRegularMain, test.sources.LaunchTestMain, 
+									main.sources.DepRegularMain, test.sources.DepTestMain] -->
+								<!-- Expected output: -->
+								<!-- Error: Could not find or load main class test.sources.LaunchTestMain -->
+								<!-- Caused by: java.lang.ClassNotFoundException: test.sources.LaunchTestMain -->
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+</project>
