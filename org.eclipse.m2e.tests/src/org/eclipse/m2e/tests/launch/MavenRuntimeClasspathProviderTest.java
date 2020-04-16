@@ -147,13 +147,13 @@ public class MavenRuntimeClasspathProviderTest extends AbstractMavenProjectTestC
   private void assertResolveClasspathEndsWithFolders(
       IRuntimeClasspathEntry[] classpathEntries,
       String[] expectedBinFolders) {
-    int i = 1; // skip jdk entry at the start
-    for(int j = 0; j < Math.min(expectedBinFolders.length, classpathEntries.length - i); j++ ) {
-      String location = classpathEntries[j + i].getLocation();
+    int delta = classpathEntries.length - expectedBinFolders.length;
+    assertTrue(delta >= 0);
+    for(int j = 0; j < expectedBinFolders.length; j++ ) {
+      String location = classpathEntries[j + delta].getLocation();
       String binFolder = expectedBinFolders[j];
       assertTrue("got " + location + " but expected something ending with " + binFolder, location.endsWith(binFolder));
     }
-    assertEquals(expectedBinFolders.length, classpathEntries.length - i);
   }
 
   private void runAddJunit5DepsTest(String projectName, String... expectedJars) throws IOException, CoreException {
