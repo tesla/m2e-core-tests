@@ -89,7 +89,13 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
   public void tearDown() throws Exception {
     try {
       if(editor != null) {
-        editor.close(false);
+        Runnable syncCloseEditor = () -> editor.getSite().getPage().closeEditor(editor, false);
+        if(Display.getCurrent() != null) {
+          syncCloseEditor.run();
+        } else {
+          PlatformUI.getWorkbench().getDisplay().asyncExec(syncCloseEditor);
+        }
+        editor = null;
       }
     } finally {
       super.tearDown();
@@ -466,8 +472,7 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 
     MavenPomEditor open() throws CoreException, InterruptedException {
       if(Display.getDefault().getThread() == Thread.currentThread()) {
-        editor = (MavenPomEditor) getActivePage()
-            .openEditor(editorInput, "org.eclipse.m2e.editor.MavenPomEditor", true);
+        run();
       } else {
         Display.getDefault().syncExec(this);
         if(exception != null) {
