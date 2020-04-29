@@ -26,7 +26,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
-import org.eclipse.m2e.editor.xml.internal.XmlUtils;
+import org.eclipse.m2e.editor.pom.XmlUtils;
 import org.junit.Test;
 
 

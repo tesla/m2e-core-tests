@@ -20,6 +20,7 @@ import static org.junit.Assert.assertSame;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.eclipse.jface.text.templates.Template;
+import org.eclipse.m2e.editor.pom.PomTemplateContext;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.junit.Test;
 import org.w3c.dom.Document;

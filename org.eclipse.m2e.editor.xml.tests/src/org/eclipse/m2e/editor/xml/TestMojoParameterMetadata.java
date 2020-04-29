@@ -7,9 +7,9 @@ import org.apache.maven.plugin.descriptor.MojoDescriptor;
 import org.apache.maven.plugin.descriptor.PluginDescriptor;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.m2e.editor.mojo.MojoParameter;
+import org.eclipse.m2e.editor.mojo.PlexusConfigHelper;
 import org.eclipse.m2e.editor.xml.mojo.IMojoParameterMetadata;
-import org.eclipse.m2e.editor.xml.mojo.MojoParameter;
-import org.eclipse.m2e.editor.xml.mojo.PlexusConfigHelper;
 
 public class TestMojoParameterMetadata implements IMojoParameterMetadata {
 

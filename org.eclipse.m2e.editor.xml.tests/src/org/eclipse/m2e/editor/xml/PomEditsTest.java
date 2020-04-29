@@ -20,7 +20,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits.Operation;
 import org.eclipse.m2e.editor.pom.ElementValueProvider;
-import org.eclipse.m2e.editor.xml.internal.XmlUtils;
+import org.eclipse.m2e.editor.pom.XmlUtils;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
