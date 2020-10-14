@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008-2010 Sonatype, Inc.
+ * Copyright (c) 2008, 2020 Sonatype, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -324,7 +324,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     // order according to mvn -X
     assertEquals(3, cp.length);
     assertEquals(new Path("/p2"), cp[0].getPath());
-    assertEquals("junit-4.0.jar", cp[2].getPath().lastSegment());
+    assertEquals("junit-4.13.1.jar", cp[2].getPath().lastSegment());
     assertEquals("easymock-1.0.jar", cp[1].getPath().lastSegment());
 
     Set<Artifact> artifacts = getMavenProjectArtifacts(project1);
