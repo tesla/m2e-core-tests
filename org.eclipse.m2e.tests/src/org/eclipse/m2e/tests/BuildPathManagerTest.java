@@ -228,7 +228,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
         .getClasspathEntries();
     assertEquals("" + Arrays.asList(classpathEntries), 2, classpathEntries.length);
-    assertEquals("junit-3.8.1.jar", classpathEntries[0].getPath().lastSegment());
+    assertEquals("junit-4.13.1.jar", classpathEntries[0].getPath().lastSegment());
     assertEquals("jaxb-api-1.5.jar", classpathEntries[1].getPath().lastSegment());
 
     WorkspaceHelpers.assertNoErrors(project);
@@ -250,7 +250,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
         .getClasspathEntries();
     assertEquals("" + Arrays.asList(classpathEntries), 4, classpathEntries.length);
-    assertEquals("junit-3.8.1.jar", classpathEntries[0].getPath().lastSegment());
+    assertEquals("junit-4.13.1.jar", classpathEntries[0].getPath().lastSegment());
     assertEquals("jaxb-api-2.0.jar", classpathEntries[1].getPath().lastSegment());
     assertEquals("jsr173_api-1.0.jar", classpathEntries[2].getPath().lastSegment());
     assertEquals("activation-1.1.jar", classpathEntries[3].getPath().lastSegment());
@@ -351,7 +351,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
 
     // order according to mvn -X. note that maven 2.0.7 and 2.1-SNAPSHOT produce different order 
     assertEquals(6, cp.length);
-    assertEquals("junit-3.8.1.jar", cp[0].getPath().lastSegment());
+    assertEquals("junit-4.13.1.jar", cp[0].getPath().lastSegment());
     assertEquals("commons-digester-1.6.jar", cp[1].getPath().lastSegment());
     assertEquals("commons-beanutils-1.6.jar", cp[2].getPath().lastSegment());
     assertEquals("commons-logging-1.0.jar", cp[3].getPath().lastSegment());
