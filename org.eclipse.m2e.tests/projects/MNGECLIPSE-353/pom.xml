@@ -44,14 +44,6 @@
 				</property>
 			</activation>
 			-->
-      <repositories>
-        <repository>
-          <id>java.net</id>
-          <name>java.net Maven Repository</name>
-          <url>https://maven-repository.dev.java.net/nonav/repository</url>
-          <layout>legacy</layout>
-        </repository>
-      </repositories>
       <dependencies>
         <dependency>
           <groupId>javax.xml.bind</groupId>

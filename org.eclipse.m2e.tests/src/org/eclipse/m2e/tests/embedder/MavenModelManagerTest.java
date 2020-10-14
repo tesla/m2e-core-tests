@@ -159,12 +159,12 @@ public class MavenModelManagerTest extends AbstractMavenProjectTestCase {
 
     DependencyNode junitA = depA.getChildren().get(1);
     assertEquals("junit", junitA.getArtifact().getArtifactId());
-    assertEquals("3.8.2", junitA.getArtifact().getVersion());
+    assertEquals("4.13.1", junitA.getArtifact().getVersion());
     assertEquals(JavaScopes.TEST, junitA.getDependency().getScope());
     assertEquals(DependencyNode.MANAGED_SCOPE, junitA.getManagedBits() & DependencyNode.MANAGED_SCOPE);
     assertEquals(JavaScopes.COMPILE, DependencyManagerUtils.getPremanagedScope(junitA));
     assertEquals(DependencyNode.MANAGED_VERSION, junitA.getManagedBits() & DependencyNode.MANAGED_VERSION);
-    assertEquals("3.8.1", DependencyManagerUtils.getPremanagedVersion(junitA));
+    assertEquals("4.13.1", DependencyManagerUtils.getPremanagedVersion(junitA));
 
     DependencyNode depB = children.get(1);
     assertEquals("direct-depB", depB.getArtifact().getArtifactId());

@@ -246,7 +246,7 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
 
     assertEquals(Arrays.asList(userClasspath).toString(), 2, userClasspath.length);
     assertEquals(new Path("/runtimeclasspath-providedscope/target/classes"), userClasspath[0].getPath());
-    assertEquals("junit-3.8.1.jar", userClasspath[1].getPath().lastSegment());
+    assertEquals("junit-4.13.1.jar", userClasspath[1].getPath().lastSegment());
   }
 
   @Test
@@ -265,7 +265,7 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     assertEquals(Arrays.asList(userClasspath).toString(), 3, userClasspath.length);
     assertEquals(new Path("/runtimeclasspath-providedscope/target/test-classes"), userClasspath[0].getPath());
     assertEquals(new Path("/runtimeclasspath-providedscope/target/classes"), userClasspath[1].getPath());
-    assertEquals("junit-3.8.1.jar", userClasspath[2].getPath().lastSegment());
+    assertEquals("junit-4.13.1.jar", userClasspath[2].getPath().lastSegment());
   }
 
   @Test
@@ -284,7 +284,7 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     assertEquals(Arrays.asList(userClasspath).toString(), 3, userClasspath.length);
     assertEquals(new Path("/runtimeclasspath-providedscope/target/test-classes"), userClasspath[0].getPath());
     assertEquals(new Path("/runtimeclasspath-providedscope/target/classes"), userClasspath[1].getPath());
-    assertEquals("junit-3.8.1.jar", userClasspath[2].getPath().lastSegment());
+    assertEquals("junit-4.13.1.jar", userClasspath[2].getPath().lastSegment());
   }
 
   @Test

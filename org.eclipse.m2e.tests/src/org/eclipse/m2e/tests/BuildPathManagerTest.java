@@ -147,11 +147,11 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
 //    assertEquals("junit-4.1.jar", project1entries[0].getPath().lastSegment());
 
     IClasspathEntry[] project2entries = getMavenContainerEntries(project2);
-    assertEquals(2, project2entries.length);
+    assertEquals(3, project2entries.length);
     assertEquals(IClasspathEntry.CPE_PROJECT, project2entries[0].getEntryKind());
     assertEquals("MNGECLIPSE-248parent", project2entries[0].getPath().segment(0));
     assertEquals(IClasspathEntry.CPE_LIBRARY, project2entries[1].getEntryKind());
-    assertEquals("junit-4.1.jar", project2entries[1].getPath().lastSegment());
+    assertEquals("junit-4.13.1.jar", project2entries[1].getPath().lastSegment());
 
     configurationManager.updateProjectConfiguration(project2, monitor);
     waitForJobsToComplete();
@@ -227,9 +227,9 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     IJavaProject javaProject = JavaCore.create(project);
     IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
         .getClasspathEntries();
-    assertEquals("" + Arrays.asList(classpathEntries), 2, classpathEntries.length);
+    assertEquals("" + Arrays.asList(classpathEntries), 3, classpathEntries.length);
     assertEquals("junit-4.13.1.jar", classpathEntries[0].getPath().lastSegment());
-    assertEquals("jaxb-api-1.5.jar", classpathEntries[1].getPath().lastSegment());
+    assertEquals("jaxb-api-1.5.jar", classpathEntries[2].getPath().lastSegment());
 
     WorkspaceHelpers.assertNoErrors(project);
   }
@@ -249,11 +249,11 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     IJavaProject javaProject = JavaCore.create(project);
     IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
         .getClasspathEntries();
-    assertEquals("" + Arrays.asList(classpathEntries), 4, classpathEntries.length);
+    assertEquals("" + Arrays.asList(classpathEntries), 5, classpathEntries.length);
     assertEquals("junit-4.13.1.jar", classpathEntries[0].getPath().lastSegment());
-    assertEquals("jaxb-api-2.0.jar", classpathEntries[1].getPath().lastSegment());
-    assertEquals("jsr173_api-1.0.jar", classpathEntries[2].getPath().lastSegment());
-    assertEquals("activation-1.1.jar", classpathEntries[3].getPath().lastSegment());
+    assertEquals("jaxb-api-2.0.jar", classpathEntries[2].getPath().lastSegment());
+    assertEquals("jsr173_api-1.0.jar", classpathEntries[3].getPath().lastSegment());
+    assertEquals("activation-1.1.jar", classpathEntries[4].getPath().lastSegment());
 
     WorkspaceHelpers.assertNoErrors(project);
   }
@@ -322,13 +322,13 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     IClasspathEntry[] cp = maven2ClasspathContainer.getClasspathEntries();
 
     // order according to mvn -X
-    assertEquals(3, cp.length);
+    assertEquals(4, cp.length);
     assertEquals(new Path("/p2"), cp[0].getPath());
     assertEquals("junit-4.13.1.jar", cp[2].getPath().lastSegment());
     assertEquals("easymock-1.0.jar", cp[1].getPath().lastSegment());
 
     Set<Artifact> artifacts = getMavenProjectArtifacts(project1);
-    assertEquals(3, artifacts.size());
+    assertEquals(4, artifacts.size());
     Artifact a1 = artifacts.iterator().next();
     assertEquals(project2.getFolder("target/classes").getLocation().toFile(), a1.getFile());
   }
@@ -350,13 +350,13 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     IClasspathEntry[] cp = maven2ClasspathContainer.getClasspathEntries();
 
     // order according to mvn -X. note that maven 2.0.7 and 2.1-SNAPSHOT produce different order 
-    assertEquals(6, cp.length);
+    assertEquals(7, cp.length);
     assertEquals("junit-4.13.1.jar", cp[0].getPath().lastSegment());
-    assertEquals("commons-digester-1.6.jar", cp[1].getPath().lastSegment());
-    assertEquals("commons-beanutils-1.6.jar", cp[2].getPath().lastSegment());
-    assertEquals("commons-logging-1.0.jar", cp[3].getPath().lastSegment());
-    assertEquals("commons-collections-2.1.jar", cp[4].getPath().lastSegment());
-    assertEquals("xml-apis-1.0.b2.jar", cp[5].getPath().lastSegment());
+    assertEquals("commons-digester-1.6.jar", cp[2].getPath().lastSegment());
+    assertEquals("commons-beanutils-1.6.jar", cp[3].getPath().lastSegment());
+    assertEquals("commons-logging-1.0.jar", cp[4].getPath().lastSegment());
+    assertEquals("commons-collections-2.1.jar", cp[5].getPath().lastSegment());
+    assertEquals("xml-apis-1.0.b2.jar", cp[6].getPath().lastSegment());
   }
 
   @Test
@@ -668,7 +668,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     File log4jJar = new File("repositories/remoterepo/log4j/log4j/1.2.13/log4j-1.2.13.jar");
     Path log4jPath = new Path(log4jJar.getAbsolutePath());
 
-    File junitJar = new File("repositories/remoterepo/junit/junit/3.8.1/junit-3.8.1.jar");
+    File junitJar = new File("repositories/remoterepo/junit/junit/4.13.1/junit-4.13.1.jar");
     Path junitPath = new Path(junitJar.getAbsolutePath());
 
     IJavaProject javaProject = JavaCore.create(project);
@@ -694,7 +694,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     waitForJobsToComplete();
 
     assertEquals(junitJar.getAbsoluteFile(), cp[cp.length - 1].getPath().toFile());
-    assertEquals("junit-3.8.1-sources.jar", cp[cp.length - 1].getSourceAttachmentPath().lastSegment());
+    assertEquals("junit-4.13.1-sources.jar", cp[cp.length - 1].getSourceAttachmentPath().lastSegment());
     assertEquals(false, cp[cp.length - 1].isExported());
   }
 
@@ -820,9 +820,9 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertEquals("org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[5].getPath().toString());
 
     IClasspathEntry[] entries = getMavenContainerEntries(project);
-    assertEquals(Arrays.toString(entries), 1, entries.length);
+    assertEquals(Arrays.toString(entries), 2, entries.length);
     assertEquals(IClasspathEntry.CPE_LIBRARY, entries[0].getEntryKind());
-    assertEquals("junit-3.8.1.jar", entries[0].getPath().lastSegment());
+    assertEquals("junit-4.13.1.jar", entries[0].getPath().lastSegment());
 
     assertTrue(project.getFile("pom.xml").exists());
     assertTrue(project.getFolder("src/main/java").exists());
@@ -1072,7 +1072,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
       Dependency dependency = new Dependency();
       dependency.setGroupId("junit");
       dependency.setArtifactId("junit");
-      dependency.setVersion("3.8.1");
+      dependency.setVersion("4.13.1");
 
       model.addDependency(dependency);
 
@@ -1404,9 +1404,9 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     IJavaProject javaProject = JavaCore.create(project);
 
     IClasspathEntry[] entries = getMavenContainerEntries(project);
-    assertEquals(Arrays.toString(entries), 1, entries.length);
+    assertEquals(Arrays.toString(entries), 2, entries.length);
     assertEquals(IClasspathEntry.CPE_LIBRARY, entries[0].getEntryKind());
-    assertEquals("junit-3.8.1.jar", entries[0].getPath().lastSegment());
+    assertEquals("junit-4.13.1.jar", entries[0].getPath().lastSegment());
     assertNull(MavenClasspathHelpers.getAttribute(entries[0], IClasspathAttribute.SOURCE_ATTACHMENT_ENCODING));
 
     final IClasspathContainer container = BuildPathManager.getMaven2ClasspathContainer(javaProject);

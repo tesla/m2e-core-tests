@@ -750,7 +750,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     IProject p1 = createExisting("t015-p1");
     waitForJobsToComplete();
 
-    File file = new File(repo, "junit/junit/3.8.1/junit-3.8.1.jar");
+    File file = new File(repo, "junit/junit/4.13.1/junit-4.13.1.jar");
     assertTrue("Can't delete file " + file.getAbsolutePath(), !file.exists() || file.delete());
 
     MavenUpdateRequest updateRequest = new MavenUpdateRequest(true /*offline*/, false /* updateSources */);
@@ -812,7 +812,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
       Artifact[] a = getMavenProjectArtifacts(f).toArray(new Artifact[0]);
       assertEquals(2, a.length);
       assertEquals(pom1.getLocation().toFile().getCanonicalFile(), a[0].getFile().getCanonicalFile());
-      assertEquals("junit-3.8.1.jar", a[1].getFile().getName());
+      assertEquals("junit-4.13.1.jar", a[1].getFile().getName());
     }
 
     copyContent(p1, "pom-changed.xml", "pom.xml");
@@ -878,7 +878,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     IMavenProjectFacade f11 = manager.create(pom11, false, null);
 
     Artifact a = f11.getMavenProject(monitor).getArtifacts().iterator().next();
-    assertEquals("3.8.1", a.getVersion());
+    assertEquals("4.13.1", a.getVersion());
   }
 
   @Test
@@ -896,7 +896,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
       Artifact[] a = getMavenProjectArtifacts(f).toArray(new Artifact[0]);
       assertEquals(2, a.length);
       assertEquals(pom1.getLocation().toFile().getCanonicalFile(), a[0].getFile().getCanonicalFile());
-      assertEquals("junit-3.8.1.jar", a[1].getFile().getName());
+      assertEquals("junit-4.13.1.jar", a[1].getFile().getName());
     }
 
     copyContent(p1, "pom-scope-changed.xml", "pom.xml");

@@ -141,7 +141,7 @@ public class ResourceChangeListenerTest extends AbstractMavenProjectTestCase {
   public void testPomDelete() throws Exception {
     // just in case, make sure we imported the right project
     IClasspathEntry[] cp = getMavenContainerEntries(project);
-    assertEquals(1, cp.length);
+    assertEquals(2, cp.length);
     assertEquals("junit-4.13.1.jar", cp[0].getPath().lastSegment());
 
     // change
@@ -157,7 +157,7 @@ public class ResourceChangeListenerTest extends AbstractMavenProjectTestCase {
   public void testPomRename() throws Exception {
     // just in case, make sure we imported the right project
     IClasspathEntry[] cp = getMavenContainerEntries(project);
-    assertEquals(1, cp.length);
+    assertEquals(2, cp.length);
     assertEquals("junit-4.13.1.jar", cp[0].getPath().lastSegment());
 
     // change
@@ -172,7 +172,7 @@ public class ResourceChangeListenerTest extends AbstractMavenProjectTestCase {
   @Test
   public void testProjectDelete() throws Exception {
     IClasspathEntry[] cp = getMavenContainerEntries(project);
-    assertEquals(1, cp.length);
+    assertEquals(2, cp.length);
     assertEquals("junit-4.13.1.jar", cp[0].getPath().lastSegment());
     waitForJobsToComplete();
     assertEquals(1, MavenPlugin.getMavenProjectRegistry().getProjects().length);
