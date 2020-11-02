@@ -31,6 +31,7 @@ import java.util.Set;
 
 import org.junit.Test;
 
+import org.eclipse.aether.repository.WorkspaceReader;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -42,10 +43,13 @@ import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.codehaus.plexus.util.xml.Xpp3DomBuilder;
 
+import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.project.MavenProject;
 
+import org.eclipse.m2e.core.embedder.ArtifactKey;
 import org.eclipse.m2e.core.internal.IMavenConstants;
+import org.eclipse.m2e.core.internal.MavenPluginActivator;
 import org.eclipse.m2e.core.internal.lifecyclemapping.AnnotationMappingMetadataSource;
 import org.eclipse.m2e.core.internal.lifecyclemapping.DefaultLifecycleMapping;
 import org.eclipse.m2e.core.internal.lifecyclemapping.InvalidLifecycleMapping;
@@ -848,6 +852,27 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertEquals(2, configurators.size());
     assertEquals(TestProjectConfigurator2.class, configurators.get(0).getClass());
     assertEquals(TestProjectConfigurator.class, configurators.get(1).getClass());
+  }
+
+  @Test
+  public void testWorkspaceArtifacts() throws Exception {
+    MavenProjectFacade facade = (MavenProjectFacade) importMavenProject(
+        "projects/lifecyclemapping/lifecycleMappingMetadata/PluginExecutionActionsTest/testConfiguratorsOrder",
+        "pom.xml");
+    assertNotNull("Expected not null MavenProjectFacade", facade);
+    ProjectRegistryManager projectRegistry = MavenPluginActivator.getDefault().getMavenProjectManagerImpl();
+    MavenExecutionRequest request = projectRegistry.createExecutionRequest(facade.getPom(),
+        facade.getResolverConfiguration(), monitor);
+    WorkspaceReader workspaceReader = request.getWorkspaceReader();
+    ArtifactKey a = facade.getArtifactKey();
+    org.eclipse.aether.artifact.Artifact artifact = new org.eclipse.aether.artifact.DefaultArtifact(a.getGroupId(),
+        a.getArtifactId(), a.getClassifier(), "pom", a.getVersion());
+    File file = workspaceReader.findArtifact(artifact);
+    assertNotNull(file);
+    artifact = new org.eclipse.aether.artifact.DefaultArtifact(a.getGroupId(), a.getArtifactId(), a.getClassifier(),
+        facade.getPackaging(), a.getVersion());
+    file = workspaceReader.findArtifact(artifact);
+    assertNull(file);
   }
 
   @Test
