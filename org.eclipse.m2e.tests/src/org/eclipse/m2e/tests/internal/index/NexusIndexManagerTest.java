@@ -293,7 +293,7 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
     IndexedArtifactGroup resolveGroup2 = indexManager.resolveGroup(iag2);
     assertTrue(resolveGroup2.getFiles().size() == 0);
 
-    ArtifactInfo info = new ArtifactInfo(REPO_URL_ECLIPSE, "org.junit", "junit", "4.13.1", "jar");
+    ArtifactInfo info = new ArtifactInfo(REPO_URL_ECLIPSE, "org.junit", "junit", "4.13.1", "", "jar");
     IndexedArtifactFile indexedArtifactFile = indexManager.getIndexedArtifactFile(info);
     assertNotNull(indexedArtifactFile);
   }
