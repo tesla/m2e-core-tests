@@ -23,7 +23,6 @@ import org.eclipse.m2e.internal.discovery.operation.MavenDiscoveryInstallOperati
 import org.eclipse.m2e.tests.common.HttpServer;
 
 
-@SuppressWarnings("restriction")
 public class MavenDiscoveryInstallOperationTest extends AbstractDiscoveryTest {
 
   private static HttpServer httpServer;

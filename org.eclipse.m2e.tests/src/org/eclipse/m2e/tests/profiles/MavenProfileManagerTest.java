@@ -37,7 +37,6 @@ import org.eclipse.m2e.profiles.core.internal.ProfileData;
 import org.eclipse.m2e.profiles.core.internal.ProfileState;
 
 
-@SuppressWarnings("restriction")
 public class MavenProfileManagerTest extends AbstractMavenProfileTest {
 
   @Test

@@ -43,7 +43,6 @@ import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits;
 
 
-@SuppressWarnings("restriction")
 public class PomEditsTest {
   private IDOMModel tempModel;
 

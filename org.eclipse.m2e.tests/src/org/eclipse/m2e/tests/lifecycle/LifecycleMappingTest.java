@@ -88,7 +88,6 @@ import org.eclipse.m2e.tests.configurators.TestProjectConfigurator;
 import org.eclipse.m2e.tests.configurators.TestProjectConfigurator2;
 
 
-@SuppressWarnings("restriction")
 public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
   @Test
   public void testLifecycleMappingSpecifiedInMetadata() throws Exception {

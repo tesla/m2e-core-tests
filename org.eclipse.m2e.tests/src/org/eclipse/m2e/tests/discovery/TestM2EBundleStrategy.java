@@ -15,7 +15,6 @@ import org.eclipse.equinox.internal.p2.discovery.compatibility.ConnectorDiscover
 import org.eclipse.m2e.internal.discovery.strategy.M2ERemoteBundleDiscoveryStrategy;
 
 
-@SuppressWarnings("restriction")
 public class TestM2EBundleStrategy extends M2ERemoteBundleDiscoveryStrategy {
 
   @Override

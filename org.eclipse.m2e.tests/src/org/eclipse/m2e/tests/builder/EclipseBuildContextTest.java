@@ -30,8 +30,6 @@ import org.codehaus.plexus.util.Scanner;
 import org.eclipse.m2e.core.internal.builder.plexusbuildapi.EclipseBuildContext;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 
-
-@SuppressWarnings("restriction")
 public class EclipseBuildContextTest extends AbstractMavenProjectTestCase {
   @Test
   public void testScanner() throws Exception {

@@ -34,7 +34,6 @@ import org.eclipse.m2e.core.ui.internal.editing.PomEdits;
 import org.eclipse.m2e.core.ui.internal.editing.PomHelper;
 
 
-@SuppressWarnings("restriction")
 public class PomHelperTest {
 
   private IDOMModel tempModel;

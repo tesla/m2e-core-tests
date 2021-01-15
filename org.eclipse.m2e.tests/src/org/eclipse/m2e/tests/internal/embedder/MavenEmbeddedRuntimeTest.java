@@ -24,7 +24,6 @@ import org.eclipse.m2e.core.embedder.MavenRuntimeManager;
 import org.eclipse.m2e.core.internal.Messages;
 
 
-@SuppressWarnings("restriction")
 public class MavenEmbeddedRuntimeTest {
   @Test
   public void testGetVersion() throws Exception {

@@ -29,7 +29,6 @@ import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 import org.eclipse.m2e.tests.configurators.TestLifecycleMapping;
 
 
-@SuppressWarnings("restriction")
 public class PluginExecutionMetadataPrioritiesTest extends AbstractLifecycleMappingTest {
   @Override
   @After

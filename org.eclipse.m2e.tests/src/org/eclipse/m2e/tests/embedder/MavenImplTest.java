@@ -61,7 +61,6 @@ import org.eclipse.m2e.tests.common.FileHelpers;
 import org.eclipse.m2e.tests.common.HttpServer;
 
 
-@SuppressWarnings("restriction")
 public class MavenImplTest extends AbstractMavenProjectTestCase {
 
   private IProgressMonitor monitor = new NullProgressMonitor();

@@ -31,7 +31,6 @@ import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.m2e.tests.mocks.ResourceDeltaStub;
 
 
-@SuppressWarnings("restriction")
 public class EclipseIncrementalBuildContextTest extends AbstractMavenProjectTestCase {
   @Test
   public void testScanner() throws Exception {

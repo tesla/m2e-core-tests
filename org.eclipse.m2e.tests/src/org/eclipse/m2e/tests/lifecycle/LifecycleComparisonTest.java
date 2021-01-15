@@ -16,7 +16,6 @@ import org.eclipse.m2e.core.internal.project.registry.MavenProjectFacade;
 import org.eclipse.m2e.tests.common.AbstractLifecycleMappingTest;
 
 
-@SuppressWarnings("restriction")
 public class LifecycleComparisonTest extends AbstractLifecycleMappingTest {
   @Test
   public void testSameProject() throws Exception {

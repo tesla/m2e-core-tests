@@ -33,7 +33,6 @@ import org.eclipse.m2e.tests.common.RequireMavenExecutionContext;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
 
-@SuppressWarnings("restriction")
 public class SourceLocationHelperTest extends AbstractMavenProjectTestCase {
   private IMavenProjectRegistry mavenProjectManager;
 

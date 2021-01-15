@@ -48,7 +48,6 @@ import org.eclipse.m2e.core.repository.IRepositoryRegistry;
  * 
  * @author dyocum
  */
-@SuppressWarnings("restriction")
 public class NexusIndexManagerSearchTest extends AbstractNexusIndexManagerTest {
   private static final String SETTINGS_ECLIPSE_REPO = "src/org/eclipse/m2e/tests/internal/index/public_mirror_repo_settings.xml";
 

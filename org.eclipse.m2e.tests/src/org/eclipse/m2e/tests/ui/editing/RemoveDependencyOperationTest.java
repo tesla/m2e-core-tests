@@ -29,7 +29,6 @@ import org.eclipse.m2e.core.ui.internal.editing.PomEdits.OperationTuple;
 import org.eclipse.m2e.core.ui.internal.editing.RemoveDependencyOperation;
 
 
-@SuppressWarnings("restriction")
 public class RemoveDependencyOperationTest extends AbstractOperationTest {
   private IDOMModel tempModel;
 

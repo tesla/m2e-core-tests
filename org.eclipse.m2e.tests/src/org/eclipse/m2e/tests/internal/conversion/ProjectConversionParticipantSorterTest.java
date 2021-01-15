@@ -40,7 +40,6 @@ import org.eclipse.m2e.core.project.conversion.AbstractProjectConversionParticip
  * 
  * @author Fred Bricon
  */
-@SuppressWarnings("restriction")
 public class ProjectConversionParticipantSorterTest {
 
   @Test

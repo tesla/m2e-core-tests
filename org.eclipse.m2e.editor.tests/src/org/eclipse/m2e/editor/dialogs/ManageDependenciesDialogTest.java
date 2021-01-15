@@ -60,7 +60,6 @@ import org.eclipse.m2e.core.ui.internal.editing.PomEdits.CompoundOperation;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 
 
-@SuppressWarnings("restriction")
 public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
   private static final String TEST_VERSION = "1.0.0";
 

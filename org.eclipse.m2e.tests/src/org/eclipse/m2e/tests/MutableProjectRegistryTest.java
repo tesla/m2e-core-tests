@@ -51,7 +51,6 @@ import org.eclipse.m2e.core.project.MavenProjectChangedEvent;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 
 
-@SuppressWarnings("restriction")
 public class MutableProjectRegistryTest extends AbstractMavenProjectTestCase {
 
   private static final String WORKSPACE_STATE_SER = "workspaceState.ser";
