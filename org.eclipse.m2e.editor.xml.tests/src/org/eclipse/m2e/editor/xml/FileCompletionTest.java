@@ -25,13 +25,11 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
+import org.junit.Ignore;
 import org.junit.Test;
 
-
-/**
- * @author atanasenko
- */
 @SuppressWarnings("restriction")
+@Ignore
 public class FileCompletionTest extends AbstractCompletionTest {
 
   IProject[] projects;
