@@ -22,7 +22,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui.forms,
  org.eclipse.m2e.maven.runtime,
  org.eclipse.m2e.core.ui,
- org.eclipse.equinox.event
+ org.eclipse.equinox.event,
+ org.eclipse.ui.workbench.texteditor
 Bundle-Name: %Bundle-Name
 Bundle-Version: 1.16.0.qualifier
 MavenArtifact-ArtifactId: org.eclipse.m2e.editor.xml.tests
