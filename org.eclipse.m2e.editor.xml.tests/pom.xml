@@ -19,6 +19,7 @@
 
   <artifactId>org.eclipse.m2e.editor.xml.tests</artifactId>
   <packaging>eclipse-test-plugin</packaging>
+  <version>1.17.2-SNAPSHOT</version>
 
   <name>Maven POM XML Editor Tests</name>
   
