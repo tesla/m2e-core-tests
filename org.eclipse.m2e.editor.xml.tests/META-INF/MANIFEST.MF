@@ -21,11 +21,11 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.search,
  org.eclipse.ui.forms,
  org.eclipse.m2e.maven.runtime,
- org.eclipse.m2e.core.ui,
+ org.eclipse.m2e.core.ui;bundle-version="1.17.2",
  org.eclipse.equinox.event,
  org.eclipse.ui.workbench.texteditor
 Bundle-Name: %Bundle-Name
-Bundle-Version: 1.16.0.qualifier
+Bundle-Version: 1.17.2.qualifier
 MavenArtifact-ArtifactId: org.eclipse.m2e.editor.xml.tests
 Bundle-Vendor: %Bundle-Vendor
 Bundle-SymbolicName: org.eclipse.m2e.editor.xml.tests;singleton:=true

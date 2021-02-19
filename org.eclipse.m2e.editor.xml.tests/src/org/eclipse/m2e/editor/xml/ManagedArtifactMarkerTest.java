@@ -27,7 +27,6 @@ import org.eclipse.m2e.core.internal.preferences.MavenConfigurationImpl;
 import org.eclipse.m2e.core.internal.preferences.ProblemSeverity;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.editor.pom.MavenPomEditor;
-import org.eclipse.m2e.editor.xml.internal.markers.OpenManagedVersionDefinitionResolution;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMarkerResolution;
@@ -158,7 +157,7 @@ public class ManagedArtifactMarkerTest extends AbstractMavenProjectTestCase {
 	private void verifyOpenManagedResolution(IMarker marker, String expected) throws BadLocationException {
 		IMarkerResolution[] resolutions = IDE.getMarkerHelpRegistry().getResolutions(marker);
 		for (IMarkerResolution resolution : resolutions) {
-			if (resolution instanceof OpenManagedVersionDefinitionResolution) {
+			if (resolution instanceof org.eclipse.m2e.editor.internal.markers.OpenManagedVersionDefinitionResolution) {
 				resolution.run(marker);
 				IEditorPart editor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
 						.getActiveEditor();
