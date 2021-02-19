@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.eclipse.m2e.tests;singleton:=true
-Bundle-Version: 1.16.0.qualifier
+Bundle-Version: 1.17.2.qualifier
 Require-Capability: osgi.extender; filter:="(&(osgi.extender=osgi.component)(version>=1.2)(!(version>=2.0)))"
 Require-Bundle: org.eclipse.core.externaltools,
  org.eclipse.core.runtime,
@@ -14,6 +14,7 @@ Require-Bundle: org.eclipse.core.externaltools,
  org.eclipse.ui,
  org.eclipse.ui.console,
  org.eclipse.m2e.core,
+ org.eclipse.m2e.editor;bundle-version="1.17.2",
  org.eclipse.m2e.editor.xml,
  org.eclipse.m2e.maven.runtime,
  org.eclipse.m2e.model.edit,
