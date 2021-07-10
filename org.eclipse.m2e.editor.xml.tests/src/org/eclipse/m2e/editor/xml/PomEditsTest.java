@@ -89,7 +89,7 @@ public class PomEditsTest extends AbstractMavenProjectTestCase {
   private String getContent(IFile file) throws Exception{
     IStructuredModel model = StructuredModelManager.getModelManager().getModelForRead(file);
     try {
-      return model.getStructuredDocument().get();
+      return model.getStructuredDocument().get().replaceAll("\\R", System.lineSeparator());
     } finally {
       model.releaseFromRead();
     }

@@ -151,7 +151,7 @@ public class MavenRuntimeClasspathProviderTest extends AbstractMavenProjectTestC
     assertTrue(delta >= 0);
     for(int j = 0; j < expectedBinFolders.length; j++ ) {
       String location = classpathEntries[j + delta].getLocation();
-      String binFolder = expectedBinFolders[j];
+      String binFolder = expectedBinFolders[j].replace('/', File.separatorChar);
       assertTrue("got " + location + " but expected something ending with " + binFolder, location.endsWith(binFolder));
     }
   }
