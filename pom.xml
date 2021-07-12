@@ -20,16 +20,6 @@
 		<tycho.scmUrl>scm:git:https://github.com/tesla/m2e-core-tests.git</tycho.scmUrl>
 	</properties>
 
-  <!--
-  <pluginRepositories>
-    <pluginRepository>
-      <id>tycho-snapshots</id>
-      <url>https://repo.eclipse.org/content/repositories/tycho-snapshots/</url>
-      <snapshots><enabled>true</enabled></snapshots>
-    </pluginRepository>
-  </pluginRepositories>
-  -->
-
 	<build>
 		<plugins>
 			<plugin>
