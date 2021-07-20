@@ -667,7 +667,8 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     File log4jJar = new File("repositories/remoterepo/log4j/log4j/1.2.13/log4j-1.2.13.jar");
     Path log4jPath = new Path(log4jJar.getAbsolutePath());
 
-    File junitJar = new File("repositories/remoterepo/junit/junit/4.13.1/junit-4.13.1.jar");
+    // This needs to remain 3.8.1 as newer JUnit may not be part of the index, so would make the test fail
+    File junitJar = new File("repositories/remoterepo/junit/junit/3.8.1/junit-3.8.1.jar");
     Path junitPath = new Path(junitJar.getAbsolutePath());
 
     IJavaProject javaProject = JavaCore.create(project);
@@ -693,7 +694,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     waitForJobsToComplete();
 
     assertEquals(junitJar.getAbsoluteFile(), cp[cp.length - 1].getPath().toFile());
-    assertEquals("junit-4.13.1-sources.jar", cp[cp.length - 1].getSourceAttachmentPath().lastSegment());
+    assertEquals("junit-3.8.1-sources.jar", cp[cp.length - 1].getSourceAttachmentPath().lastSegment());
     assertEquals(false, cp[cp.length - 1].isExported());
   }
 
