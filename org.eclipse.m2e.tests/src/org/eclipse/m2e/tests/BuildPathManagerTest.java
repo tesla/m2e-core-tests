@@ -23,6 +23,7 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -54,8 +55,6 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.launching.JavaRuntime;
-
-import org.codehaus.plexus.util.DirectoryScanner;
 
 import org.apache.maven.archetype.catalog.Archetype;
 import org.apache.maven.artifact.Artifact;
@@ -223,9 +222,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
 
     waitForJobsToComplete();
 
-    IJavaProject javaProject = JavaCore.create(project);
-    IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
-        .getClasspathEntries();
+    IClasspathEntry[] classpathEntries = getClasspathEntries(project);
     assertEquals("" + Arrays.asList(classpathEntries), 3, classpathEntries.length);
     assertEquals("junit-4.13.1.jar", classpathEntries[0].getPath().lastSegment());
     assertEquals("jaxb-api-1.5.jar", classpathEntries[2].getPath().lastSegment());
@@ -245,9 +242,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
 
     waitForJobsToComplete();
 
-    IJavaProject javaProject = JavaCore.create(project);
-    IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
-        .getClasspathEntries();
+    IClasspathEntry[] classpathEntries = getClasspathEntries(project);
     assertEquals("" + Arrays.asList(classpathEntries), 5, classpathEntries.length);
     assertEquals("junit-4.13.1.jar", classpathEntries[0].getPath().lastSegment());
     assertEquals("jaxb-api-2.0.jar", classpathEntries[2].getPath().lastSegment());
@@ -316,9 +311,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
 
 //    MavenPlugin.getBuildpathManager().updateClasspathContainer(p1, new NullProgressMonitor());
 
-    IJavaProject javaProject = JavaCore.create(project1);
-    IClasspathContainer maven2ClasspathContainer = BuildPathManager.getMaven2ClasspathContainer(javaProject);
-    IClasspathEntry[] cp = maven2ClasspathContainer.getClasspathEntries();
+    IClasspathEntry[] cp = getClasspathEntries(project1);
 
     // order according to mvn -X
     assertEquals(4, cp.length);
@@ -344,9 +337,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     p3.build(IncrementalProjectBuilder.FULL_BUILD, null);
     waitForJobsToComplete();
 
-    IJavaProject javaProject = JavaCore.create(p3);
-    IClasspathContainer maven2ClasspathContainer = BuildPathManager.getMaven2ClasspathContainer(javaProject);
-    IClasspathEntry[] cp = maven2ClasspathContainer.getClasspathEntries();
+    IClasspathEntry[] cp = getClasspathEntries(p3);
 
     // order according to mvn -X. note that maven 2.0.7 and 2.1-SNAPSHOT produce different order 
     assertEquals(7, cp.length);
@@ -367,19 +358,15 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     waitForJobsToComplete();
 
     IJavaProject javaProject = JavaCore.create(project);
-    IClasspathContainer container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
 
     // sanity check
-    IClasspathEntry[] cp = container.getClasspathEntries();
-    assertEquals(2, cp.length);
-    assertNull(cp[0].getSourceAttachmentPath());
-    assertNull(cp[1].getSourceAttachmentPath());
+    IClasspathEntry[] cp = getClasspathEntries(project);
+    assertNullSourceAttachmentPaths(2, cp);
 
     // test project
     getBuildPathManager().scheduleDownload(project, true, false);
     waitForJobsToComplete();
-    container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
-    cp = container.getClasspathEntries();
+    cp = getClasspathEntries(project);
     assertEquals(2, cp.length);
     assertEquals("downloadsources-t001-0.0.1-sources.jar", cp[0].getSourceAttachmentPath().lastSegment());
     assertEquals("downloadsources-t002-0.0.1-sources.jar", cp[1].getSourceAttachmentPath().lastSegment());
@@ -395,8 +382,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     // test one entry
     getBuildPathManager().scheduleDownload(getPackageFragmentRoot(javaProject, cp[0]), true, false);
     waitForJobsToComplete();
-    container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
-    cp = container.getClasspathEntries();
+    cp = getClasspathEntries(project);
     assertEquals(2, cp.length);
     assertEquals("downloadsources-t001-0.0.1-sources.jar", cp[0].getSourceAttachmentPath().lastSegment());
     assertNull(cp[1].getSourceAttachmentPath());
@@ -414,38 +400,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     getBuildPathManager().scheduleDownload(getPackageFragmentRoot(javaProject, cp[0]), true, false);
     getBuildPathManager().scheduleDownload(getPackageFragmentRoot(javaProject, cp[1]), true, false);
     waitForJobsToComplete();
-    container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
-    cp = container.getClasspathEntries();
-    assertEquals(2, cp.length);
-    assertEquals("downloadsources-t001-0.0.1-sources.jar", cp[0].getSourceAttachmentPath().lastSegment());
-    assertEquals("downloadsources-t002-0.0.1-sources.jar", cp[1].getSourceAttachmentPath().lastSegment());
-  }
-
-  @Test
-  public void testDownloadSources_001_workspaceRestart() throws Exception {
-    deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t001/0.0.1/"));
-    deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t002/0.0.1/"));
-
-    IProject project = createExisting("downloadsources-p001", "projects/downloadsources/p001");
-    waitForJobsToComplete();
-
-    IJavaProject javaProject = JavaCore.create(project);
-    IClasspathContainer container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
-
-    // sanity check
-    IClasspathEntry[] cp = container.getClasspathEntries();
-    assertEquals(2, cp.length);
-    assertNull(cp[0].getSourceAttachmentPath());
-    assertNull(cp[1].getSourceAttachmentPath());
-
-    // purge MavenProject cache to simulate workspace restart
-    deserializeFromWorkspaceState(MavenPlugin.getMavenProjectRegistry().getProject(project));
-
-    // test project
-    getBuildPathManager().scheduleDownload(project, true, false);
-    waitForJobsToComplete();
-    container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
-    cp = container.getClasspathEntries();
+    cp = getClasspathEntries(project);
     assertEquals(2, cp.length);
     assertEquals("downloadsources-t001-0.0.1-sources.jar", cp[0].getSourceAttachmentPath().lastSegment());
     assertEquals("downloadsources-t002-0.0.1-sources.jar", cp[1].getSourceAttachmentPath().lastSegment());
@@ -456,18 +411,28 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     return javaProject.findPackageFragmentRoot(cp.getPath());
   }
 
-  private void deleteSourcesAndJavadoc(File basedir) {
-    if(!basedir.exists()) {
-      return;
-    }
-    DirectoryScanner ds = new DirectoryScanner();
-    ds.setBasedir(basedir);
-    ds.setIncludes(new String[] {"*-sources.jar", "*-javadoc.jar", "m2e-lastUpdated.properties"});
-    ds.scan();
+  @Test
+  public void testDownloadSources_001_workspaceRestart() throws Exception {
+    deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t001/0.0.1/"));
+    deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t002/0.0.1/"));
 
-    for(String path : ds.getIncludedFiles()) {
-      new File(basedir, path).delete();
-    }
+    IProject project = createExisting("downloadsources-p001", "projects/downloadsources/p001");
+    waitForJobsToComplete();
+
+    // sanity check
+    IClasspathEntry[] cp = getClasspathEntries(project);
+    assertNullSourceAttachmentPaths(2, cp);
+
+    // purge MavenProject cache to simulate workspace restart
+    deserializeFromWorkspaceState(MavenPlugin.getMavenProjectRegistry().getProject(project));
+
+    // test project
+    getBuildPathManager().scheduleDownload(project, true, false);
+    waitForJobsToComplete();
+    cp = getClasspathEntries(project);
+    assertEquals(2, cp.length);
+    assertEquals("downloadsources-t001-0.0.1-sources.jar", cp[0].getSourceAttachmentPath().lastSegment());
+    assertEquals("downloadsources-t002-0.0.1-sources.jar", cp[1].getSourceAttachmentPath().lastSegment());
   }
 
   @Test
@@ -478,10 +443,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     IProject project = createExisting("downloadsources-p001", "projects/downloadsources/p001");
     waitForJobsToComplete();
 
-    IJavaProject javaProject = JavaCore.create(project);
-    final IClasspathContainer container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
-
-    IPath entryPath = container.getClasspathEntries()[0].getPath();
+    IPath entryPath = getClasspathEntries(project)[0].getPath();
 
     IPath srcPath = new Path("/a");
     IPath srcRoot = new Path("/b");
@@ -495,35 +457,10 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
         new IClasspathAttribute[] {attribute}, // 
         false /*not exported*/);
 
-    BuildPathManager buildpathManager = getBuildPathManager();
-
-    IClasspathContainer containerSuggestion = new IClasspathContainer() {
-      @Override
-      public IClasspathEntry[] getClasspathEntries() {
-        return new IClasspathEntry[] {entry};
-      }
-
-      @Override
-      public String getDescription() {
-        return container.getDescription();
-      }
-
-      @Override
-      public int getKind() {
-        return container.getKind();
-      }
-
-      @Override
-      public IPath getPath() {
-        return container.getPath();
-      }
-    };
-    buildpathManager.persistAttachedSourcesAndJavadoc(javaProject, containerSuggestion, monitor);
-    waitForJobsToComplete();
+    BuildPathManager buildpathManager = persistAttachedSourcesAndJavadoc(project, entry);
 
     // check custom source/javadoc
-    IClasspathContainer container2 = BuildPathManager.getMaven2ClasspathContainer(javaProject);
-    IClasspathEntry entry2 = container2.getClasspathEntries()[0];
+    IClasspathEntry entry2 = getClasspathEntries(project)[0];
     assertEquals(entryPath, entry2.getPath());
     assertEquals(srcPath, entry2.getSourceAttachmentPath());
     assertEquals(srcRoot, entry2.getSourceAttachmentRootPath());
@@ -546,19 +483,14 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     waitForJobsToComplete();
 
     // sanity check
-    IJavaProject javaProject = JavaCore.create(project);
-    IClasspathContainer container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
-    IClasspathEntry[] cp = container.getClasspathEntries();
-    assertEquals(1, cp.length);
-    assertNull(cp[0].getSourceAttachmentPath());
+    IClasspathEntry[] cp = getClasspathEntries(project);
+    assertNullSourceAttachmentPaths(1, cp);
 
     getBuildPathManager().scheduleDownload(project, false, true);
     waitForJobsToComplete();
 
-    container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
-    cp = container.getClasspathEntries();
-    assertEquals(1, cp.length);
-    assertNull(cp[0].getSourceAttachmentPath()); // sanity check
+    cp = getClasspathEntries(project);
+    assertNullSourceAttachmentPaths(1, cp);
     assertEquals("" + cp[0], 1, getAttributeCount(cp[0], IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME));
   }
 
@@ -570,31 +502,20 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     waitForJobsToComplete();
 
     // sanity check
-    IJavaProject javaProject = JavaCore.create(project);
-    IClasspathContainer container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
-    IClasspathEntry[] cp = container.getClasspathEntries();
-    assertEquals(1, cp.length);
-    assertNull(cp[0].getSourceAttachmentPath());
+    IClasspathEntry[] cp = getClasspathEntries(project);
+    assertNullSourceAttachmentPaths(1, cp);
 
     getBuildPathManager().scheduleDownload(project, true, false);
     waitForJobsToComplete();
 
-    javaProject = JavaCore.create(project);
-    container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
-    cp = container.getClasspathEntries();
+    cp = getClasspathEntries(project);
     assertEquals(1, cp.length);
     assertEquals("downloadsources-t004-0.0.1-sources.jar", cp[0].getSourceAttachmentPath().lastSegment());
   }
 
-  private static int getAttributeCount(IClasspathEntry entry, String name) {
+  private static long getAttributeCount(IClasspathEntry entry, String name) {
     IClasspathAttribute[] attrs = entry.getExtraAttributes();
-    int count = 0;
-    for(int i = 0; i < attrs.length; i++ ) {
-      if(name.equals(attrs[i].getName())) {
-        count++ ;
-      }
-    }
-    return count;
+    return Arrays.stream(attrs).map(IClasspathAttribute::getName).filter(name::equals).count();
   }
 
   @Test
@@ -604,17 +525,14 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     IProject project = createExisting("downloadsources-p004", "projects/downloadsources/p004");
     waitForJobsToComplete();
 
-    IJavaProject javaProject = JavaCore.create(project);
-    IClasspathContainer container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
-    IClasspathEntry[] cp = container.getClasspathEntries();
+    IClasspathEntry[] cp = getClasspathEntries(project);
 
     // sanity check
     assertEquals("downloadsources-t005-0.0.1-tests.jar", cp[1].getPath().lastSegment());
 
     getBuildPathManager().scheduleDownload(project, true, false);
     waitForJobsToComplete();
-    container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
-    cp = container.getClasspathEntries();
+    cp = getClasspathEntries(project);
 
     assertEquals(2, cp.length);
     assertEquals("downloadsources-t005-0.0.1-test-sources.jar", cp[1].getSourceAttachmentPath().lastSegment());
@@ -627,17 +545,14 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     IProject project = createExisting("downloadsources-p005", "projects/downloadsources/p005");
     waitForJobsToComplete();
 
-    IJavaProject javaProject = JavaCore.create(project);
-    IClasspathContainer container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
-    IClasspathEntry[] cp = container.getClasspathEntries();
+    IClasspathEntry[] cp = getClasspathEntries(project);
 
     // sanity check
     assertEquals("downloadsources-t006-0.0.1-jdk14.jar", cp[0].getPath().lastSegment());
 
     getBuildPathManager().scheduleDownload(project, true, false);
     waitForJobsToComplete();
-    container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
-    cp = container.getClasspathEntries();
+    cp = getClasspathEntries(project);
 
     assertEquals(1, cp.length);
     assertNotNull(cp[0].getSourceAttachmentPath());
@@ -706,14 +621,11 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     IProject project = createExisting("downloadsources-p007", "projects/downloadsources/p007");
     waitForJobsToComplete();
 
-    IJavaProject javaProject = JavaCore.create(project);
-    IClasspathContainer container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
-    IClasspathEntry[] cp = container.getClasspathEntries();
+    IClasspathEntry[] cp = getClasspathEntries(project);
 
     // sanity check
-    assertEquals(1, cp.length);
+    assertNullSourceAttachmentPaths(1, cp);
     assertEquals("downloadsources-t007-0.0.1-tests.jar", cp[0].getPath().lastSegment());
-    assertNull(cp[0].getSourceAttachmentPath());
 
     boolean oldDownloadSources = mavenConfiguration.isDownloadSources();
     try {
@@ -721,12 +633,10 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
       MavenUpdateRequest request = new MavenUpdateRequest(project, false/*offline*/, false/*updateSnapshots*/);
       MavenPlugin.getMavenProjectRegistry().refresh(request);
       waitForJobsToComplete();
-      container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
-      cp = container.getClasspathEntries();
+      cp = getClasspathEntries(project);
 
-      assertEquals(1, cp.length);
+      assertNullSourceAttachmentPaths(1, cp);
       assertEquals("downloadsources-t007-0.0.1-tests.jar", cp[0].getPath().lastSegment());
-      assertNull(cp[0].getSourceAttachmentPath());
     } finally {
       ((MavenConfigurationImpl) mavenConfiguration).setDownloadSources(oldDownloadSources);
     }
@@ -745,22 +655,17 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
       waitForJobsToComplete();
 
       // sanity check
-      IJavaProject javaProject = JavaCore.create(project);
-      IClasspathContainer container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
-      IClasspathEntry[] cp = container.getClasspathEntries();
-      assertEquals(1, cp.length);
-      assertNull(cp[0].getSourceAttachmentPath());
+      IClasspathEntry[] cp = getClasspathEntries(project);
+      assertNullSourceAttachmentPaths(1, cp);
       assertEquals("" + cp[0], 0, getAttributeCount(cp[0], IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME));
 
       MavenUpdateRequest request = new MavenUpdateRequest(project, false/*offline*/, false/*updateSnapshots*/);
       //when sources are missing, we expect the javadoc to be downloaded if available.
       MavenPlugin.getMavenProjectRegistry().refresh(request);
       waitForJobsToComplete();
-      container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
-      cp = container.getClasspathEntries();
+      cp = getClasspathEntries(project);
 
-      assertEquals(1, cp.length);
-      assertNull(cp[0].getSourceAttachmentPath()); // sanity check
+      assertNullSourceAttachmentPaths(1, cp);
       assertEquals("" + cp[0], 1, getAttributeCount(cp[0], IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME));
     } finally {
       ((MavenConfigurationImpl) mavenConfiguration).setDownloadSources(oldDownloadSources);
@@ -777,9 +682,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     IProject p1 = createExisting("classifiers-p1", "projects/classifiers/classifiers-p1");
     waitForJobsToComplete();
 
-    IJavaProject javaProject = JavaCore.create(p1);
-    IClasspathContainer container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
-    IClasspathEntry[] cp = container.getClasspathEntries();
+    IClasspathEntry[] cp = getClasspathEntries(p1);
 
     assertEquals(2, cp.length);
     assertEquals("classifiers-p2-0.0.1.jar", cp[0].getPath().lastSegment());
@@ -788,8 +691,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     IProject p2 = createExisting("classifiers-p2", "projects/classifiers/classifiers-p2");
     waitForJobsToComplete();
 
-    container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
-    cp = container.getClasspathEntries();
+    cp = getClasspathEntries(p1);
 
     assertEquals(1, cp.length);
     assertEquals("classifiers-p2", cp[0].getPath().lastSegment());
@@ -1389,9 +1291,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
         new String[] {"a/pom.xml", "b/pom.xml"}, new ResolverConfiguration());
     waitForJobsToComplete();
 
-    IJavaProject javaProject = JavaCore.create(projects[1]);
-    IClasspathContainer container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
-    IClasspathEntry[] cp = container.getClasspathEntries();
+    IClasspathEntry[] cp = getClasspathEntries(projects[1]);
 
     assertEquals(1, cp.length);
     ClasspathHelpers.assertClasspathEntry(cp, projects[0].getFullPath());
@@ -1401,17 +1301,13 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
   public void test385391_keepCustomSourceEncoding() throws Exception {
     IProject project = createSimpleProject("simple-project", null);
 
-    IJavaProject javaProject = JavaCore.create(project);
-
     IClasspathEntry[] entries = getMavenContainerEntries(project);
     assertEquals(Arrays.toString(entries), 2, entries.length);
     assertEquals(IClasspathEntry.CPE_LIBRARY, entries[0].getEntryKind());
     assertEquals("junit-4.13.1.jar", entries[0].getPath().lastSegment());
     assertNull(MavenClasspathHelpers.getAttribute(entries[0], IClasspathAttribute.SOURCE_ATTACHMENT_ENCODING));
 
-    final IClasspathContainer container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
-
-    IPath entryPath = container.getClasspathEntries()[0].getPath();
+    IPath entryPath = getClasspathEntries(project)[0].getPath();
 
     String encoding = "ISO-8859-1";
 
@@ -1423,8 +1319,55 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
         new IClasspathAttribute[] {attribute}, // 
         false /*not exported*/);
 
-    BuildPathManager buildpathManager = getBuildPathManager();
+    persistAttachedSourcesAndJavadoc(project, entry);
 
+    // check custom source encoding
+    IClasspathEntry entry2 = getClasspathEntries(project)[0];
+    assertEquals(entryPath, entry2.getPath());
+    assertEquals(entry.getSourceAttachmentPath(), entry2.getSourceAttachmentPath());
+    assertEquals(entry.getSourceAttachmentRootPath(), entry2.getSourceAttachmentRootPath());
+    assertEquals(encoding, MavenClasspathHelpers.getAttribute(entry2, IClasspathAttribute.SOURCE_ATTACHMENT_ENCODING));
+  }
+
+  // --- utility methods ---
+
+  private Set<Artifact> getMavenProjectArtifacts(IProject p) throws CoreException {
+    MavenProject mavenProject = manager.create(p, monitor).getMavenProject(monitor);
+    return mavenProject.getArtifacts();
+  }
+
+  private void deleteSourcesAndJavadoc(File basedir) throws IOException {
+    if(!basedir.exists()) {
+      return;
+    }
+    try (var files = Files.newDirectoryStream(basedir.toPath());) {
+      for(java.nio.file.Path file : files) {
+        if(file.toString().endsWith("-sources.jar") || file.toString().endsWith("-javadoc.jar")
+            || file.endsWith("m2e-lastUpdated.properties")) {
+          Files.delete(file);
+        }
+      }
+    }
+  }
+
+  private static IClasspathEntry[] getClasspathEntries(IProject project) throws JavaModelException {
+    IJavaProject javaProject2 = JavaCore.create(project);
+    IClasspathContainer container2 = BuildPathManager.getMaven2ClasspathContainer(javaProject2);
+    return container2.getClasspathEntries();
+  }
+
+  private void assertNullSourceAttachmentPaths(int expectedLength, IClasspathEntry[] entries) {
+    assertEquals(expectedLength, entries.length);
+    for(IClasspathEntry entry : entries) {
+      assertNull(entry.getSourceAttachmentPath());
+    }
+  }
+
+  private BuildPathManager persistAttachedSourcesAndJavadoc(IProject project, final IClasspathEntry entry)
+      throws CoreException, InterruptedException {
+    IJavaProject javaProject = JavaCore.create(project);
+    BuildPathManager buildpathManager = getBuildPathManager();
+    final IClasspathContainer container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
     IClasspathContainer containerSuggestion = new IClasspathContainer() {
       @Override
       public IClasspathEntry[] getClasspathEntries() {
@@ -1448,18 +1391,6 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     };
     buildpathManager.persistAttachedSourcesAndJavadoc(javaProject, containerSuggestion, monitor);
     waitForJobsToComplete();
-
-    // check custom source encoding
-    IClasspathContainer container2 = BuildPathManager.getMaven2ClasspathContainer(javaProject);
-    IClasspathEntry entry2 = container2.getClasspathEntries()[0];
-    assertEquals(entryPath, entry2.getPath());
-    assertEquals(entry.getSourceAttachmentPath(), entry2.getSourceAttachmentPath());
-    assertEquals(entry.getSourceAttachmentRootPath(), entry2.getSourceAttachmentRootPath());
-    assertEquals(encoding, MavenClasspathHelpers.getAttribute(entry2, IClasspathAttribute.SOURCE_ATTACHMENT_ENCODING));
-  }
-
-  private Set<Artifact> getMavenProjectArtifacts(IProject p) throws CoreException {
-    MavenProject mavenProject = manager.create(p, monitor).getMavenProject(monitor);
-    return mavenProject.getArtifacts();
+    return buildpathManager;
   }
 }
