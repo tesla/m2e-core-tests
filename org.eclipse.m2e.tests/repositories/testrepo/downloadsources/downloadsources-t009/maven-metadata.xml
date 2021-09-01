@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <metadata>
   <groupId>downloadsources</groupId>
-  <artifactId>downloadsources-parent</artifactId>
+  <artifactId>downloadsources-t009</artifactId>
   <versioning>
-    <release>0.0.1</release>
     <versions>
-      <version>0.0.1</version>
+      <version>0.0.1-SNAPSHOT</version>
     </versions>
-    <lastUpdated>20210904071631</lastUpdated>
+    <lastUpdated>20210904071644</lastUpdated>
   </versioning>
 </metadata>

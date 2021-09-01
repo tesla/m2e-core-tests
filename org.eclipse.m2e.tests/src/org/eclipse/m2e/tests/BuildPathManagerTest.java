@@ -476,6 +476,35 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
   }
 
   @Test
+  public void testDownloadSources_001_redownloadRelease() throws Exception {
+    deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t001/0.0.1/"));
+    deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t002/0.0.1/"));
+
+    IProject project = createExisting("downloadsources-p001", "projects/downloadsources/p001");
+    waitForJobsToComplete();
+
+    // sanity check
+    IClasspathEntry[] cp = getClasspathEntries(project);
+    assertNullSourceAttachmentPaths(2, cp);
+
+    // download sources the first time
+    getBuildPathManager().scheduleDownload(project, true, false);
+    waitForJobsToComplete();
+    cp = getClasspathEntries(project);
+    assertEquals(2, cp.length);
+    assertEquals("downloadsources-t001-0.0.1-sources.jar", cp[0].getSourceAttachmentPath().lastSegment());
+    assertEquals("downloadsources-t002-0.0.1-sources.jar", cp[1].getSourceAttachmentPath().lastSegment());
+
+    // download sources a second time time
+    getBuildPathManager().scheduleDownload(project, true, false);
+    waitForJobsToComplete();
+    cp = getClasspathEntries(project);
+    assertEquals(2, cp.length);
+    assertEquals("downloadsources-t001-0.0.1-sources.jar", cp[0].getSourceAttachmentPath().lastSegment());
+    assertEquals("downloadsources-t002-0.0.1-sources.jar", cp[1].getSourceAttachmentPath().lastSegment());
+  }
+
+  @Test
   public void testDownloadSources_002_javadoconly() throws Exception {
     deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t003/0.0.1"));
 
@@ -671,6 +700,89 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
       ((MavenConfigurationImpl) mavenConfiguration).setDownloadSources(oldDownloadSources);
       ((MavenConfigurationImpl) mavenConfiguration).setDownloadJavadoc(oldDownloadJavadoc);
     }
+  }
+
+  @Test
+  public void testDownloadSources_009_downloadSnapshot() throws Exception {
+    deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t009/0.0.1-SNAPSHOT/"));
+
+    IProject project = createExisting("downloadsources-t009", "projects/downloadsources/p009");
+    waitForJobsToComplete();
+
+    // sanity check
+    IClasspathEntry[] cp = getClasspathEntries(project);
+    assertNullSourceAttachmentPaths(1, cp);
+
+    // download sources the first time
+    getBuildPathManager().scheduleDownload(project, true, false);
+    waitForJobsToComplete();
+    cp = getClasspathEntries(project);
+    assertEquals(1, cp.length);
+    assertEquals("downloadsources-t009-0.0.1-SNAPSHOT-sources.jar", cp[0].getSourceAttachmentPath().lastSegment());
+  }
+
+  @Test
+  public void testDownloadSources_009_redownloadSnapshot() throws Exception {
+    deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t009/0.0.1-SNAPSHOT/"));
+
+    IProject project = createExisting("downloadsources-t009", "projects/downloadsources/p009");
+    waitForJobsToComplete();
+
+    // sanity check
+    IClasspathEntry[] cp = getClasspathEntries(project);
+    assertNullSourceAttachmentPaths(1, cp);
+
+    // download sources the first time
+    getBuildPathManager().scheduleDownload(project, true, false);
+    waitForJobsToComplete();
+    cp = getClasspathEntries(project);
+    assertEquals(1, cp.length);
+    assertEquals("downloadsources-t009-0.0.1-SNAPSHOT-sources.jar", cp[0].getSourceAttachmentPath().lastSegment());
+
+    // download sources a second time time
+    getBuildPathManager().scheduleDownload(project, true, false);
+    waitForJobsToComplete();
+    cp = getClasspathEntries(project);
+    assertEquals(1, cp.length);
+    assertEquals("downloadsources-t009-0.0.1-SNAPSHOT-sources.jar", cp[0].getSourceAttachmentPath().lastSegment());
+  }
+
+  @Test
+  public void testDownloadSources_009_redownloadSnapshotWithOlderSources() throws Exception {
+    File localSnapshotRepoMirror = new File(repo, "downloadsources/downloadsources-t009/0.0.1-SNAPSHOT/");
+    deleteSourcesAndJavadoc(localSnapshotRepoMirror);
+
+    IProject project = createExisting("downloadsources-t009", "projects/downloadsources/p009");
+    waitForJobsToComplete();
+
+    // sanity check
+    IClasspathEntry[] cp = getClasspathEntries(project);
+    assertNullSourceAttachmentPaths(1, cp);
+
+    // download sources the first time
+    getBuildPathManager().scheduleDownload(project, true, false);
+    waitForJobsToComplete();
+    cp = getClasspathEntries(project);
+    assertEquals(1, cp.length);
+    assertEquals("downloadsources-t009-0.0.1-SNAPSHOT-sources.jar", cp[0].getSourceAttachmentPath().lastSegment());
+
+    // Pretend artifact was last-modified after its sources
+    // The sources artifact is (sometimes and sometimes not) touched during source download, so the main-artifact is touched.
+    File mainArtifact = new File(localSnapshotRepoMirror, "downloadsources-t009-0.0.1-SNAPSHOT.jar");
+    File mainArtifactSources = new File(localSnapshotRepoMirror, "downloadsources-t009-0.0.1-SNAPSHOT-sources.jar");
+    mainArtifact.setLastModified(mainArtifactSources.lastModified() + 10_000);
+
+    // download sources a second time time
+    getBuildPathManager().scheduleDownload(project, true, false);
+    waitForJobsToComplete();
+    cp = getClasspathEntries(project);
+    assertEquals(1, cp.length);
+    assertEquals("downloadsources-t009-0.0.1-SNAPSHOT-sources.jar", cp[0].getSourceAttachmentPath().lastSegment());
+
+    // Afterwards sanity check: For this test-case setup it is mandatory that the main-artifact is last-modified after its sources.
+    // Because the setup of this situation is a bit fragile, this afterwards check makes sure the test setup was not pointless.
+    assertTrue("Main artifact not last-modified after sources",
+        mainArtifactSources.lastModified() < mainArtifact.lastModified());
   }
 
   private BuildPathManager getBuildPathManager() {
