@@ -30,7 +30,20 @@
 
   <modules>
     <module>m2e-test-parent</module>
-    <module>test-packaging-plugin</module>
+    <module>422106_legacyPlexusUtils-plugin</module>
+    <module>438454_guicescopes-plugin</module>
+    <module>441257_stalePluginRealms/parentWithBuildExtensions</module>
+    <module>downloadsources</module>
     <module>mngeclipse-2110</module>
+    <module>mngeclipse-2126</module>
+    <module>mngeclipse-2149</module>
+    <module>mngeclipse-369</module>
+    <module>readparent</module>
+    <module>registrymanager</module>
+    <module>test-buildcontext-plugin</module>
+    <module>test-buildhelper-plugin</module>
+    <module>test-embeddedmapping-plugin</module>
+    <module>testLifecycleMappingMetadata</module>
+    <module>test-packaging-plugin</module>
   </modules>
 </project>
