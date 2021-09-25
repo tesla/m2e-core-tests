@@ -24,10 +24,10 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.m2e.core.ui;bundle-version="1.17.2",
  org.eclipse.equinox.event,
  org.eclipse.ui.workbench.texteditor
-Bundle-Name: %Bundle-Name
+Bundle-Name: M2E Maven POM File XML Editor Tests
 Bundle-Version: 1.17.2.qualifier
 MavenArtifact-ArtifactId: org.eclipse.m2e.editor.xml.tests
-Bundle-Vendor: %Bundle-Vendor
+Bundle-Vendor: Eclipse.org - m2e
 Bundle-SymbolicName: org.eclipse.m2e.editor.xml.tests;singleton:=true
 Bundle-ClassPath: .
 MavenArtifact-GroupId: org.eclipse.m2e
