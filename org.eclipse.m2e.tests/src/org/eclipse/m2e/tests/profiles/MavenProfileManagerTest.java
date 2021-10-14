@@ -21,9 +21,12 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.Test;
 
@@ -236,4 +239,27 @@ public class MavenProfileManagerTest extends AbstractMavenProfileTest {
     }
   }
 
+  @Test
+  public void testLoadingProfilesFromPomsResolvedViaTheirRelativePath() throws Exception {
+    // -- Given...
+    //
+    String pomPath = "projects/profiles/relative-path-profiles/modules/module-a/pom.xml";
+    IProject project = importProject(pomPath);
+    waitForJobsToComplete();
+    assertNotNull(pomPath + " could not be imported", project);
+
+    IMavenProjectFacade facade = getFacade(project);
+
+    // -- When...
+    //
+    List<ProfileData> profiles = profileManager.getProfileDatas(facade, monitor);
+
+    // -- Then...
+    //
+    Set<String> actualProfileIds = profiles.stream().map(ProfileData::getId).collect(Collectors.toSet());
+
+    assertEquals(
+        new HashSet<>(Arrays.asList("module-one", "module-two", "api-one", "api-two", "parent-one", "parent-two")),
+        actualProfileIds);
+  }
 }
