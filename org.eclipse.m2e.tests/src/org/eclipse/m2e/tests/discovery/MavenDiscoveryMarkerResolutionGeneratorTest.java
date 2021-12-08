@@ -14,6 +14,7 @@ import org.junit.Test;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.ui.IMarkerResolution;
 import org.eclipse.ui.IMarkerResolutionGenerator2;
 import org.eclipse.ui.views.markers.WorkbenchMarkerResolution;
@@ -48,12 +49,13 @@ public class MavenDiscoveryMarkerResolutionGeneratorTest extends AbstractLifecyc
     assertNotNull("Expected not null MavenProjectFacade", facade);
     IProject project = facade.getProject();
 
-    List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
-    assertEquals("Error markers : " + toString(errorMarkers), 1, errorMarkers.size());
+    IMarker[] errorMarkers = project.findMarkers(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, true,
+        IResource.DEPTH_INFINITE);
+    assertEquals("Error markers : " + toString(errorMarkers), 1, errorMarkers.length);
 
     String expectedErrorMessage = "Project configurator \"no such project configurator id for test-lifecyclemapping-plugin:test-goal-for-eclipse-extension2 - embedded from pom\" required by plugin execution \"org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-for-eclipse-extension2 (execution: default-test-goal-for-eclipse-extension2, phase: compile)\" is not available. To enable full functionality, install the project configurator and run Maven->Update Project Configuration.";
-    IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID,
-        expectedErrorMessage, null /*lineNumber*/, project);
+    IMarker marker = WorkspaceHelpers.assertMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, -1, expectedErrorMessage,
+        null /*lineNumber*/, "pom.xml", project);
     WorkspaceHelpers
         .assertConfiguratorErrorMarkerAttributes(marker,
             "no such project configurator id for test-lifecyclemapping-plugin:test-goal-for-eclipse-extension2 - embedded from pom");
@@ -87,14 +89,15 @@ public class MavenDiscoveryMarkerResolutionGeneratorTest extends AbstractLifecyc
     assertNotNull("Expected not null MavenProjectFacade", facade);
     IProject project = facade.getProject();
 
-    List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
+    List<IMarker> errorMarkers = List
+        .of(project.findMarkers(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, true, IResource.DEPTH_INFINITE));
     assertEquals("Error markers", 2, errorMarkers.size());
 
     List<MojoExecutionKey> notCoveredMojoExecutions = getNotCoveredMojoExecutions(facade);
 
     String expectedErrorMessage = "Plugin execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 (execution: default-test-goal-1, phase: process-resources)";
-    IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID,
-        expectedErrorMessage, null /*lineNumber*/, project);
+    IMarker marker = WorkspaceHelpers.assertMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, -1, expectedErrorMessage,
+        null /*lineNumber*/, "pom.xml", project);
     WorkspaceHelpers.assertErrorMarkerAttributes(marker, notCoveredMojoExecutions.get(0));
     assertTrue("Resolve MojoExecution marker", generator.hasResolutions(marker));
   }
@@ -110,7 +113,8 @@ public class MavenDiscoveryMarkerResolutionGeneratorTest extends AbstractLifecyc
     for(IProject project : projects) {
       IMavenProjectFacade facade = mavenProjectManager.create(project, monitor);
       IProject p = facade.getProject();
-      errorMarkers.addAll(WorkspaceHelpers.findErrorMarkers(p));
+      errorMarkers
+          .addAll(List.of(p.findMarkers(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, true, IResource.DEPTH_INFINITE)));
     }
 
     IMarkerResolution m = generator.getResolutions(errorMarkers.get(0))[0];

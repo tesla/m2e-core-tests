@@ -35,6 +35,7 @@ import org.eclipse.aether.repository.WorkspaceReader;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.JavaCore;
@@ -374,15 +375,16 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
         notCoveredMojoExecutions.get(1).toString());
 
     // Also verify that we get the expected markers
-    List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
-    assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
+    IMarker[] errorMarkers = project.findMarkers(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, true,
+        IResource.DEPTH_INFINITE);
+    assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.length);
     String expectedErrorMessage = "Plugin execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 (execution: default-test-goal-1, phase: process-resources)";
-    IMarker marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID,
-        expectedErrorMessage, 11 /*lineNumber <plugin> of plugin def*/, project);
+    IMarker marker = WorkspaceHelpers.assertMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, -1, expectedErrorMessage,
+        11 /*lineNumber <plugin> of plugin def*/, "pom.xml", project);
     WorkspaceHelpers.assertErrorMarkerAttributes(marker, notCoveredMojoExecutions.get(0));
     expectedErrorMessage = "Plugin execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-2 (execution: default-test-goal-2, phase: compile)";
-    marker = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
-        11 /*lineNumber <plugin> of plugin def*/, project);
+    marker = WorkspaceHelpers.assertMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, -1, expectedErrorMessage,
+        11 /*lineNumber <plugin> of plugin def*/, "pom.xml", project);
     WorkspaceHelpers.assertErrorMarkerAttributes(marker, notCoveredMojoExecutions.get(1));
   }
 

@@ -17,9 +17,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.m2e.core.internal.IMavenConstants;
@@ -112,14 +114,16 @@ public class ManagedArtifactMarkerTest extends AbstractMavenProjectTestCase {
   public void test355882_noMarkerOnDifferentClassifier() throws Exception {
 	    IProject project = importProject("projects/355882/test1/pom.xml");
 	    waitForJobsToComplete();
-	    XmlEditorHelpers.assertNoEditorHintWarningMarkers(project);
+	    assertTrue(Stream.of(project.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE)) //
+	    	.map(marker -> marker.getAttribute(IMarker.MESSAGE, "")) //
+	    	.noneMatch(message -> message.contains("Overriding managed version"))); //$NON-NLS-1$
   }
   @Test
   public void test355882_MarkerOnClassifierVersionOverride() throws Exception {
 	    IProject project = importProject("projects/355882/test2/pom.xml");
 	    waitForJobsToComplete();
 	    
-	    IMarker[] markers = XmlEditorHelpers.findEditorHintWarningMarkers(project).toArray(new IMarker[0]);
+	    IMarker[] markers = project.findMarkers(IMavenConstants.MARKER_POM_LOADING_ID, true, IResource.DEPTH_INFINITE);
 	    assertEquals(1, markers.length);
 
 	    XmlEditorHelpers.assertEditorHintWarningMarker(IMavenConstants.MARKER_POM_LOADING_ID,

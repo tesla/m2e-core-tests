@@ -313,13 +313,13 @@ public class MavenBuilderTest extends AbstractMavenProjectTestCase {
     waitForJobsToComplete();
 
     String message = "Plugin execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-buildhelper-plugin:1.0.0:publish (execution: add-source, phase: generate-sources)";
-    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, message, 23, project);
+    WorkspaceHelpers.assertMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, -1, message, 23, "pom.xml", project);
 
     deserializeFromWorkspaceState(MavenPlugin.getMavenProjectRegistry().create(project, monitor));
 
     // this is supposed to succeed
     project.build(IncrementalProjectBuilder.CLEAN_BUILD, monitor);
-    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, message, 23, project);
+    WorkspaceHelpers.assertMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, -1, message, 23, "pom.xml", project);
   }
 
   @Test

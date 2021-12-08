@@ -20,7 +20,6 @@ import java.util.List;
 
 import org.junit.Test;
 
-import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 
 import org.apache.maven.artifact.Artifact;
@@ -47,7 +46,7 @@ public class MavenPluginMetadataSourceTest extends AbstractLifecycleMappingTest 
     WorkspaceHelpers
         .assertMarker(
             "org.eclipse.m2e.core.maven2Problem.lifecycleMapping",
-            IMarker.SEVERITY_ERROR,
+            -1,
             "Plugin execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 (execution: not-covered, phase: compile)",
             null, "pom.xml", project);
 

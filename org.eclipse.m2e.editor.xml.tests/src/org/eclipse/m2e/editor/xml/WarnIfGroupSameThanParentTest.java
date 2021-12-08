@@ -17,6 +17,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.m2e.core.internal.IMavenConstants;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
@@ -45,7 +46,7 @@ public class WarnIfGroupSameThanParentTest extends AbstractMavenProjectTestCase 
     {
       // "child2552withDuplicateGroupAndVersion/pom.xml"
       IProject project = projects[0];
-      IMarker[] markers = XmlEditorHelpers.findEditorHintWarningMarkers(project).toArray(new IMarker[0]);
+      IMarker[] markers = project.findMarkers(IMavenConstants.MARKER_POM_LOADING_ID, true, IResource.DEPTH_INFINITE);
       assertEquals(2, markers.length);
       XmlEditorHelpers.assertEditorHintWarningMarker(IMavenConstants.MARKER_POM_LOADING_ID,
           IMavenConstants.EDITOR_HINT_PARENT_GROUP_ID, null /* message */, 8 /* lineNumber */, 1 /* resolutions */,
@@ -55,33 +56,37 @@ public class WarnIfGroupSameThanParentTest extends AbstractMavenProjectTestCase 
           markers[1]);
       // Fix the problem - the marker should be removed
       copyContent(project, "pom_good.xml", "pom.xml");
-      XmlEditorHelpers.assertNoEditorHintWarningMarkers(project);
+      markers = project.findMarkers(IMavenConstants.MARKER_POM_LOADING_ID, true, IResource.DEPTH_INFINITE);
+      assertEquals("Content fixed, markers should be removed", 0, markers.length);
     }
 
     {
       // "child2552withDuplicateGroup/pom.xml",
       IProject project = projects[1];
-      IMarker[] markers = XmlEditorHelpers.findEditorHintWarningMarkers(project).toArray(new IMarker[0]);
+      IMarker[] markers = project.findMarkers(IMavenConstants.MARKER_POM_LOADING_ID, true, IResource.DEPTH_INFINITE);
       assertEquals(1, markers.length);
       XmlEditorHelpers.assertEditorHintWarningMarker(IMavenConstants.MARKER_POM_LOADING_ID,
           IMavenConstants.EDITOR_HINT_PARENT_GROUP_ID, null /* message */, 8 /* lineNumber */, 1 /* resolutions */,
           markers[0]);
       // Fix the problem - the marker should be removed
       copyContent(project, "pom_good.xml", "pom.xml");
-      XmlEditorHelpers.assertNoEditorHintWarningMarkers(project);
+      markers = project.findMarkers(IMavenConstants.MARKER_POM_LOADING_ID, true, IResource.DEPTH_INFINITE);
+      assertEquals("Content fixed, markers should be removed", 0, markers.length);
     }
 
     {
       // "child2552withDuplicateVersion/pom.xml"
       IProject project = projects[2];
-      IMarker[] markers = XmlEditorHelpers.findEditorHintWarningMarkers(project).toArray(new IMarker[0]);
+      IMarker[] markers = project.findMarkers(IMavenConstants.MARKER_POM_LOADING_ID, true, IResource.DEPTH_INFINITE);
       assertEquals(1, markers.length);
       XmlEditorHelpers.assertEditorHintWarningMarker(IMavenConstants.MARKER_POM_LOADING_ID,
           IMavenConstants.EDITOR_HINT_PARENT_VERSION, null /* message */, 9 /* lineNumber */, 1 /* resolutions */,
           markers[0]);
       // Fix the problem - the marker should be removed
       copyContent(project, "pom_good.xml", "pom.xml");
-      XmlEditorHelpers.assertNoEditorHintWarningMarkers(project);
+      markers = project.findMarkers(IMavenConstants.MARKER_POM_LOADING_ID, true, IResource.DEPTH_INFINITE);
+      assertEquals("Content fixed, markers should be removed", 0, markers.length);
     }
   }
+
 }

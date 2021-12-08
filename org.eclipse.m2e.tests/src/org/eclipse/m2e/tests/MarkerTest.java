@@ -92,8 +92,8 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
     waitForJobsToComplete();
     expectedErrorMessage = "Plugin execution not covered by lifecycle configuration: org.codehaus.modello:modello-maven-plugin:1.1:java (execution: standard, phase: generate-sources)";
-    WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
-        21 /*lineNumber*/, project);
+    WorkspaceHelpers.assertMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, -1, expectedErrorMessage,
+        21 /*lineNumber*/, "pom.xml", project);
 
     // Fix the current configuration problem, introduce a dependency problem
     copyContent(project, "pom_badDependency.xml", "pom.xml");
@@ -375,7 +375,8 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     IProject project = importProject("projects/markers/testUncoveredPluginExecutionResolutions/pom.xml");
     waitForJobsToComplete();
 
-    List<IMarker> errorMarkers = WorkspaceHelpers.findErrorMarkers(project);
+    List<IMarker> errorMarkers = List
+        .of(project.findMarkers(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, true, IResource.DEPTH_INFINITE));
     assertEquals(1, errorMarkers.size());
 
     IMarkerResolution[] resolutions = IDE.getMarkerHelpRegistry().getResolutions(errorMarkers.get(0));
