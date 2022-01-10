@@ -26,7 +26,7 @@ import org.junit.Test;
 
 /**
  * Hello fellow tester: everytime this test finds a regression add an 'x' here: everytime you do mindless test update
- * add an 'y' here:
+ * add an 'y' here: y
  * 
  * @author mkleint
  */
