@@ -48,12 +48,12 @@ public class WarnIfGroupSameThanParentTest extends AbstractMavenProjectTestCase 
       IProject project = projects[0];
       IMarker[] markers = project.findMarkers(IMavenConstants.MARKER_POM_LOADING_ID, true, IResource.DEPTH_INFINITE);
       assertEquals(2, markers.length);
-      XmlEditorHelpers.assertEditorHintWarningMarker(IMavenConstants.MARKER_POM_LOADING_ID,
-          IMavenConstants.EDITOR_HINT_PARENT_GROUP_ID, null /* message */, 8 /* lineNumber */, 1 /* resolutions */,
-          markers[0]);
-      XmlEditorHelpers.assertEditorHintWarningMarker(IMavenConstants.MARKER_POM_LOADING_ID,
-          IMavenConstants.EDITOR_HINT_PARENT_VERSION, null /* message */, 10 /* lineNumber */, 1 /* resolutions */,
-          markers[1]);
+      // The order is non-deterministic so check both variants
+      try {
+        assertMarkers(markers, 1, 0);
+      } catch (Error e) {
+        assertMarkers(markers, 0, 1);
+      }
       // Fix the problem - the marker should be removed
       copyContent(project, "pom_good.xml", "pom.xml");
       markers = project.findMarkers(IMavenConstants.MARKER_POM_LOADING_ID, true, IResource.DEPTH_INFINITE);
@@ -89,4 +89,13 @@ public class WarnIfGroupSameThanParentTest extends AbstractMavenProjectTestCase 
     }
   }
 
+	 
+  private void assertMarkers(IMarker[] markers, int indexToCheckFirst, int indexToCheckSecond) throws Exception {
+    XmlEditorHelpers.assertEditorHintWarningMarker(IMavenConstants.MARKER_POM_LOADING_ID,
+        IMavenConstants.EDITOR_HINT_PARENT_GROUP_ID, null /* message */, 8 /* lineNumber */, 1 /* resolutions */,
+        markers[indexToCheckFirst]);
+    XmlEditorHelpers.assertEditorHintWarningMarker(IMavenConstants.MARKER_POM_LOADING_ID,
+        IMavenConstants.EDITOR_HINT_PARENT_VERSION, null /* message */, 10 /* lineNumber */, 1 /* resolutions */,
+        markers[indexToCheckSecond]);
+  }
 }
