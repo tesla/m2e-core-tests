@@ -40,7 +40,6 @@ import org.eclipse.m2e.core.internal.archetype.ArchetypeCatalogFactory;
 import org.eclipse.m2e.core.internal.archetype.ArchetypeCatalogFactory.DefaultLocalCatalogFactory;
 import org.eclipse.m2e.core.internal.archetype.ArchetypeCatalogFactory.InternalCatalogFactory;
 import org.eclipse.m2e.core.internal.archetype.ArchetypeCatalogFactory.LocalCatalogFactory;
-import org.eclipse.m2e.core.internal.archetype.ArchetypeCatalogFactory.NexusIndexerCatalogFactory;
 import org.eclipse.m2e.core.internal.archetype.ArchetypeCatalogFactory.RemoteCatalogFactory;
 import org.eclipse.m2e.core.internal.archetype.ArchetypeManager;
 import org.eclipse.m2e.tests.common.FileHelpers;
@@ -66,8 +65,6 @@ public class ArchetypeManagerTest {
   @Test
   public void testArchetypeManager() throws Exception {
     {
-      ArchetypeCatalogFactory catalog = archetypeManager.getArchetypeCatalogFactory(NexusIndexerCatalogFactory.ID);
-      assertNotNull(catalog);
       ArchetypeCatalog archetypeCatalog = catalog.getArchetypeCatalog();
       assertNotNull(archetypeCatalog);
       List<?> archetypes = archetypeCatalog.getArchetypes();
