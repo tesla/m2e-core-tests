@@ -65,14 +65,6 @@ public class ArchetypeManagerTest {
   @Test
   public void testArchetypeManager() throws Exception {
     {
-      ArchetypeCatalog archetypeCatalog = catalog.getArchetypeCatalog();
-      assertNotNull(archetypeCatalog);
-      List<?> archetypes = archetypeCatalog.getArchetypes();
-      assertNotNull(archetypes);
-      // assertFalse(nexusArchetypes.isEmpty());  central index is not available here
-    }
-
-    {
       ArchetypeCatalogFactory catalog = archetypeManager.getArchetypeCatalogFactory(InternalCatalogFactory.ID);
       assertNotNull(catalog);
 
