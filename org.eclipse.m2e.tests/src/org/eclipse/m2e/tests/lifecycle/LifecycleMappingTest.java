@@ -458,7 +458,11 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
 
     assertEquals(problems.toString(), 1, problems.size());
     assertEquals(
-        "Conflicting lifecycle mapping metadata (project packaging type=\"test-packaging-a\"): Mapping defined in 'MavenProject: lifecycleMappingMetadataTests:testDuplicatePackagingType:0.0.1-SNAPSHOT @ /Users/konradwindszus/workspaces/junit-workspace/testDuplicatePackagingType/pom.xml' and 'MavenProject: lifecycleMappingMetadataTests:testDuplicatePackagingType:0.0.1-SNAPSHOT @ /Users/konradwindszus/workspaces/junit-workspace/testDuplicatePackagingType/pom.xml'. To enable full functionality, remove the conflicting mapping and run Maven->Update Project Configuration.",
+        "Conflicting lifecycle mapping metadata (project packaging type=\"test-packaging-a\"): Mapping defined in 'MavenProject: lifecycleMappingMetadataTests:testDuplicatePackagingType:0.0.1-SNAPSHOT @ "
+            + facade.getFullPath(new File("pom.xml"))
+            + "' and 'MavenProject: lifecycleMappingMetadataTests:testDuplicatePackagingType:0.0.1-SNAPSHOT @ "
+            + facade.getFullPath(new File("pom.xml"))
+            + "'. To enable full functionality, remove the conflicting mapping and run Maven->Update Project Configuration.",
         problems.get(0).getMessage());
 
     assertNull(mappingResult.getLifecycleMapping());
@@ -475,9 +479,13 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
 
     assertEquals(4, problems.size());
     assertEquals(
-        "Conflicting lifecycle mapping (plugin execution \"org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 (execution: default-test-goal-1, phase: process-resources)\"): Mapping defined in 'MavenProject: lifecycleMappingMetadataTests:testDuplicatePluginExecution1:0.0.1-SNAPSHOT @ /Users/konradwindszus/workspaces/junit-workspace/testDuplicatePluginExecution1/pom.xml' and 'MavenProject: lifecycleMappingMetadataTests:testDuplicatePluginExecution1:0.0.1-SNAPSHOT @ /Users/konradwindszus/workspaces/junit-workspace/testDuplicatePluginExecution1/pom.xml'. To enable full functionality, remove the conflicting mapping and run Maven->Update Project Configuration.",
+        "Conflicting lifecycle mapping (plugin execution \"org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 (execution: default-test-goal-1, phase: process-resources)\"): Mapping defined in 'MavenProject: lifecycleMappingMetadataTests:testDuplicatePluginExecution1:0.0.1-SNAPSHOT @ "
+            + facade.getFullPath(new File("pom.xml"))
+            + "' and 'MavenProject: lifecycleMappingMetadataTests:testDuplicatePluginExecution1:0.0.1-SNAPSHOT @ "
+            + facade.getFullPath(new File("pom.xml"))
+            + "'. To enable full functionality, remove the conflicting mapping and run Maven->Update Project Configuration.",
         problems.get(0).getMessage());
-    // [1] Conflicting lifecycle mapping (plugin execution "org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-2 (execution: default-test-goal-2, phase: compile)"). To enable full functionality, remove the conflicting mapping and run Maven->Update Project Configuration.
+    // [1] Conflicting lifecycle mapping (plugin execution "org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-2 (execution: default-test-goal-2, phase: compile)"). ...
     // [2] Plugin execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 (execution: default-test-goal-1, phase: process-resources)
     // [3] Plugin execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-2 (execution: default-test-goal-2, phase: compile)
   }
@@ -493,7 +501,11 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
 
     assertEquals(3, problems.size());
     assertEquals(
-        "Conflicting lifecycle mapping (plugin execution \"org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 (execution: default-test-goal-1, phase: process-resources)\"): Mapping defined in 'MavenProject: lifecycleMappingMetadataTests:testDuplicatePluginExecution2:0.0.1-SNAPSHOT @ /Users/konradwindszus/workspaces/junit-workspace/testDuplicatePluginExecution2/pom.xml' and 'MavenProject: lifecycleMappingMetadataTests:testDuplicatePluginExecution2:0.0.1-SNAPSHOT @ /Users/konradwindszus/workspaces/junit-workspace/testDuplicatePluginExecution2/pom.xml'. To enable full functionality, remove the conflicting mapping and run Maven->Update Project Configuration.",
+        "Conflicting lifecycle mapping (plugin execution \"org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 (execution: default-test-goal-1, phase: process-resources)\"): Mapping defined in 'MavenProject: lifecycleMappingMetadataTests:testDuplicatePluginExecution2:0.0.1-SNAPSHOT @ "
+            + facade.getFullPath(new File("pom.xml"))
+            + "' and 'MavenProject: lifecycleMappingMetadataTests:testDuplicatePluginExecution2:0.0.1-SNAPSHOT @ "
+            + facade.getFullPath(new File("pom.xml"))
+            + "'. To enable full functionality, remove the conflicting mapping and run Maven->Update Project Configuration.",
         problems.get(0).getMessage());
     // [1] Plugin execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 (execution: default-test-goal-1, phase: process-resources)
     // [2] Plugin execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-2 (execution: default-test-goal-2, phase: compile)
