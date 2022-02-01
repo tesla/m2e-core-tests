@@ -65,7 +65,7 @@ public class SourceLocationHelperTest extends AbstractMavenProjectTestCase {
     WorkspaceHelpers.assertNoErrors(project);
     MavenProject mavenProject = facade.getMavenProject(monitor);
     SourceLocation sourceLocation = SourceLocationHelper.findPackagingLocation(mavenProject);
-    assertSourceLocation(new SourceLocation(7, 3, 13), sourceLocation);
+    assertSourceLocation(new SourceLocation(facade.getPomFile().toString(), null, 7, 3, 13), sourceLocation);
   }
 
   @Test
@@ -111,11 +111,11 @@ public class SourceLocationHelperTest extends AbstractMavenProjectTestCase {
     MojoExecutionKey mojoExecutionKey = getMojoExecutionKey("org.eclipse.m2e.test.lifecyclemapping",
         "test-lifecyclemapping-plugin", "default-test-goal-1", ((MavenProjectFacade) facade).getMojoExecutions());
     SourceLocation sourceLocation = SourceLocationHelper.findLocation(childMavenProject, mojoExecutionKey);
-    assertSourceLocation(new SourceLocation(16, 7, 14), sourceLocation);
+    assertSourceLocation(new SourceLocation(facade.getPomFile().toString(), null, 16, 7, 14), sourceLocation);
     mojoExecutionKey = getMojoExecutionKey("org.eclipse.m2e.test.lifecyclemapping", "test-lifecyclemapping-plugin",
         "default-test-goal-2", ((MavenProjectFacade) facade).getMojoExecutions());
     sourceLocation = SourceLocationHelper.findLocation(childMavenProject, mojoExecutionKey);
-    assertSourceLocation(new SourceLocation(16, 7, 14), sourceLocation);
+    assertSourceLocation(new SourceLocation(facade.getPomFile().toString(), null, 16, 7, 14), sourceLocation);
     mojoExecutionKey = getMojoExecutionKey("org.eclipse.m2e.test.lifecyclemapping", "test-lifecyclemapping-plugin",
         "parent2Execution", ((MavenProjectFacade) facade).getMojoExecutions());
     sourceLocation = SourceLocationHelper.findLocation(childMavenProject, mojoExecutionKey);
@@ -125,7 +125,7 @@ public class SourceLocationHelperTest extends AbstractMavenProjectTestCase {
     mojoExecutionKey = getMojoExecutionKey("org.eclipse.m2e.test.lifecyclemapping", "test-lifecyclemapping-plugin",
         "childExecution", ((MavenProjectFacade) facade).getMojoExecutions());
     sourceLocation = SourceLocationHelper.findLocation(childMavenProject, mojoExecutionKey);
-    assertSourceLocation(new SourceLocation(21, 11, 21), sourceLocation);
+    assertSourceLocation(new SourceLocation(facade.getPomFile().toString(), null, 21, 11, 21), sourceLocation);
   }
 
   @RequireMavenExecutionContext
@@ -141,12 +141,12 @@ public class SourceLocationHelperTest extends AbstractMavenProjectTestCase {
     MojoExecutionKey mojoExecutionKey = getMojoExecutionKey("org.apache.maven.plugins", "maven-clean-plugin",
         ((MavenProjectFacade) facade).getMojoExecutions());
     SourceLocation sourceLocation = SourceLocationHelper.findLocation(parentMavenProject, mojoExecutionKey);
-    assertSourceLocation(new SourceLocation(13, 3, 13), sourceLocation);
+    assertSourceLocation(new SourceLocation(facade.getPomFile().toString(), null, 13, 3, 13), sourceLocation);
     // Plugin from current pom
     mojoExecutionKey = getMojoExecutionKey("org.apache.maven.plugins", "maven-install-plugin",
         ((MavenProjectFacade) facade).getMojoExecutions());
     sourceLocation = SourceLocationHelper.findLocation(parentMavenProject, mojoExecutionKey);
-    assertSourceLocation(new SourceLocation(17, 7, 14), sourceLocation);
+    assertSourceLocation(new SourceLocation(facade.getPomFile().toString(), null, 17, 7, 14), sourceLocation);
 
     facade = importMavenProject("projects/markers/SourceLocationHelperTest/testMojoExecutionLocation",
         "parent/child/pom.xml");
@@ -158,12 +158,12 @@ public class SourceLocationHelperTest extends AbstractMavenProjectTestCase {
     mojoExecutionKey = getMojoExecutionKey("org.apache.maven.plugins", "maven-clean-plugin",
         ((MavenProjectFacade) facade).getMojoExecutions());
     sourceLocation = SourceLocationHelper.findLocation(mavenProject, mojoExecutionKey);
-    assertSourceLocation(new SourceLocation(2, 1, 9), sourceLocation);
+    assertSourceLocation(new SourceLocation(facade.getPomFile().toString(), null, 2, 1, 9), sourceLocation);
     // Plugin from current pom
     mojoExecutionKey = getMojoExecutionKey("org.apache.maven.plugins", "maven-compiler-plugin",
         ((MavenProjectFacade) facade).getMojoExecutions());
     sourceLocation = SourceLocationHelper.findLocation(mavenProject, mojoExecutionKey);
-    assertSourceLocation(new SourceLocation(15, 7, 14), sourceLocation);
+    assertSourceLocation(new SourceLocation(facade.getPomFile().toString(), null, 15, 7, 14), sourceLocation);
     // Plugin from parent pom
     mojoExecutionKey = getMojoExecutionKey("org.apache.maven.plugins", "maven-install-plugin",
         ((MavenProjectFacade) facade).getMojoExecutions());
@@ -182,10 +182,10 @@ public class SourceLocationHelperTest extends AbstractMavenProjectTestCase {
     // Dependency from current pom
     Dependency dependency = getDependency("missing", "missing-parent1", parentMavenProject);
     SourceLocation sourceLocation = SourceLocationHelper.findLocation(parentMavenProject, dependency);
-    assertSourceLocation(new SourceLocation(16, 5, 16), sourceLocation);
+    assertSourceLocation(new SourceLocation(facade.getPomFile().toString(), null, 16, 5, 16), sourceLocation);
     dependency = getDependency("missing", "missing-parent2", parentMavenProject);
     sourceLocation = SourceLocationHelper.findLocation(parentMavenProject, dependency);
-    assertSourceLocation(new SourceLocation(21, 5, 16), sourceLocation);
+    assertSourceLocation(new SourceLocation(facade.getPomFile().toString(), null, 21, 5, 16), sourceLocation);
 
     facade = importMavenProject("projects/markers/SourceLocationHelperTest/testDependencyLocation",
         "parent/child/pom.xml");
@@ -194,10 +194,10 @@ public class SourceLocationHelperTest extends AbstractMavenProjectTestCase {
     // Dependency from current pom
     dependency = getDependency("missing", "missing-parent2", mavenProject);
     sourceLocation = SourceLocationHelper.findLocation(mavenProject, dependency);
-    assertSourceLocation(new SourceLocation(14, 5, 16), sourceLocation);
+    assertSourceLocation(new SourceLocation(facade.getPomFile().toString(), null, 14, 5, 16), sourceLocation);
     dependency = getDependency("missing", "missing-child", mavenProject);
     sourceLocation = SourceLocationHelper.findLocation(mavenProject, dependency);
-    assertSourceLocation(new SourceLocation(19, 5, 16), sourceLocation);
+    assertSourceLocation(new SourceLocation(facade.getPomFile().toString(), null, 19, 5, 16), sourceLocation);
     // Dependency from parent pom
     dependency = getDependency("missing", "missing-parent1", mavenProject);
     sourceLocation = SourceLocationHelper.findLocation(mavenProject, dependency);
