@@ -462,14 +462,10 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
 
     IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
         .getClasspathEntries();
-    assertEquals("" + Arrays.asList(classpathEntries), 3, classpathEntries.length);
-    //runtime + transitive runtime dependencies
-    assertEquals("commons-beanutils-1.6.jar", classpathEntries[0].getPath().lastSegment());
+    assertEquals("" + Arrays.asList(classpathEntries), 1, classpathEntries.length);
+    //runtime dependencies
+    assertEquals("commons-beanutils-1.9.4.jar", classpathEntries[0].getPath().lastSegment());
     assertTest(classpathEntries[0]);
-    assertEquals("commons-logging-1.0.jar", classpathEntries[1].getPath().lastSegment());
-    assertTest(classpathEntries[1]);
-    assertEquals("commons-collections-2.0.jar", classpathEntries[2].getPath().lastSegment());
-    assertTest(classpathEntries[2]);
   }
 
   @Test
@@ -482,19 +478,15 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
 
     IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
         .getClasspathEntries();
-    assertEquals("" + Arrays.asList(classpathEntries), 4, classpathEntries.length);
+    assertEquals("" + Arrays.asList(classpathEntries), 2, classpathEntries.length);
     //project dependency
     assertEquals("runtime-jar-dependencies", classpathEntries[0].getPath().lastSegment());
     assertTest(classpathEntries[0]);
     assertDoesntExportTests(classpathEntries[0]);
 
     //transitive runtime dependency
-    assertEquals("commons-beanutils-1.6.jar", classpathEntries[1].getPath().lastSegment());
+    assertEquals("commons-beanutils-1.9.4.jar", classpathEntries[1].getPath().lastSegment());
     assertTest(classpathEntries[1]);
-    assertEquals("commons-logging-1.0.jar", classpathEntries[2].getPath().lastSegment());
-    assertTest(classpathEntries[2]);
-    assertEquals("commons-collections-2.0.jar", classpathEntries[3].getPath().lastSegment());
-    assertTest(classpathEntries[3]);
   }
 
   @Test
