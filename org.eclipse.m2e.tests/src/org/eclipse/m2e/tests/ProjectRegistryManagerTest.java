@@ -31,7 +31,6 @@ import java.util.Set;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -823,28 +822,6 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
       assertEquals(1, a.length);
       assertEquals(pom1.getLocation().toFile().getCanonicalFile(), a[0].getFile().getCanonicalFile());
     }
-  }
-
-  /**
-   * This test disabled until https://issues.sonatype.org/browse/MNGECLIPSE-1448 is resolved
-   */
-  @Test
-  @Ignore
-  public void _testExtensionPluginResolution() throws Exception {
-    IProject p1 = createExisting("MNGECLIPSE380-plugin", "resources/MNGECLIPSE380/plugin");
-    IProject p2 = createExisting("MNGECLIPSE380-project", "resources/MNGECLIPSE380/project");
-    waitForJobsToComplete();
-
-    p1.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
-
-    IFile pom2 = p2.getFile("pom.xml");
-    assertNotNull(manager.create(pom2, false, null));
-
-    deleteProject(p1);
-    waitForJobsToComplete();
-    assertNull(manager.create(pom2, false, null));
-
-    assertNotNull(manager.create(pom2, false, null));
   }
 
   @Test
