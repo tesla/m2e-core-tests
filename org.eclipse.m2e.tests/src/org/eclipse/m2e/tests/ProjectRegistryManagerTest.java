@@ -951,7 +951,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
   @Test
   public void testEnvironmentVariablesConsidered() throws Exception {
     String tmpDir = System.getenv("TEMP");
-    assertTrue("This test requires the environment variable TEMP to be set", tmpDir != null);
+    assertNotNull("This test requires the environment variable TEMP to be set", tmpDir);
 
     File systemJar = new File("projects/MNGECLIPSE-581/mngeclipse-581.jar");
     File tempJar = new File(tmpDir, "mngeclipse-581.jar");
