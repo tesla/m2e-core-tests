@@ -1,0 +1,36 @@
+Bundle-ManifestVersion: 2
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Require-Bundle: org.eclipse.core.runtime,
+ org.eclipse.core.resources,
+ org.eclipse.text,
+ org.junit,
+ org.eclipse.m2e.tests.common,
+ org.eclipse.m2e.editor.xml,
+ org.eclipse.jface,
+ org.eclipse.jface.text,
+ org.eclipse.wst.xml.core,
+ org.eclipse.wst.xml.ui,
+ org.eclipse.m2e.core,
+ org.eclipse.ui.editors,
+ org.eclipse.ui,
+ org.eclipse.wst.sse.ui,
+ org.eclipse.wst.sse.core,
+ org.eclipse.m2e.editor,
+ org.eclipse.emf.ecore.edit,
+ org.eclipse.ui.ide,
+ org.eclipse.search,
+ org.eclipse.ui.forms,
+ org.eclipse.m2e.maven.runtime,
+ org.eclipse.m2e.core.ui;bundle-version="1.17.2",
+ org.eclipse.equinox.event,
+ org.eclipse.ui.workbench.texteditor
+Bundle-Name: M2E Maven POM File XML Editor Tests
+Bundle-Version: 1.17.2.qualifier
+MavenArtifact-ArtifactId: org.eclipse.m2e.editor.xml.tests
+Bundle-Vendor: Eclipse.org - m2e
+Bundle-SymbolicName: org.eclipse.m2e.editor.xml.tests;singleton:=true
+Bundle-ClassPath: .
+MavenArtifact-GroupId: org.eclipse.m2e
+Manifest-Version: 1.0
+Bundle-ActivationPolicy: lazy
+Automatic-Module-Name: org.eclipse.m2e.editor.xml.tests

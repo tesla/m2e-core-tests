@@ -91,6 +91,7 @@
 			<id>its</id>
 			<modules>
 				<module>org.eclipse.m2e.editor.tests</module>
+				<module>org.eclipse.m2e.editor.xml.tests</module>
 			</modules>
 		</profile>
 

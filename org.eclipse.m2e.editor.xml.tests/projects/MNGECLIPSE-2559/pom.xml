@@ -1,0 +1,73 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>aaa</groupId>
+	<artifactId>xxx</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<dependencies>
+		<!-- not managed -->
+		<dependency>
+			<groupId>ant</groupId>
+			<artifactId>ant-antlr</artifactId>
+			<version>1.6.5</version>
+		</dependency>
+		<!-- managed, overriding -->
+		<dependency>
+			<groupId>ant</groupId>
+			<artifactId>ant-apache-oro</artifactId>
+			<version>1.6.5</version>
+		</dependency>
+		<!-- managed, overriding, ignore -->
+		<dependency>
+			<groupId>ant</groupId>
+			<artifactId>ant</artifactId>
+			<version>1.6.5</version><!--$NO-MVN-MAN-VER$ -->
+		</dependency>
+	</dependencies>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>ant</groupId>
+				<artifactId>ant-apache-oro</artifactId>
+				<version>1.6.3</version>
+			</dependency>
+			<dependency>
+				<groupId>ant</groupId>
+				<artifactId>ant</artifactId>
+				<version>1.6.5</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+	<build>
+		<plugins>
+			<!-- managed, overriding -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
+			</plugin>
+			<!-- managed, overriding, ignore -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>surefire-report-maven-plugin</artifactId>
+				<version>2.0-beta-1</version><!--$NO-MVN-MAN-VER$ -->
+			</plugin>
+		</plugins>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>2.3.2</version>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>surefire-report-maven-plugin</artifactId>
+					<version>2.0-beta-1</version>
+				</plugin>
+			</plugins>
+
+		</pluginManagement>
+	</build>
+
+</project>
