@@ -418,7 +418,7 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
 
     IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
         .getClasspathEntries();
-    assertEquals("" + Arrays.asList(classpathEntries), 6, classpathEntries.length);
+    assertEquals("" + Arrays.asList(classpathEntries), 4, classpathEntries.length);
     //test dependency
     assertEquals("junit-4.13.1.jar", classpathEntries[0].getPath().lastSegment());
     assertTest(classpathEntries[0]);
@@ -426,12 +426,8 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     assertEquals("commons-io-2.7.jar", classpathEntries[2].getPath().lastSegment());
     assertNotTest(classpathEntries[2]);
     //test + transitive test dependencies
-    assertEquals("commons-beanutils-1.6.jar", classpathEntries[3].getPath().lastSegment());
+    assertEquals("commons-beanutils-1.9.4.jar", classpathEntries[3].getPath().lastSegment());
     assertTest(classpathEntries[3]);
-    assertEquals("commons-logging-1.0.jar", classpathEntries[4].getPath().lastSegment());
-    assertTest(classpathEntries[4]);
-    assertEquals("commons-collections-2.0.jar", classpathEntries[5].getPath().lastSegment());
-    assertTest(classpathEntries[5]);
   }
 
   @Test
