@@ -141,7 +141,6 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 
     assertTrue("Expected change to affect pom.xml", isAffected(project.getFile("pom.xml"), change));
     Change undo = change.perform(monitor);
-    assertTrue("Editor is dirty", editor.isDirty());
     assertNotNull("Undo Operation", undo);
 
     assertTrue("pom has exclusion set", hasExclusionSet(editor, ROOT, VALID));
@@ -169,7 +168,6 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 
     assertTrue("Expected change to affect pom.xml", isAffected(project.getFile("pom.xml"), change));
     Change undo = change.perform(monitor);
-    assertTrue("Editor is dirty", editor.isDirty());
     assertNotNull("Undo Operation", undo);
 
     assertTrue("pom has exclusion set", hasExclusionSet(editor, ROOT, VALID));
@@ -198,7 +196,6 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 
     assertTrue("Expected change to affect module's pom.xml", isAffected(project.getFile("pom.xml"), change));
     Change undo = change.perform(monitor);
-    assertTrue("Editor is dirty", editor.isDirty());
     assertNotNull("Undo Operation", undo);
 
     assertTrue("pom has exclusion set", hasExclusionSet(editor, ROOT, VALID));
@@ -257,7 +254,6 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 
     assertTrue("Expected change to affect local pom.xml", isAffected(project.getFile("pom.xml"), change));
     Change undo = change.perform(monitor);
-    assertTrue("Editor is dirty", editor.isDirty());
     assertNotNull("Undo Operation", undo);
 
     assertTrue("pom has exclusion set", hasExclusionSet(editor, ROOT, VALID));
@@ -290,7 +286,6 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 
     assertTrue("Expected change to affect pom.xml", isAffected(project.getFile("pom.xml"), change));
     Change undo = change.perform(monitor);
-    assertTrue("Editor is dirty", editor.isDirty());
     assertNotNull("Undo Operation", undo);
 
     assertTrue("pom has exclusion set", hasExclusionSet(editor, ROOT, VALID));
@@ -320,7 +315,6 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 
     assertTrue("Expected change to affect pom.xml", isAffected(module.getFile("pom.xml"), change));
     Change undo = change.perform(monitor);
-    assertTrue("Editor is dirty", editor.isDirty());
     assertNotNull("Undo Operation", undo);
 
     assertTrue("pom has exclusion set", hasExclusionSet(editor, ROOT, VALID));
@@ -349,7 +343,6 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 
     assertTrue("Expected change to affect pom.xml", isAffected(project.getFile("pom.xml"), change));
     Change undo = change.perform(monitor);
-    assertTrue("Editor is dirty", editor.isDirty());
     assertNotNull("Undo Operation", undo);
 
     assertTrue("pom has exclusion set", hasExclusionSet(editor, ROOT, VALID));
@@ -377,7 +370,6 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 
     assertTrue("Expected change to affect test-pom.xml", isAffected(project.getFile("pom.xml"), change));
     Change undo = change.perform(monitor);
-    assertTrue("Editor is dirty", editor.isDirty());
     assertNotNull("Undo Operation", undo);
 
     assertTrue("pom has exclusion set", hasExclusionSet(editor, ROOT, VALID));
