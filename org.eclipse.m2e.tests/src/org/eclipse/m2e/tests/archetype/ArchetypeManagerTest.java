@@ -99,7 +99,7 @@ public class ArchetypeManagerTest {
     }
 
     Collection<ArchetypeCatalogFactory> catalogs = archetypeManager.getArchetypeCatalogs();
-    assertEquals("" + catalogs.toString(), 5, catalogs.size());
+    assertEquals("" + catalogs.toString(), 4, catalogs.size());
   }
 
   @Test
