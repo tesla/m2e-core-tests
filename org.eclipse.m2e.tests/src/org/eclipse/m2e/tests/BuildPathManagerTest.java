@@ -67,18 +67,12 @@ import org.apache.maven.project.MavenProject;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.internal.IMavenConstants;
 import org.eclipse.m2e.core.internal.MavenPluginActivator;
-import org.eclipse.m2e.core.internal.index.IMutableIndex;
-import org.eclipse.m2e.core.internal.index.nexus.NexusIndex;
-import org.eclipse.m2e.core.internal.index.nexus.NexusIndexManager;
 import org.eclipse.m2e.core.internal.preferences.MavenConfigurationImpl;
 import org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager;
-import org.eclipse.m2e.core.internal.repository.RepositoryRegistry;
 import org.eclipse.m2e.core.project.IProjectConfigurationManager;
 import org.eclipse.m2e.core.project.MavenUpdateRequest;
 import org.eclipse.m2e.core.project.ProjectImportConfiguration;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
-import org.eclipse.m2e.core.repository.IRepository;
-import org.eclipse.m2e.core.repository.IRepositoryRegistry;
 import org.eclipse.m2e.jdt.MavenJdtPlugin;
 import org.eclipse.m2e.jdt.internal.BuildPathManager;
 import org.eclipse.m2e.jdt.internal.MavenClasspathHelpers;
@@ -587,59 +581,6 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertNotNull(cp[0].getSourceAttachmentPath());
     assertEquals(cp[0].getSourceAttachmentPath().toString(), "downloadsources-t006-0.0.1-sources.jar",
         cp[0].getSourceAttachmentPath().lastSegment());
-  }
-
-  @Test
-  public void testDownloadSources_006_nonMavenProject() throws Exception {
-    RepositoryRegistry repositoryRegistry = (RepositoryRegistry) MavenPlugin.getRepositoryRegistry();
-    repositoryRegistry.updateRegistry(monitor);
-
-    NexusIndexManager indexManager = (NexusIndexManager) MavenPlugin.getIndexManager();
-    indexManager.getIndexUpdateJob().join();
-    IMutableIndex localIndex = indexManager.getLocalIndex();
-    localIndex.updateIndex(true, monitor);
-
-    for(IRepository repository : repositoryRegistry.getRepositories(IRepositoryRegistry.SCOPE_SETTINGS)) {
-      if("file:repositories/remoterepo".equals(repository.getUrl())) {
-        NexusIndex remoteIndex = indexManager.getIndex(repository);
-        remoteIndex.updateIndex(true, monitor); // actually scan the repo
-      }
-    }
-
-    IProject project = createExisting("downloadsources-p006", "projects/downloadsources/p006");
-
-    File log4jJar = new File("repositories/remoterepo/log4j/log4j/1.2.13/log4j-1.2.13.jar");
-    Path log4jPath = new Path(log4jJar.getAbsolutePath());
-
-    // This needs to remain 3.8.1 as newer JUnit may not be part of the index, so would make the test fail
-    File junitJar = new File("repositories/remoterepo/junit/junit/3.8.1/junit-3.8.1.jar");
-    Path junitPath = new Path(junitJar.getAbsolutePath());
-
-    IJavaProject javaProject = JavaCore.create(project);
-    IClasspathEntry[] origCp = javaProject.getRawClasspath();
-    IClasspathEntry[] cp = new IClasspathEntry[origCp.length + 2];
-    System.arraycopy(origCp, 0, cp, 0, origCp.length);
-
-    cp[cp.length - 2] = JavaCore.newLibraryEntry(log4jPath, null, null, true);
-    cp[cp.length - 1] = JavaCore.newLibraryEntry(junitPath, null, null, false);
-
-    javaProject.setRawClasspath(cp, monitor);
-
-    getBuildPathManager().scheduleDownload(javaProject.findPackageFragmentRoot(log4jPath), true, false);
-    waitForJobsToComplete();
-
-    cp = javaProject.getRawClasspath();
-
-    assertEquals(log4jJar.getAbsoluteFile(), cp[cp.length - 2].getPath().toFile());
-    assertEquals("log4j-1.2.13-sources.jar", cp[cp.length - 2].getSourceAttachmentPath().lastSegment());
-    assertEquals(true, cp[cp.length - 2].isExported());
-
-    getBuildPathManager().scheduleDownload(javaProject.findPackageFragmentRoot(junitPath), true, false);
-    waitForJobsToComplete();
-
-    assertEquals(junitJar.getAbsoluteFile(), cp[cp.length - 1].getPath().toFile());
-    assertEquals("junit-3.8.1-sources.jar", cp[cp.length - 1].getSourceAttachmentPath().lastSegment());
-    assertEquals(false, cp[cp.length - 1].isExported());
   }
 
   @Test

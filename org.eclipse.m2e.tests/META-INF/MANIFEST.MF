@@ -43,7 +43,6 @@ Export-Package: org.eclipse.m2e.tests,
  org.eclipse.m2e.tests.archetype,
  org.eclipse.m2e.tests.configurators,
  org.eclipse.m2e.tests.embedder,
- org.eclipse.m2e.tests.internal.index,
  org.eclipse.m2e.tests.scm
 Import-Package: org.eclipse.equinox.p2.metadata,
  org.eclipse.ltk.core.refactoring,
