@@ -54,7 +54,7 @@ public class LocalProjectScannerTest {
   public void testDeepNesting() throws Exception {
     File baseDir = new File("projects/localprojectscanner/deepnesting/parent").getCanonicalFile();
 
-    LocalProjectScanner scanner = new LocalProjectScanner(baseDir, baseDir.getAbsolutePath(), false, modelManager);
+    LocalProjectScanner scanner = new LocalProjectScanner(List.of(baseDir.getAbsolutePath()), false, modelManager);
     scanner.run(new NullProgressMonitor());
 
     List<MavenProjectInfo> projects = scanner.getProjects();
@@ -88,7 +88,7 @@ public class LocalProjectScannerTest {
   public void testModuleReferencedByFile() throws Exception {
     File baseDir = new File("projects/localprojectscanner/module_referenced_by_file/parent").getCanonicalFile();
 
-    LocalProjectScanner scanner = new LocalProjectScanner(baseDir, baseDir.getAbsolutePath(), false, modelManager);
+    LocalProjectScanner scanner = new LocalProjectScanner(List.of(baseDir.getAbsolutePath()), false, modelManager);
     scanner.run(new NullProgressMonitor());
 
     List<MavenProjectInfo> projects = scanner.getProjects();
@@ -118,7 +118,7 @@ public class LocalProjectScannerTest {
   public void testSkipNested() throws Exception {
     File baseDir = new File("projects/localprojectscanner/skip_nested").getCanonicalFile();
 
-    LocalProjectScanner scanner = new LocalProjectScanner(baseDir, baseDir.getAbsolutePath(), false, modelManager);
+    LocalProjectScanner scanner = new LocalProjectScanner(List.of(baseDir.getAbsolutePath()), false, modelManager);
     scanner.run(new NullProgressMonitor());
 
     Map<File, MavenProjectInfo> projects = toPathMap(scanner.getProjects());
@@ -150,7 +150,7 @@ public class LocalProjectScannerTest {
   public void testDeepNesting002() throws Exception {
     File baseDir = new File("projects/localprojectscanner/deepnesting/parent").getCanonicalFile();
 
-    LocalProjectScanner scanner = new LocalProjectScanner(baseDir, baseDir.getParentFile().getAbsolutePath(), false,
+    LocalProjectScanner scanner = new LocalProjectScanner(List.of(baseDir.getParentFile().getAbsolutePath()), false,
         modelManager);
     scanner.run(new NullProgressMonitor());
 
@@ -188,7 +188,7 @@ public class LocalProjectScannerTest {
     folders.add(new File(baseDir, "submodule").getAbsolutePath());
     folders.add(new File(baseDir, "module").getAbsolutePath());
 
-    LocalProjectScanner scanner = new LocalProjectScanner(baseDir, folders, false, modelManager);
+    LocalProjectScanner scanner = new LocalProjectScanner(folders, false, modelManager);
     scanner.run(new NullProgressMonitor());
 
     List<MavenProjectInfo> projects = scanner.getProjects();
@@ -207,7 +207,7 @@ public class LocalProjectScannerTest {
     folders.add(new File(baseDir, "module").getAbsolutePath());
     folders.add(new File(baseDir, "submodule").getAbsolutePath());
 
-    scanner = new LocalProjectScanner(baseDir, folders, false, modelManager);
+    scanner = new LocalProjectScanner(folders, false, modelManager);
     scanner.run(new NullProgressMonitor());
 
     projects = scanner.getProjects();
@@ -222,7 +222,7 @@ public class LocalProjectScannerTest {
   public void testMNGECLIPSE614_ImportModulesOutsideOfParent() throws Exception {
     File baseDir = new File("projects/localprojectscanner/MNGECLIPSE-614/very-important-parent").getCanonicalFile();
 
-    LocalProjectScanner scanner = new LocalProjectScanner(baseDir, baseDir.getAbsolutePath(), false, modelManager);
+    LocalProjectScanner scanner = new LocalProjectScanner(List.of(baseDir.getAbsolutePath()), false, modelManager);
     scanner.run(new NullProgressMonitor());
     List<MavenProjectInfo> projects = scanner.getProjects();
 
@@ -244,7 +244,7 @@ public class LocalProjectScannerTest {
   public void testCircleRefs() throws Exception {
     File baseDir = new File("projects/localprojectscanner/circlerefs").getCanonicalFile();
 
-    LocalProjectScanner scanner = new LocalProjectScanner(baseDir, baseDir.getAbsolutePath(), false, modelManager);
+    LocalProjectScanner scanner = new LocalProjectScanner(List.of(baseDir.getAbsolutePath()), false, modelManager);
     scanner.run(new NullProgressMonitor());
 
     List<MavenProjectInfo> projects = scanner.getProjects();
@@ -256,8 +256,7 @@ public class LocalProjectScannerTest {
   public void testRenameInWorkspace() throws Exception {
     File baseDir = new File("projects/localprojectscanner/rename/mavenNNNNNNNN").getCanonicalFile();
 
-    LocalProjectScanner scanner = new LocalProjectScanner(baseDir.getParentFile().getCanonicalFile(), //
-        baseDir.getAbsolutePath(), true, modelManager);
+    LocalProjectScanner scanner = new LocalProjectScanner(List.of(baseDir.getAbsolutePath()), true, modelManager);
     scanner.run(new NullProgressMonitor());
 
     List<MavenProjectInfo> projects = scanner.getProjects();
@@ -287,7 +286,7 @@ public class LocalProjectScannerTest {
     createSymbolicLink(d1link, d2);
     createSymbolicLink(d2link, d1);
 
-    LocalProjectScanner scanner = new LocalProjectScanner(tempDirectory.getParentFile(), tempDirectory.toString(),
+    LocalProjectScanner scanner = new LocalProjectScanner(List.of(tempDirectory.toString()),
         false, modelManager);
     scanner.run(new NullProgressMonitor());
     List<MavenProjectInfo> projects = scanner.getProjects();
@@ -308,7 +307,7 @@ public class LocalProjectScannerTest {
   public void testNoMetadata() throws Exception {
     File baseDir = new File("projects/localprojectscanner/nometadata").getCanonicalFile();
 
-    LocalProjectScanner scanner = new LocalProjectScanner(baseDir, baseDir.getAbsolutePath(), false, modelManager);
+    LocalProjectScanner scanner = new LocalProjectScanner(List.of(baseDir.getAbsolutePath()), false, modelManager);
     scanner.run(new NullProgressMonitor());
     //.metadata folder shouldn't be scanned, hence the project hidden inside shouldn't be found 
     List<MavenProjectInfo> projects = scanner.getProjects();
@@ -322,10 +321,7 @@ public class LocalProjectScannerTest {
     File baseDir = new File("projects/localprojectscanner/341038_projectsOutsideWorkspaceNotRenamed")
         .getCanonicalFile();
 
-    //the workspace folder is pointing on nothing because we don't want to have projectFolder equal to workspaceFolder 
-    File workspaceFolder = new File("anywhere but not the same as project folder");
-
-    LocalProjectScanner scanner = new LocalProjectScanner(workspaceFolder, baseDir.getAbsolutePath(), true,
+    LocalProjectScanner scanner = new LocalProjectScanner(List.of(baseDir.getAbsolutePath()), true,
         modelManager);
     scanner.run(new NullProgressMonitor());
 
