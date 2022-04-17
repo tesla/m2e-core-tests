@@ -60,5 +60,6 @@ Import-Package: org.eclipse.equinox.p2.metadata,
  org.eclipse.ui.forms.editor,
  org.eclipse.ui.ide,
  org.eclipse.ui.part,
- org.eclipse.ui.views.markers
+ org.eclipse.ui.views.markers,
+ org.slf4j
 Automatic-Module-Name: org.eclipse.m2e.tests
