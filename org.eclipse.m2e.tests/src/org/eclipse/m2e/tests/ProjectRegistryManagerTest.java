@@ -62,9 +62,9 @@ import org.apache.maven.project.MavenProject;
 
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.ArtifactRef;
+import org.eclipse.m2e.core.embedder.IMavenExecutionContext;
 import org.eclipse.m2e.core.internal.IMavenConstants;
 import org.eclipse.m2e.core.internal.MavenPluginActivator;
-import org.eclipse.m2e.core.internal.embedder.MavenExecutionContext;
 import org.eclipse.m2e.core.internal.preferences.MavenConfigurationImpl;
 import org.eclipse.m2e.core.internal.project.registry.MavenProjectFacade;
 import org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager;
@@ -432,7 +432,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
 
   protected MavenProject getParentProject(final IMavenProjectFacade f) throws CoreException {
     // create execution context with proper resolver configuration
-    MavenExecutionContext context = manager.createExecutionContext(f.getPom(), f.getResolverConfiguration());
+    IMavenExecutionContext context = manager.createExecutionContext(f.getPom(), f.getResolverConfiguration());
     return context.execute(f.getMavenProject(monitor),
         (context1, monitor) -> MavenPlugin.getMaven().resolveParentProject(f.getMavenProject(monitor), monitor),
         monitor);

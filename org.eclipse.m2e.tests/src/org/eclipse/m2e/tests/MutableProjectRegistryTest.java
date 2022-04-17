@@ -208,7 +208,8 @@ public class MutableProjectRegistryTest extends AbstractMavenProjectTestCase {
     File tmpDir = File.createTempFile("m2e-" + name.getMethodName(), "dir");
     tmpDir.delete();
     tmpDir.mkdir();
-    ProjectRegistryReader reader = new ProjectRegistryReader(tmpDir);
+    ProjectRegistryReader reader = new ProjectRegistryReader();
+    reader.setStateLocation(tmpDir);
     reader.writeWorkspaceState(state);
 
     project.delete(true, true, monitor);
@@ -246,7 +247,8 @@ public class MutableProjectRegistryTest extends AbstractMavenProjectTestCase {
     File tmpDir = File.createTempFile("m2e-" + name.getMethodName(), "dir");
     tmpDir.delete();
     tmpDir.mkdir();
-    ProjectRegistryReader reader = new ProjectRegistryReader(tmpDir);
+    ProjectRegistryReader reader = new ProjectRegistryReader();
+    reader.setStateLocation(tmpDir);
     reader.writeWorkspaceState(state);
 
     state = reader.readWorkspaceState(null);

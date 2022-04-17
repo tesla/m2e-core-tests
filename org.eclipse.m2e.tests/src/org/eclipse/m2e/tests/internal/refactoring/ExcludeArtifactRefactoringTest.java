@@ -16,6 +16,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
 
@@ -41,9 +42,11 @@ import org.eclipse.ltk.core.refactoring.TextFileChange;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.internal.ErrorEditorPart;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
@@ -178,8 +181,8 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
    */
   @Test
   public void testSingleArtifactKeyWorkspaceParent() throws Exception {
-    IProject[] projects = importProjects(EXCLUDE_PATH + "/workspaceParent", new String[] {
-        "workspaceParentProject/pom.xml", "workspaceParentModule/pom.xml"}, new ResolverConfiguration());
+    IProject[] projects = importProjects(EXCLUDE_PATH + "/workspaceParent",
+        new String[] {"workspaceParentProject/pom.xml", "workspaceParentModule/pom.xml"}, new ResolverConfiguration());
     waitForJobsToComplete();
     IProject project = getProject(projects, "workspaceParentModule");
 
@@ -207,8 +210,8 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
    */
   @Test
   public void testSingleArtifactKeyInWorkspaceParent() throws Exception {
-    IProject[] projects = importProjects(EXCLUDE_PATH + "/workspaceParentWithDependency", new String[] {
-        "workspaceParentWithDependencyProject/pom.xml", "workspaceParentWithDependencyModule/pom.xml"},
+    IProject[] projects = importProjects(EXCLUDE_PATH + "/workspaceParentWithDependency",
+        new String[] {"workspaceParentWithDependencyProject/pom.xml", "workspaceParentWithDependencyModule/pom.xml"},
         new ResolverConfiguration());
     waitForJobsToComplete();
     IProject project = getProject(projects, "workspaceParentWithDependencyModule");
@@ -268,15 +271,14 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
     waitForJobsToComplete();
 
     new FindEditorRunnable(project.getFile("pom.xml")).open();
-    ExcludeArtifactRefactoring refactoring = createRefactoring(project.getFile("pom.xml"), new ArtifactKey[] {VALID,
-        MISSING});
+    ExcludeArtifactRefactoring refactoring = createRefactoring(project.getFile("pom.xml"),
+        new ArtifactKey[] {VALID, MISSING});
     RefactoringStatus status = refactoring.checkInitialConditions(monitor);
     assertEquals("Expected OK status from checkInitialConditions: ", RefactoringStatus.OK, status.getSeverity());
 
     status = refactoring.checkFinalConditions(monitor);
     assertEquals("Expected FATAL status from checkFinalConditions: ", RefactoringStatus.ERROR, status.getSeverity());
-    assertTrue(
-        "Missing Dependency Expected",
+    assertTrue("Missing Dependency Expected",
         hasMessage(
             "Unable to locate source for dependency a-fake-artifact:that-should-never-exist:1.2.3 in the workspace.",
             status));
@@ -296,14 +298,15 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
    */
   @Test
   public void testArtifactsInMultiplePom() throws Exception {
-    IProject[] projects = importProjects(EXCLUDE_PATH + "/workspaceParent2", new String[] {
-        "workspaceParent2Module/pom.xml", "workspaceParent2Project/pom.xml"}, new ResolverConfiguration());
+    IProject[] projects = importProjects(EXCLUDE_PATH + "/workspaceParent2",
+        new String[] {"workspaceParent2Module/pom.xml", "workspaceParent2Project/pom.xml"},
+        new ResolverConfiguration());
     waitForJobsToComplete();
 
     IProject module = getProject(projects, "workspaceParent2Module");
     new FindEditorRunnable(module.getFile("pom.xml")).open();
-    ExcludeArtifactRefactoring refactoring = createRefactoring(module.getFile("pom.xml"), new ArtifactKey[] {VALID,
-        VALID3});
+    ExcludeArtifactRefactoring refactoring = createRefactoring(module.getFile("pom.xml"),
+        new ArtifactKey[] {VALID, VALID3});
     RefactoringStatus status = refactoring.checkInitialConditions(monitor);
     assertTrue("Expected OK status from checkInitialConditions: " + status.toString(), status.isOK());
 
@@ -330,8 +333,8 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
     waitForJobsToComplete();
 
     new FindEditorRunnable(project.getFile("pom.xml")).open();
-    ExcludeArtifactRefactoring refactoring = createRefactoring(project.getFile("pom.xml"), new ArtifactKey[] {VALID,
-        VALID2});
+    ExcludeArtifactRefactoring refactoring = createRefactoring(project.getFile("pom.xml"),
+        new ArtifactKey[] {VALID, VALID2});
     RefactoringStatus status = refactoring.checkInitialConditions(monitor);
     assertTrue("Expected OK status from checkInitialConditions: " + status.toString(), status.isOK());
 
@@ -354,7 +357,8 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
    */
   @Test
   public void testStrangePomName() throws Exception {
-    IProject project = importProjects(EXCLUDE_PATH, new String[] {"noParent/test-pom.xml"}, new ResolverConfiguration())[0];
+    IProject project = importProjects(EXCLUDE_PATH, new String[] {"noParent/test-pom.xml"},
+        new ResolverConfiguration())[0];
     waitForJobsToComplete();
 
     new FindEditorRunnable(project.getFile("pom.xml")).open();
@@ -377,8 +381,8 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 
   @Test
   public void testCopyDown() throws Exception {
-    IProject[] projects = importProjects(EXCLUDE_PATH + "/workspaceParentWithDependency", new String[] {
-        "workspaceParentWithDependencyProject/pom.xml", "workspaceParentWithDependencyModule/pom.xml"},
+    IProject[] projects = importProjects(EXCLUDE_PATH + "/workspaceParentWithDependency",
+        new String[] {"workspaceParentWithDependencyProject/pom.xml", "workspaceParentWithDependencyModule/pom.xml"},
         new ResolverConfiguration());
     waitForJobsToComplete();
     IProject module = getProject(projects, "workspaceParentWithDependencyModule");
@@ -402,8 +406,8 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 
   @Test
   public void testPullUp() throws Exception {
-    IProject[] projects = importProjects(EXCLUDE_PATH + "/workspaceParent", new String[] {
-        "workspaceParentProject/pom.xml", "workspaceParentModule/pom.xml"}, new ResolverConfiguration());
+    IProject[] projects = importProjects(EXCLUDE_PATH + "/workspaceParent",
+        new String[] {"workspaceParentProject/pom.xml", "workspaceParentModule/pom.xml"}, new ResolverConfiguration());
     waitForJobsToComplete();
     IProject module = getProject(projects, "workspaceParentModule");
     IProject project = getProject(projects, "workspaceParentProject");
@@ -467,9 +471,9 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
         run();
       } else {
         Display.getDefault().syncExec(this);
-        if(exception != null) {
-          throw new CoreException(exception.getStatus());
-        }
+      }
+      if(exception != null) {
+        throw new CoreException(exception.getStatus());
       }
       waitForJobsToComplete();
       return editor;
@@ -478,8 +482,23 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
     @Override
     public void run() {
       try {
-        editor = (MavenPomEditor) getActivePage()
-            .openEditor(editorInput, "org.eclipse.m2e.editor.MavenPomEditor", true);
+        IEditorPart editorPart = getActivePage().openEditor(editorInput, "org.eclipse.m2e.editor.MavenPomEditor", true);
+        if(editorPart instanceof MavenPomEditor) {
+          editor = (MavenPomEditor) editorPart;
+          return;
+        } else if(editorPart instanceof ErrorEditorPart) {
+          ErrorEditorPart errorEditorPart = (ErrorEditorPart) editorPart;
+          try {
+            Field field = ErrorEditorPart.class.getDeclaredField("error");
+            field.setAccessible(true);
+            IStatus status = (IStatus) field.get(errorEditorPart);
+            this.exception = new PartInitException(status);
+            return;
+          } catch(NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex) {
+            // can't get the cause then...
+          }
+        }
+        this.exception = new PartInitException("invalid editor returned: " + editor);
       } catch(PartInitException e) {
         this.exception = e;
       }
@@ -583,7 +602,8 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
     Dependency d = null;
     for(Dependency dep : model.getDependencies()) {
       if(dep.getArtifactId().equals(dependencyKey.getArtifactId())
-          && dep.getGroupId().equals(dependencyKey.getGroupId()) && dep.getVersion().equals(dependencyKey.getVersion())) {
+          && dep.getGroupId().equals(dependencyKey.getGroupId())
+          && dep.getVersion().equals(dependencyKey.getVersion())) {
         d = dep;
         break;
       }

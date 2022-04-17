@@ -392,7 +392,7 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
     final IProject p = workspace.getRoot().getProject(name.getMethodName());
     p.create(new NullProgressMonitor());
     p.open(new NullProgressMonitor());
-    MavenMarkerManager mmm = new MavenMarkerManager(null);
+    MavenMarkerManager mmm = new MavenMarkerManager();
     mmm.addMarker(p, IMavenConstants.MARKER_CONFIGURATION_ID, Messages.ProjectConfigurationUpdateRequired, -1,
         IMarker.SEVERITY_ERROR);
     assertEquals(1,
