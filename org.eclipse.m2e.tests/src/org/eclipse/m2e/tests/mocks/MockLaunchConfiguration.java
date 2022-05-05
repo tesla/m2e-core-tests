@@ -36,16 +36,16 @@ import org.eclipse.debug.core.ILaunchDelegate;
  */
 public class MockLaunchConfiguration implements ILaunchConfiguration {
 
-  private Map<String, ?> attributes;
+  private Map<String, Object> attributes;
 
   private ILaunchConfigurationType type;
 
-  public MockLaunchConfiguration(Map<String, ?> attributes, ILaunchConfigurationType type) {
+  public MockLaunchConfiguration(Map<String, Object> attributes, ILaunchConfigurationType type) {
     this.attributes = attributes;
     this.type = type;
   }
 
-  public MockLaunchConfiguration(Map<String, ?> attributes) {
+  public MockLaunchConfiguration(Map<String, Object> attributes) {
     this(attributes, null);
   }
 
@@ -87,18 +87,21 @@ public class MockLaunchConfiguration implements ILaunchConfiguration {
 
   @Override
   public List<String> getAttribute(String attributeName, List<String> defaultValue) {
+    @SuppressWarnings("unchecked")
     List<String> attr = (List<String>) attributes.get(attributeName);
     return attr == null ? defaultValue : attr;
   }
 
   @Override
   public Set<String> getAttribute(String attributeName, Set<String> defaultValue) {
+    @SuppressWarnings("unchecked")
     Set<String> attr = (Set<String>) attributes.get(attributeName);
     return attr == null ? defaultValue : attr;
   }
 
   @Override
   public Map<String, String> getAttribute(String attributeName, Map<String, String> defaultValue) {
+    @SuppressWarnings("unchecked")
     Map<String, String> attr = (Map<String, String>) attributes.get(attributeName);
     return attr == null ? defaultValue : attr;
   }
@@ -111,7 +114,7 @@ public class MockLaunchConfiguration implements ILaunchConfiguration {
 
   @Override
   public Map<String, Object> getAttributes() {
-    return (Map<String, Object>) attributes;
+    return attributes;
   }
 
   @Override

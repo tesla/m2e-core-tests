@@ -18,7 +18,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -201,6 +200,6 @@ public class MavenRuntimeClasspathProviderTest extends AbstractMavenProjectTestC
     String absPomDir = file.getAbsolutePath();
     Map<String, Object> attributes = new HashMap<>();
     attributes.put(MavenLaunchConstants.ATTR_POM_DIR, absPomDir);
-    return new MockLaunchConfiguration(attributes, new MockLaunchConfigurationType(Collections.singletonMap("id", type)));
+    return new MockLaunchConfiguration(attributes, new MockLaunchConfigurationType(Map.of("id", type)));
   }
 }

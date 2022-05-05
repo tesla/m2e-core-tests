@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 
@@ -206,54 +207,33 @@ public class ProjectConfigurationElementSorterTest {
     assertFalse(weirdo.id + " should not be found as root configurator", sorter.isRootConfigurator(weirdo.id));
   }
 
-  private static class ConfiguratorMock extends ConfigElementMock {
+  public static abstract class ConfiguratorMock implements IConfigurationElement {
 
     String id;
 
-    private String after;
-
-    private String before;
-
-    private String secondaryTo;
-
-    public ConfiguratorMock(String id) {
-      this.id = id;
-    }
-
     static ConfiguratorMock create(String id) {
-      return new ConfiguratorMock(id);
+      ConfiguratorMock mock = Mockito.mock(ConfiguratorMock.class);
+      mock.id = id;
+      Mockito.when(mock.toString()).thenCallRealMethod();
+      return mock;
     }
 
     static ConfiguratorMock createLegacy(String id, String secondaryTo) {
       ConfiguratorMock mock = create(id);
-      mock.secondaryTo = secondaryTo;
+      Mockito.when(mock.getAttribute("secondaryTo")).thenReturn(secondaryTo);
       return mock;
     }
 
     static ConfiguratorMock create(String id, String runsAfter) {
       ConfiguratorMock mock = create(id);
-      mock.after = runsAfter;
+      Mockito.when(mock.getAttribute("runsAfter")).thenReturn(runsAfter);
       return mock;
     }
 
     static ConfiguratorMock create(String id, String runsAfter, String runsBefore) {
       ConfiguratorMock mock = create(id, runsAfter);
-      mock.before = runsBefore;
+      Mockito.when(mock.getAttribute("runsBefore")).thenReturn(runsBefore);
       return mock;
-    }
-
-    @Override
-    public String getAttribute(String attrName) {
-      switch(attrName) {
-        case "runsAfter":
-          return after;
-        case "runsBefore":
-          return before;
-        case "secondaryTo":
-          return secondaryTo;
-        default:
-          return null;
-      }
     }
 
     @Override

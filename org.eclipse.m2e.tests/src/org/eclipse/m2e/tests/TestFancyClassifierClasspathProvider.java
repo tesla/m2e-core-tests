@@ -37,24 +37,22 @@ public class TestFancyClassifierClasspathProvider extends AbstractClassifierClas
     return "fancy";
   }
 
-  @Deprecated
   @Override
   public void setRuntimeClasspath(Set<IRuntimeClasspathEntry> runtimeClasspath, IMavenProjectFacade mavenProjectFacade,
-      IProgressMonitor monitor) {
+      IProgressMonitor monitor, int classpathProperty) {
     Set<IPath> folders = new LinkedHashSet<>();
     folders.add(new Path("src/main/java"));
     folders.add(new Path("src/main/resources"));
-    addFolders(runtimeClasspath, mavenProjectFacade.getProject(), folders);
+    addFolders(runtimeClasspath, mavenProjectFacade.getProject(), folders, classpathProperty);
   }
 
-  @Deprecated
   @Override
   public void setTestClasspath(Set<IRuntimeClasspathEntry> testClasspath, IMavenProjectFacade mavenProjectFacade,
-      IProgressMonitor monitor) {
+      IProgressMonitor monitor, int classpathProperty) {
     Set<IPath> folders = new LinkedHashSet<>();
     folders.add(new Path("src/test/java"));
     folders.add(new Path("src/test/resources"));
-    addFolders(testClasspath, mavenProjectFacade.getProject(), folders);
+    addFolders(testClasspath, mavenProjectFacade.getProject(), folders, classpathProperty);
   }
 
 }

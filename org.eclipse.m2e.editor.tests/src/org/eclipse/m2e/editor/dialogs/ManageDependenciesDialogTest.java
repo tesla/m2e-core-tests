@@ -94,7 +94,7 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
     IMaven maven = MavenPlugin.getMaven();
     maven.detachFromSession(project);
 
-    final MavenProject project2 = maven.resolveParentProject(project, new NullProgressMonitor());
+    final MavenProject project2 = project.getParent();
     assertNotNull(project2);
     assertEquals(project2.getArtifactId(), "forge-parent");
     assertEquals(project2.getGroupId(), "org.sonatype.forge");

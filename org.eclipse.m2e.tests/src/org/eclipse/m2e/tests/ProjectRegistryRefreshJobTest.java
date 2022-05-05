@@ -246,6 +246,8 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
 
     event = new ResourceChangeEvent(project, IResourceChangeEvent.PRE_CLOSE, IncrementalProjectBuilder.FULL_BUILD,
         delta) {
+      private static final long serialVersionUID = 1L;
+
       @Override
       public IResource getResource() {
         return project;
