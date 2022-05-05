@@ -20,7 +20,6 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -105,7 +104,7 @@ public class MavenLaunchDelegateTest {
       Files.createDirectories(mvn);
     }
     ILaunchConfiguration configuration = new MockLaunchConfiguration(
-        Collections.singletonMap(MavenLaunchConstants.ATTR_POM_DIR, "${workspace_loc}/foo/bar"));
+        Map.of(MavenLaunchConstants.ATTR_POM_DIR, "${workspace_loc}/foo/bar"));
     launcher.appendRuntimeSpecificArguments("3.3.3", arguments, configuration);
     String expectedVmArgs = "-Dmaven.multiModuleProjectDirectory="
         + MavenLaunchUtils.quote(ResourcesPlugin.getWorkspace().getRoot().getLocation().append("foo").toOSString());

@@ -63,7 +63,6 @@ public class MavenClasspathContainerSaveHelperTest {
 
     ByteArrayOutputStream os = new ByteArrayOutputStream();
     helper.writeContainer(new MavenClasspathContainer(new Path(IClasspathManager.CONTAINER_ID), entries), os);
-    os.close();
 
     IClasspathContainer container = helper.readContainer(new ByteArrayInputStream(os.toByteArray()));
 

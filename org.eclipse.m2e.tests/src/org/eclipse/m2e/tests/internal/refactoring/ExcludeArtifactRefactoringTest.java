@@ -584,7 +584,7 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
 
     try {
       Resource resource = new PomResourceFactoryImpl().createResource(uri);
-      resource.load(new HashMap());
+      resource.load(new HashMap<>());
       return (PomResourceImpl) resource;
 
     } catch(Exception ex) {

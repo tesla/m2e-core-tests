@@ -6,7 +6,7 @@ import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.equinox.internal.p2.discovery.AbstractCatalogSource;
 import org.eclipse.equinox.internal.p2.discovery.Policy;
 import org.eclipse.equinox.internal.p2.discovery.compatibility.BundleDiscoverySource;
@@ -25,10 +25,10 @@ public class TestM2EBundleStrategy extends M2ERemoteBundleDiscoveryStrategy {
     IExtensionPoint extensionPoint = getExtensionRegistry().getExtensionPoint(
         ConnectorDiscoveryExtensionReader.EXTENSION_POINT_ID);
     IExtension[] extensions = extensionPoint.getExtensions();
-    monitor.beginTask("Loading local extensions", extensions.length == 0 ? 1 : extensions.length);
     try {
+      SubMonitor subMonitor = SubMonitor.convert(monitor, "Loading local extensions", 1);
       if(extensions.length > 0) {
-        processExtensions(new SubProgressMonitor(monitor, extensions.length), extensions);
+        processExtensions(subMonitor.split(1), extensions);
       }
     } finally {
       monitor.done();

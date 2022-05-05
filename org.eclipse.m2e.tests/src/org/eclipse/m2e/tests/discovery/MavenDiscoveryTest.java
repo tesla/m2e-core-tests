@@ -236,7 +236,7 @@ public class MavenDiscoveryTest implements IShellProvider {
       @Override
       public URL getResource(String resourceName) {
         try {
-          return new File(emptydir, resourceName).toURL();
+          return new File(emptydir, resourceName).toURI().toURL();
         } catch(MalformedURLException e) {
           throw new RuntimeException(e);
         }
@@ -261,7 +261,7 @@ public class MavenDiscoveryTest implements IShellProvider {
       @Override
       public URL getResource(String resourceName) {
         try {
-          return pluginxml.toURL();
+          return pluginxml.toURI().toURL();
         } catch(MalformedURLException e) {
           throw new RuntimeException(e);
         }

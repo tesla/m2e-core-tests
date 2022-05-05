@@ -19,9 +19,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.Test;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 
@@ -31,7 +33,6 @@ import org.eclipse.m2e.core.internal.MavenPluginActivator;
 import org.eclipse.m2e.core.internal.project.ProjectConfigurationManager;
 import org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
-import org.eclipse.m2e.core.project.MavenUpdateRequest;
 import org.eclipse.m2e.core.project.configurator.AbstractProjectConfigurator;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 
@@ -72,12 +73,8 @@ public class ImportSortOrderTestCase extends AbstractMavenProjectTestCase {
     projects.add(createProject("PosConfigJar", "projects/MNGECLIPSE-1028/PosConfig/PosConfigJar/pom.xml"));
     projects.add(createProject("PosConfigWeb", "projects/MNGECLIPSE-1028/PosConfig/PosConfigWeb/pom.xml"));
 
-    MavenUpdateRequest updateRequest = new MavenUpdateRequest(false, false);
-    for(IProject project : projects) {
-      updateRequest.addPomFile(project);
-    }
-
-    manager.refresh(updateRequest, monitor);
+    Set<IFile> pomFiles = getPomFiles(projects.toArray(IProject[]::new));
+    manager.refresh(pomFiles, monitor);
 
     for(IProject project : projects) {
       facades.add(manager.create(project, monitor));
