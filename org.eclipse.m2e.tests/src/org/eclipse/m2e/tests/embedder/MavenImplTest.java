@@ -577,7 +577,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
     MavenExecutionContext context = maven.createExecutionContext();
     result = context.execute(project, (context1, monitor) -> {
       MavenSession session = context1.getSession();
-      maven.execute(session, execution, monitor);
+      maven.execute(session.getCurrentProject(), execution, monitor);
       return session.getResult();
     }, monitor);
 

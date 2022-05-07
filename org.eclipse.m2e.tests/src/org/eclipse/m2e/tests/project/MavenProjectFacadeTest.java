@@ -175,7 +175,7 @@ public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
 
     testIsStale(project, "pom.xml");
     for(IPath filename : ProjectRegistryManager.METADATA_PATH) {
-      MavenPluginActivator.getDefault().getMaven().execute(true /*offline*/, false /*updateSnapshots*/, (c, m) -> {
+      MavenPlugin.getMaven().execute(true /*offline*/, false /*updateSnapshots*/, (c, m) -> {
         ProjectRegistryManager projectManager = MavenPluginActivator.getDefault().getMavenProjectManagerImpl();
         projectManager.refresh(getPomFiles(project), monitor);
         return null;

@@ -44,11 +44,11 @@ import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.codehaus.plexus.util.xml.Xpp3DomBuilder;
 
-import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.project.MavenProject;
 
 import org.eclipse.m2e.core.embedder.ArtifactKey;
+import org.eclipse.m2e.core.embedder.IMavenExecutionContext;
 import org.eclipse.m2e.core.internal.IMavenConstants;
 import org.eclipse.m2e.core.internal.MavenPluginActivator;
 import org.eclipse.m2e.core.internal.lifecyclemapping.AnnotationMappingMetadataSource;
@@ -346,7 +346,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     for(Map.Entry<MojoExecutionKey, List<AbstractBuildParticipant>> entry : buildParticipants.entrySet()) {
       if(artifactId.equals(entry.getKey().getArtifactId())) {
         for(AbstractBuildParticipant participant : entry.getValue()) {
-          assertTrue(participantType.equals(participant.getClass()));
+          assertEquals(participantType, participant.getClass());
         }
       }
     }
@@ -874,9 +874,9 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
         "pom.xml");
     assertNotNull("Expected not null MavenProjectFacade", facade);
     ProjectRegistryManager projectRegistry = MavenPluginActivator.getDefault().getMavenProjectManagerImpl();
-    MavenExecutionRequest request = projectRegistry.createExecutionRequest(facade.getPom(),
-        facade.getResolverConfiguration(), monitor);
-    WorkspaceReader workspaceReader = request.getWorkspaceReader();
+    IMavenExecutionContext executionContext = projectRegistry.createExecutionContext(facade.getPom(),
+        facade.getResolverConfiguration());
+    WorkspaceReader workspaceReader = executionContext.getExecutionRequest().getWorkspaceReader();
     ArtifactKey a = facade.getArtifactKey();
     org.eclipse.aether.artifact.Artifact artifact = new org.eclipse.aether.artifact.DefaultArtifact(a.getGroupId(),
         a.getArtifactId(), a.getClassifier(), "pom", a.getVersion());
