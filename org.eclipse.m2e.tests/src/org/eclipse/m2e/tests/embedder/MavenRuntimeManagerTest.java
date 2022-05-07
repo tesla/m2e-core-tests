@@ -15,6 +15,7 @@ package org.eclipse.m2e.tests.embedder;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -29,9 +30,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.eclipse.m2e.core.MavenPlugin;
-import org.eclipse.m2e.core.embedder.IMavenLauncherConfiguration;
 import org.eclipse.m2e.core.internal.MavenPluginActivator;
 import org.eclipse.m2e.core.internal.launch.AbstractMavenRuntime;
+import org.eclipse.m2e.core.internal.launch.AbstractMavenRuntime.IMavenLauncherConfiguration;
 import org.eclipse.m2e.core.internal.launch.MavenEmbeddedRuntime;
 import org.eclipse.m2e.core.internal.launch.MavenExternalRuntime;
 import org.eclipse.m2e.core.internal.launch.MavenRuntimeManagerImpl;
@@ -41,7 +42,6 @@ import org.eclipse.m2e.core.project.IMavenProjectFacade;
 /**
  * @author Eugene Kuleshov
  */
-@SuppressWarnings("deprecation")
 public class MavenRuntimeManagerTest {
 
   private MavenRuntimeManagerImpl runtimeManager;
@@ -94,9 +94,8 @@ public class MavenRuntimeManagerTest {
     }
     assertEquals(null, runtime.getSettings());
 
-    assertTrue(runtime.equals(runtime));
-    assertFalse(runtime.equals(null));
-    assertTrue(runtime.hashCode() != 0);
+    assertNotNull(runtime);
+    assertNotEquals(0, runtime.hashCode());
 
     DummyLauncherConfig m2conf = new DummyLauncherConfig();
     runtime.createLauncherConfiguration(m2conf, null);
@@ -145,13 +144,12 @@ public class MavenRuntimeManagerTest {
 
     assertNotNull(m2conf.mainRealm);
     assertNotNull(m2conf.mainType);
-    assertTrue(m2conf.realms.get(m2conf.mainRealm).size() == 0);
-    assertTrue(m2conf.realms.get(IMavenLauncherConfiguration.LAUNCHER_REALM).size() == 1);
+    assertEquals(0, m2conf.realms.get(m2conf.mainRealm).size());
+    assertEquals(1, m2conf.realms.get(IMavenLauncherConfiguration.LAUNCHER_REALM).size());
 
-    assertTrue(runtime.equals(runtime));
-    assertFalse(runtime.equals(null));
-    assertFalse(runtime.equals(runtimeManager.getRuntime(MavenRuntimeManagerImpl.DEFAULT)));
-    assertTrue(runtime.hashCode() != 0);
+    assertNotNull(runtime);
+    assertNotEquals(runtimeManager.getRuntime(MavenRuntimeManagerImpl.DEFAULT), runtime);
+    assertNotEquals(0, runtime.hashCode());
   }
 
   static class DummyLauncherConfig implements IMavenLauncherConfiguration {
