@@ -22,8 +22,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
 
@@ -31,8 +34,6 @@ import org.eclipse.m2e.actions.MavenLaunchConstants;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.jdt.internal.launch.MavenRuntimeClasspathProvider;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
-import org.eclipse.m2e.tests.mocks.MockLaunchConfiguration;
-import org.eclipse.m2e.tests.mocks.MockLaunchConfigurationType;
 
 
 public class MavenRuntimeClasspathProviderTest extends AbstractMavenProjectTestCase {
@@ -128,7 +129,8 @@ public class MavenRuntimeClasspathProviderTest extends AbstractMavenProjectTestC
       String... expectedBinFolders)
       throws Exception {
     importProjects(baseDir, pomNames, new ResolverConfiguration());
-    MockLaunchConfiguration configuration = getAppLaunchConfiguration(baseDir + "/" + subModuleWithLaunch);
+    ILaunchConfiguration configuration = getLaunchConfiguration(baseDir + "/" + subModuleWithLaunch,
+        MavenRuntimeClasspathProvider.JDT_JAVA_APPLICATION);
     configuration.getAttributes().put(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,
         subModuleWithLaunch);
     configuration.getAttributes().put(IJavaLaunchConfigurationConstants.ATTR_EXCLUDE_TEST_CODE, useRuntimeScope);
@@ -157,7 +159,8 @@ public class MavenRuntimeClasspathProviderTest extends AbstractMavenProjectTestC
 
   private void runAddJunit5DepsTest(String projectName, String... expectedJars) throws IOException, CoreException {
     importProject("projects/" + projectName + "/pom.xml");
-    MockLaunchConfiguration configuration = getTestLaunchConfiguration("projects/" + projectName);
+    ILaunchConfiguration configuration = getLaunchConfiguration("projects/" + projectName,
+        MavenRuntimeClasspathProvider.JDT_JUNIT_TEST);
     configuration.getAttributes().put("org.eclipse.jdt.junit.TEST_KIND", "org.eclipse.jdt.junit.loader.junit5");
     configuration.getAttributes().put(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, projectName);
     MavenRuntimeClasspathProvider mavenRuntimeClasspathProvider = new MavenRuntimeClasspathProvider();
@@ -187,19 +190,13 @@ public class MavenRuntimeClasspathProviderTest extends AbstractMavenProjectTestC
     assertEquals(jars.length, resolveClasspath.length - i);
   }
 
-  private MockLaunchConfiguration getAppLaunchConfiguration(String pomDirectory) {
-    return getLaunchConfiguration(pomDirectory, MavenRuntimeClasspathProvider.JDT_JAVA_APPLICATION);
-  }
-
-  private MockLaunchConfiguration getTestLaunchConfiguration(String pomDirectory) {
-    return getLaunchConfiguration(pomDirectory, MavenRuntimeClasspathProvider.JDT_JUNIT_TEST);
-  }
-
-  private MockLaunchConfiguration getLaunchConfiguration(String pomDirectory, String type) {
+  private ILaunchConfiguration getLaunchConfiguration(String pomDirectory, String type) throws CoreException {
     File file = new File(pomDirectory);
     String absPomDir = file.getAbsolutePath();
     Map<String, Object> attributes = new HashMap<>();
     attributes.put(MavenLaunchConstants.ATTR_POM_DIR, absPomDir);
-    return new MockLaunchConfiguration(attributes, new MockLaunchConfigurationType(Map.of("id", type)));
+    ILaunchConfigurationType launchConfigurationType = Mockito.mock(ILaunchConfigurationType.class);
+    Mockito.when(launchConfigurationType.getAttribute("id")).thenReturn(type);
+    return MavenLaunchDelegateTest.mockLaunchConfiguration(attributes, launchConfigurationType);
   }
 }

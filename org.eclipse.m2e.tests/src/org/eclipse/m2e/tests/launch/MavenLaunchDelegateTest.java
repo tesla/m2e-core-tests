@@ -15,21 +15,32 @@ package org.eclipse.m2e.tests.launch;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.stubbing.Answer;
 
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.Launch;
 import org.eclipse.jdt.launching.IVMRunner;
 
@@ -40,7 +51,6 @@ import org.eclipse.m2e.internal.launch.MavenLaunchDelegate;
 import org.eclipse.m2e.internal.launch.MavenLaunchUtils;
 import org.eclipse.m2e.internal.launch.MavenRuntimeLaunchSupport.VMArguments;
 import org.eclipse.m2e.internal.launch.MavenSourceLocator;
-import org.eclipse.m2e.tests.mocks.MockLaunchConfiguration;
 import org.eclipse.m2e.tests.mocks.MockVMRunner;
 
 
@@ -103,8 +113,8 @@ public class MavenLaunchDelegateTest {
     if(!Files.exists(mvn)) {
       Files.createDirectories(mvn);
     }
-    ILaunchConfiguration configuration = new MockLaunchConfiguration(
-        Map.of(MavenLaunchConstants.ATTR_POM_DIR, "${workspace_loc}/foo/bar"));
+    ILaunchConfiguration configuration = mockLaunchConfiguration(
+        Map.of(MavenLaunchConstants.ATTR_POM_DIR, "${workspace_loc}/foo/bar"), null);
     launcher.appendRuntimeSpecificArguments("3.3.3", arguments, configuration);
     String expectedVmArgs = "-Dmaven.multiModuleProjectDirectory="
         + MavenLaunchUtils.quote(ResourcesPlugin.getWorkspace().getRoot().getLocation().append("foo").toOSString());
@@ -114,7 +124,7 @@ public class MavenLaunchDelegateTest {
   @Test
   public void testGlobalSettingsProgramArguments() throws Exception {
     IMavenConfiguration mavenConfig = MavenPlugin.getMavenConfiguration();
-    MockLaunchConfiguration configuration = getLaunchConfiguration("projects/444262_settings");
+    ILaunchConfiguration configuration = getLaunchConfiguration("projects/444262_settings");
     try {
       performDummyLaunch(configuration);
       assertArrayEquals(new String[] {"-B"}, runner.getConfiguration().getProgramArguments());
@@ -139,7 +149,7 @@ public class MavenLaunchDelegateTest {
   @Test
   public void testUserSettingsProgramArguments() throws Exception {
     IMavenConfiguration mavenConfig = MavenPlugin.getMavenConfiguration();
-    MockLaunchConfiguration configuration = getLaunchConfiguration("projects/444262_settings");
+    ILaunchConfiguration configuration = getLaunchConfiguration("projects/444262_settings");
     try {
       mavenConfig.setUserSettingsFile(new File("settings_empty.xml").getAbsolutePath());
       performDummyLaunch(configuration);
@@ -163,11 +173,38 @@ public class MavenLaunchDelegateTest {
     }
   }
 
-  private MockLaunchConfiguration getLaunchConfiguration(String pomDirectory) {
+  private ILaunchConfiguration getLaunchConfiguration(String pomDirectory) throws CoreException {
     File file = new File(pomDirectory);
     String absPomDir = file.getAbsolutePath();
     Map<String, Object> attributes = new HashMap<>();
     attributes.put(MavenLaunchConstants.ATTR_POM_DIR, absPomDir);
-    return new MockLaunchConfiguration(attributes);
+    return mockLaunchConfiguration(attributes, null);
+  }
+
+  @SuppressWarnings("unchecked")
+  static ILaunchConfiguration mockLaunchConfiguration(Map<String, Object> attributes, ILaunchConfigurationType type)
+      throws CoreException {
+    ILaunchConfiguration config = mock(ILaunchConfiguration.class);
+    when(config.getType()).thenReturn(type);
+    when(config.getAttribute(anyString(), anyBoolean())).then(returnAttributeOrDefault(attributes));
+    when(config.getAttribute(anyString(), anyInt())).then(returnAttributeOrDefault(attributes));
+    //Use any() matcher because that one also matches null-arguments
+    when(config.getAttribute(anyString(), (List<String>) any())).then(returnAttributeOrDefault(attributes));
+    when(config.getAttribute(anyString(), (Set<String>) any())).then(returnAttributeOrDefault(attributes));
+    when(config.getAttribute(anyString(), (Map<String, String>) any())).then(returnAttributeOrDefault(attributes));
+    when(config.getAttribute(anyString(), (String) any())).then(returnAttributeOrDefault(attributes));
+    when(config.getAttributes()).thenReturn(attributes);
+    when(config.hasAttribute(anyString())).thenAnswer(a -> attributes.containsKey(a.getArgument(0)));
+    return config;
+  }
+
+  private static <T> Answer<T> returnAttributeOrDefault(Map<String, Object> attributes) {
+    return (Answer<T>) a -> {
+      String attributeName = a.getArgument(0);
+      T defaultValue = a.getArgument(1);
+      @SuppressWarnings("unchecked")
+      T attr = (T) attributes.get(attributeName);
+      return attr == null ? defaultValue : attr;
+    };
   }
 }
