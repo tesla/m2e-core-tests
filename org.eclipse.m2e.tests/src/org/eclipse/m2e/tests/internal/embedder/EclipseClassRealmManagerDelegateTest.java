@@ -19,9 +19,10 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
 
 import org.codehaus.plexus.classworlds.realm.ClassRealm;
 
@@ -44,81 +45,42 @@ public class EclipseClassRealmManagerDelegateTest {
         ClassRealmManagerDelegate.class, EclipseClassRealmManagerDelegate.ROLE_HINT);
   }
 
+  @Test
   public void testRealmSetup() throws Exception {
-    DummyRealm realm = new DummyRealm();
 
-    final List<ClassRealmConstituent> constituents = new ArrayList<>();
-
-    ClassRealmRequest request = new ClassRealmRequest() {
-
+    List<String> realmImports = new ArrayList<>();
+    ClassRealm realm = new ClassRealm(null, "test-" + System.currentTimeMillis(), null) {
       @Override
-      public List<ClassRealmConstituent> getConstituents() {
-        return constituents;
+      public void importFrom(ClassLoader classLoader, String packageName) {
+        realmImports.add(packageName);
       }
-
-      @Deprecated
-      @Override
-      public List<String> getImports() {
-        return new ArrayList<>();
-      }
-
-      @Override
-      public ClassLoader getParent() {
-        return null;
-      }
-
-      @Override
-      public RealmType getType() {
-        return RealmType.Plugin;
-      }
-
-      @Override
-      public Map<String, ClassLoader> getForeignImports() {
-        return null;
-      }
-
-      @Override
-      public List<String> getParentImports() {
-        return null;
-      }
-
     };
+
+    List<ClassRealmConstituent> constituents = new ArrayList<>();
+    ClassRealmRequest request = Mockito.mock(ClassRealmRequest.class);
+    Mockito.when(request.getConstituents()).thenReturn(constituents);
 
     delegate.setupRealm(realm, request);
 
-    assertFalse(realm.imports.toString(), realm.imports.contains("org.sonatype.plexus.build.incremental"));
+    assertFalse(realmImports.toString(), realmImports.contains("org.sonatype.plexus.build.incremental"));
 
     constituents.add(new DummyConstituent("0.0.3"));
 
     delegate.setupRealm(realm, request);
 
-    assertTrue(realm.imports.toString(), realm.imports.contains("org.sonatype.plexus.build.incremental"));
+    assertTrue(realmImports.toString(), realmImports.contains("org.sonatype.plexus.build.incremental"));
 
-    realm.imports.clear();
+    realmImports.clear();
     constituents.clear();
     constituents.add(new DummyConstituent("999.0"));
 
     delegate.setupRealm(realm, request);
 
-    assertFalse(realm.imports.toString(), realm.imports.contains("org.sonatype.plexus.build.incremental"));
+    assertFalse(realmImports.toString(), realmImports.contains("org.sonatype.plexus.build.incremental"));
   }
 
-  static class DummyRealm extends ClassRealm {
 
-    public List<String> imports = new ArrayList<>();
-
-    public DummyRealm() {
-      super(null, "test-" + System.currentTimeMillis(), null);
-    }
-
-    @Override
-    public void importFrom(ClassLoader classLoader, String packageName) {
-      imports.add(packageName);
-    }
-
-  }
-
-  static class DummyConstituent implements ClassRealmConstituent {
+  private static class DummyConstituent implements ClassRealmConstituent {
 
     private String version;
 
@@ -155,7 +117,5 @@ public class EclipseClassRealmManagerDelegateTest {
     public File getFile() {
       return new File("");
     }
-
   }
-
 }
