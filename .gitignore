@@ -1,7 +1,15 @@
 .classpath
 .project
+# Keep .classpath/.project files for this and direct child projects
+!/.project
+!/*/.classpath
+!/*/.project
+
 .settings/
 target/
 bin/
 
 .DS_Store
+
+.polyglot*
+.tycho-consumer-pom.xml
