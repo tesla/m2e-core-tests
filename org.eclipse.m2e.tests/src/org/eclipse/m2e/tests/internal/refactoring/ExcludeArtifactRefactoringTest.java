@@ -466,6 +466,7 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
       editorInput = new FileEditorInput(file);
     }
 
+    @SuppressWarnings("synthetic-access")
     MavenPomEditor open() throws CoreException, InterruptedException {
       if(Display.getDefault().getThread() == Thread.currentThread()) {
         run();
