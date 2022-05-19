@@ -29,6 +29,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -64,7 +66,6 @@ import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.ArtifactRef;
 import org.eclipse.m2e.core.embedder.IMavenExecutionContext;
 import org.eclipse.m2e.core.internal.IMavenConstants;
-import org.eclipse.m2e.core.internal.MavenPluginActivator;
 import org.eclipse.m2e.core.internal.preferences.MavenConfigurationImpl;
 import org.eclipse.m2e.core.internal.project.registry.MavenProjectFacade;
 import org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager;
@@ -79,15 +80,20 @@ import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.m2e.tests.common.ClasspathHelpers;
 import org.eclipse.m2e.tests.common.FilexWagon;
 import org.eclipse.m2e.tests.common.MavenRunner;
+import org.eclipse.m2e.tests.common.OSGiServiceInjector;
 import org.eclipse.m2e.tests.common.RequireMavenExecutionContext;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
 @RunWith(MavenRunner.class)
 public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
 
+  @Rule
+  public OSGiServiceInjector serviceInjector = OSGiServiceInjector.INSTANCE;
+
+  @Inject
   ProjectRegistryManager manager;
 
-  ArrayList<MavenProjectChangedEvent> events;
+  List<MavenProjectChangedEvent> events;
 
   IMavenProjectChangedListener listener = (event, monitor) -> events.addAll(Arrays.asList(event));
 
@@ -98,9 +104,6 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
-
-    manager = MavenPluginActivator.getDefault().getMavenProjectManagerImpl();
-
     events = new ArrayList<>();
     manager.addMavenProjectChangedListener(listener);
   }
@@ -112,7 +115,6 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
       manager.removeMavenProjectChangedListener(listener);
       listener = null;
       events = null;
-      manager = null;
     } finally {
       super.tearDown();
     }
@@ -123,10 +125,6 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     File dir = new File("resources/" + test, name);
 
     return createExisting(name, dir.getAbsolutePath());
-  }
-
-  private MavenProjectChangedEvent[] getEvents() {
-    return events.toArray(new MavenProjectChangedEvent[events.size()]);
   }
 
   private Set<Artifact> getMavenProjectArtifacts(IMavenProjectFacade f1) throws CoreException {
@@ -648,10 +646,9 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
       assertStartWith(repo.getAbsolutePath(), a2.getFile().getAbsolutePath());
     }
 
-    MavenProjectChangedEvent[] events = getEvents();
-    assertEquals(2, events.length);
-    assertEquals(p3.getFile(IMavenConstants.POM_FILE_NAME), events[0].getSource());
-    assertEquals(p1.getFile(IMavenConstants.POM_FILE_NAME), events[1].getSource());
+    assertEquals(2, events.size());
+    assertEquals(p3.getFile(IMavenConstants.POM_FILE_NAME), events.get(0).getSource());
+    assertEquals(p1.getFile(IMavenConstants.POM_FILE_NAME), events.get(1).getSource());
 
     this.events.clear();
     p2.delete(true, monitor);
@@ -668,10 +665,9 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
       assertEquals(false, a1[1].isResolved());
     }
 
-    events = getEvents();
-    assertEquals(2, events.length);
-    assertEquals(p2.getFile(IMavenConstants.POM_FILE_NAME), events[0].getSource());
-    assertEquals(p1.getFile(IMavenConstants.POM_FILE_NAME), events[1].getSource());
+    assertEquals(2, events.size());
+    assertEquals(p2.getFile(IMavenConstants.POM_FILE_NAME), events.get(0).getSource());
+    assertEquals(p1.getFile(IMavenConstants.POM_FILE_NAME), events.get(1).getSource());
   }
 
   @Test

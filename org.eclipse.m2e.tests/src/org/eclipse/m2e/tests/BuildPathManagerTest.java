@@ -30,9 +30,10 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
-import org.junit.After;
-import org.junit.Before;
+import javax.inject.Inject;
+
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.core.resources.ICommand;
@@ -78,6 +79,7 @@ import org.eclipse.m2e.jdt.internal.BuildPathManager;
 import org.eclipse.m2e.jdt.internal.MavenClasspathHelpers;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.m2e.tests.common.ClasspathHelpers;
+import org.eclipse.m2e.tests.common.OSGiServiceInjector;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
 
@@ -85,22 +87,11 @@ import org.eclipse.m2e.tests.common.WorkspaceHelpers;
  * @author Eugene Kuleshov
  */
 public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
+  @Rule
+  public OSGiServiceInjector serviceInjector = OSGiServiceInjector.INSTANCE;
 
+  @Inject
   private ProjectRegistryManager manager;
-
-  @Override
-  @Before
-  public void setUp() throws Exception {
-    super.setUp();
-    manager = MavenPluginActivator.getDefault().getMavenProjectManagerImpl();
-  }
-
-  @Override
-  @After
-  public void tearDown() throws Exception {
-    manager = null;
-    super.tearDown();
-  }
 
   @Test
   public void testEnableMavenNature() throws Exception {

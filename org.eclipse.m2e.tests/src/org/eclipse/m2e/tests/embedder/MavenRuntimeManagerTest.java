@@ -26,17 +26,20 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.m2e.core.MavenPlugin;
-import org.eclipse.m2e.core.internal.MavenPluginActivator;
 import org.eclipse.m2e.core.internal.launch.AbstractMavenRuntime;
 import org.eclipse.m2e.core.internal.launch.AbstractMavenRuntime.IMavenLauncherConfiguration;
 import org.eclipse.m2e.core.internal.launch.MavenEmbeddedRuntime;
 import org.eclipse.m2e.core.internal.launch.MavenExternalRuntime;
 import org.eclipse.m2e.core.internal.launch.MavenRuntimeManagerImpl;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
+import org.eclipse.m2e.tests.common.OSGiServiceInjector;
 
 
 /**
@@ -44,11 +47,14 @@ import org.eclipse.m2e.core.project.IMavenProjectFacade;
  */
 public class MavenRuntimeManagerTest {
 
+  @Rule
+  public OSGiServiceInjector serviceInjector = OSGiServiceInjector.INSTANCE;
+
+  @Inject
   private MavenRuntimeManagerImpl runtimeManager;
 
   @Before
   public void setUp() throws Exception {
-    runtimeManager = MavenPluginActivator.getDefault().getMavenRuntimeManager();
     runtimeManager.reset();
   }
 

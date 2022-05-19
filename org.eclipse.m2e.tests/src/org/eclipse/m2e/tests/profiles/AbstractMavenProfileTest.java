@@ -17,9 +17,9 @@ import java.io.File;
 
 import org.junit.After;
 import org.junit.Before;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.util.tracker.ServiceTracker;
+import org.junit.Rule;
+
+import com.google.inject.Inject;
 
 import org.eclipse.core.resources.IProject;
 
@@ -28,15 +28,18 @@ import org.eclipse.m2e.core.internal.IMavenConstants;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.profiles.core.internal.IProfileManager;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
+import org.eclipse.m2e.tests.common.OSGiServiceInjector;
 
 
 public abstract class AbstractMavenProfileTest extends AbstractMavenProjectTestCase {
 
+  @Rule
+  public OSGiServiceInjector serviceInjector = OSGiServiceInjector.INSTANCE;
+
+  @Inject
   protected IProfileManager profileManager;
 
   private String originalSettings;
-
-  private ServiceTracker<IProfileManager, IProfileManager> profileManagerTracker;
 
   @Override
   @Before
@@ -44,10 +47,6 @@ public abstract class AbstractMavenProfileTest extends AbstractMavenProjectTestC
     super.setUp();
     originalSettings = mavenConfiguration.getUserSettingsFile();
     mavenConfiguration.setUserSettingsFile(new File("settings_profiles.xml").getCanonicalPath());
-    BundleContext context = FrameworkUtil.getBundle(AbstractMavenProfileTest.class).getBundleContext();
-    profileManagerTracker = new ServiceTracker<>(context, IProfileManager.class, null);
-    profileManagerTracker.open();
-    profileManager = profileManagerTracker.getService();
   }
 
   protected IMavenProjectFacade getFacade(IProject project) {
@@ -57,11 +56,9 @@ public abstract class AbstractMavenProfileTest extends AbstractMavenProjectTestC
   @Override
   @After
   public void tearDown() throws Exception {
-    profileManager = null;
     if(originalSettings != null) {
       mavenConfiguration.setUserSettingsFile(originalSettings);
     }
-    profileManagerTracker.close();
     super.tearDown();
   }
 

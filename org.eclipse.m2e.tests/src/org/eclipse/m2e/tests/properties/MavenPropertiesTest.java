@@ -17,18 +17,20 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Properties;
 
+import javax.inject.Inject;
+
+import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.core.resources.IProject;
 
-import org.eclipse.m2e.core.MavenPlugin;
-import org.eclipse.m2e.core.internal.MavenPluginActivator;
 import org.eclipse.m2e.core.internal.project.ResolverConfigurationIO;
 import org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager;
 import org.eclipse.m2e.core.project.IProjectConfigurationManager;
 import org.eclipse.m2e.core.project.MavenUpdateRequest;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
+import org.eclipse.m2e.tests.common.OSGiServiceInjector;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
 
@@ -41,16 +43,14 @@ public class MavenPropertiesTest extends AbstractMavenProjectTestCase {
 
   private IProject project;
 
+  @Rule
+  public OSGiServiceInjector serviceInjector = OSGiServiceInjector.INSTANCE;
+
+  @Inject
   private ProjectRegistryManager manager;
 
+  @Inject
   private IProjectConfigurationManager configurationManager;
-
-  @Override
-  public void setUp() throws Exception {
-    super.setUp();
-    manager = MavenPluginActivator.getDefault().getMavenProjectManagerImpl();
-    configurationManager = MavenPlugin.getProjectConfigurationManager();
-  }
 
   @Test
   public void testBuildingProjectWithProperties() throws Exception {
