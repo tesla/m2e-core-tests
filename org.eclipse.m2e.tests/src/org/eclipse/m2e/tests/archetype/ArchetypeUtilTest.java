@@ -21,7 +21,7 @@ import org.junit.Test;
 
 import org.apache.maven.archetype.catalog.Archetype;
 
-import org.eclipse.m2e.core.archetype.ArchetypeUtil;
+import org.eclipse.m2e.core.ui.internal.util.ArchetypeUtil;
 
 
 /**
