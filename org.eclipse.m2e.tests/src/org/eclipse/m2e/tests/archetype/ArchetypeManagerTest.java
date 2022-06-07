@@ -35,13 +35,14 @@ import org.apache.maven.artifact.repository.ArtifactRepository;
 
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.IMavenConfiguration;
-import org.eclipse.m2e.core.internal.MavenPluginActivator;
 import org.eclipse.m2e.core.internal.archetype.ArchetypeCatalogFactory;
 import org.eclipse.m2e.core.internal.archetype.ArchetypeCatalogFactory.DefaultLocalCatalogFactory;
 import org.eclipse.m2e.core.internal.archetype.ArchetypeCatalogFactory.InternalCatalogFactory;
 import org.eclipse.m2e.core.internal.archetype.ArchetypeCatalogFactory.LocalCatalogFactory;
 import org.eclipse.m2e.core.internal.archetype.ArchetypeCatalogFactory.RemoteCatalogFactory;
 import org.eclipse.m2e.core.internal.archetype.ArchetypeManager;
+import org.eclipse.m2e.core.ui.internal.M2EUIPluginActivator;
+import org.eclipse.m2e.core.ui.internal.archetype.MavenArchetype;
 import org.eclipse.m2e.tests.common.FileHelpers;
 import org.eclipse.m2e.tests.common.HttpServer;
 
@@ -59,7 +60,7 @@ public class ArchetypeManagerTest {
 
   @Before
   public void setUp() throws Exception {
-    archetypeManager = MavenPluginActivator.getDefault().getArchetypeManager();
+    archetypeManager = M2EUIPluginActivator.getDefault().getArchetypeManager();
   }
 
   @Test
@@ -235,7 +236,7 @@ public class ArchetypeManagerTest {
       Archetype archetype = new Archetype();
       archetype.setRepository("http://localhost/");
       archetype.setArtifactId("my-archetype");
-      repo = archetypeManager.getArchetypeRepository(archetype);
+      repo = archetypeManager.getArchetypeRepository(new MavenArchetype(archetype));
 
     } finally {
 
@@ -271,7 +272,7 @@ public class ArchetypeManagerTest {
 
       configuration.setUserSettingsFile(new File(ARCHETYPE_REPOS_SETTINGS).getCanonicalPath());
 
-      List<?> properties = archetypeManager.getRequiredProperties(archetype, null, null);
+      List<?> properties = archetypeManager.getRequiredProperties(new MavenArchetype(archetype), null, null);
       assertNotNull("Required Properties are null!", properties);
 
       assertEquals("Unexpected required properties " + properties.toString(), 1, properties.size());
@@ -305,9 +306,11 @@ public class ArchetypeManagerTest {
 
       configuration.setUserSettingsFile(new File(ARCHETYPE_REPOS_SETTINGS).getCanonicalPath());
 
-      ArtifactRepository remoteArchetypeRepository = archetypeManager.getArchetypeRepository(archetype);
+      ArtifactRepository remoteArchetypeRepository = archetypeManager
+          .getArchetypeRepository(new MavenArchetype(archetype));
 
-      List<?> properties = archetypeManager.getRequiredProperties(archetype, remoteArchetypeRepository, null);
+      List<?> properties = archetypeManager.getRequiredProperties(new MavenArchetype(archetype),
+          remoteArchetypeRepository, null);
       assertNotNull("Required Properties are null!", properties);
 
       assertEquals("Unexpected required properties " + properties.toString(), 1, properties.size());

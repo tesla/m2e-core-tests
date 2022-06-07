@@ -77,6 +77,7 @@ import org.eclipse.m2e.core.project.MavenUpdateRequest;
 import org.eclipse.m2e.core.project.ProjectImportConfiguration;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.core.project.configurator.MojoExecutionKey;
+import org.eclipse.m2e.core.ui.internal.archetype.MavenArchetype;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.m2e.tests.common.FilexWagon;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
@@ -666,8 +667,9 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
 
     workspace.run((IWorkspaceRunnable) monitor -> {
       ProjectImportConfiguration pic = new ProjectImportConfiguration(new ResolverConfiguration());
-      MavenPlugin.getProjectConfigurationManager().createArchetypeProjects(location, archetype, projectName,
-          projectName, "0.0.1-SNAPSHOT", "jar", new Properties(), pic, monitor);
+      MavenPlugin.getProjectConfigurationManager().createArchetypeProjects(location, new MavenArchetype(archetype),
+          projectName,
+          projectName, "0.0.1-SNAPSHOT", "jar", new Properties(), pic, null, monitor);
     }, MavenPlugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
 
     return project;
