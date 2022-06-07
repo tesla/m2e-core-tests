@@ -73,6 +73,8 @@ import org.eclipse.m2e.core.project.IProjectConfigurationManager;
 import org.eclipse.m2e.core.project.MavenUpdateRequest;
 import org.eclipse.m2e.core.project.ProjectImportConfiguration;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
+import org.eclipse.m2e.core.ui.internal.M2EUIPluginActivator;
+import org.eclipse.m2e.core.ui.internal.archetype.MavenArchetype;
 import org.eclipse.m2e.jdt.MavenJdtPlugin;
 import org.eclipse.m2e.jdt.internal.BuildPathManager;
 import org.eclipse.m2e.jdt.internal.MavenClasspathHelpers;
@@ -1110,7 +1112,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
   }
 
   private Archetype findQuickStartArchetype() throws CoreException {
-    List<Archetype> archetypes = MavenPluginActivator.getDefault().getArchetypeManager()
+    List<Archetype> archetypes = M2EUIPluginActivator.getDefault().getArchetypeManager()
         .getArchetypeCatalogFactory("internal").getArchetypeCatalog().getArchetypes();
     for(Archetype archetype : archetypes) {
       if("org.apache.maven.archetypes".equals(archetype.getGroupId())
@@ -1131,8 +1133,8 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
       ResolverConfiguration resolverConfiguration = new ResolverConfiguration();
       ProjectImportConfiguration pic = new ProjectImportConfiguration(resolverConfiguration);
 
-      MavenPlugin.getProjectConfigurationManager().createArchetypeProjects(location, archetype, // 
-          projectName, projectName, "0.0.1-SNAPSHOT", "jar", new Properties(), pic, monitor);
+      MavenPlugin.getProjectConfigurationManager().createArchetypeProjects(location, new MavenArchetype(archetype), // 
+          projectName, projectName, "0.0.1-SNAPSHOT", "jar", new Properties(), pic, null, monitor);
     }, MavenPlugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
 
     return project;
