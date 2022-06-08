@@ -1133,7 +1133,8 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
       ResolverConfiguration resolverConfiguration = new ResolverConfiguration();
       ProjectImportConfiguration pic = new ProjectImportConfiguration(resolverConfiguration);
 
-      MavenPlugin.getProjectConfigurationManager().createArchetypeProjects(location, new MavenArchetype(archetype), // 
+      M2EUIPluginActivator.getDefault().getArchetypeManager().getGenerator().createArchetypeProjects(location,
+          new MavenArchetype(archetype), // 
           projectName, projectName, "0.0.1-SNAPSHOT", "jar", new Properties(), pic, null, monitor);
     }, MavenPlugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
 
