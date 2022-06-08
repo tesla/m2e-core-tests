@@ -156,7 +156,7 @@ public class MutableProjectRegistryTest extends AbstractMavenProjectTestCase {
   }
 
   private Map<ArtifactKey, Collection<IFile>> getWorkspaceArtifacts(IProjectRegistry state, ArtifactKey artifact) {
-    return state.getWorkspaceArtifacts(artifact.getGroupId(), artifact.getArtifactId());
+    return state.getWorkspaceArtifacts(artifact.groupId(), artifact.artifactId());
   }
 
   @Test

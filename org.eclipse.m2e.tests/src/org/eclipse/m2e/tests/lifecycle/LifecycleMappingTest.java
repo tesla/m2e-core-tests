@@ -344,7 +344,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
   private void assertBuildParticipantType(Map<MojoExecutionKey, List<AbstractBuildParticipant>> buildParticipants,
       String artifactId, Class<MojoExecutionBuildParticipant> participantType) {
     for(Map.Entry<MojoExecutionKey, List<AbstractBuildParticipant>> entry : buildParticipants.entrySet()) {
-      if(artifactId.equals(entry.getKey().getArtifactId())) {
+      if(artifactId.equals(entry.getKey().artifactId())) {
         for(AbstractBuildParticipant participant : entry.getValue()) {
           assertEquals(participantType, participant.getClass());
         }
@@ -441,8 +441,8 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
         facade, monitor);
     assertEquals(1, buildParticipants.size());
     MojoExecutionKey executionKey = buildParticipants.keySet().iterator().next();
-    assertEquals("package", executionKey.getLifecyclePhase());
-    assertEquals("test-lifecyclemapping-plugin", executionKey.getArtifactId());
+    assertEquals("package", executionKey.lifecyclePhase());
+    assertEquals("test-lifecyclemapping-plugin", executionKey.artifactId());
     assertEquals(1, buildParticipants.get(executionKey).size());
     assertTrue(buildParticipants.get(executionKey).get(0) instanceof MojoExecutionBuildParticipant);
   }
@@ -878,12 +878,12 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
         facade.getResolverConfiguration());
     WorkspaceReader workspaceReader = executionContext.getExecutionRequest().getWorkspaceReader();
     ArtifactKey a = facade.getArtifactKey();
-    org.eclipse.aether.artifact.Artifact artifact = new org.eclipse.aether.artifact.DefaultArtifact(a.getGroupId(),
-        a.getArtifactId(), a.getClassifier(), "pom", a.getVersion());
+    org.eclipse.aether.artifact.Artifact artifact = new org.eclipse.aether.artifact.DefaultArtifact(a.groupId(),
+        a.artifactId(), a.classifier(), "pom", a.version());
     File file = workspaceReader.findArtifact(artifact);
     assertNotNull(file);
-    artifact = new org.eclipse.aether.artifact.DefaultArtifact(a.getGroupId(), a.getArtifactId(), a.getClassifier(),
-        facade.getPackaging(), a.getVersion());
+    artifact = new org.eclipse.aether.artifact.DefaultArtifact(a.groupId(), a.artifactId(), a.classifier(),
+        facade.getPackaging(), a.version());
     file = workspaceReader.findArtifact(artifact);
     assertNull(file);
   }

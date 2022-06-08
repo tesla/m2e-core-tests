@@ -36,7 +36,6 @@ import org.eclipse.jdt.core.IClasspathEntry;
 
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.internal.IMavenConstants;
-import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.IProjectConfigurationManager;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
@@ -180,14 +179,13 @@ public class ResourceChangeListenerTest extends AbstractMavenProjectTestCase {
     waitForJobsToComplete();
     driveEvents();
     assertTrue(Arrays.stream(MavenPlugin.getMavenProjectRegistry().getProjects())
-        .filter(f -> f.getArtifactKey().getArtifactId().equals("resourcechange")).findAny()
-        .isPresent());
+        .anyMatch(f -> f.getArtifactKey().artifactId().equals("resourcechange")));
 
     project.delete(true, new NullProgressMonitor());
 
     waitForJobsToComplete();
     driveEvents();
-    assertTrue(Arrays.stream(MavenPlugin.getMavenProjectRegistry().getProjects()).filter(f -> f.getArtifactKey().getArtifactId().equals("resourcechange"))
-        .findAny().isEmpty());
+    assertTrue(Arrays.stream(MavenPlugin.getMavenProjectRegistry().getProjects())
+        .noneMatch(f -> f.getArtifactKey().artifactId().equals("resourcechange")));
   }
 }

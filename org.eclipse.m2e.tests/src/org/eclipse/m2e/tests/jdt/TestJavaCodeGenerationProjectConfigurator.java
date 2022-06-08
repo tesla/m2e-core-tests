@@ -49,6 +49,6 @@ public class TestJavaCodeGenerationProjectConfigurator extends AbstractSourcesGe
   @Override
   protected File[] getSourceFolders(ProjectConfigurationRequest request, MojoExecution mojoExecution,
       IProgressMonitor monitor) {
-    return new File[] {new File(request.getMavenProject().getBuild().getDirectory(), "generated-sources/test")};
+    return new File[] {new File(request.mavenProject().getBuild().getDirectory(), "generated-sources/test")};
   }
 }
