@@ -23,6 +23,7 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -185,9 +186,11 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
       archetype.setGroupId("org.eclipse.m2e.its");
       archetype.setArtifactId("mngeclipse-2110");
       archetype.setVersion("1.0");
-      archetype.setRepository("http://bad.host"); // should be mirrored by settings
-
-      IProject project = createArchetypeProject("mngeclipse-2110", null, archetype);
+      archetype.setRepository(new File("repositories/testrepo").getAbsoluteFile().toURI().toASCIIString());
+      Collection<IProject> projects = createProjectsFromArchetype("mngeclipse-2110", new MavenArchetype(archetype),
+          null);
+      assertEquals(1, projects.size());
+      IProject project = projects.iterator().next();
       assertTrue(project.isAccessible());
     } finally {
       mavenConfiguration.setUserSettingsFile(oldSettings);
@@ -597,10 +600,11 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
       archetype.setGroupId("org.apache.maven.archetypes");
       archetype.setArtifactId("maven-archetype-quickstart");
       archetype.setVersion("RELEASE");
-      IProject moduleProject = createArchetypeProject(moduleName, parentProject.getLocation(), archetype);
-
+      Collection<IProject> projects = createProjectsFromArchetype(moduleName, new MavenArchetype(archetype),
+          parentProject.getLocation());
+      assertEquals(1, projects.size());
+      IProject moduleProject = projects.iterator().next();
       assertNoErrors(moduleProject);
-
       parentProject.refreshLocal(IResource.DEPTH_ONE, monitor);
       IFolder moduleFolder = parentProject.getFolder(moduleName);
       assertTrue(moduleFolder.exists());
@@ -665,15 +669,10 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
   private IProject createArchetypeProject(final String projectName, final IPath location, final Archetype archetype)
       throws CoreException {
     final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-
     workspace.run((IWorkspaceRunnable) monitor -> {
-      ProjectImportConfiguration pic = new ProjectImportConfiguration(new ResolverConfiguration());
       M2EUIPluginActivator.getDefault().getArchetypeManager().getGenerator().createArchetypeProjects(location,
-          new MavenArchetype(archetype),
-          projectName,
-          projectName, "0.0.1-SNAPSHOT", "jar", new Properties(), pic, null, monitor);
+          new MavenArchetype(archetype), projectName, projectName, "0.0.1-SNAPSHOT", "jar", new Properties(), monitor);
     }, MavenPlugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
-
     return project;
   }
 
