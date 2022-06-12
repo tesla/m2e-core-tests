@@ -1,0 +1,49 @@
+<settings>
+  <localRepository>target/localrepo</localRepository>
+
+  <profiles>
+    <profile>
+      <id>testrepo</id>
+      <repositories>
+        <repository>
+          <id>testrepo</id>
+          <url>file:repositories/testrepo</url>
+          <snapshots><enabled>true</enabled></snapshots>
+          <releases><enabled>true</enabled></releases>
+        </repository>
+      </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>testrepo</id>
+          <url>file:repositories/testrepo</url>
+          <snapshots><enabled>true</enabled></snapshots>
+          <releases><enabled>true</enabled></releases>
+        </pluginRepository>
+      </pluginRepositories>
+    </profile>
+    <profile>
+      <id>rso</id>
+      <repositories>
+        <repository>
+          <id>central</id>
+          <url>https://repository.sonatype.org/content/repositories/central/</url>
+          <snapshots><enabled>true</enabled></snapshots>
+          <releases><enabled>true</enabled></releases>
+        </repository>
+      </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>central</id>
+          <url>https://repository.sonatype.org/content/repositories/central/</url>
+          <snapshots><enabled>true</enabled></snapshots>
+          <releases><enabled>true</enabled></releases>
+        </pluginRepository>
+      </pluginRepositories>
+    </profile>
+  </profiles>
+
+  <activeProfiles>
+    <activeProfile>testrepo</activeProfile>
+  </activeProfiles>
+
+</settings>
