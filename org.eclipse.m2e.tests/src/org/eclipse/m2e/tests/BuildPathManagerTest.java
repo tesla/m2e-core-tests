@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -1077,16 +1078,23 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
   }
 
   @Test
-  public void testArchetypeProject() throws CoreException {
+  public void testArchetypeProject() throws CoreException, IOException {
+    useSettings("settings2.xml");
     Archetype quickStart = findQuickStartArchetype();
-
-    IProject project = createArchetypeProject("archetype-project", null, quickStart);
-
-    assertNotNull(JavaCore.create(project)); // TODO more meaningful assertion 
+    IPath location = null;
+    Collection<IProject> projects = createProjectsFromArchetype("archetype-project", new MavenArchetype(quickStart),
+        location);
+    assertEquals(1, projects.size());
+    IProject project = projects.iterator().next();
+    assertMavenNature(project);
+    assertNotNull(JavaCore.create(project));
   }
+
+
 
   @Test
   public void testArchetypeProjectInExternalLocation() throws CoreException, IOException {
+    useSettings("settings2.xml");
     Archetype quickStart = findQuickStartArchetype();
 
     File tmp = File.createTempFile("m2eclipse", "test");
@@ -1128,16 +1136,10 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
   private IProject createArchetypeProject(final String projectName, final IPath location, final Archetype archetype)
       throws CoreException {
     final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-
-    workspace.run((IWorkspaceRunnable) monitor -> {
-      ResolverConfiguration resolverConfiguration = new ResolverConfiguration();
-      ProjectImportConfiguration pic = new ProjectImportConfiguration(resolverConfiguration);
-
+    workspace.run((IWorkspaceRunnable) m -> {
       M2EUIPluginActivator.getDefault().getArchetypeManager().getGenerator().createArchetypeProjects(location,
-          new MavenArchetype(archetype), // 
-          projectName, projectName, "0.0.1-SNAPSHOT", "jar", new Properties(), pic, null, monitor);
+          new MavenArchetype(archetype), projectName, projectName, "0.0.1-SNAPSHOT", "jar", new Properties(), monitor);
     }, MavenPlugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
-
     return project;
   }
 
