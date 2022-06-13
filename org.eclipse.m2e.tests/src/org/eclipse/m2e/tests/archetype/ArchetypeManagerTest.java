@@ -31,18 +31,17 @@ import org.eclipse.core.runtime.Platform;
 
 import org.apache.maven.archetype.catalog.Archetype;
 import org.apache.maven.archetype.catalog.ArchetypeCatalog;
-import org.apache.maven.artifact.repository.ArtifactRepository;
 
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.IMavenConfiguration;
 import org.eclipse.m2e.core.ui.internal.M2EUIPluginActivator;
 import org.eclipse.m2e.core.ui.internal.archetype.ArchetypeCatalogFactory;
-import org.eclipse.m2e.core.ui.internal.archetype.ArchetypeManager;
-import org.eclipse.m2e.core.ui.internal.archetype.MavenArchetype;
 import org.eclipse.m2e.core.ui.internal.archetype.ArchetypeCatalogFactory.DefaultLocalCatalogFactory;
 import org.eclipse.m2e.core.ui.internal.archetype.ArchetypeCatalogFactory.InternalCatalogFactory;
 import org.eclipse.m2e.core.ui.internal.archetype.ArchetypeCatalogFactory.LocalCatalogFactory;
 import org.eclipse.m2e.core.ui.internal.archetype.ArchetypeCatalogFactory.RemoteCatalogFactory;
+import org.eclipse.m2e.core.ui.internal.archetype.ArchetypePlugin;
+import org.eclipse.m2e.core.ui.internal.archetype.MavenArchetype;
 import org.eclipse.m2e.tests.common.FileHelpers;
 import org.eclipse.m2e.tests.common.HttpServer;
 
@@ -56,11 +55,11 @@ public class ArchetypeManagerTest {
 
   private static final String ARCHETYPE_REPOS_SETTINGS = "src/org/eclipse/m2e/tests/archetype/settings_archetypes.xml";
 
-  private ArchetypeManager archetypeManager;
+  private ArchetypePlugin archetypeManager;
 
   @Before
   public void setUp() throws Exception {
-    archetypeManager = M2EUIPluginActivator.getDefault().getArchetypeManager();
+    archetypeManager = M2EUIPluginActivator.getDefault().getArchetypePlugin();
   }
 
   @Test
@@ -105,7 +104,8 @@ public class ArchetypeManagerTest {
 
   @Test
   public void testLocalArchetypeCatalogFactory() throws Exception {
-    LocalCatalogFactory catalogFactory = new LocalCatalogFactory("archetype-catalog.xml", "local", true);
+    LocalCatalogFactory catalogFactory = M2EUIPluginActivator.getDefault().getArchetypePlugin()
+        .newLocalCatalogFactory("archetype-catalog.xml", "local", true, true);
     ArchetypeCatalog catalog = catalogFactory.getArchetypeCatalog();
     assertNotNull(catalog);
     assertEquals(2, catalog.getArchetypes().size());
@@ -116,7 +116,8 @@ public class ArchetypeManagerTest {
     Bundle bundle = Platform.getBundle(M2E_TEST_PLUGIN_ID);
     assertNotNull(bundle);
     URL embeddedCatalog = bundle.getEntry("/resources/490230_embedded_archetype_catalog/my-catalog.xml");
-    LocalCatalogFactory catalogFactory = new LocalCatalogFactory(embeddedCatalog.toString(), "embedded", false);
+    LocalCatalogFactory catalogFactory = M2EUIPluginActivator.getDefault().getArchetypePlugin()
+        .newLocalCatalogFactory(embeddedCatalog.toString(), "embedded", false, true);
     ArchetypeCatalog catalog = catalogFactory.getArchetypeCatalog();
     assertNotNull(catalog);
     assertEquals(1, catalog.getArchetypes().size());
@@ -129,7 +130,8 @@ public class ArchetypeManagerTest {
   }
 
   public void asserEmptyCatalog(String url, String description) throws Exception {
-    LocalCatalogFactory catalogFactory = new LocalCatalogFactory(url, description, true);
+    LocalCatalogFactory catalogFactory = M2EUIPluginActivator.getDefault().getArchetypePlugin()
+        .newLocalCatalogFactory(url, description, true, true);
     ArchetypeCatalog catalog = catalogFactory.getArchetypeCatalog();
     assertNotNull(catalog);
     assertEquals(0, catalog.getArchetypes().size());
@@ -138,29 +140,44 @@ public class ArchetypeManagerTest {
   @Test
   public void testRemoteArchetypeCatalogFactory() throws Exception {
     assertEquals("http://server/repo",
-        new RemoteCatalogFactory("http://server/repo/archetype-catalog.xml", null, true).getRepositoryUrl());
+        M2EUIPluginActivator.getDefault().getArchetypePlugin()
+            .newRemoteCatalogFactory("http://server/repo/archetype-catalog.xml", null, true, true).getRepositoryUrl());
     assertEquals("http://server/repo",
-        new RemoteCatalogFactory("http://server/repo/archetype.catalog.xml", null, true).getRepositoryUrl());
+        M2EUIPluginActivator.getDefault().getArchetypePlugin()
+            .newRemoteCatalogFactory("http://server/repo/archetype.catalog.xml", null, true, true).getRepositoryUrl());
     assertEquals("http://server/repo",
-        new RemoteCatalogFactory("http://server/repo/archetype-catalog.txt", null, true).getRepositoryUrl());
-    assertEquals("http://server/repo", new RemoteCatalogFactory("http://server/repo/", null, true).getRepositoryUrl());
-    assertEquals("http://server/repo", new RemoteCatalogFactory("http://server/repo", null, true).getRepositoryUrl());
-    assertEquals("", new RemoteCatalogFactory("catalog.xml", null, true).getRepositoryUrl());
-    assertEquals("/", new RemoteCatalogFactory("/", null, true).getRepositoryUrl());
+        M2EUIPluginActivator.getDefault().getArchetypePlugin()
+            .newRemoteCatalogFactory("http://server/repo/archetype-catalog.txt", null, true, true).getRepositoryUrl());
+    assertEquals("http://server/repo",
+        M2EUIPluginActivator.getDefault().getArchetypePlugin()
+            .newRemoteCatalogFactory("http://server/repo/", null, true, true).getRepositoryUrl());
+    assertEquals("http://server/repo",
+        M2EUIPluginActivator.getDefault().getArchetypePlugin()
+            .newRemoteCatalogFactory("http://server/repo", null, true, true).getRepositoryUrl());
+    assertEquals("", M2EUIPluginActivator.getDefault().getArchetypePlugin()
+        .newRemoteCatalogFactory("catalog.xml", null, true, true).getRepositoryUrl());
+    assertEquals("/", M2EUIPluginActivator.getDefault().getArchetypePlugin()
+        .newRemoteCatalogFactory("/", null, true, true).getRepositoryUrl());
 
     //Ok these don't make sense
-    assertEquals("", new RemoteCatalogFactory("", null, true).getRepositoryUrl());
-    assertEquals("", new RemoteCatalogFactory("/.", null, true).getRepositoryUrl());
-    assertEquals("", new RemoteCatalogFactory(".", null, true).getRepositoryUrl());
-    assertEquals(".", new RemoteCatalogFactory("./", null, true).getRepositoryUrl());
+    assertEquals("", M2EUIPluginActivator.getDefault().getArchetypePlugin()
+        .newRemoteCatalogFactory("", null, true, true).getRepositoryUrl());
+    assertEquals("", M2EUIPluginActivator.getDefault().getArchetypePlugin()
+        .newRemoteCatalogFactory("/.", null, true, true).getRepositoryUrl());
+    assertEquals("", M2EUIPluginActivator.getDefault().getArchetypePlugin()
+        .newRemoteCatalogFactory(".", null, true, true).getRepositoryUrl());
+    assertEquals(".", M2EUIPluginActivator.getDefault().getArchetypePlugin()
+        .newRemoteCatalogFactory("./", null, true, true).getRepositoryUrl());
 
-    assertEquals(null, new RemoteCatalogFactory(null, null, true).getRepositoryUrl());
+    assertEquals(null, M2EUIPluginActivator.getDefault().getArchetypePlugin()
+        .newRemoteCatalogFactory(null, null, true, true).getRepositoryUrl());
   }
 
   @Test
   public void testArchetypeManagerSaveRestore() throws Exception {
 
-    ArchetypeCatalogFactory catalogFactory = new RemoteCatalogFactory("http://www.sonatype.org/", "test", true);
+    ArchetypeCatalogFactory catalogFactory = M2EUIPluginActivator.getDefault().getArchetypePlugin()
+        .newRemoteCatalogFactory("http://www.sonatype.org/", "test", true, true);
     assertEquals("test", catalogFactory.getDescription());
     assertNotNull(catalogFactory.getArchetypeCatalog());
 
@@ -212,40 +229,14 @@ public class ArchetypeManagerTest {
     httpServer.addResources("/", "");
     httpServer.start();
     try {
-      final RemoteCatalogFactory factory = new RemoteCatalogFactory(httpServer.getHttpUrl() + "/archetype-catalog.xml",
-          null, true);
+      final RemoteCatalogFactory factory = M2EUIPluginActivator.getDefault().getArchetypePlugin()
+          .newRemoteCatalogFactory(httpServer.getHttpUrl() + "/archetype-catalog.xml",
+          null, true, true);
       ArchetypeCatalog catalog = factory.getArchetypeCatalog();
       assertEquals(2, catalog.getArchetypes().size());
     } finally {
       httpServer.stop();
     }
-  }
-
-  @Test
-  public void test371775_archetypeRepoAuthentication() throws Exception {
-
-    IMavenConfiguration configuration = MavenPlugin.getMavenConfiguration();
-
-    String userSettings = configuration.getUserSettingsFile();
-
-    ArtifactRepository repo;
-    try {
-
-      configuration.setUserSettingsFile(new File(ARCHETYPE_REPOS_SETTINGS).getCanonicalPath());
-
-      Archetype archetype = new Archetype();
-      archetype.setRepository("http://localhost/");
-      archetype.setArtifactId("my-archetype");
-      repo = archetypeManager.getArchetypeRepository(new MavenArchetype(archetype));
-
-    } finally {
-
-      configuration.setUserSettingsFile(userSettings);
-    }
-    assertEquals("my-archetype-repo", repo.getId());
-    assertNotNull("Repo Authentication is null!", repo.getAuthentication());
-    assertEquals("m2e", repo.getAuthentication().getUsername());
-    assertEquals("371775", repo.getAuthentication().getPassword());
   }
 
   @Test
@@ -272,45 +263,7 @@ public class ArchetypeManagerTest {
 
       configuration.setUserSettingsFile(new File(ARCHETYPE_REPOS_SETTINGS).getCanonicalPath());
 
-      List<?> properties = archetypeManager.getRequiredProperties(new MavenArchetype(archetype), null, null);
-      assertNotNull("Required Properties are null!", properties);
-
-      assertEquals("Unexpected required properties " + properties.toString(), 1, properties.size());
-
-    } finally {
-
-      configuration.setUserSettingsFile(userSettings);
-    }
-
-  }
-
-  @Test
-  public void test387784_remoteArchetypeWithProperties() throws Exception {
-
-    File localRepo = new File("target/localrepo-archetypes");
-
-    FileHelpers.deleteDirectory(localRepo);
-    assertFalse(localRepo.exists());
-
-    Archetype archetype = new Archetype();
-    archetype.setGroupId("foo.bar");
-    archetype.setArtifactId("someproject-archetype");
-    archetype.setVersion("1.0");
-    archetype.setRepository("file:repositories/customrepo");
-
-    IMavenConfiguration configuration = MavenPlugin.getMavenConfiguration();
-
-    String userSettings = configuration.getUserSettingsFile();
-
-    try {
-
-      configuration.setUserSettingsFile(new File(ARCHETYPE_REPOS_SETTINGS).getCanonicalPath());
-
-      ArtifactRepository remoteArchetypeRepository = archetypeManager
-          .getArchetypeRepository(new MavenArchetype(archetype));
-
-      List<?> properties = archetypeManager.getRequiredProperties(new MavenArchetype(archetype),
-          remoteArchetypeRepository, null);
+      List<?> properties = archetypeManager.getRequiredProperties(new MavenArchetype(archetype), null);
       assertNotNull("Required Properties are null!", properties);
 
       assertEquals("Unexpected required properties " + properties.toString(), 1, properties.size());
@@ -330,7 +283,8 @@ public class ArchetypeManagerTest {
     httpServer.start();
     String url = httpServer.getHttpUrl() + "/archetype-catalog.xml";
     try {
-      RemoteCatalogFactory remoteFactory = new RemoteCatalogFactory(url, null, true);
+      RemoteCatalogFactory remoteFactory = M2EUIPluginActivator.getDefault().getArchetypePlugin()
+          .newRemoteCatalogFactory(url, null, true, true);
       archetypeManager.addArchetypeCatalogFactory(remoteFactory);
 
       List<Archetype> archetypes = remoteFactory.getArchetypeCatalog().getArchetypes();

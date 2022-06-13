@@ -1,0 +1,24 @@
+<settings>
+	<localRepository>target/localrepo</localRepository>
+	<profiles>
+		<profile>
+			<id>archetype</id>
+			<repositories>
+				<repository>
+					<!-- id expected by maven-archetype-plugin to avoid	fetching from everywhere -->
+					<id>archetype</id>
+					<url>${repoUrl}</url>
+					<snapshots>
+						<enabled>true</enabled>
+					</snapshots>
+					<releases>
+						<enabled>true</enabled>
+					</releases>
+				</repository>
+			</repositories>
+		</profile>
+	</profiles>
+	<activeProfiles>
+		<activeProfile>archetype</activeProfile>
+	</activeProfiles>
+</settings>

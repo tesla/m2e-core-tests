@@ -22,6 +22,7 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -178,17 +179,25 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
 
   @Test
   public void testResolutionOfArchetypeFromRepository() throws Exception {
-    useSettings("settings2.xml");
-
-    Archetype archetype = new Archetype();
-    archetype.setGroupId("org.eclipse.m2e.its");
-    archetype.setArtifactId("mngeclipse-2110");
-    archetype.setVersion("1.0");
-    archetype.setRepository(new File("repositories/testrepo").getAbsoluteFile().toURI().toASCIIString());
-    Collection<IProject> projects = createProjectsFromArchetype("mngeclipse-2110", new MavenArchetype(archetype), null);
-    assertEquals(1, projects.size());
-    IProject project = projects.iterator().next();
-    assertTrue(project.isAccessible());
+    File templateSettings = new File("settings_archetype_repo.xml").getCanonicalFile().getAbsoluteFile();
+    String interpolated = Files.readString(templateSettings.toPath()).replace("${repoUrl}",
+        new File("repositories/testrepo").getAbsoluteFile().toURI().toASCIIString());
+    File tempFile = File.createTempFile("settings", ".xml");
+    try {
+      Files.writeString(tempFile.toPath(), interpolated);
+      mavenConfiguration.setUserSettingsFile(tempFile.getAbsolutePath());
+      Archetype archetype = new Archetype();
+      archetype.setGroupId("org.eclipse.m2e.its");
+      archetype.setArtifactId("mngeclipse-2110");
+      archetype.setVersion("1.0");
+      Collection<IProject> projects = createProjectsFromArchetype("mngeclipse-2110", new MavenArchetype(archetype),
+          null);
+      assertEquals(1, projects.size());
+      IProject project = projects.iterator().next();
+      assertTrue(project.isAccessible());
+    } finally {
+      tempFile.delete();
+    }
   }
 
   @Test
@@ -665,7 +674,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
       throws CoreException {
     final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
     workspace.run((IWorkspaceRunnable) monitor -> {
-      M2EUIPluginActivator.getDefault().getArchetypeManager().getGenerator().createArchetypeProjects(location,
+      M2EUIPluginActivator.getDefault().getArchetypePlugin().getGenerator().createArchetypeProjects(location,
           new MavenArchetype(archetype), projectName, projectName, "0.0.1-SNAPSHOT", "jar", new Properties(), monitor);
     }, MavenPlugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
     return project;
