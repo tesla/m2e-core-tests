@@ -1120,7 +1120,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
   }
 
   private Archetype findQuickStartArchetype() throws CoreException {
-    List<Archetype> archetypes = M2EUIPluginActivator.getDefault().getArchetypeManager()
+    List<Archetype> archetypes = M2EUIPluginActivator.getDefault().getArchetypePlugin()
         .getArchetypeCatalogFactory("internal").getArchetypeCatalog().getArchetypes();
     for(Archetype archetype : archetypes) {
       if("org.apache.maven.archetypes".equals(archetype.getGroupId())
@@ -1137,7 +1137,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
       throws CoreException {
     final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
     workspace.run((IWorkspaceRunnable) m -> {
-      M2EUIPluginActivator.getDefault().getArchetypeManager().getGenerator().createArchetypeProjects(location,
+      M2EUIPluginActivator.getDefault().getArchetypePlugin().getGenerator().createArchetypeProjects(location,
           new MavenArchetype(archetype), projectName, projectName, "0.0.1-SNAPSHOT", "jar", new Properties(), monitor);
     }, MavenPlugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
     return project;

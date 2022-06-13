@@ -14,10 +14,12 @@
 package org.eclipse.m2e.tests;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.Arrays;
 
 import org.junit.After;
 import org.junit.Before;
@@ -34,6 +36,7 @@ import org.eclipse.jdt.core.IClasspathEntry;
 
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.internal.IMavenConstants;
+import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.IProjectConfigurationManager;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
@@ -175,11 +178,16 @@ public class ResourceChangeListenerTest extends AbstractMavenProjectTestCase {
     assertEquals(2, cp.length);
     assertEquals("junit-4.13.1.jar", cp[0].getPath().lastSegment());
     waitForJobsToComplete();
-    assertEquals(1, MavenPlugin.getMavenProjectRegistry().getProjects().length);
+    driveEvents();
+    assertTrue(Arrays.stream(MavenPlugin.getMavenProjectRegistry().getProjects())
+        .filter(f -> f.getArtifactKey().getArtifactId().equals("resourcechange")).findAny()
+        .isPresent());
 
     project.delete(true, new NullProgressMonitor());
 
     waitForJobsToComplete();
-    assertEquals(0, MavenPlugin.getMavenProjectRegistry().getProjects().length);
+    driveEvents();
+    assertTrue(Arrays.stream(MavenPlugin.getMavenProjectRegistry().getProjects()).filter(f -> f.getArtifactKey().getArtifactId().equals("resourcechange"))
+        .findAny().isEmpty());
   }
 }
