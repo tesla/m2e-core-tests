@@ -1,0 +1,1 @@
+This file is just for git to retain the folder, the folder is just to not let an test "escape" while searching for maven extensions.
