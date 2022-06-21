@@ -81,6 +81,7 @@ public class MavenImportWizardPageTest extends AbstractMavenProjectTestCase {
   @Test
   public void test408042_simpleProject() throws Exception {
     scanProjects("projects/408042_importWorkingSet/simple");
+    waitForJobsToComplete();
     assertFalse(page.shouldCreateWorkingSet());
     assertEquals("simple", page.getWorkingSetName());
   }
@@ -88,6 +89,7 @@ public class MavenImportWizardPageTest extends AbstractMavenProjectTestCase {
   @Test
   public void test408042_multimoduleProject() throws Exception {
     scanProjects("projects/408042_importWorkingSet/multimodule");
+    waitForJobsToComplete();
     assertTrue(page.shouldCreateWorkingSet());
     assertEquals("multimodule-parent", page.getWorkingSetName());
   }
