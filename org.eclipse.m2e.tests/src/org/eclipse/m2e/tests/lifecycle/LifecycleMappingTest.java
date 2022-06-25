@@ -327,8 +327,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertTrue(lifecycleMapping instanceof JarLifecycleMapping);
 
     List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
-    assertEquals(configurators.toString(), 1, configurators.size());
-    assertTrue(configurators.get(0) instanceof JavaProjectConfigurator);
+    assertHasJavaConfigurator(configurators);
 
     List<MojoExecutionKey> notCoveredMojoExecutions = getNotCoveredMojoExecutions(facade);
     assertEquals(notCoveredMojoExecutions.toString(), 0, notCoveredMojoExecutions.size());
@@ -339,6 +338,15 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
 
     assertBuildParticipantType(buildParticipants, "maven-resources-plugin", MojoExecutionBuildParticipant.class);
     // TODO assert all other mojo executions
+  }
+
+  private void assertHasJavaConfigurator(List<AbstractProjectConfigurator> configurators) {
+    for(AbstractProjectConfigurator configurator : configurators) {
+      if(configurator instanceof JavaProjectConfigurator) {
+        return;
+      }
+    }
+    fail("no java configurator found: " + configurators.toString());
   }
 
   private void assertBuildParticipantType(Map<MojoExecutionKey, List<AbstractBuildParticipant>> buildParticipants,
