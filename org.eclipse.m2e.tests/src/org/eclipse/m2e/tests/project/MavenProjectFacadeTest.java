@@ -6,6 +6,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.List;
 
@@ -25,6 +26,7 @@ import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.configurator.AbstractProjectConfigurator;
 import org.eclipse.m2e.core.project.configurator.ILifecycleMapping;
 import org.eclipse.m2e.core.project.configurator.MojoExecutionKey;
+import org.eclipse.m2e.jdt.internal.JavaProjectConfigurator;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.m2e.tests.common.RequireMavenExecutionContext;
 
@@ -147,7 +149,20 @@ public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
 
     List<AbstractProjectConfigurator> projectConfigurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
     assertNotNull("Expected not null projectConfigurators", projectConfigurators);
-    assertEquals(1, projectConfigurators.size());
+    assertHasJavaConfiguratior(projectConfigurators);
+  }
+
+  /**
+   * @param projectConfigurators
+   */
+  private void assertHasJavaConfiguratior(List<AbstractProjectConfigurator> projectConfigurators) {
+    for(AbstractProjectConfigurator configurator : projectConfigurators) {
+      if(configurator instanceof JavaProjectConfigurator) {
+        return;
+      }
+    }
+    fail("Java Project configurator not found!");
+
   }
 
   @Test
@@ -164,7 +179,7 @@ public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
 
     List<AbstractProjectConfigurator> projectConfigurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
     assertNotNull("Expected not null projectConfigurators", projectConfigurators);
-    assertEquals(1, projectConfigurators.size());
+    assertHasJavaConfiguratior(projectConfigurators);
   }
 
   @Test

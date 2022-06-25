@@ -32,7 +32,8 @@ Require-Bundle: org.eclipse.core.externaltools,
  org.eclipse.jface.text,
  org.eclipse.jdt.junit,
  org.eclipse.core.expressions,
- org.eclipse.m2e.profiles.core
+ org.eclipse.m2e.profiles.core,
+ org.eclipse.m2e.mavenarchiver;bundle-version="2.0.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ClassPath: .
