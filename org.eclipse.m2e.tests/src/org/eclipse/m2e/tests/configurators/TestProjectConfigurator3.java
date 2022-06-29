@@ -51,7 +51,7 @@ public class TestProjectConfigurator3 extends AbstractProjectConfigurator {
 
     IPath logPath = new Path("target/configurator-log.txt");
 
-    IFile file = request.getProject().getFile(logPath);
+    IFile file = request.mavenProjectFacade().getProject().getFile(logPath);
     String text = null;
     if(file.exists()) {
       try (InputStream contents = file.getContents(true)) {

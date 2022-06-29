@@ -74,7 +74,7 @@ public abstract class AbstractOperationTest {
     return null != PomEdits.findChild(
         exclusionsElement,
         "exclusion",
-        new PomEdits.Matcher[] {PomEdits.childEquals("artifactId", exclusion.getArtifactId()),
-            PomEdits.childEquals("groupId", exclusion.getGroupId())});
+        new PomEdits.Matcher[] {PomEdits.childEquals("artifactId", exclusion.artifactId()),
+            PomEdits.childEquals("groupId", exclusion.groupId())});
   }
 }

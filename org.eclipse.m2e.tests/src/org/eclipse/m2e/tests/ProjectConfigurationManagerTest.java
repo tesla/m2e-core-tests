@@ -579,9 +579,9 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().create(parentProject, monitor);
     if(facade != null) {
       Parent parent = new Parent();
-      parent.setGroupId(facade.getArtifactKey().getGroupId());
-      parent.setArtifactId(facade.getArtifactKey().getArtifactId());
-      parent.setVersion(facade.getArtifactKey().getVersion());
+      parent.setGroupId(facade.getArtifactKey().groupId());
+      parent.setArtifactId(facade.getArtifactKey().artifactId());
+      parent.setVersion(facade.getArtifactKey().version());
       model.setParent(parent);
     }
 

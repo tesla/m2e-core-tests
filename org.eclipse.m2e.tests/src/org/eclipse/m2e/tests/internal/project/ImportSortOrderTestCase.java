@@ -92,7 +92,7 @@ public class ImportSortOrderTestCase extends AbstractMavenProjectTestCase {
 
     Map<String, Integer> aMap = new HashMap<>();
     for(int i = 0; i < facades.size(); i++ ) {
-      aMap.put(facades.get(i).getArtifactKey().getArtifactId(), Integer.valueOf(i));
+      aMap.put(facades.get(i).getArtifactKey().artifactId(), Integer.valueOf(i));
     }
     assertResultMap(aMap);
   }

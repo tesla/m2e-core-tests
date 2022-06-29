@@ -132,9 +132,9 @@ public class LifecycleMappingDiscoveryTest extends AbstractLifecycleMappingTest 
     for(ILifecycleMappingRequirement req : request.getRequirements()) {
       if(req instanceof MojoExecutionMappingRequirement) {
         MojoExecutionMappingRequirement goal = (MojoExecutionMappingRequirement) req;
-        if("test-goal-1".equals(goal.getExecution().getGoal())) {
+        if("test-goal-1".equals(goal.getExecution().goal())) {
           goal1 = goal;
-        } else if("test-goal-2".equals(goal.getExecution().getGoal())) {
+        } else if("test-goal-2".equals(goal.getExecution().goal())) {
           goal2 = goal;
         }
       }
@@ -219,9 +219,9 @@ public class LifecycleMappingDiscoveryTest extends AbstractLifecycleMappingTest 
     for(ILifecycleMappingRequirement req : request.getRequirements()) {
       if(req instanceof MojoExecutionMappingRequirement) {
         MojoExecutionMappingRequirement goal = (MojoExecutionMappingRequirement) req;
-        if("test-goal-1".equals(goal.getExecution().getGoal())) {
+        if("test-goal-1".equals(goal.getExecution().goal())) {
           goal1 = goal;
-        } else if("test-goal-2".equals(goal.getExecution().getGoal())) {
+        } else if("test-goal-2".equals(goal.getExecution().goal())) {
           goal2 = goal;
         }
       }
@@ -288,7 +288,7 @@ public class LifecycleMappingDiscoveryTest extends AbstractLifecycleMappingTest 
 
     MojoExecutionMappingRequirement goal1 = (MojoExecutionMappingRequirement) elementKeys.get(0);
 
-    assertEquals("test-goal-1", goal1.getExecution().getGoal());
+    assertEquals("test-goal-1", goal1.getExecution().goal());
 
     assertNull(request.getSelectedProposal(goal1));
   }

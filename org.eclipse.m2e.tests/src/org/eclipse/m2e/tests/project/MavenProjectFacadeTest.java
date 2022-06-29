@@ -40,7 +40,7 @@ public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
 
     MojoExecutionKey compileKey = null;
     for(MojoExecutionKey executionKey : facade.getMojoExecutionMapping().keySet()) {
-      if("maven-compiler-plugin".equals(executionKey.getArtifactId()) && "compile".equals(executionKey.getGoal())) {
+      if("maven-compiler-plugin".equals(executionKey.artifactId()) && "compile".equals(executionKey.goal())) {
         compileKey = executionKey;
         break;
       }
@@ -66,7 +66,7 @@ public class MavenProjectFacadeTest extends AbstractMavenProjectTestCase {
 
     MojoExecutionKey compileKey = null;
     for(MojoExecutionKey executionKey : facade.getMojoExecutionMapping().keySet()) {
-      if("maven-compiler-plugin".equals(executionKey.getArtifactId()) && "compile".equals(executionKey.getGoal())) {
+      if("maven-compiler-plugin".equals(executionKey.artifactId()) && "compile".equals(executionKey.goal())) {
         compileKey = executionKey;
         break;
       }

@@ -17,6 +17,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -549,12 +550,7 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
    * Assert the expected message on RefactoringStatus entry.
    */
   protected static boolean hasMessage(String msg, RefactoringStatus status) {
-    for(RefactoringStatusEntry entry : status.getEntries()) {
-      if(entry.getMessage().equals(msg)) {
-        return true;
-      }
-    }
-    return false;
+    return Arrays.stream(status.getEntries()).map(RefactoringStatusEntry::getMessage).anyMatch(msg::equals);
   }
 
   /*
@@ -566,11 +562,11 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
     found[0] = false;
     performOnDOMDocument(new OperationTuple(editor.getDocument(), document -> {
       Element dep = findChild(findChild(document.getDocumentElement(), DEPENDENCIES), DEPENDENCY,
-          childEquals(GROUP_ID, dependencyKey.getGroupId()), childEquals(ARTIFACT_ID, dependencyKey.getArtifactId()),
-          childEquals(VERSION, dependencyKey.getVersion()));
+          childEquals(GROUP_ID, dependencyKey.groupId()), childEquals(ARTIFACT_ID, dependencyKey.artifactId()),
+          childEquals(VERSION, dependencyKey.version()));
       if(dep != null) {
         Element exclusion = findChild(findChild(dep, EXCLUSIONS), EXCLUSION,
-            childEquals(GROUP_ID, excluded.getGroupId()), childEquals(ARTIFACT_ID, excluded.getArtifactId()));
+            childEquals(GROUP_ID, excluded.groupId()), childEquals(ARTIFACT_ID, excluded.artifactId()));
         found[0] = exclusion != null;
 
       }
@@ -602,9 +598,9 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
     Model model = loadResource(project.getFile("pom.xml")).getModel();
     Dependency d = null;
     for(Dependency dep : model.getDependencies()) {
-      if(dep.getArtifactId().equals(dependencyKey.getArtifactId())
-          && dep.getGroupId().equals(dependencyKey.getGroupId())
-          && dep.getVersion().equals(dependencyKey.getVersion())) {
+      if(dep.getArtifactId().equals(dependencyKey.artifactId())
+          && dep.getGroupId().equals(dependencyKey.groupId())
+          && dep.getVersion().equals(dependencyKey.version())) {
         d = dep;
         break;
       }
@@ -613,7 +609,7 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
       return false;
     }
     for(Exclusion ex : d.getExclusions()) {
-      if(ex.getArtifactId().equals(excluded.getArtifactId()) && ex.getGroupId().equals(excluded.getGroupId())) {
+      if(ex.getArtifactId().equals(excluded.artifactId()) && ex.getGroupId().equals(excluded.groupId())) {
         return true;
       }
     }

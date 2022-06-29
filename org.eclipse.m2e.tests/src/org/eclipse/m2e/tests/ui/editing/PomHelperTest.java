@@ -131,8 +131,8 @@ public class PomHelperTest {
 
     ArtifactKey dep = new ArtifactKey("AAA", "BB2B", "2.0", null);
 
-    PomHelper.createPlugin(findChild(tempModel.getDocument().getDocumentElement(), "plugins"), dep.getGroupId(),
-        dep.getArtifactId(), dep.getVersion());
+    PomHelper.createPlugin(findChild(tempModel.getDocument().getDocumentElement(), "plugins"), dep.groupId(),
+        dep.artifactId(), dep.version());
 
     assertNotNull(findPlugin(findChild(tempModel.getDocument().getDocumentElement(), "plugins"), dep));
   }
@@ -144,8 +144,8 @@ public class PomHelperTest {
 
     ArtifactKey dep = new ArtifactKey("AAA", "BB2B", "2.0", null);
 
-    PomHelper.createPlugin(findChild(tempModel.getDocument().getDocumentElement(), "plugins"), dep.getGroupId(),
-        dep.getArtifactId(), dep.getVersion());
+    PomHelper.createPlugin(findChild(tempModel.getDocument().getDocumentElement(), "plugins"), dep.groupId(),
+        dep.artifactId(), dep.version());
 
     assertNotNull(findPlugin(findChild(tempModel.getDocument().getDocumentElement(), "plugins"), dep));
   }
@@ -170,7 +170,7 @@ public class PomHelperTest {
   }
 
   private static Element findPlugin(Element parent, ArtifactKey key) {
-    return findChild(parent, "plugin", PomEdits.childEquals("groupId", key.getGroupId()),
-        PomEdits.childEquals("artifactId", key.getArtifactId()), PomEdits.childEquals("version", key.getVersion()));
+    return findChild(parent, "plugin", PomEdits.childEquals("groupId", key.groupId()),
+        PomEdits.childEquals("artifactId", key.artifactId()), PomEdits.childEquals("version", key.version()));
   }
 }

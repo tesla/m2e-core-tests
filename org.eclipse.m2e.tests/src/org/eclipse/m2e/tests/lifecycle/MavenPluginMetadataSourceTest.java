@@ -61,9 +61,9 @@ public class MavenPluginMetadataSourceTest extends AbstractLifecycleMappingTest 
     LifecycleMappingMetadataSource metadata = ((PluginExecutionMetadata) executionMapping.get(0)).getSource();
     assertNotNull(metadata);
     Artifact artifact = (Artifact) metadata.getSource();
-    assertEquals(executionKey.getGroupId(), artifact.getGroupId());
-    assertEquals(executionKey.getArtifactId(), artifact.getArtifactId());
-    assertEquals(executionKey.getVersion(), artifact.getVersion());
+    assertEquals(executionKey.groupId(), artifact.getGroupId());
+    assertEquals(executionKey.artifactId(), artifact.getArtifactId());
+    assertEquals(executionKey.version(), artifact.getVersion());
   }
 
   @Test
