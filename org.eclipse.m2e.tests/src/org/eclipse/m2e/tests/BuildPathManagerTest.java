@@ -389,7 +389,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
       deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t001/0.0.1/"));
       deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t002/0.0.1/"));
       MavenPlugin.getMavenProjectRegistry()
-          .refresh(new MavenUpdateRequest(new IProject[] {project}, false /*offline*/, false));
+          .refresh(new MavenUpdateRequest(List.of(project), false /*offline*/, false));
       waitForJobsToComplete();
     }
 
@@ -1042,7 +1042,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
       model.setBuild(new Build());
       model.getBuild().addPlugin(buildPlugin);
 
-      String[] directories = {"src/main/java", "src/test/java", "src/main/resources", "src/test/resources"};
+      List<String> directories = List.of("src/main/java", "src/test/java", "src/main/resources", "src/test/resources");
 
       ProjectImportConfiguration config = new ProjectImportConfiguration();
 

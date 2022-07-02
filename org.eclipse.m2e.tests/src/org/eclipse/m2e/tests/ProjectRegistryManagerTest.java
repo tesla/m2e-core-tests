@@ -25,7 +25,6 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -89,7 +88,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
 
   ArrayList<MavenProjectChangedEvent> events;
 
-  IMavenProjectChangedListener listener = (event, monitor) -> events.addAll(Arrays.asList(event));
+  IMavenProjectChangedListener listener = (event, monitor) -> events.addAll(event);
 
   @Rule
   public TestName name = new TestName();

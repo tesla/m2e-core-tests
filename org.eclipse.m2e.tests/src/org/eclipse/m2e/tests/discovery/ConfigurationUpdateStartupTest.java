@@ -19,6 +19,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
@@ -56,9 +57,9 @@ public class ConfigurationUpdateStartupTest extends AbstractLifecycleMappingTest
 
   @Test
   public void testEmptyWorkspace() {
-    assertEquals("Expected no projects", 0, UpdateConfigurationStartup.getSavedProjects().length);
+    assertEquals("Expected no projects", 0, UpdateConfigurationStartup.getSavedProjects().size());
     UpdateConfigurationStartup.saveMarkedProjects();
-    assertEquals("Expected no projects", 0, UpdateConfigurationStartup.getSavedProjects().length);
+    assertEquals("Expected no projects", 0, UpdateConfigurationStartup.getSavedProjects().size());
   }
 
   @Test
@@ -69,9 +70,9 @@ public class ConfigurationUpdateStartupTest extends AbstractLifecycleMappingTest
     importProject("javaNoError", BASE_DIR);
     waitForJobsToComplete();
 
-    assertEquals("Expected no projects", 0, UpdateConfigurationStartup.getSavedProjects().length);
+    assertEquals("Expected no projects", 0, UpdateConfigurationStartup.getSavedProjects().size());
     UpdateConfigurationStartup.saveMarkedProjects();
-    assertEquals("Expected no projects", 0, UpdateConfigurationStartup.getSavedProjects().length);
+    assertEquals("Expected no projects", 0, UpdateConfigurationStartup.getSavedProjects().size());
   }
 
   @Test
@@ -84,14 +85,14 @@ public class ConfigurationUpdateStartupTest extends AbstractLifecycleMappingTest
     importProject("javaNoError", BASE_DIR);
     waitForJobsToComplete();
 
-    assertEquals("Expected no projects", 0, UpdateConfigurationStartup.getSavedProjects().length);
+    assertEquals("Expected no projects", 0, UpdateConfigurationStartup.getSavedProjects().size());
     UpdateConfigurationStartup.saveMarkedProjects();
-    assertEquals("Expected no projects", 0, UpdateConfigurationStartup.getSavedProjects().length);
+    assertEquals("Expected no projects", 0, UpdateConfigurationStartup.getSavedProjects().size());
   }
 
   @Test
   public void testMavenProjectsErrors() throws Exception {
-    assertEquals("Expected no projects", 0, UpdateConfigurationStartup.getSavedProjects().length);
+    assertEquals("Expected no projects", 0, UpdateConfigurationStartup.getSavedProjects().size());
 
     // Simple maven
     importMavenProject(BASE_DIR, "simple-pom/pom.xml");
@@ -107,18 +108,18 @@ public class ConfigurationUpdateStartupTest extends AbstractLifecycleMappingTest
     waitForJobsToComplete();
 
     UpdateConfigurationStartup.saveMarkedProjects();
-    assertEquals("Expected no projects", 1, UpdateConfigurationStartup.getSavedProjects().length);
+    assertEquals("Expected no projects", 1, UpdateConfigurationStartup.getSavedProjects().size());
   }
 
   @Test
   public void testConfigureSpecifiedProjects() throws Exception {
-    assertEquals("Expected no projects", 0, UpdateConfigurationStartup.getSavedProjects().length);
+    assertEquals("Expected no projects", 0, UpdateConfigurationStartup.getSavedProjects().size());
 
     String[] projects = new String[] {"projectA", "projectB", "projectC"};
     UpdateConfigurationStartup.enableStartup(Arrays.asList(projects));
 
-    IProject[] persisted = UpdateConfigurationStartup.getSavedProjects();
-    assertEquals("Expected no projects", projects.length, persisted.length);
+    List<IProject> persisted = UpdateConfigurationStartup.getSavedProjects();
+    assertEquals("Expected no projects", projects.length, persisted.size());
 
     for(String projectName : projects) {
       assertTrue("Missing Project:" + projectName, hasProject(persisted, projectName));
@@ -134,13 +135,8 @@ public class ConfigurationUpdateStartupTest extends AbstractLifecycleMappingTest
     assertFalse("Plugin Disabled", pluginDisabled());
   }
 
-  private static boolean hasProject(IProject[] projects, String name) {
-    for(IProject project : projects) {
-      if(name.equals(project.getName())) {
-        return true;
-      }
-    }
-    return false;
+  private static boolean hasProject(List<IProject> projects, String name) {
+    return projects.stream().anyMatch(p -> name.equals(p.getName()));
   }
 
   private static void importProject(String name, String base) throws Exception {

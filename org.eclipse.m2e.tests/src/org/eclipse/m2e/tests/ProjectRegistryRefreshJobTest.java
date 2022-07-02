@@ -20,7 +20,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import org.junit.After;
 import org.junit.Before;
@@ -70,7 +69,7 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
 
   ArrayList<MavenProjectChangedEvent> events;
 
-  IMavenProjectChangedListener listener = (event, monitor) -> events.addAll(Arrays.asList(event));
+  IMavenProjectChangedListener listener = (event, monitor) -> events.addAll(event);
 
   @Override
   @Before
