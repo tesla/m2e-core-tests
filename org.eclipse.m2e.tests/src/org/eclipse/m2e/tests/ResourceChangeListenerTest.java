@@ -19,7 +19,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.util.Arrays;
 
 import org.junit.After;
 import org.junit.Before;
@@ -178,14 +177,14 @@ public class ResourceChangeListenerTest extends AbstractMavenProjectTestCase {
     assertEquals("junit-4.13.1.jar", cp[0].getPath().lastSegment());
     waitForJobsToComplete();
     driveEvents();
-    assertTrue(Arrays.stream(MavenPlugin.getMavenProjectRegistry().getProjects())
+    assertTrue(MavenPlugin.getMavenProjectRegistry().getProjects().stream()
         .anyMatch(f -> f.getArtifactKey().artifactId().equals("resourcechange")));
 
     project.delete(true, new NullProgressMonitor());
 
     waitForJobsToComplete();
     driveEvents();
-    assertTrue(Arrays.stream(MavenPlugin.getMavenProjectRegistry().getProjects())
+    assertTrue(MavenPlugin.getMavenProjectRegistry().getProjects().stream()
         .noneMatch(f -> f.getArtifactKey().artifactId().equals("resourcechange")));
   }
 }

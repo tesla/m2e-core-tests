@@ -185,12 +185,12 @@ public class ProjectConversionParticipantSorterTest {
     }
 
     @Override
-    public String[] getPrecedingConverterIds() {
+    public List<String> getPrecedingConverterIds() {
       return split(after);
     }
 
     @Override
-    public String[] getSucceedingConverterIds() {
+    public List<String> getSucceedingConverterIds() {
       return split(before);
     }
 

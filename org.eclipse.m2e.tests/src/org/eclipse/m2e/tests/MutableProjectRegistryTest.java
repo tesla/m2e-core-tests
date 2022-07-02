@@ -80,8 +80,7 @@ public class MutableProjectRegistryTest extends AbstractMavenProjectTestCase {
     MutableProjectRegistry delta2 = new MutableProjectRegistry(state);
     delta2.setProject(f2.getPom(), f2);
 
-    MavenProjectFacade[] facades = delta2.getProjects();
-    assertEquals(2, facades.length);
+    assertEquals(2, delta2.getProjects().size());
 
     assertSame(f1, delta2.getProjectFacade(f1.getPom()));
     assertSame(f2, delta2.getProjectFacade(f2.getPom()));
@@ -108,12 +107,12 @@ public class MutableProjectRegistryTest extends AbstractMavenProjectTestCase {
     delta = new MutableProjectRegistry(state);
     delta.setProject(f2.getPom(), f2);
 
-    MavenProjectFacade[] facades = delta.getProjects();
-    assertEquals(1, facades.length);
-    assertSame(f2, facades[0]);
+    List<MavenProjectFacade> facades = delta.getProjects();
+    assertEquals(1, facades.size());
+    assertSame(f2, facades.get(0));
 
     assertSame(f2, delta.getProjectFacade(f1.getPom()));
-    assertSame(f1, state.getProjects()[0]);
+    assertSame(f1, state.getProjects().get(0));
 
     List<MavenProjectChangedEvent> events = state.apply(delta);
     assertEquals(1, events.size());
@@ -140,14 +139,14 @@ public class MutableProjectRegistryTest extends AbstractMavenProjectTestCase {
     assertNull(delta.getProjectFacade(f1.getPom()));
     assertTrue(getWorkspaceArtifacts(delta, f1.getArtifactKey()).isEmpty());
 
-    assertEquals(0, delta.getProjects().length);
-    assertSame(f1, state.getProjects()[0]);
+    assertTrue(delta.getProjects().isEmpty());
+    assertSame(f1, state.getProjects().get(0));
 
     List<MavenProjectChangedEvent> events = state.apply(delta);
 
     assertNull(state.getProjectFacade(f1.getPom()));
     assertTrue(getWorkspaceArtifacts(state, f1.getArtifactKey()).isEmpty());
-    assertEquals(0, state.getProjects().length);
+    assertTrue(state.getProjects().isEmpty());
 
     assertEquals(1, events.size());
     assertEquals(MavenProjectChangedEvent.KIND_REMOVED, events.get(0).getKind());
@@ -171,12 +170,12 @@ public class MutableProjectRegistryTest extends AbstractMavenProjectTestCase {
     delta.removeProject(f1.getPom(), f1.getArtifactKey());
 
     assertNull(delta.getProjectFacade(f1.getPom()));
-    assertEquals(0, delta.getProjects().length);
+    assertTrue(delta.getProjects().isEmpty());
 
     List<MavenProjectChangedEvent> events = state.apply(delta);
 
     assertNull(state.getProjectFacade(f1.getPom()));
-    assertEquals(0, state.getProjects().length);
+    assertTrue(state.getProjects().isEmpty());
     assertTrue(events.isEmpty());
   }
 

@@ -14,7 +14,6 @@
 package org.eclipse.m2e.tests.internal.project;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -30,9 +29,9 @@ public class TestMavenProjectChangedListener implements IMavenProjectChangedList
   public final static List<MavenProjectChangedEvent> events = new ArrayList<>();
 
   @Override
-  public void mavenProjectChanged(MavenProjectChangedEvent[] events, IProgressMonitor monitor) {
+  public void mavenProjectChanged(List<MavenProjectChangedEvent> events, IProgressMonitor monitor) {
     if(record) {
-      TestMavenProjectChangedListener.events.addAll(Arrays.asList(events));
+      TestMavenProjectChangedListener.events.addAll(events);
     }
   }
 

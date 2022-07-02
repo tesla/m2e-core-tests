@@ -13,11 +13,12 @@
 
 package org.eclipse.m2e.tests.conversion;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+
+import java.util.List;
 
 import org.junit.Test;
 
@@ -56,8 +57,8 @@ public class ProjectConversionEnablerTest extends AbstractProjectConversionTestC
     assertEquals("The class found is incorrect:" + className, "FooEnabler70", className);
     assertNotNull(en.canBeConverted(project));
     assertTrue(en.canBeConverted(project).isOK());
-    String[] packagings = en.getPackagingTypes(project);
-    assertArrayEquals(FooEnablerBase.PACKAGING, packagings);
+    List<String> packagings = en.getPackagingTypes(project);
+    assertEquals(FooEnablerBase.PACKAGING, packagings);
   }
 
   @Test
@@ -81,8 +82,8 @@ public class ProjectConversionEnablerTest extends AbstractProjectConversionTestC
     assertNotNull(en.canBeConverted(project));
     assertEquals(IStatus.ERROR, en.canBeConverted(project).getSeverity());
     assertEquals(MavenLayoutEnablerBase.ERR_MSG, en.canBeConverted(project).getMessage());
-    String[] packagings = en.getPackagingTypes(project);
-    assertArrayEquals(FooEnablerBase.PACKAGING, packagings);
+    List<String> packagings = en.getPackagingTypes(project);
+    assertEquals(FooEnablerBase.PACKAGING, packagings);
   }
 
   @Test
@@ -107,7 +108,7 @@ public class ProjectConversionEnablerTest extends AbstractProjectConversionTestC
 
   public static abstract class FooEnablerBase implements IProjectConversionEnabler {
 
-    public static final String[] PACKAGING = {"jar", "war", "rar"};
+    public static final List<String> PACKAGING = List.of("jar", "war", "rar");
 
     @Override
     public boolean accept(IProject project) {
@@ -120,7 +121,7 @@ public class ProjectConversionEnablerTest extends AbstractProjectConversionTestC
     }
 
     @Override
-    public String[] getPackagingTypes(IProject project) {
+    public List<String> getPackagingTypes(IProject project) {
       return PACKAGING;
     }
   }

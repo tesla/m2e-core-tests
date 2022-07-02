@@ -653,7 +653,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
 
     workspace.run((IWorkspaceRunnable) monitor -> {
       ProjectImportConfiguration pic = new ProjectImportConfiguration(new ResolverConfiguration());
-      MavenPlugin.getProjectConfigurationManager().createSimpleProject(project, location, model, new String[0], pic,
+      MavenPlugin.getProjectConfigurationManager().createSimpleProject(project, location, model, List.of(), pic,
           listener, monitor);
     }, MavenPlugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
 

@@ -20,6 +20,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
@@ -104,7 +105,7 @@ public class MavenImportWizardPageTest extends AbstractMavenProjectTestCase {
   @Test
   public void test408042_nestedproject() throws Exception {
     IProject outer = importProject("projects/408042_importWorkingSet/nestedproject/pom.xml");
-    WorkingSets.addToWorkingSet(new IProject[] {outer}, "testworkingset");
+    WorkingSets.addToWorkingSet(List.of(outer), "testworkingset");
     scanProjects(outer.getLocation().append("inner").toOSString());
     assertTrue(page.shouldCreateWorkingSet());
     assertEquals("testworkingset", page.getWorkingSetName());
