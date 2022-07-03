@@ -304,7 +304,7 @@ public class LifecycleMappingDiscoveryTest extends AbstractLifecycleMappingTest 
       }
     }
     assertNotNull("projectConfiguratorRequirement not found", configurator);
-    assertEquals("LifecycleMappingTest.projectConfigurator", configurator.getProjectConfiguratorId());
+    assertEquals("LifecycleMappingTest.projectConfigurator", configurator.configuratorId());
     // sanity checks
     /*
     assertEquals("test-goal-1", goal1.getGoal());
