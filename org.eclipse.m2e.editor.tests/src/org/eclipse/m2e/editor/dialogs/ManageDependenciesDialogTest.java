@@ -26,6 +26,7 @@ import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.getTextValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
@@ -83,7 +84,7 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
     IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().getMavenProject(TEST_GROUP_ID, "child",
         TEST_VERSION);
     final MavenProject project = facade.getMavenProject(monitor);
-    assertEquals(project.getArtifactId(), "child");
+    assertEquals("child", project.getArtifactId());
 
     final ManageDependenciesDialog.DepLabelProvider provider = new ManageDependenciesDialog.DepLabelProvider();
 
@@ -95,9 +96,9 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
 
     final MavenProject project2 = project.getParent();
     assertNotNull(project2);
-    assertEquals(project2.getArtifactId(), "forge-parent");
-    assertEquals(project2.getGroupId(), "org.sonatype.forge");
-    assertEquals(project2.getVersion(), "6");
+    assertEquals("forge-parent", project2.getArtifactId());
+    assertEquals("org.sonatype.forge", project2.getGroupId());
+    assertEquals("6", project2.getVersion());
     Display.getDefault().syncExec(() -> foreground = provider.getForeground(project2));
     assertNotNull(foreground);
   }
@@ -111,7 +112,7 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
     IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().getMavenProject(TEST_GROUP_ID + ".same", "child",
         TEST_VERSION);
     MavenProject project = facade.getMavenProject(monitor);
-    assertEquals(project.getArtifactId(), "child");
+    assertEquals("child", project.getArtifactId());
 
     LinkedList<MavenProject> hierarchy = new LinkedList<>();
     hierarchy.add(project);
@@ -181,7 +182,7 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
     LinkedList<Dependency> selectedDeps = new LinkedList<>();
     List<Dependency> dependencies = childProject.getOriginalModel().getDependencies();
     assertNotNull(dependencies);
-    assertEquals(dependencies.size(), 1);
+    assertEquals(1, dependencies.size());
     selectedDeps.add(dependencies.get(0));
 
     IDOMModel tempChild = createTempModel(child);
@@ -270,7 +271,7 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
 
     LinkedList<Dependency> dependencies = new LinkedList<>();
     assertNotNull(project.getOriginalModel().getDependencies().get(0));
-    assertEquals(project.getOriginalModel().getDependencies().get(0).getVersion(), "0.1");
+    assertEquals("0.1", project.getOriginalModel().getDependencies().get(0).getVersion());
     dependencies.add(project.getOriginalModel().getDependencies().get(0));
 
     IDOMModel temp = createTempModel(model);
@@ -323,13 +324,13 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
     LinkedList<Dependency> selectedDeps = new LinkedList<>();
     List<Dependency> dependencies = childProject.getOriginalModel().getDependencies();
     assertNotNull(dependencies);
-    assertEquals(dependencies.size(), 1);
-    assertEquals(dependencies.get(0).getVersion(), "1.0");
+    assertEquals(1, dependencies.size());
+    assertEquals("1.0", dependencies.get(0).getVersion());
     selectedDeps.add(dependencies.get(0));
 
     assertNotNull(parentProject.getOriginalModel().getDependencyManagement());
-    assertEquals(parentProject.getOriginalModel().getDependencyManagement().getDependencies().get(0).getVersion(),
-        "1.1");
+    assertEquals("1.1",
+        parentProject.getOriginalModel().getDependencyManagement().getDependencies().get(0).getVersion());
 
     IDOMModel tempChild = createTempModel(child);
     IDOMModel tempParent = createTempModel(parent);
@@ -367,22 +368,16 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
 
   @Test
   public void testBrokenSource() throws Exception {
-    try {
-      loadModels("projects/broken_child", new String[] {"child/pom.xml"});
-      assertTrue("Expected Exception but didn't get one", false);
-    } catch(Throwable t) {
-
-    }
+    String[] poms = new String[] {"child/pom.xml"};
+    AssertionError error = assertThrows(AssertionError.class, () -> loadModels("projects/broken_child", poms));
+    assertTrue(error.getMessage().startsWith("Project org.eclipse.m2e.tests-broken_child-1.0.0 was not imported"));
   }
 
   @Test
   public void testBrokenTarget() throws Exception {
-    try {
-      loadModels("projects/broken_target", new String[] {"child/pom.xml", "parent/pom.xml"});
-      assertTrue("Expected Exception but didn't get one", false);
-    } catch(Throwable t) {
-
-    }
+    String[] poms = new String[] {"child/pom.xml", "parent/pom.xml"};
+    CoreException error = assertThrows(CoreException.class, () -> loadModels("projects/broken_target", poms));
+    assertTrue(error.getMessage().startsWith("only whitespace content allowed before start tag and not B"));
   }
 
   @Test
@@ -408,7 +403,7 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
     List<Dependency> dependencies = childProject.getOriginalModel().getDependencies();
 
     assertNotNull(dependencies);
-    assertEquals(dependencies.size(), 4);
+    assertEquals(4, dependencies.size());
 
     for(Dependency dep : dependencies) {
       if(dep.getArtifactId().equals("to-move") || dep.getArtifactId().equals("move-but-exists")) {
@@ -416,7 +411,7 @@ public class ManageDependenciesDialogTest extends AbstractMavenProjectTestCase {
       }
     }
 
-    assertEquals(selectedDeps.size(), 3);
+    assertEquals(3, selectedDeps.size());
 
     IDOMModel tempChild = createTempModel(child);
     IDOMModel tempParent = createTempModel(parent);

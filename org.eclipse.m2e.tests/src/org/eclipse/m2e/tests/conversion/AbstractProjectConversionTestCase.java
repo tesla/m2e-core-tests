@@ -13,9 +13,10 @@
 
 package org.eclipse.m2e.tests.conversion;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 
 import org.junit.Assert;
 
@@ -24,8 +25,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-
-import org.codehaus.plexus.util.IOUtil;
 
 import org.apache.maven.model.Model;
 
@@ -85,7 +84,8 @@ public abstract class AbstractProjectConversionTestCase extends AbstractMavenPro
    * Asserts the contents of the file is identical to the expectedFile
    */
   public void assertFileContentEquals(String message, IFile expectedFile, IFile file) throws Exception {
-    Assert.assertEquals(message, getAsString(expectedFile), getAsString(file));
+    Assert.assertEquals(message, getAsString(expectedFile).replaceAll("\r\n", "\n"),
+        getAsString(file).replaceAll("\r\n", "\n"));
   }
 
   /**
@@ -96,16 +96,12 @@ public abstract class AbstractProjectConversionTestCase extends AbstractMavenPro
         project.getFile(IMavenConstants.POM_FILE_NAME));
   }
 
-  protected String getAsString(IFile file) throws IOException, CoreException {
-    StringWriter sw = new StringWriter();
-    InputStream is = null;
-    try {
-      is = file.getContents();
-      IOUtil.copy(is, sw, "UTF-8");
-    } finally {
-      IOUtil.close(is);
+  public static String getAsString(IFile file) throws IOException, CoreException {
+    ByteArrayOutputStream output = new ByteArrayOutputStream();
+    try (InputStream is = file.getContents()) {
+      is.transferTo(output);
     }
-    return sw.toString().replaceAll("\r\n", "\n");
+    return new String(output.toByteArray(), StandardCharsets.UTF_8);
   }
 
 }

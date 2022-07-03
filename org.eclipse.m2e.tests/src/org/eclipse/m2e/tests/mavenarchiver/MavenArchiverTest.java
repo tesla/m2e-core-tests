@@ -20,14 +20,13 @@ import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
-import org.codehaus.plexus.util.IOUtil;
-
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.ArtifactKey;
 import org.eclipse.m2e.core.internal.IMavenConstants;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
+import org.eclipse.m2e.tests.conversion.AbstractProjectConversionTestCase;
 
 public class MavenArchiverTest
     extends AbstractMavenProjectTestCase
@@ -289,7 +288,7 @@ public class MavenArchiverTest
         IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().create( project, monitor );
         ArtifactKey key = facade.getArtifactKey();
         
-        String manifest =getAsString(generatedManifestFile);
+        String manifest = AbstractProjectConversionTestCase.getAsString(generatedManifestFile);
         assertTrue("Built-By is invalid :"+manifest, manifest.contains("You know who"));
         assertTrue("Implementation-Title is invalid :" + manifest,
             manifest.contains("Implementation-Title: " + key.artifactId()));
@@ -315,7 +314,7 @@ public class MavenArchiverTest
         IMavenProjectFacade parentFacade = MavenPlugin.getMavenProjectRegistry().create( parent, monitor );
         String parentUrl = parentFacade.getMavenProject( monitor ).getModel().getUrl();
 
-        String manifest =getAsString(generatedManifestFile);
+        String manifest = AbstractProjectConversionTestCase.getAsString(generatedManifestFile);
         assertTrue("Implementation-Url is invalid :"+manifest, manifest.contains("Implementation-URL: "+parentUrl));
     }
     
@@ -349,40 +348,16 @@ public class MavenArchiverTest
         assertTrue("Invalid Classpath in manifest : " + manifestContent, 
         		manifestContent.contains("Class-Path: mavenarchiver-p001-0.0.1-SNAPSHOT.jar"));
     }
-    
-    private Properties loadProperties( IPath aPath )
-        throws CoreException, IOException
-    {
-        Properties properties = new Properties();
-        InputStream contents = workspace.getRoot().getFile( aPath ).getContents();
-        try
-        {
-            properties.load( contents );
-        }
-        finally
-        {
-            contents.close();
-        }
-        return properties;
+
+    private Properties loadProperties(IPath aPath) throws CoreException, IOException {
+      Properties properties = new Properties();
+      try (InputStream contents = workspace.getRoot().getFile(aPath).getContents()) {
+        properties.load(contents);
+      }
+      return properties;
     }
-    
-    //Copied from AbstractWTPTestCase
-    protected String getAsString(IFile file) throws IOException, CoreException 
-    {
-	    InputStream ins = null;
-	    String content = null;
-	    try 
-	    {
-	      ins = file.getContents();
-	      content = IOUtil.toString(ins, 1024);
-	    } finally {
-	      IOUtil.close(ins);   
-	    }
-	    return content;
-	}      
-    
-    protected String getAsString(IPath path) throws IOException, CoreException 
-    {
-    	return getAsString(workspace.getRoot().getFile( path ));
-	}    
-}
+
+    protected String getAsString(IPath path) throws IOException, CoreException {
+      return AbstractProjectConversionTestCase.getAsString(workspace.getRoot().getFile(path));
+    }
+  }

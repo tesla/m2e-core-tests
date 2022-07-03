@@ -25,8 +25,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 
-import org.codehaus.plexus.util.IOUtil;
-
 import org.eclipse.m2e.core.internal.lifecyclemapping.LifecycleMappingFactory;
 import org.eclipse.m2e.core.internal.lifecyclemapping.discovery.ILifecycleMappingRequirement;
 import org.eclipse.m2e.core.internal.lifecyclemapping.discovery.IMavenDiscoveryProposal;
@@ -53,12 +51,8 @@ public class LifecycleMappingDiscoveryTest extends AbstractLifecycleMappingTest 
     if(pathname == null) {
       return new LifecycleMappingMetadataSource();
     }
-
-    InputStream is = new FileInputStream(new File(pathname));
-    try {
+    try (InputStream is = new FileInputStream(new File(pathname))) {
       return LifecycleMappingFactory.createLifecycleMappingMetadataSource(is);
-    } finally {
-      IOUtil.close(is);
     }
   }
 
@@ -80,11 +74,8 @@ public class LifecycleMappingDiscoveryTest extends AbstractLifecycleMappingTest 
     List<String> mappingStrategies = new ArrayList<>();
     List<String> configurators = new ArrayList<>();
     if(pluginxmlPath != null) {
-      FileInputStream is = new FileInputStream(pluginxmlPath);
-      try {
+      try (FileInputStream is = new FileInputStream(pluginxmlPath)) {
         MavenDiscovery.parsePluginXml(is, configurators, mappingStrategies);
-      } finally {
-        IOUtil.close(is);
       }
     }
 
