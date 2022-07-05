@@ -24,7 +24,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.junit
 Require-Capability: osgi.extender; filter:="(&(osgi.extender=osgi.component)(version>=1.2)(!(version>=2.0)))"
 Bundle-Name: M2E Maven POM File Editor Tests
-Bundle-Version: 2.0.0.qualifier
+Bundle-Version: 2.1000.0.qualifier
 MavenArtifact-ArtifactId: org.eclipse.m2e.test
 Bundle-Vendor: Eclipse.org - m2e
 Bundle-SymbolicName: org.eclipse.m2e.editor.tests;singleton:=true
