@@ -39,16 +39,9 @@
 
 	<profiles>
 		<profile>
-			<id>uts</id>
-			<modules>
-				<module>org.eclipse.m2e.tests</module>
-			</modules>
-		</profile>
-
-		<profile>
 			<id>its</id>
 			<modules>
-				<module>org.eclipse.m2e.editor.tests</module>
+				<module>org.eclipse.m2e.tests</module>
 			</modules>
 		</profile>
 	</profiles>
