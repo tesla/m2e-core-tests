@@ -319,7 +319,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     Set<Artifact> artifacts = getMavenProjectArtifacts(project1);
     assertEquals(4, artifacts.size());
     Artifact a1 = artifacts.iterator().next();
-    assertEquals(project2.getFolder("target/classes").getLocation().toFile(), a1.getFile());
+    assertEquals(project2.getFile("pom.xml").getLocation().toFile(), a1.getFile());
   }
 
   @Test
