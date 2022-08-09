@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008-2014 Sonatype, Inc. and others
+ * Copyright (c) 2008, 2022 Sonatype, Inc. and others
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import org.junit.After;
 import org.junit.Before;
@@ -79,7 +78,6 @@ import org.eclipse.m2e.core.project.MavenUpdateRequest;
 import org.eclipse.m2e.core.project.ProjectImportConfiguration;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.core.project.configurator.MojoExecutionKey;
-import org.eclipse.m2e.core.ui.internal.M2EUIPluginActivator;
 import org.eclipse.m2e.core.ui.internal.archetype.MavenArchetype;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.m2e.tests.common.FilexWagon;
@@ -677,16 +675,6 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     parent.setVersion("1.0.0");
     model.setParent(parent);
     return createSimpleProject(projectName, null, model, listener);
-  }
-
-  private IProject createArchetypeProject(final String projectName, final IPath location, final Archetype archetype)
-      throws CoreException {
-    final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-    workspace.run((IWorkspaceRunnable) monitor -> {
-      M2EUIPluginActivator.getDefault().getArchetypePlugin().getGenerator().createArchetypeProjects(location,
-          new MavenArchetype(archetype), projectName, projectName, "0.0.1-SNAPSHOT", "jar", new Properties(), monitor);
-    }, MavenPlugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
-    return project;
   }
 
   protected void testStaleProjectConfigurationMarker(ProblemSeverity problemSeverity) throws Exception {
