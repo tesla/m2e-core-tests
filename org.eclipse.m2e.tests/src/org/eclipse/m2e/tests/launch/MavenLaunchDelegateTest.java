@@ -127,18 +127,20 @@ public class MavenLaunchDelegateTest {
     ILaunchConfiguration configuration = getLaunchConfiguration("projects/444262_settings");
     try {
       performDummyLaunch(configuration);
-      assertArrayEquals(new String[] {"-B"}, runner.getConfiguration().getProgramArguments());
+      assertArrayEquals(new String[] {"-B", "-Dstyle.color=always"},
+            runner.getConfiguration().getProgramArguments());
 
       // relative preference path to global settings is relative to eclipse home 
       mavenConfig.setGlobalSettingsFile("settings_empty.xml");
       performDummyLaunch(configuration);
-      assertArrayEquals(new String[] {"-B", "-gs", new File("settings_empty.xml").getAbsolutePath()},
+      assertArrayEquals(
+          new String[] {"-B", "-Dstyle.color=always", "-gs", new File("settings_empty.xml").getAbsolutePath()},
           runner.getConfiguration().getProgramArguments());
 
       // specifying -gs within goals overrides global settings from  configuration
       configuration.getAttributes().put(MavenLaunchConstants.ATTR_GOALS, "clean -gs other_settings.xml");
       performDummyLaunch(configuration);
-      assertArrayEquals(new String[] {"-B", "clean", "-gs", "other_settings.xml"},
+      assertArrayEquals(new String[] {"-B", "-Dstyle.color=always", "clean", "-gs", "other_settings.xml"},
           runner.getConfiguration().getProgramArguments());
 
     } finally {
@@ -153,12 +155,13 @@ public class MavenLaunchDelegateTest {
     try {
       mavenConfig.setUserSettingsFile(new File("settings_empty.xml").getAbsolutePath());
       performDummyLaunch(configuration);
-      assertArrayEquals(new String[] {"-B", "-s", mavenConfig.getUserSettingsFile()},
+      assertArrayEquals(new String[] {"-B", "-Dstyle.color=always", "-s", mavenConfig.getUserSettingsFile()},
           runner.getConfiguration().getProgramArguments());
 
       configuration.getAttributes().put(MavenLaunchConstants.ATTR_USER_SETTINGS, "settings.xml");
       performDummyLaunch(configuration);
-      assertArrayEquals(new String[] {"-B", "-s", "settings.xml"}, runner.getConfiguration().getProgramArguments());
+      assertArrayEquals(new String[] {"-B", "-Dstyle.color=always", "-s", "settings.xml"},
+          runner.getConfiguration().getProgramArguments());
     } finally {
       mavenConfig.setUserSettingsFile(null);
     }
