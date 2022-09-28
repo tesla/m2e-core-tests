@@ -16,7 +16,9 @@
 	<properties>
 		<tycho.scmUrl>scm:git:https://github.com/tesla/m2e-core-tests.git</tycho.scmUrl>
 	</properties>
-
+	<modules>
+		<module>org.eclipse.m2e.tests</module>
+	</modules>
 	<build>
 		<plugins>
 			<plugin>
@@ -36,13 +38,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
-	<profiles>
-		<profile>
-			<id>its</id>
-			<modules>
-				<module>org.eclipse.m2e.tests</module>
-			</modules>
-		</profile>
-	</profiles>
 </project>
