@@ -40,7 +40,6 @@ import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
-import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -578,15 +577,12 @@ public class ExcludeArtifactRefactoringTest extends AbstractMavenProjectTestCase
   public static PomResourceImpl loadResource(IFile pomFile) throws CoreException {
     String path = pomFile.getFullPath().toOSString();
     URI uri = URI.createPlatformResourceURI(path, true);
-
     try {
       Resource resource = new PomResourceFactoryImpl().createResource(uri);
       resource.load(new HashMap<>());
       return (PomResourceImpl) resource;
-
     } catch(Exception ex) {
-      String msg = NLS.bind("Can't load model {0}", pomFile);
-      throw new CoreException(new Status(IStatus.ERROR, "test", -1, msg, ex));
+      throw new CoreException(Status.error("Can't load model " + pomFile, ex));
     }
   }
 

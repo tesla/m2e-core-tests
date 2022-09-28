@@ -28,7 +28,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -95,12 +94,11 @@ public class ResourceChangeListenerTest extends AbstractMavenProjectTestCase {
   public void testPomMove001() throws Exception {
     // setup some more
     workspace.run((IWorkspaceRunnable) monitor -> {
-      try {
-        InputStream contents = new FileInputStream("projects/resourcechange/pom001.xml");
+      try (InputStream contents = new FileInputStream("projects/resourcechange/pom001.xml")) {
         IFile pom001 = project.getFile("pom001.xml");
         pom001.create(contents, true, monitor);
       } catch(Exception e) {
-        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, 0, e.getMessage(), e));
+        throw new CoreException(Status.error(e.getMessage(), e));
       }
     }, null);
     waitForJobsToComplete();
@@ -118,12 +116,11 @@ public class ResourceChangeListenerTest extends AbstractMavenProjectTestCase {
   public void testPomMove002() throws Exception {
     // setup some more
     workspace.run((IWorkspaceRunnable) monitor -> {
-      try {
-        InputStream contents = new FileInputStream("projects/resourcechange/pom001.xml");
+      try (InputStream contents = new FileInputStream("projects/resourcechange/pom001.xml")) {
         IFile pom001 = project.getFile("pom001.xml");
         pom001.create(contents, true, monitor);
       } catch(Exception e) {
-        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, 0, e.getMessage(), e));
+        throw new CoreException(Status.error(e.getMessage(), e));
       }
     }, null);
     waitForJobsToComplete();

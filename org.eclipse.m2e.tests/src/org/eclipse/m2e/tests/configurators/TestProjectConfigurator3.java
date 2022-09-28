@@ -23,7 +23,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 
@@ -57,7 +56,7 @@ public class TestProjectConfigurator3 extends AbstractProjectConfigurator {
       try (InputStream contents = file.getContents(true)) {
         text = IOUtil.toString(contents) + ",";
       } catch(IOException ex) {
-        throw new CoreException(new Status(IStatus.ERROR, "org.eclipse.m2e.tests", ex.getLocalizedMessage()));
+        throw new CoreException(Status.error(ex.getLocalizedMessage()));
       }
     }
     text = Objects.toString(text, "") + getName();
