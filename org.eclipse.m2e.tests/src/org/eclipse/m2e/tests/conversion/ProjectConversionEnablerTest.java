@@ -146,7 +146,7 @@ public class ProjectConversionEnablerTest extends AbstractProjectConversionTestC
 
     @Override
     public IStatus canBeConverted(IProject project) {
-      return new Status(IStatus.ERROR, "org.eclipse.m2e.tests", ERR_MSG);
+      return Status.error(ERR_MSG);
 
     }
   }
