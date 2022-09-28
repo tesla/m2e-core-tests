@@ -28,7 +28,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.After;
@@ -1138,7 +1138,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
     workspace.run((IWorkspaceRunnable) m -> {
       M2EUIPluginActivator.getDefault().getArchetypePlugin().getGenerator().createArchetypeProjects(location,
-          new MavenArchetype(archetype), projectName, projectName, "0.0.1-SNAPSHOT", "jar", new Properties(), monitor);
+          new MavenArchetype(archetype), projectName, projectName, "0.0.1-SNAPSHOT", "jar", Map.of(), monitor);
     }, MavenPlugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
     return project;
   }
