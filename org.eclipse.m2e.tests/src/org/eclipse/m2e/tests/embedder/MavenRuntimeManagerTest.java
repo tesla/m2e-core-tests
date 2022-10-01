@@ -21,7 +21,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -56,24 +56,28 @@ public class MavenRuntimeManagerTest {
   public void testGetRuntime() throws Exception {
     assertEquals(MavenRuntimeManagerImpl.EMBEDDED, runtimeManager.getRuntime(null).getName());
     assertEquals(MavenRuntimeManagerImpl.EMBEDDED, runtimeManager.getRuntime("").getName());
-    assertEquals(MavenRuntimeManagerImpl.EMBEDDED, runtimeManager.getRuntime(MavenRuntimeManagerImpl.DEFAULT).getName());
+    assertEquals(MavenRuntimeManagerImpl.EMBEDDED,
+        runtimeManager.getRuntime(MavenRuntimeManagerImpl.DEFAULT).getName());
 
-    assertEquals(MavenRuntimeManagerImpl.EMBEDDED, runtimeManager.getRuntime(MavenRuntimeManagerImpl.EMBEDDED)
-        .getLocation());
+    assertEquals(MavenRuntimeManagerImpl.EMBEDDED,
+        runtimeManager.getRuntime(MavenRuntimeManagerImpl.EMBEDDED).getLocation());
 
-    assertEquals(MavenRuntimeManagerImpl.WORKSPACE, runtimeManager.getRuntime(MavenRuntimeManagerImpl.WORKSPACE)
-        .getLocation());
+    assertEquals(MavenRuntimeManagerImpl.WORKSPACE,
+        runtimeManager.getRuntime(MavenRuntimeManagerImpl.WORKSPACE).getLocation());
   }
 
   @Test
   public void testSetDefaultRuntime() throws Exception {
-    assertEquals(MavenRuntimeManagerImpl.EMBEDDED, runtimeManager.getRuntime(MavenRuntimeManagerImpl.DEFAULT).getName());
+    assertEquals(MavenRuntimeManagerImpl.EMBEDDED,
+        runtimeManager.getRuntime(MavenRuntimeManagerImpl.DEFAULT).getName());
 
     runtimeManager.setDefaultRuntime(null);
-    assertEquals(MavenRuntimeManagerImpl.EMBEDDED, runtimeManager.getRuntime(MavenRuntimeManagerImpl.DEFAULT).getName());
+    assertEquals(MavenRuntimeManagerImpl.EMBEDDED,
+        runtimeManager.getRuntime(MavenRuntimeManagerImpl.DEFAULT).getName());
 
     runtimeManager.setDefaultRuntime(runtimeManager.getRuntime(MavenRuntimeManagerImpl.WORKSPACE));
-    assertEquals(MavenRuntimeManagerImpl.EMBEDDED, runtimeManager.getRuntime(MavenRuntimeManagerImpl.DEFAULT).getName());
+    assertEquals(MavenRuntimeManagerImpl.EMBEDDED,
+        runtimeManager.getRuntime(MavenRuntimeManagerImpl.DEFAULT).getName());
 
     assertFalse(runtimeManager.getMavenRuntimes().isEmpty());
   }
@@ -106,21 +110,13 @@ public class MavenRuntimeManagerTest {
     assertTrue(m2conf.realms.get(IMavenLauncherConfiguration.LAUNCHER_REALM).size() > 0);
     List<String> classpathEntries = m2conf.realms.get(MavenEmbeddedRuntime.PLEXUS_CLASSWORLD_NAME);
     assertNotNull("Realm " + MavenEmbeddedRuntime.PLEXUS_CLASSWORLD_NAME + " does not exist", classpathEntries);
-    assertTrue(classpathEntries.size() > 0);
-    boolean foundPlexusApi = false;
-    boolean foundSlf4j = false;
-    for(String classpathEntry : classpathEntries) {
-      if(classpathEntry.contains("plexus-build-api")) {
-        foundPlexusApi = true;
-        break;
-      } else if(classpathEntry.contains("org.slf4j.api")
-          //or in Dev mode:
-          || Files.isRegularFile(Paths.get(classpathEntry, "org", "slf4j", "Logger.class"))) {
-        foundSlf4j = true;
-      }
-    }
-    assertFalse("plexus-build-api jar is in classpath", foundPlexusApi);
-    assertTrue("slf4j-api bundle is missing from the classpath", foundSlf4j);
+    assertFalse(classpathEntries.isEmpty());
+    assertFalse("plexus-build-api jar is in classpath",
+        classpathEntries.stream().anyMatch(e -> e.contains("plexus-build-api")));
+    assertTrue("slf4j-api bundle is missing from the classpath",
+        classpathEntries.stream().anyMatch(e -> e.contains("org.slf4j.api") || e.contains("slf4j-api")
+        //or in Dev mode:
+            || Files.isRegularFile(Path.of(e, "org", "slf4j", "Logger.class"))));
   }
 
   @Test
