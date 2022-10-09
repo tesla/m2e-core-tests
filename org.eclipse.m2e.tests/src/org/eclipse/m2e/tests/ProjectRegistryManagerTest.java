@@ -484,7 +484,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertEquals("t007-p2", a1.get(0).getArtifactId());
     assertEquals("junit", a1.get(1).getArtifactId());
 
-    assertContainsOnly(getProjectsFromEvents(events), p1, p2);
+    assertEquals(Set.of(p1, p2), getProjectsFromEvents(events));
   }
 
   @Test
@@ -1293,28 +1293,28 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     // 1. update p1 to have new dependency on junit
     events.clear();
     copyContent(p1, "pom_newDependency.xml", "pom.xml");
-    assertContainsOnly(getProjectsFromEvents(events), p1 /* self */, p2 /* 1.0 */, p4 /* 2.0 (unresolved) */);
+    assertEquals(Set.of(p1 /* self */, p2 /* 1.0 */, p4 /* 2.0 (unresolved) */), getProjectsFromEvents(events));
 
     // 2. update p1's parent to a new version (should behave same as with dependency change)
     events.clear();
     copyContent(p1, "pom_changedParent.xml", "pom.xml"); // parent 1.0->2.0
-    assertContainsOnly(getProjectsFromEvents(events), p1 /* self */, p2, p4);
+    assertEquals(Set.of(p1 /* self */, p2, p4), getProjectsFromEvents(events));
 
     // 3. update p1 to a new version (should rebuild all versionless dependents)
     events.clear();
     copyContent(p1, "pom_changedVersion.xml", "pom.xml"); // 1.0->2.0
-    assertContainsOnly(getProjectsFromEvents(events), p1 /* self */, p2, p3, p4);
+    assertEquals(Set.of(p1 /* self */, p2, p3, p4), getProjectsFromEvents(events));
 
     // 4. add new dependency to parent (similar to [1])
     events.clear();
     copyContent(parent, "pom_newDependency.xml", "pom.xml");
     // p1 at this point references parent 2.0 (from repo), same with p4
-    assertContainsOnly(getProjectsFromEvents(events), parent /* self */, p2, p3);
+    assertEquals(Set.of(parent /* self */, p2, p3), getProjectsFromEvents(events));
 
     // 5. update parent to new version (similar to [3])
     events.clear();
     copyContent(parent, "pom_changedVersion.xml", "pom.xml"); // 1.0 -> 3.0
-    assertContainsOnly(getProjectsFromEvents(events), parent /* self */, p1, p2, p3, p4);
+    assertEquals(Set.of(parent /* self */, p1, p2, p3, p4), getProjectsFromEvents(events));
 
   }
 
@@ -1349,7 +1349,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     // 1. imported directly
     events.clear();
     copyContent(managedDeps, "pom_modified.xml", "pom.xml");
-    assertContainsOnly(getProjectsFromEvents(events), managedDeps /* self */, p2);
+    assertEquals(Set.of(managedDeps /* self */, p2), getProjectsFromEvents(events));
     assertNoErrors(p2);
 
     IMavenProjectFacade f2 = manager.create(p2, monitor);
@@ -1370,7 +1370,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
      * assertion would fail with p1 missing if deps2 does not exist in repository
      * since p1's parent (which imports deps2) will be set to null due to build failure
      */
-    assertContainsOnly(getProjectsFromEvents(events), managedDeps2 /* self */, p1, p2);
+    assertEquals(Set.of(managedDeps2 /* self */, p1, p2), getProjectsFromEvents(events));
 
     // 3. refresh on imported artifact download
     events.clear();
@@ -1380,7 +1380,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     Set<IFile> pomFiles = getPomFiles(p1);
     manager.refresh(pomFiles, monitor);
     // both p1 and p2 reference deps2
-    assertContainsOnly(getProjectsFromEvents(events), p1 /* self */, p2);
+    assertEquals(Set.of(p1 /* self */, p2), getProjectsFromEvents(events));
   }
 
   @Test
