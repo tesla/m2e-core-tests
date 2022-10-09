@@ -20,6 +20,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Set;
 
 import org.junit.After;
 import org.junit.Before;
@@ -260,7 +261,7 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
   public void test445675_autobuild() throws Exception {
     // import with autobuild off
     project = importProject("projects/updateProject/simple/pom.xml");
-    assertContainsOnly(getProjectsFromEvents(events), project);
+    assertEquals(Set.of(project), getProjectsFromEvents(events));
 
     copyContent(project, "pom.xml", "pomWithOneDependency.xml"); // save for later
 
@@ -282,13 +283,13 @@ public class ProjectRegistryRefreshJobTest extends AbstractMavenProjectTestCase 
     // project will get build when autobuild gets enabled
     setAutoBuilding(true);
     waitForJobsToComplete();
-    assertContainsOnly(getProjectsFromEvents(events), project);
+    assertEquals(Set.of(project), getProjectsFromEvents(events));
 
     // change pom with autobuild on
     events.clear();
     copyContent(project, "pomWithOneDependency.xml", "pom.xml", false);
     waitForJobsToComplete();
-    assertContainsOnly(getProjectsFromEvents(events), project);
+    assertEquals(Set.of(project), getProjectsFromEvents(events));
   }
 
   @Test
