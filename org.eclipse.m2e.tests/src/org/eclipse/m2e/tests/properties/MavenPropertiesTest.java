@@ -25,6 +25,7 @@ import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.internal.MavenPluginActivator;
 import org.eclipse.m2e.core.internal.project.ResolverConfigurationIO;
 import org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager;
+import org.eclipse.m2e.core.project.IProjectConfiguration;
 import org.eclipse.m2e.core.project.IProjectConfigurationManager;
 import org.eclipse.m2e.core.project.MavenUpdateRequest;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
@@ -87,8 +88,10 @@ public class MavenPropertiesTest extends AbstractMavenProjectTestCase {
     testProperties.put("key6", "<![CDATA[value>]]>");
     testProperties.put("key7", "value%7C");
 
-    ResolverConfiguration conf = ResolverConfigurationIO.readResolverConfiguration(project);
-    assertEquals(testProperties, conf.getProperties());
+    IProjectConfiguration conf = ResolverConfigurationIO.readResolverConfiguration(project);
+    Properties properties = new Properties();
+    properties.putAll(conf.getConfigurationProperties());
+    assertEquals(testProperties, properties);
   }
 
   private void buildProject() throws Exception {
