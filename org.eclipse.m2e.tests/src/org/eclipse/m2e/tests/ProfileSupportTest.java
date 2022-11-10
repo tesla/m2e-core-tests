@@ -53,7 +53,7 @@ public class ProfileSupportTest extends AbstractMavenProjectTestCase {
     assertEquals("Profile is deactivated, no classpath entries should be present", 0, entries.length);
 
     IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().getProject(project);
-    List<String> inactiveProfiles = facade.getResolverConfiguration().getInactiveProfileList();
+    List<String> inactiveProfiles = facade.getConfiguration().getInactiveProfileList();
     assertEquals(1, inactiveProfiles.size());
     assertEquals("test", inactiveProfiles.get(0));
   }

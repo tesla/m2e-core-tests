@@ -92,7 +92,8 @@ public class MavenPropertiesTest extends AbstractMavenProjectTestCase {
   }
 
   private void buildProject() throws Exception {
-    ResolverConfiguration resolverConfiguration = manager.getProject(project).getResolverConfiguration();
+    ResolverConfiguration resolverConfiguration = new ResolverConfiguration(
+        manager.getProject(project).getConfiguration());
     configurationManager.setResolverConfiguration(project, resolverConfiguration);
 
     MavenUpdateRequest request = new MavenUpdateRequest(project, false, false);
@@ -101,8 +102,10 @@ public class MavenPropertiesTest extends AbstractMavenProjectTestCase {
   }
 
   private void setPropertiesToResolver(Properties properties) {
-    ResolverConfiguration resolverConfiguration = manager.getProject(project).getResolverConfiguration();
+    ResolverConfiguration resolverConfiguration = new ResolverConfiguration(
+        manager.getProject(project).getConfiguration());
     resolverConfiguration.setProperties(properties);
+    configurationManager.updateProjectConfiguration(project, resolverConfiguration, null);
   }
 
 }
