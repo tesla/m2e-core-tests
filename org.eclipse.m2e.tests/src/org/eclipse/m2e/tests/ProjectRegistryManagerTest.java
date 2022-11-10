@@ -430,7 +430,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
 
   protected MavenProject getParentProject(final IMavenProjectFacade f) throws CoreException {
     // create execution context with proper resolver configuration
-    IMavenExecutionContext context = manager.createExecutionContext(f.getPom(), f.getResolverConfiguration());
+    IMavenExecutionContext context = manager.createExecutionContext(f.getPom(), f.getConfiguration());
     return context.execute(f.getMavenProject(monitor), (context1, monitor) -> f.getMavenProject(monitor).getParent(),
         monitor);
   }

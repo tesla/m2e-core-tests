@@ -31,6 +31,7 @@ import org.apache.maven.model.Model;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.MavenModelManager;
 import org.eclipse.m2e.core.internal.IMavenConstants;
+import org.eclipse.m2e.core.project.IProjectConfiguration;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 
@@ -67,8 +68,7 @@ public abstract class AbstractProjectConversionTestCase extends AbstractMavenPro
     IProgressMonitor monitor = new NullProgressMonitor();
     MavenPlugin.getProjectConversionManager().convert(project, model, monitor);
     createPomXml(project, model);
-    ResolverConfiguration configuration = new ResolverConfiguration();
-    MavenPlugin.getProjectConfigurationManager().enableMavenNature(project, configuration, monitor);
+    MavenPlugin.getProjectConfigurationManager().enableMavenNature(project, new ResolverConfiguration(), monitor);
     waitForJobsToComplete(monitor);
   }
 

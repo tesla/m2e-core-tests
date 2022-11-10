@@ -247,8 +247,7 @@ public class SourceLocationHelperTest extends AbstractMavenProjectTestCase {
   }
 
   private IMavenProjectFacade importMavenProject(String basedir, String pomName) throws Exception {
-    ResolverConfiguration configuration = new ResolverConfiguration();
-    IProject[] project = importProjects(basedir, new String[] {pomName}, configuration);
+    IProject[] project = importProjects(basedir, new String[] {pomName}, new ResolverConfiguration());
     waitForJobsToComplete();
 
     return mavenProjectManager.create(project[0], monitor);

@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.IClasspathEntry;
 
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.internal.IMavenConstants;
+import org.eclipse.m2e.core.project.IProjectConfiguration;
 import org.eclipse.m2e.core.project.IProjectConfigurationManager;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
@@ -51,8 +52,7 @@ public class ResourceChangeListenerTest extends AbstractMavenProjectTestCase {
     project = createProject("resourcechange", "projects/resourcechange/pom.xml");
 
     IProjectConfigurationManager configurationManager = MavenPlugin.getProjectConfigurationManager();
-    ResolverConfiguration configuration = new ResolverConfiguration();
-    configurationManager.enableMavenNature(project, configuration, monitor);
+    configurationManager.enableMavenNature(project, new ResolverConfiguration(), monitor);
     configurationManager.updateProjectConfiguration(project, monitor);
 
     waitForJobsToComplete();

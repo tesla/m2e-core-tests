@@ -883,7 +883,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertNotNull("Expected not null MavenProjectFacade", facade);
     ProjectRegistryManager projectRegistry = MavenPluginActivator.getDefault().getMavenProjectManagerImpl();
     IMavenExecutionContext executionContext = projectRegistry.createExecutionContext(facade.getPom(),
-        facade.getResolverConfiguration());
+        facade.getConfiguration());
     WorkspaceReader workspaceReader = executionContext.getExecutionRequest().getWorkspaceReader();
     ArtifactKey a = facade.getArtifactKey();
     org.eclipse.aether.artifact.Artifact artifact = new org.eclipse.aether.artifact.DefaultArtifact(a.groupId(),
