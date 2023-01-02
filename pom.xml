@@ -15,8 +15,10 @@
 
 	<properties>
 		<tycho.scmUrl>scm:git:https://github.com/tesla/m2e-core-tests.git</tycho.scmUrl>
+		<rcptt-maven-version>2.5.4</rcptt-maven-version>
 	</properties>
 	<modules>
 		<module>org.eclipse.m2e.tests</module>
+		<module>org.eclipse.m2e.rcptt.tests</module>
 	</modules>
 </project>
