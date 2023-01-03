@@ -5,7 +5,7 @@
   <version>0.0.1-SNAPSHOT</version>
 
   <properties>
-    <compileSource>1.5</compileSource>
+    <compileSource>8</compileSource>
   </properties>
 
   <build>
@@ -25,8 +25,7 @@
     <dependency>
       <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
-      <version>5.8</version>
-      <classifier>jdk15</classifier>
+      <version>7.7.1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
