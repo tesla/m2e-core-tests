@@ -709,24 +709,25 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
 
   @Test
   public void testFailToGetPluginParameterValue() throws Exception {
-    MavenProjectFacade facade = (MavenProjectFacade) importMavenProject("projects/lifecyclemapping",
-        "testFailToGetPluginParameterValue/pom.xml");
-    assertNotNull("Expected not null MavenProjectFacade", facade);
+    withDefaultLifecycleMapping(PluginExecutionAction.warn, () -> {
+      MavenProjectFacade facade = (MavenProjectFacade) importMavenProject("projects/lifecyclemapping",
+          "testFailToGetPluginParameterValue/pom.xml");
+      assertNotNull("Expected not null MavenProjectFacade", facade);
 
-    LifecycleMappingResult mappingResult = calculateLifecycleMapping(facade);
+      LifecycleMappingResult mappingResult = calculateLifecycleMapping(facade);
 
-    List<MavenProblemInfo> problems = mappingResult.getProblems();
+      List<MavenProblemInfo> problems = mappingResult.getProblems();
 
-    assertEquals(problems.toString(), 2, problems.size());
-    assertTrue(
-        problems.get(0).toString(),
-        problems.get(0).getMessage()
-            .contains("Plugin missing:missing:1.0.0 or one of its dependencies could not be resolved"));
-    assertEquals(
-        "Plugin execution not covered by lifecycle configuration: missing:missing:1.0.0:run (execution: test, phase: compile)",
-        problems.get(1).getMessage());
-    // [0] CoreException: Could not calculate build plan: Plugin missing:missing:1.0.0 or one of its dependencies could not be resolved: Failed to read artifact descriptor for missing:missing:jar:1.0.0: ArtifactResolutionException: Failure to find missing:missing:pom:1.0.0 in file:repositories/testrepo was cached in the local repository, resolution will not be reattempted until the update interval of testrepo has elapsed or updates are forced
-    // [1] Plugin execution not covered by lifecycle configuration: missing:missing:1.0.0:run (execution: test, phase: compile))
+      assertEquals(problems.toString(), 2, problems.size());
+      assertTrue(problems.get(0).toString(), problems.get(0).getMessage()
+          .contains("Plugin missing:missing:1.0.0 or one of its dependencies could not be resolved"));
+      assertEquals(
+          "Plugin execution not covered by lifecycle configuration: missing:missing:1.0.0:run (execution: test, phase: compile)",
+          problems.get(1).getMessage());
+      // [0] CoreException: Could not calculate build plan: Plugin missing:missing:1.0.0 or one of its dependencies could not be resolved: Failed to read artifact descriptor for missing:missing:jar:1.0.0: ArtifactResolutionException: Failure to find missing:missing:pom:1.0.0 in file:repositories/testrepo was cached in the local repository, resolution will not be reattempted until the update interval of testrepo has elapsed or updates are forced
+      // [1] Plugin execution not covered by lifecycle configuration: missing:missing:1.0.0:run (execution: test, phase: compile))
+      return null;
+    });
   }
 
   @Test
@@ -785,36 +786,40 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
 
   @Test
   public void testNotCoveredMojoExecutionWarnings() throws Exception {
-    String originalSeverity = mavenConfiguration.getNotCoveredMojoExecutionSeverity();
-    try {
-      ((MavenConfigurationImpl) mavenConfiguration).setNotCoveredMojoExecutionSeverity(ProblemSeverity.warning
-          .toString());
-      IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping", "notCoveredMojoExecutions/pom.xml");
-      assertNotNull("Expected not null MavenProjectFacade", facade);
-      IProject project = facade.getProject();
-      assertNotNull("Expected not null project", project);
-      assertNoErrors(project);
+    withDefaultLifecycleMapping(PluginExecutionAction.warn, () -> {
+      String originalSeverity = mavenConfiguration.getNotCoveredMojoExecutionSeverity();
+      try {
+        ((MavenConfigurationImpl) mavenConfiguration)
+            .setNotCoveredMojoExecutionSeverity(ProblemSeverity.warning.toString());
+        IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping",
+            "notCoveredMojoExecutions/pom.xml");
+        assertNotNull("Expected not null MavenProjectFacade", facade);
+        IProject project = facade.getProject();
+        assertNotNull("Expected not null project", project);
+        assertNoErrors(project);
 
-      // Also verify that we get the expected markers
-      List<IMarker> errorMarkers = WorkspaceHelpers.findMarkers(project, IMarker.SEVERITY_WARNING);
-      assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
+        // Also verify that we get the expected markers
+        List<IMarker> errorMarkers = WorkspaceHelpers.findMarkers(project, IMarker.SEVERITY_WARNING);
+        assertEquals(WorkspaceHelpers.toString(errorMarkers), 2, errorMarkers.size());
 
-      List<MojoExecutionKey> notCoveredMojoExecutions = getNotCoveredMojoExecutions(facade);
-      assertEquals(notCoveredMojoExecutions.toString(), 2, notCoveredMojoExecutions.size());
+        List<MojoExecutionKey> notCoveredMojoExecutions = getNotCoveredMojoExecutions(facade);
+        assertEquals(notCoveredMojoExecutions.toString(), 2, notCoveredMojoExecutions.size());
 
-      String expectedErrorMessage = "Plugin execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 (execution: default-test-goal-1, phase: process-resources)";
-      IMarker marker = WorkspaceHelpers.assertWarningMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID,
-          expectedErrorMessage, 11 /*lineNumber <plugin> of plugin def*/, project);
-      WorkspaceHelpers.assertErrorMarkerAttributes(marker, notCoveredMojoExecutions.get(0));
+        String expectedErrorMessage = "Plugin execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 (execution: default-test-goal-1, phase: process-resources)";
+        IMarker marker = WorkspaceHelpers.assertWarningMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID,
+            expectedErrorMessage, 11 /*lineNumber <plugin> of plugin def*/, project);
+        WorkspaceHelpers.assertErrorMarkerAttributes(marker, notCoveredMojoExecutions.get(0));
 
-      expectedErrorMessage = "Plugin execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-2 (execution: default-test-goal-2, phase: compile)";
-      marker = WorkspaceHelpers.assertWarningMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
-          11 /*lineNumber <plugin> of plugin def*/, project);
-      WorkspaceHelpers.assertErrorMarkerAttributes(marker, notCoveredMojoExecutions.get(1));
+        expectedErrorMessage = "Plugin execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-2 (execution: default-test-goal-2, phase: compile)";
+        marker = WorkspaceHelpers.assertWarningMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, expectedErrorMessage,
+            11 /*lineNumber <plugin> of plugin def*/, project);
+        WorkspaceHelpers.assertErrorMarkerAttributes(marker, notCoveredMojoExecutions.get(1));
 
-    } finally {
-      ((MavenConfigurationImpl) mavenConfiguration).setNotCoveredMojoExecutionSeverity(originalSeverity);
-    }
+      } finally {
+        ((MavenConfigurationImpl) mavenConfiguration).setNotCoveredMojoExecutionSeverity(originalSeverity);
+      }
+      return null;
+    });
   }
 
   @Test

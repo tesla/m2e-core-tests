@@ -44,6 +44,7 @@ import org.eclipse.m2e.core.internal.IMavenConstants;
 import org.eclipse.m2e.core.internal.MavenPluginActivator;
 import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.internal.markers.MavenMarkerManager;
+import org.eclipse.m2e.core.lifecyclemapping.model.PluginExecutionAction;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.editor.internal.lifecycle.LifecycleMappingResolution;
 import org.eclipse.m2e.editor.internal.lifecycle.WorkspaceLifecycleMappingResolution;
@@ -89,11 +90,15 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
 
     // Fix the current configuration problem, introduce a new one
     copyContent(project, "pom_badConfiguration1.xml", "pom.xml");
-    MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
-    waitForJobsToComplete();
-    expectedErrorMessage = "Plugin execution not covered by lifecycle configuration: org.codehaus.modello:modello-maven-plugin:1.1:java (execution: standard, phase: generate-sources)";
-    WorkspaceHelpers.assertMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, -1, expectedErrorMessage,
-        21 /*lineNumber*/, "pom.xml", project);
+    IProject prj = project;
+    withDefaultLifecycleMapping(PluginExecutionAction.warn, () -> {
+      MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(prj, monitor);
+      waitForJobsToComplete();
+      String error = "Plugin execution not covered by lifecycle configuration: org.codehaus.modello:modello-maven-plugin:1.1:java (execution: standard, phase: generate-sources)";
+      WorkspaceHelpers.assertMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, -1, error,
+          21 /*lineNumber*/, "pom.xml", prj);
+      return null;
+    });
 
     // Fix the current configuration problem, introduce a dependency problem
     copyContent(project, "pom_badDependency.xml", "pom.xml");
@@ -372,14 +377,14 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
 
   @Test
   public void testMarkerResolutions() throws Exception {
-    IProject project = importProject("projects/markers/testUncoveredPluginExecutionResolutions/pom.xml");
-    waitForJobsToComplete();
-
-    List<IMarker> errorMarkers = List
-        .of(project.findMarkers(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, true, IResource.DEPTH_INFINITE));
-    assertEquals(1, errorMarkers.size());
-
-    IMarkerResolution[] resolutions = IDE.getMarkerHelpRegistry().getResolutions(errorMarkers.get(0));
+    IMarkerResolution[] resolutions = withDefaultLifecycleMapping(PluginExecutionAction.warn, () -> {
+      IProject project = importProject("projects/markers/testUncoveredPluginExecutionResolutions/pom.xml");
+      waitForJobsToComplete();
+      List<IMarker> errorMarkers = List
+          .of(project.findMarkers(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, true, IResource.DEPTH_INFINITE));
+      assertEquals(1, errorMarkers.size());
+      return IDE.getMarkerHelpRegistry().getResolutions(errorMarkers.get(0));
+    });
 
     assertEquals(3, resolutions.length);
     assertNotNull(getResolution(resolutions, DiscoveryWizardResolution.class));
