@@ -94,6 +94,7 @@ public class MavenDiscoveryMarkerResolutionGeneratorTest extends AbstractLifecyc
     assertEquals("Error markers", 2, errorMarkers.size());
 
     List<MojoExecutionKey> notCoveredMojoExecutions = getNotCoveredMojoExecutions(facade);
+    assertTrue(notCoveredMojoExecutions.size() > 0);
 
     String expectedErrorMessage = "Plugin execution not covered by lifecycle configuration: org.eclipse.m2e.test.lifecyclemapping:test-lifecyclemapping-plugin:1.0.0:test-goal-1 (execution: default-test-goal-1, phase: process-resources)";
     IMarker marker = WorkspaceHelpers.assertMarker(IMavenConstants.MARKER_LIFECYCLEMAPPING_ID, -1, expectedErrorMessage,
