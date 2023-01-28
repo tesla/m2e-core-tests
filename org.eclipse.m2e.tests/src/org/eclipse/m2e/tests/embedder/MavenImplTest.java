@@ -583,4 +583,18 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
 
     assertFalse(result.getExceptions().toString(), result.hasExceptions());
   }
+
+  @Test
+  public void testAllProjects() throws Exception {
+    MavenExecutionResult result = readMavenProject(new File("projects/simple-pom/pom.xml"), false);
+    assertFalse(result.hasExceptions());
+    MavenProject project = result.getProject();
+    MavenExecutionContext context = maven.createExecutionContext();
+    result = context.execute(project, (context1, monitor) -> {
+      MavenSession session = context1.getSession();
+      assertNotNull("getProjects", session.getProjects());
+      assertNotNull("getAllProjects", session.getAllProjects());
+      return session.getResult();
+    }, monitor);
+  }
 }
