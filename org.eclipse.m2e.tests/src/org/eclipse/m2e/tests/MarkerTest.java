@@ -338,7 +338,7 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
         AddMarkersProjectConfigurator.WARNING_MESSAGE + " " + mojoExecutionKey0,
         AddMarkersProjectConfigurator.WARNING_LINE_NUMBER, AddMarkersProjectConfigurator.FILE_NAME, project);
 
-    String mojoExecutionKey1 = "org.apache.maven.plugins:maven-install-plugin:2.4:install:default-install";
+    String mojoExecutionKey1 = "org.apache.maven.plugins:maven-install-plugin:3.1.0:install:default-install";
     IMarker errorMarker1 = WorkspaceHelpers.assertErrorMarker(IMavenConstants.MARKER_BUILD_PARTICIPANT_ID,
         AddMarkersProjectConfigurator.ERROR_MESSAGE + " " + mojoExecutionKey1,
         AddMarkersProjectConfigurator.ERROR_LINE_NUMBER, AddMarkersProjectConfigurator.FILE_NAME, project);
