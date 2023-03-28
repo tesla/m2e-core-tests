@@ -77,6 +77,7 @@ import org.eclipse.m2e.jdt.internal.BuildPathManager;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.m2e.tests.common.ClasspathHelpers;
 import org.eclipse.m2e.tests.common.FilexWagon;
+import org.eclipse.m2e.tests.common.HttxWagon;
 import org.eclipse.m2e.tests.common.MavenRunner;
 import org.eclipse.m2e.tests.common.RequireMavenExecutionContext;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
@@ -153,7 +154,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
 
     events.clear();
 
-    // this emulates project refresh 
+    // this emulates project refresh
     IFile pom = p1.getFile("pom.xml");
     pom.setLocalTimeStamp(pom.getLocalTimeStamp() + 1000L);
     pom.touch(monitor);
@@ -910,7 +911,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     FileUtils.deleteDirectory(new File(repo, "mngeclipse1996"));
     String oldSettings = mavenConfiguration.getUserSettingsFile();
     try {
-      injectFilexWagon();
+      injectRedirectingWagons();
       IJobChangeListener jobChangeListener = new JobChangeAdapter() {
         @Override
         public void scheduled(IJobChangeEvent event) {
@@ -925,11 +926,13 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
       mavenConfiguration.setUserSettingsFile(new File("projects/MNGECLIPSE-1996/settings.xml").getAbsolutePath());
       waitForJobsToComplete();
       FilexWagon.setRequestFilterPattern("mngeclipse1996/.*xml", true);
-      List<String> requests;
+      HttxWagon.setRequestFilterPattern("mngeclipse1996/.*xml", true);
+      List<String> requests = new ArrayList<>();
       try {
         importProjects("projects/MNGECLIPSE-1996", new String[] {"pom.xml", "mod-a/pom.xml", "mod-b/pom.xml",
             "mod-c/pom.xml", "mod-d/pom.xml", "mod-e/pom.xml"}, new ResolverConfiguration());
-        requests = FilexWagon.getRequests();
+        requests.addAll(FilexWagon.getRequests());
+        requests.addAll(HttxWagon.getRequests());
       } finally {
         Job.getJobManager().removeJobChangeListener(jobChangeListener);
       }
@@ -1148,18 +1151,19 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
 
     mavenConfiguration.setUserSettingsFile("projects/356645_redundantSnapshotResolution/settings.xml");
     waitForJobsToComplete();
-    injectFilexWagon();
+    injectRedirectingWagons();
 
-    IProject[] projects = importProjects("projects/356645_redundantSnapshotResolution", new String[] {
-        "projectA/pom.xml", "projectB/pom.xml"}, new ResolverConfiguration());
+    IProject[] projects = importProjects("projects/356645_redundantSnapshotResolution",
+        new String[] {"projectA/pom.xml", "projectB/pom.xml"}, new ResolverConfiguration());
     waitForJobsToComplete();
 
     FilexWagon.setRequestFilterPattern("missing/missing/.*", true);
+    HttxWagon.setRequestFilterPattern("missing/missing/.*", true);
 
     Set<IFile> pomFiles = getPomFiles(projects);
     manager.refresh(pomFiles, monitor);
 
-    assertEquals(3, FilexWagon.getRequests().size());
+    assertEquals(3, FilexWagon.getRequests().size() + HttxWagon.getRequests().size());
   }
 
   @Test
@@ -1168,9 +1172,10 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
 
     mavenConfiguration.setUserSettingsFile("projects/405090_staleBuildExtensionsResolutionError/settings.xml");
     waitForJobsToComplete();
-    injectFilexWagon();
+    injectRedirectingWagons();
 
     FilexWagon.setRequestFailPattern(".*/test-lifecyclemapping-plugin/.*");
+    HttxWagon.setRequestFailPattern(".*/test-lifecyclemapping-plugin/.*");
 
     IProject project = importProjects("projects/405090_staleBuildExtensionsResolutionError", new String[] {"/pom.xml"},
         new ResolverConfiguration(), true)[0];
@@ -1181,6 +1186,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
         project);
 
     FilexWagon.setRequestFailPattern(null);
+    HttxWagon.setRequestFailPattern(null);
 
     Set<IFile> pomFiles = getPomFiles(project);
     manager.refresh(pomFiles, monitor);
@@ -1458,23 +1464,26 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
   @Test
   public void test460983_parentVersionRange() throws Exception {
     mavenConfiguration.setUserSettingsFile(new File("settings-filex.xml").getCanonicalPath());
-    injectFilexWagon();
+    injectRedirectingWagons();
 
     FilexWagon.setRequestFilterPattern("460983_parentVersionRange/.*pom", true);
+    HttxWagon.setRequestFilterPattern("460983_parentVersionRange/.*pom", true);
 
-    IProject[] projects = importProjects("projects/460983_parentVersionRange", new String[] {"pom.xml",
-        "module/pom.xml"}, new ResolverConfiguration());
+    IProject[] projects = importProjects("projects/460983_parentVersionRange",
+        new String[] {"pom.xml", "module/pom.xml"}, new ResolverConfiguration());
     waitForJobsToComplete();
     assertNoErrors(projects[0]);
     assertNoErrors(projects[1]);
 
     assertTrue(FilexWagon.getRequests().isEmpty());
+    assertTrue(HttxWagon.getRequests().isEmpty());
 
     Set<IFile> pomFiles = getPomFiles(projects[1]);
     manager.refresh(pomFiles, monitor); // shouldn't throw any exceptions
     assertNoErrors(projects[1]);
 
     assertTrue(FilexWagon.getRequests().isEmpty());
+    assertTrue(HttxWagon.getRequests().isEmpty());
   }
 
   @Test
