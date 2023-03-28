@@ -418,7 +418,7 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
 
     IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
         .getClasspathEntries();
-    assertEquals("" + Arrays.asList(classpathEntries), 4, classpathEntries.length);
+    assertEquals("" + Arrays.asList(classpathEntries), 6, classpathEntries.length);
     //test dependency
     assertEquals("junit-4.13.1.jar", classpathEntries[0].getPath().lastSegment());
     assertTest(classpathEntries[0]);
@@ -458,7 +458,7 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
 
     IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
         .getClasspathEntries();
-    assertEquals("" + Arrays.asList(classpathEntries), 1, classpathEntries.length);
+    assertEquals("" + Arrays.asList(classpathEntries), 3, classpathEntries.length);
     //runtime dependencies
     assertEquals("commons-beanutils-1.9.4.jar", classpathEntries[0].getPath().lastSegment());
     assertTest(classpathEntries[0]);
@@ -474,7 +474,7 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
 
     IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
         .getClasspathEntries();
-    assertEquals("" + Arrays.asList(classpathEntries), 2, classpathEntries.length);
+    assertEquals("" + Arrays.asList(classpathEntries), 4, classpathEntries.length);
     //project dependency
     assertEquals("runtime-jar-dependencies", classpathEntries[0].getPath().lastSegment());
     assertTest(classpathEntries[0]);

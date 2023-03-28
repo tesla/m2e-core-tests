@@ -25,8 +25,14 @@
       <id>localcentral</id>
       <repositories>
         <repository>
-          <id>central</id>
+          <id>local-central</id>
           <url>file:repositories/remoterepo</url>
+          <snapshots><enabled>true</enabled></snapshots>
+          <releases><enabled>true</enabled></releases>
+        </repository>
+        <repository>
+          <id>central</id>
+          <url>https://repo1.maven.org/maven2</url>
           <snapshots><enabled>true</enabled></snapshots>
           <releases><enabled>true</enabled></releases>
         </repository>
@@ -34,7 +40,7 @@
       <pluginRepositories>
         <pluginRepository>
           <id>central</id>
-          <url>file:repositories/remoterepo</url>
+          <url>https://repo1.maven.org/maven2</url>
           <snapshots><enabled>true</enabled></snapshots>
           <releases><enabled>true</enabled></releases>
         </pluginRepository>

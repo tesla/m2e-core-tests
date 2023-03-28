@@ -8,7 +8,7 @@
       <repositories>
         <repository>
           <id>central</id>
-          <url>file:repositories/remoterepo</url>
+          <url>https://repo1.maven.org/maven2</url>
           <snapshots><enabled>true</enabled></snapshots>
           <releases><enabled>true</enabled></releases>
         </repository>
@@ -16,11 +16,11 @@
       <pluginRepositories>
         <pluginRepository>
           <id>central</id>
-          <url>file:repositories/remoterepo</url>
+          <url>https://repo1.maven.org/maven2</url>
           <snapshots><enabled>true</enabled></snapshots>
           <releases><enabled>true</enabled></releases>
         </pluginRepository>
-      </pluginRepositories>      
+      </pluginRepositories>
     </profile>
     <profile>
       <id>inactive-settings-profile</id>
@@ -34,7 +34,7 @@
        		<snapshots><enabled>true</enabled></snapshots>
        		<releases><enabled>true</enabled></releases>
      	</repository>
-      </repositories>      
+      </repositories>
     </profile>
   </profiles>
 

@@ -1,5 +1,5 @@
 
-<!-- 
+<!--
   | settings.xml that can be used to assert all requests to remote repositories
   | using org.eclipse.m2e.tests.common.FilexWagon
  -->
@@ -32,7 +32,7 @@
       <repositories>
         <repository>
           <id>central</id>
-          <url>filex:repositories/remoterepo</url>
+          <url>httx://repo1.maven.org/maven2</url>
           <snapshots><enabled>true</enabled></snapshots>
           <releases><enabled>true</enabled></releases>
         </repository>
@@ -40,7 +40,7 @@
       <pluginRepositories>
         <pluginRepository>
           <id>central</id>
-          <url>filex:repositories/remoterepo</url>
+          <url>httx://repo1.maven.org/maven2</url>
           <snapshots><enabled>true</enabled></snapshots>
           <releases><enabled>true</enabled></releases>
         </pluginRepository>

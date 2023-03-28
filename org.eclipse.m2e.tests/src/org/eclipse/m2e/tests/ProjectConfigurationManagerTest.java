@@ -17,8 +17,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -81,6 +81,7 @@ import org.eclipse.m2e.core.project.configurator.MojoExecutionKey;
 import org.eclipse.m2e.core.ui.internal.archetype.MavenArchetype;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.m2e.tests.common.FilexWagon;
+import org.eclipse.m2e.tests.common.HttxWagon;
 import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 
 
@@ -148,8 +149,9 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
   public void testWorkspaceResolutionOfInterModuleDependenciesDuringImport() throws Exception {
     String oldSettings = mavenConfiguration.getUserSettingsFile();
     try {
-      injectFilexWagon();
+      injectRedirectingWagons();
       FilexWagon.setRequestFilterPattern("test/.*", true);
+      HttxWagon.setRequestFilterPattern("test/.*", true);
       IJobChangeListener jobChangeListener = new JobChangeAdapter() {
         @Override
         public void scheduled(IJobChangeEvent event) {
@@ -161,11 +163,12 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
       };
       Job.getJobManager().addJobChangeListener(jobChangeListener);
       mavenConfiguration.setUserSettingsFile(new File("projects/MNGECLIPSE-1990/settings.xml").getAbsolutePath());
-      List<String> requests;
+      List<String> requests = new ArrayList<>();
       try {
         importProjects("projects/MNGECLIPSE-1990", new String[] {"pom.xml", "dependent/pom.xml", "dependency/pom.xml",
             "parent/pom.xml"}, new ResolverConfiguration());
-        requests = FilexWagon.getRequests();
+        requests.addAll(FilexWagon.getRequests());
+        requests.addAll(HttxWagon.getRequests());
       } finally {
         Job.getJobManager().removeJobChangeListener(jobChangeListener);
       }
@@ -487,15 +490,11 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     mavenConfiguration.setUserSettingsFile("projects/397251_forcePluginResolutionUpdate/settings.xml");
     waitForJobsToComplete();
 
-    injectFilexWagon();
+    injectRedirectingWagons();
     FilexWagon.setRequestFailPattern("org/apache/maven/plugins/maven-resources-plugin/.*");
+    HttxWagon.setRequestFailPattern("org/apache/maven/plugins/maven-resources-plugin/.*");
 
-    try {
-      importProject("projects/397251_forcePluginResolutionUpdate/pom.xml");
-      fail();
-    } catch(CoreException e) {
-      // ignore
-    }
+    assertThrows(CoreException.class, () -> importProject("projects/397251_forcePluginResolutionUpdate/pom.xml"));
     waitForJobsToComplete();
 
     IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject("397251_forcePluginResolutionUpdate");
@@ -505,6 +504,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
 //    assertTrue(mapping.get(key).isEmpty());
 
     FilexWagon.setRequestFailPattern(null);
+    HttxWagon.setRequestFailPattern(null);
 
     MavenUpdateRequest request = new MavenUpdateRequest(false, true);
     request.addPomFile(project);
@@ -633,7 +633,7 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     IProject project = createSimplePomProject("testProject", l);
     assertNoErrors(project);
     assertTrue(listenerCalled[0]);
-    
+
     listenerCalled[0] = false;
     importProject("projects/projectimport/p001/pom.xml", new ResolverConfiguration(), l);
     assertNoErrors(project);
