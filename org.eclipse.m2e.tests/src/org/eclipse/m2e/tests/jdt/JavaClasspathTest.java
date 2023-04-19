@@ -109,16 +109,12 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
 
     IJavaProject javaProject = JavaCore.create(project);
     IClasspathEntry[] originalCp = javaProject.getRawClasspath();
-
-    assertEquals(5, originalCp.length);
-    assertEquals("/project/src/main/java", originalCp[0].getPath().toPortableString());
-    assertEquals("/project/src/main/resources", originalCp[1].getPath().toPortableString());
-    assertEquals("/project/src/test/java", originalCp[2].getPath().toPortableString());
-    assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", originalCp[3].getPath().segment(0));
-    assertEquals(M2E_CONTAINER, originalCp[4].getPath().segment(0));
-
+    //first assert that items are there...
+    assertClasspath(new String[] {"/project/src/main/java", "/project/src/main/resources", "/project/src/test/java",
+        M2E_CONTAINER, JRE_CONTAINER}, originalCp);
+    //update the project
     updateProjectConfiguration(project);
-
+    //check that classpath is still there...
     javaProject = JavaCore.create(project);
     IClasspathEntry[] updatedCp = javaProject.getRawClasspath();
     assertEquals("classpath changed on update", originalCp.length, updatedCp.length);
@@ -135,11 +131,13 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     IJavaProject javaProject = JavaCore.create(project);
     IClasspathEntry[] originalCp = javaProject.getRawClasspath();
 
-    assertEquals(5, originalCp.length);
-    assertEquals(M2E_CONTAINER, originalCp[4].getPath().segment(0));
-    assertFalse(originalCp[4].isExported());
-
-    originalCp[4] = MavenClasspathHelpers.getDefaultContainerEntry(true);
+    IClasspathEntry entry = assertClasspath(project, M2E_CONTAINER).get(M2E_CONTAINER);
+    assertFalse(entry.isExported());
+    for(int i = 0; i < originalCp.length; i++ ) {
+      if(originalCp[i] == entry) {
+        originalCp[i] = MavenClasspathHelpers.getDefaultContainerEntry(true);
+      }
+    }
     javaProject.setRawClasspath(originalCp, monitor);
 
     updateProjectConfiguration(project);
@@ -147,8 +145,8 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     javaProject = JavaCore.create(project);
     IClasspathEntry[] updatedCp = javaProject.getRawClasspath();
     assertEquals("classpath changed on update", originalCp.length, updatedCp.length);
-    assertEquals(M2E_CONTAINER, updatedCp[4].getPath().segment(0));
-    assertTrue(updatedCp[4].isExported());
+    IClasspathEntry udpated = assertClasspath(project, M2E_CONTAINER).get(M2E_CONTAINER);
+    assertTrue(udpated.isExported());
   }
 
   @Test
@@ -250,13 +248,6 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
   public void test388541_KeepClasspathAttributes() throws Exception {
     IProject project = importProject("projects/388541/pom.xml");
     assertNoErrors(project);
-
-    IJavaProject javaProject = JavaCore.create(project);
-
-    IClasspathEntry[] cp = javaProject.getRawClasspath();
-
-    assertEquals(cp.toString(), 5, cp.length);
-
     String srcMain = "/388541/src/main/java";
     Map<String, IClasspathEntry> map = assertClasspath(project,
         "M2_REPO/junit/junit/4.13.1/junit-4.13.1.jar", //

@@ -1162,13 +1162,12 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
 
     WorkspaceHelpers.assertNoErrors(project);
 
-    final IJavaProject javaProject = JavaCore.create(project);
-    final IClasspathEntry[] cp = javaProject.getRawClasspath();
-    final IClasspathEntry cpMain = cp[0];
-    final IClasspathEntry cpTest = cp[1];
+    String srcMain = "/" + projectName + "/src/main/java";
+    String srcTest = "/" + projectName + "/src/test/java";
+    Map<String, IClasspathEntry> map = assertClasspath(project, srcMain, srcTest);
 
-    assertEquals(new Path("/" + projectName + "/src/main/java"), cpMain.getPath());
-    assertEquals(new Path("/" + projectName + "/src/test/java"), cpTest.getPath());
+    final IClasspathEntry cpMain = map.get(srcMain);
+    final IClasspathEntry cpTest = map.get(srcTest);
 
     final IPath[] inclusionsMain = cpMain.getInclusionPatterns();
     assertEquals(2, inclusionsMain.length);
