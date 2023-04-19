@@ -24,10 +24,8 @@ import org.junit.Test;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
 
 import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.MojoExecution;
@@ -39,6 +37,7 @@ import org.eclipse.m2e.core.embedder.IMavenExecutionContext;
 import org.eclipse.m2e.core.internal.embedder.AbstractRunnable;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
+import org.eclipse.m2e.tests.common.ClasspathHelpers;
 
 
 public class MavenProjectMutableStateTest extends AbstractMavenProjectTestCase {
@@ -48,17 +47,14 @@ public class MavenProjectMutableStateTest extends AbstractMavenProjectTestCase {
     waitForJobsToComplete();
     assertNoErrors(project);
 
-    IJavaProject javaProject = JavaCore.create(project);
-    IClasspathEntry[] cp = javaProject.getRawClasspath();
 
-    assertEquals(6, cp.length);
-
-    assertEquals(project.getFolder("src/main/java").getFullPath(), cp[0].getPath());
-    assertEquals(project.getFolder("src/main/avaj").getFullPath(), cp[1].getPath());
-    assertEquals(project.getFolder("src/main/secruoser").getFullPath(), cp[2].getPath());
-    assertEquals(project.getFolder("src/test/java").getFullPath(), cp[3].getPath());
-    assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", cp[4].getPath().segment(0));
-    assertEquals("org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER", cp[5].getPath().toOSString());
+    IPath srcMain = project.getFolder("src/main/java").getFullPath();
+    IPath srcMain2 = project.getFolder("src/main/avaj").getFullPath();
+    IPath srcCustom = project.getFolder("src/main/secruoser").getFullPath();
+    IPath srcTest = project.getFolder("src/test/java").getFullPath();
+    ClasspathHelpers.assertClasspath(project, srcMain.toPortableString(),
+        srcMain2.toPortableString(), srcCustom.toPortableString(), srcTest.toPortableString(),
+        ClasspathHelpers.JRE_CONTAINER, ClasspathHelpers.M2E_CONTAINER);
   }
 
   @Test
