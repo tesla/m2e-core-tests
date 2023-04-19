@@ -15,16 +15,15 @@ package org.eclipse.m2e.tests.jdt;
 
 import static org.eclipse.m2e.tests.common.ClasspathHelpers.assertClasspath;
 import static org.eclipse.m2e.tests.common.ClasspathHelpers.getClasspathAttribute;
-import static org.eclipse.m2e.tests.common.ClasspathHelpers.getClasspathEntry;
 import static org.junit.Assert.assertEquals;
+
+import java.util.Map;
 
 import org.junit.Test;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
@@ -38,43 +37,40 @@ public class JavaCodeGenerationProjectConfiguratorTest extends AbstractMavenProj
         "projects/368333_missingGeneratedSourceFolders", new ResolverConfiguration());
     assertNoErrors(project);
 
-    IJavaProject javaProject = JavaCore.create(project);
-
-    assertClasspath(new String[] {//
-        "/368333_missingGeneratedSourceFolders/src/main/java", //
+    String srcMain = "/368333_missingGeneratedSourceFolders/src/main/java";
+    String srcGeneratedTest = "/368333_missingGeneratedSourceFolders/target/generated-sources/test";
+    Map<String, IClasspathEntry> map = assertClasspath(project,
+        srcMain, //
             "/368333_missingGeneratedSourceFolders/src/test/java", //
             "org.eclipse.jdt.launching.JRE_CONTAINER/.*", //
             "org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER", //
-            "/368333_missingGeneratedSourceFolders/target/generated-sources/test",//
-        }, //
-        javaProject.getRawClasspath());
+        srcGeneratedTest);
 
-    assertClasspathAttribute(javaProject.getRawClasspath(), "/368333_missingGeneratedSourceFolders/src/main/java",
+    assertClasspathAttribute(map, srcMain,
         IClasspathAttribute.IGNORE_OPTIONAL_PROBLEMS, null);
-    assertClasspathAttribute(javaProject.getRawClasspath(),
-        "/368333_missingGeneratedSourceFolders/target/generated-sources/test",
+    assertClasspathAttribute(map,
+        srcGeneratedTest,
         IClasspathAttribute.IGNORE_OPTIONAL_PROBLEMS, "true");
 
     MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(project, monitor);
 
-    assertClasspath(new String[] {//
-        "/368333_missingGeneratedSourceFolders/src/main/java", //
+    map = assertClasspath(project,
+        srcMain, //
             "/368333_missingGeneratedSourceFolders/src/test/java", //
             "org.eclipse.jdt.launching.JRE_CONTAINER/.*", //
             "org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER", //
-            "/368333_missingGeneratedSourceFolders/target/generated-sources/test",//
-        }, //
-        javaProject.getRawClasspath());
+        srcGeneratedTest);
 
-    assertClasspathAttribute(javaProject.getRawClasspath(), "/368333_missingGeneratedSourceFolders/src/main/java",
+    assertClasspathAttribute(map, srcMain,
         IClasspathAttribute.IGNORE_OPTIONAL_PROBLEMS, null);
-    assertClasspathAttribute(javaProject.getRawClasspath(),
-        "/368333_missingGeneratedSourceFolders/target/generated-sources/test",
+    assertClasspathAttribute(map,
+        srcGeneratedTest,
         IClasspathAttribute.IGNORE_OPTIONAL_PROBLEMS, "true");
   }
 
-  private void assertClasspathAttribute(IClasspathEntry[] cp, String path, String name, String expectedValue) {
-    IClasspathAttribute attribute = getClasspathAttribute(getClasspathEntry(cp, path), name);
+  private void assertClasspathAttribute(Map<String, IClasspathEntry> map, String path, String name,
+      String expectedValue) {
+    IClasspathAttribute attribute = getClasspathAttribute(map.get(path), name);
     String value = attribute != null ? attribute.getValue() : null;
     assertEquals(expectedValue, value);
   }

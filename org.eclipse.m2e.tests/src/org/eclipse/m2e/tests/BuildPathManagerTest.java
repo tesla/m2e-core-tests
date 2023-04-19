@@ -1245,23 +1245,22 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     IProject project = importProject("projects/MNGECLIPSE-2367_sourcesResourcesOverlap/project04/pom.xml");
     assertNoErrors(project);
 
-    IJavaProject javaProject = JavaCore.create(project);
-
-    IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
-
-    assertClasspath(new String[] {//
-        "/project04/src/main/java", //
-        "/project04/src/main_impl/java", //
-        "/project04/src/test/java", //
+    String srcJava = "/project04/src/main/java";
+    String srcImpl = "/project04/src/main_impl/java";
+    String srcTest = "/project04/src/test/java";
+    Map<String, IClasspathEntry> map = assertClasspath(project,
+        srcJava, //
+        srcImpl, //
+        srcTest, //
         "org.eclipse.jdt.launching.JRE_CONTAINER/.*", //
-        "org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER", //
-    }, //
-        rawClasspath);
-    assertEquals(0, rawClasspath[0].getExclusionPatterns().length);
-    assertEquals(0, rawClasspath[1].getExclusionPatterns().length);
-    assertEquals(1, rawClasspath[1].getInclusionPatterns().length);
-    assertEquals("**/*.java", rawClasspath[1].getInclusionPatterns()[0].toString());
-    assertEquals(0, rawClasspath[2].getExclusionPatterns().length);
+        "org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER" //
+    );
+
+    assertEquals(0, map.get(srcJava).getExclusionPatterns().length);
+    assertEquals(0, map.get(srcImpl).getExclusionPatterns().length);
+    assertEquals(1, map.get(srcImpl).getInclusionPatterns().length);
+    assertEquals("**/*.java", map.get(srcImpl).getInclusionPatterns()[0].toString());
+    assertEquals(0, map.get(srcTest).getExclusionPatterns().length);
   }
 
   @Test
@@ -1269,21 +1268,18 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     IProject project = importProject("projects/MNGECLIPSE-2367_sourcesResourcesOverlap/project05/pom.xml");
     assertNoErrors(project);
 
-    IJavaProject javaProject = JavaCore.create(project);
-
-    IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
-
-    assertClasspath(new String[] {//
+    String resourcePath = "/project05/src/main/resources";
+    IClasspathEntry entry = assertClasspath(project,
         "/project05/src/main/java", //
-        "/project05/src/main/resources", //
+        resourcePath, //
         "/project05/src/test/java", //
         "org.eclipse.jdt.launching.JRE_CONTAINER/.*", //
-        "org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER", //
-    }, //
-        rawClasspath);
-    assertEquals(0, rawClasspath[1].getInclusionPatterns().length);
-    assertEquals(1, rawClasspath[1].getExclusionPatterns().length);
-    assertEquals("**", rawClasspath[1].getExclusionPatterns()[0].toString());
+        "org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER" //
+    ).get(resourcePath);
+    assertNotNull(entry);
+    assertEquals(0, entry.getInclusionPatterns().length);
+    assertEquals(1, entry.getExclusionPatterns().length);
+    assertEquals("**", entry.getExclusionPatterns()[0].toString());
   }
 
   @Test
@@ -1297,14 +1293,8 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     // ideally we need to add a warning marker on the offending pom.xml element
     // https://issues.sonatype.org/browse/MNGECLIPSE-2433
 
-    IJavaProject javaProject = JavaCore.create(projects[1]);
-    IClasspathEntry[] cp = javaProject.getRawClasspath();
-
-    assertEquals(4, cp.length);
-    assertEquals("/project02/src/main/java", cp[0].getPath().toPortableString());
-    assertEquals("/project02/src/test/java", cp[1].getPath().toPortableString());
-    assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", cp[2].getPath().segment(0));
-    assertEquals("org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER", cp[3].getPath().segment(0));
+    ClasspathHelpers.assertClasspath(projects[1], "/project02/src/main/java", "/project02/src/test/java",
+        "org.eclipse.jdt.launching.JRE_CONTAINER.*", "org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER");
   }
 
   @Test

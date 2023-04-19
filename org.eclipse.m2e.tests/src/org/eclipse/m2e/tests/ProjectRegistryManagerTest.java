@@ -1208,8 +1208,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
       IJavaProject javaProject = JavaCore.create(project);
       assertHasMarker(project, IMavenConstants.MARKER_DEPENDENCY_ID, "Checksum validation failed");
 
-      IClasspathEntry[] cp;
-      cp = BuildPathManager.getMaven2ClasspathContainer(javaProject).getClasspathEntries();
+      IClasspathEntry[] cp = BuildPathManager.getMaven2ClasspathContainer(javaProject).getClasspathEntries();
       ClasspathHelpers.assertClasspath(new String[] {".*bad-checksum-0.0.1-SNAPSHOT.jar"}, cp);
 
       setChecksumPolicy(ArtifactRepositoryPolicy.CHECKSUM_POLICY_WARN);
@@ -1252,8 +1251,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
       IJavaProject javaProject = JavaCore.create(project);
       assertHasMarker(project, IMavenConstants.MARKER_DEPENDENCY_ID, "Checksum validation failed");
 
-      IClasspathEntry[] cp;
-      cp = BuildPathManager.getMaven2ClasspathContainer(javaProject).getClasspathEntries();
+      IClasspathEntry[] cp = BuildPathManager.getMaven2ClasspathContainer(javaProject).getClasspathEntries();
       ClasspathHelpers.assertClasspath(new String[] {".*bad-checksum-0.0.1-SNAPSHOT.jar"}, cp);
 
       //Override specific repo config
