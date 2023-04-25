@@ -23,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -175,6 +176,12 @@ public class MarkerTest extends AbstractMavenProjectTestCase {
 
     String expectedErrorMessage = "Missing artifact commons-logging:commons-logging:jar:100";
     List<IMarker> markers = WorkspaceHelpers.findErrorMarkers(project);
+    long timeout = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(10);
+    while(markers.size() < 2 && System.currentTimeMillis() < timeout) {
+      TimeUnit.MILLISECONDS.sleep(100);
+      waitForJobsToComplete();
+      markers = WorkspaceHelpers.findErrorMarkers(project);
+    }
     // (jdt) The container 'Maven Dependencies' references non existing library ...commons-logging/commons-logging/100/commons-logging-100.jar'
     // (maven) Missing artifact commons-logging:commons-logging:jar:100
     assertEquals(WorkspaceHelpers.toString(markers), 2, markers.size());

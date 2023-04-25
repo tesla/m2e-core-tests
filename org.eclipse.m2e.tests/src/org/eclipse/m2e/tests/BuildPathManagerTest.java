@@ -260,14 +260,17 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
 
     IJavaProject javaProject = JavaCore.create(project);
 
-    assertEquals(new Path("/projectimport-p001/target/classes"), javaProject.getOutputLocation());
-    IClasspathEntry[] cp = javaProject.getRawClasspath();
+    String outputPath = "/projectimport-p001/target/classes";
+    assertEquals(new Path(outputPath), javaProject.getOutputLocation());
 
-    assertEquals(4, cp.length);
-    assertEquals(new Path("/projectimport-p001/src/main/java"), cp[0].getPath());
-    assertEquals(new Path("/projectimport-p001/target/classes"), cp[0].getOutputLocation());
-    assertEquals(new Path("/projectimport-p001/src/test/java"), cp[1].getPath());
-    assertEquals(new Path("/projectimport-p001/target/test-classes"), cp[1].getOutputLocation());
+    String srcMain = "/projectimport-p001/src/main/java";
+    String srcTest = "/projectimport-p001/src/test/java";
+    Map<String, IClasspathEntry> map = ClasspathHelpers.assertClasspath(project, srcMain, srcTest);
+    IClasspathEntry cp0 = map.get(srcMain);
+    IClasspathEntry cp1 = map.get(srcTest);
+
+    assertEquals(new Path(outputPath), cp0.getOutputLocation());
+    assertEquals(new Path("/projectimport-p001/target/test-classes"), cp1.getOutputLocation());
   }
 
   // disabled nested modules tests 
