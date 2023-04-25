@@ -1313,6 +1313,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
   }
 
   @Test
+  @Ignore("See https://github.com/eclipse-m2e/m2e-core/issues/1362")
   public void test431080_flatDirectoryLayout() throws Exception {
     IProject project = importProject("projects/431080_flatDirectoryLayout/pom.xml");
     waitForJobsToComplete();
