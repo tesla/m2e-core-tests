@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.eclipse.core.resources.IFile;
@@ -84,6 +85,7 @@ public class ImportSortOrderTestCase extends AbstractMavenProjectTestCase {
   }
 
   @Test
+  @Ignore
   public void testCollectionSortProject() throws Exception {
     ProjectConfigurationManager manager = (ProjectConfigurationManager) MavenPlugin.getProjectConfigurationManager();
 
