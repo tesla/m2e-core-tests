@@ -90,17 +90,21 @@ import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
 
   private ProjectRegistryManager manager;
+  private boolean initialDownloadSources;
 
   @Override
   @Before
   public void setUp() throws Exception {
     super.setUp();
     manager = MavenPluginActivator.getDefault().getMavenProjectManagerImpl();
+    initialDownloadSources = mavenConfiguration.isDownloadSources();
+    ((MavenConfigurationImpl) mavenConfiguration).setDownloadSources(false);
   }
 
   @Override
   @After
   public void tearDown() throws Exception {
+    ((MavenConfigurationImpl) mavenConfiguration).setDownloadSources(initialDownloadSources);
     manager = null;
     super.tearDown();
   }
