@@ -21,14 +21,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import org.junit.Test;
-
-import org.eclipse.core.resources.IProject;
-
 import org.codehaus.plexus.util.Scanner;
-
+import org.eclipse.core.resources.IProject;
 import org.eclipse.m2e.core.internal.builder.plexusbuildapi.EclipseBuildContext;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
+import org.junit.Test;
 
 public class EclipseBuildContextTest extends AbstractMavenProjectTestCase {
   @Test
@@ -46,7 +43,7 @@ public class EclipseBuildContextTest extends AbstractMavenProjectTestCase {
   }
 
   private EclipseBuildContext newBuildContext(IProject project) {
-    return new EclipseBuildContext(project, new HashMap<String, Object>(), new DummyBuildResultCollector());
+    return new EclipseBuildContext(project, new HashMap<>(), new DummyBuildResultCollector());
   }
 
   private void checkScanner(Scanner scanner) {

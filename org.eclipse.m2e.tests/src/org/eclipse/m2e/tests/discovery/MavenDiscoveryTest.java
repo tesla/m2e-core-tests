@@ -27,10 +27,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.equinox.internal.p2.discovery.AbstractCatalogSource;
 import org.eclipse.equinox.internal.p2.discovery.Catalog;
@@ -39,13 +35,15 @@ import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.IShellProvider;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.internal.Workbench;
-
 import org.eclipse.m2e.core.project.configurator.MojoExecutionKey;
 import org.eclipse.m2e.internal.discovery.MavenDiscovery;
 import org.eclipse.m2e.internal.discovery.wizards.MavenCatalogConfiguration;
 import org.eclipse.m2e.internal.discovery.wizards.MavenCatalogViewer;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.internal.Workbench;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 
 public class MavenDiscoveryTest implements IShellProvider {
@@ -277,7 +275,7 @@ public class MavenDiscoveryTest implements IShellProvider {
     item.setId("id");
 
     List<String> configurators = new ArrayList<>();
-    MavenDiscovery.getProvidedProjectConfigurators(item, configurators, new ArrayList<String>());
+    MavenDiscovery.getProvidedProjectConfigurators(item, configurators, new ArrayList<>());
 
     assertEquals(1, configurators.size());
     assertEquals("LifecycleMappingTest.projectConfigurator", configurators.get(0));
