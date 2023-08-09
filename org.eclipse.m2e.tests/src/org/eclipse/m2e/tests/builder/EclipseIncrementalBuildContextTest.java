@@ -20,15 +20,12 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import org.junit.Test;
-
-import org.eclipse.core.resources.IProject;
-
 import org.codehaus.plexus.util.Scanner;
-
+import org.eclipse.core.resources.IProject;
 import org.eclipse.m2e.core.internal.builder.plexusbuildapi.EclipseIncrementalBuildContext;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
 import org.eclipse.m2e.tests.mocks.ResourceDeltaStub;
+import org.junit.Test;
 
 
 public class EclipseIncrementalBuildContextTest extends AbstractMavenProjectTestCase {
@@ -58,7 +55,7 @@ public class EclipseIncrementalBuildContextTest extends AbstractMavenProjectTest
   }
 
   private EclipseIncrementalBuildContext newBuildContext(ResourceDeltaStub delta) {
-    return new EclipseIncrementalBuildContext(delta, new HashMap<String, Object>(), new DummyBuildResultCollector());
+    return new EclipseIncrementalBuildContext(delta, new HashMap<>(), new DummyBuildResultCollector());
   }
 
   private void checkResourcesScanner(Scanner scanner) {
