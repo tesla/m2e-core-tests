@@ -114,7 +114,7 @@ public class MavenRuntimeManagerTest {
     assertFalse("plexus-build-api jar is in classpath",
         classpathEntries.stream().anyMatch(e -> e.contains("plexus-build-api")));
     assertTrue("slf4j-api bundle is missing from the classpath",
-        classpathEntries.stream().anyMatch(e -> e.contains("org.slf4j.api") || e.contains("slf4j-api")
+        classpathEntries.stream().anyMatch(e -> e.contains("slf4j.api") || e.contains("slf4j-api")
         //or in Dev mode:
             || Files.isRegularFile(Path.of(e, "org", "slf4j", "Logger.class"))));
   }
