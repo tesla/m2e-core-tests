@@ -16,7 +16,7 @@ package org.eclipse.m2e.tests.jdt.internal;
 import org.junit.Assert;
 import org.junit.Test;
 
-import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IClasspathEntry;
 
 import org.eclipse.m2e.core.embedder.ArtifactKey;
@@ -29,7 +29,7 @@ public class ClasspathEntryDescriptorTest {
   public void testArtifactKeyDeserialization() throws Exception {
     final ArtifactKey key = new ArtifactKey("g", "a", "v", "c");
 
-    ClasspathEntryDescriptor original = new ClasspathEntryDescriptor(IClasspathEntry.CPE_LIBRARY, new Path("/path"));
+    ClasspathEntryDescriptor original = new ClasspathEntryDescriptor(IClasspathEntry.CPE_LIBRARY, IPath.fromOSString("/path"));
     original.setArtifactKey(key);
 
     ClasspathEntryDescriptor deserelized = new ClasspathEntryDescriptor(original.toClasspathEntry());

@@ -23,7 +23,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 
 import org.codehaus.plexus.util.IOUtil;
@@ -48,7 +47,7 @@ public class TestProjectConfigurator3 extends AbstractProjectConfigurator {
 
     System.err.println("running " + getName());
 
-    IPath logPath = new Path("target/configurator-log.txt");
+    IPath logPath = IPath.fromOSString("target/configurator-log.txt");
 
     IFile file = request.mavenProjectFacade().getProject().getFile(logPath);
     String text = null;

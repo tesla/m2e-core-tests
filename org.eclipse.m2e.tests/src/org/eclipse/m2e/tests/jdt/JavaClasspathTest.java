@@ -36,7 +36,7 @@ import org.junit.Test;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -558,7 +558,7 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
   }
 
   private void addAccessRule(IClasspathEntryDescriptor entry) {
-    entry.addAccessRule(JavaCore.newAccessRule(Path.fromPortableString("**/internal/**"), IAccessRule.K_DISCOURAGED));
+    entry.addAccessRule(JavaCore.newAccessRule(IPath.fromPortableString("**/internal/**"), IAccessRule.K_DISCOURAGED));
   }
 
   private IExecutionEnvironment getLatestExecutionEnvironment() {

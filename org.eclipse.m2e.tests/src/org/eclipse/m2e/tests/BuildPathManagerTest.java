@@ -46,7 +46,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathContainer;
@@ -90,6 +89,7 @@ import org.eclipse.m2e.tests.common.WorkspaceHelpers;
 public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
 
   private ProjectRegistryManager manager;
+
   private boolean initialDownloadSources;
 
   @Override
@@ -265,7 +265,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     IJavaProject javaProject = JavaCore.create(project);
 
     String outputPath = "/projectimport-p001/target/classes";
-    assertEquals(new Path(outputPath), javaProject.getOutputLocation());
+    assertEquals(IPath.fromOSString(outputPath), javaProject.getOutputLocation());
 
     String srcMain = "/projectimport-p001/src/main/java";
     String srcTest = "/projectimport-p001/src/test/java";
@@ -273,8 +273,8 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     IClasspathEntry cp0 = map.get(srcMain);
     IClasspathEntry cp1 = map.get(srcTest);
 
-    assertEquals(new Path(outputPath), cp0.getOutputLocation());
-    assertEquals(new Path("/projectimport-p001/target/test-classes"), cp1.getOutputLocation());
+    assertEquals(IPath.fromOSString(outputPath), cp0.getOutputLocation());
+    assertEquals(IPath.fromOSString("/projectimport-p001/target/test-classes"), cp1.getOutputLocation());
   }
 
   // disabled nested modules tests 
@@ -290,12 +290,12 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
 
     IJavaProject javaProject = JavaCore.create(project);
 
-    assertEquals(new Path("/projectimport-p002/target/classes"), javaProject.getOutputLocation());
+    assertEquals(IPath.fromOSString("/projectimport-p002/target/classes"), javaProject.getOutputLocation());
     IClasspathEntry[] cp = javaProject.getRawClasspath();
 
     assertEquals(3, cp.length);
-    assertEquals(new Path("/projectimport-p002/p002-m1/src/main/java"), cp[0].getPath());
-    assertEquals(new Path("/projectimport-p002/p002-m1/target/classes"), cp[0].getOutputLocation());
+    assertEquals(IPath.fromOSString("/projectimport-p002/p002-m1/src/main/java"), cp[0].getPath());
+    assertEquals(IPath.fromOSString("/projectimport-p002/p002-m1/target/classes"), cp[0].getOutputLocation());
   }
 
   @Test
@@ -319,7 +319,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
 
     // order according to mvn -X
     assertEquals(4, cp.length);
-    assertEquals(new Path("/p2"), cp[0].getPath());
+    assertEquals(IPath.fromOSString("/p2"), cp[0].getPath());
     assertEquals("junit-4.13.1.jar", cp[2].getPath().lastSegment());
     assertEquals("easymock-1.0.jar", cp[1].getPath().lastSegment());
 
@@ -449,8 +449,8 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
 
     IPath entryPath = getClasspathEntries(project)[0].getPath();
 
-    IPath srcPath = new Path("/a");
-    IPath srcRoot = new Path("/b");
+    IPath srcPath = IPath.fromOSString("/a");
+    IPath srcRoot = IPath.fromOSString("/b");
     String javaDocUrl = "c";
 
     IClasspathAttribute attribute = JavaCore.newClasspathAttribute(IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME,
@@ -1066,14 +1066,14 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     tmp.delete(); //deleting a tmp file so we can use the name for a folder
 
     final String projectName1 = "external-simple-project-1";
-    createSimpleProject(projectName1, new Path(tmp.getAbsolutePath()).append(projectName1));
+    createSimpleProject(projectName1, IPath.fromOSString(tmp.getAbsolutePath()).append(projectName1));
 
     final String projectName2 = "external-simple-project-2";
     File existingFolder = new File(tmp, projectName2);
     existingFolder.mkdirs();
     new File(existingFolder, IMavenConstants.POM_FILE_NAME).createNewFile();
     try {
-      createSimpleProject(projectName2, new Path(tmp.getAbsolutePath()).append(projectName2));
+      createSimpleProject(projectName2, IPath.fromOSString(tmp.getAbsolutePath()).append(projectName2));
       fail("Project creation should fail if the POM exists in the target folder");
     } catch(CoreException e) {
       final String msg = IMavenConstants.POM_FILE_NAME + " already exists";
@@ -1108,7 +1108,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     tmp.delete(); //deleting a tmp file so we can use the name for a folder
 
     final String projectName1 = "external-archetype-project-1";
-    IProject project1 = createArchetypeProject(projectName1, new Path(tmp.getAbsolutePath()).append(projectName1),
+    IProject project1 = createArchetypeProject(projectName1, IPath.fromOSString(tmp.getAbsolutePath()).append(projectName1),
         quickStart);
     assertNotNull(JavaCore.create(project1)); // TODO more meaningful assertion 
 
@@ -1117,7 +1117,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     existingFolder.mkdirs();
     new File(existingFolder, IMavenConstants.POM_FILE_NAME).createNewFile();
     try {
-      createArchetypeProject(projectName2, new Path(tmp.getAbsolutePath()).append(projectName2), quickStart);
+      createArchetypeProject(projectName2, IPath.fromOSString(tmp.getAbsolutePath()).append(projectName2), quickStart);
       fail("Project creation should fail if the POM exists in the target folder");
     } catch(CoreException e) {
       // this is supposed to happen
@@ -1178,20 +1178,20 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
 
     final IPath[] inclusionsMain = cpMain.getInclusionPatterns();
     assertEquals(2, inclusionsMain.length);
-    assertEquals(new Path("org/apache/maven/"), inclusionsMain[0]);
-    assertEquals(new Path("org/maven/ide/eclipse/"), inclusionsMain[1]);
+    assertEquals(IPath.fromOSString("org/apache/maven/"), inclusionsMain[0]);
+    assertEquals(IPath.fromOSString("org/maven/ide/eclipse/"), inclusionsMain[1]);
 
     final IPath[] exclusionsMain = cpMain.getExclusionPatterns();
     assertEquals(1, exclusionsMain.length);
-    assertEquals(new Path("org/maven/ide/eclipse/tests/"), exclusionsMain[0]);
+    assertEquals(IPath.fromOSString("org/maven/ide/eclipse/tests/"), exclusionsMain[0]);
 
     final IPath[] inclusionsTest = cpTest.getInclusionPatterns();
     assertEquals(1, inclusionsTest.length);
-    assertEquals(new Path("org/apache/maven/tests/"), inclusionsTest[0]);
+    assertEquals(IPath.fromOSString("org/apache/maven/tests/"), inclusionsTest[0]);
 
     final IPath[] exclusionsTest = cpTest.getExclusionPatterns();
     assertEquals(1, exclusionsTest.length);
-    assertEquals(new Path("org/apache/maven/tests/Excluded.java"), exclusionsTest[0]);
+    assertEquals(IPath.fromOSString("org/apache/maven/tests/Excluded.java"), exclusionsTest[0]);
   }
 
   @Test

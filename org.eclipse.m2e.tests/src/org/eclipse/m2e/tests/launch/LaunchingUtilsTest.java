@@ -25,7 +25,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 
 import org.eclipse.m2e.internal.launch.LaunchingUtils;
 import org.eclipse.m2e.tests.common.AbstractMavenProjectTestCase;
@@ -65,7 +64,7 @@ public class LaunchingUtilsTest extends AbstractMavenProjectTestCase {
       project.delete(true, monitor);
       // create new project with same name but in a different location
       IProjectDescription projectDescription = workspace.newProjectDescription(project.getName());
-      IPath location = Path.fromOSString(projectTargetFolder.getAbsolutePath());
+      IPath location = IPath.fromOSString(projectTargetFolder.getAbsolutePath());
       projectDescription.setLocation(location);
       project.create(projectDescription, monitor);
       project.open(IResource.NONE, monitor);

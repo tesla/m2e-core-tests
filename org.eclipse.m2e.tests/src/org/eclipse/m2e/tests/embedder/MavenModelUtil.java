@@ -25,9 +25,9 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 
@@ -71,7 +71,7 @@ public class MavenModelUtil {
 
     IWorkspace workspace = ResourcesPlugin.getWorkspace();
     IWorkspaceRoot root = workspace.getRoot();
-    IFile file = root.getFile(new Path(uri.toPlatformString(true)));
+    IFile file = root.getFile(IPath.fromOSString(uri.toPlatformString(true)));
 
     StringWriter sw = new StringWriter();
 
