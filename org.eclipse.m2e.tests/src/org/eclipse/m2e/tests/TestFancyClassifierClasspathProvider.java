@@ -18,7 +18,6 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
 
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
@@ -41,8 +40,8 @@ public class TestFancyClassifierClasspathProvider extends AbstractClassifierClas
   public void setRuntimeClasspath(Set<IRuntimeClasspathEntry> runtimeClasspath, IMavenProjectFacade mavenProjectFacade,
       IProgressMonitor monitor, int classpathProperty) {
     Set<IPath> folders = new LinkedHashSet<>();
-    folders.add(new Path("src/main/java"));
-    folders.add(new Path("src/main/resources"));
+    folders.add(IPath.fromOSString("src/main/java"));
+    folders.add(IPath.fromOSString("src/main/resources"));
     addFolders(runtimeClasspath, mavenProjectFacade.getProject(), folders, classpathProperty);
   }
 
@@ -50,8 +49,8 @@ public class TestFancyClassifierClasspathProvider extends AbstractClassifierClas
   public void setTestClasspath(Set<IRuntimeClasspathEntry> testClasspath, IMavenProjectFacade mavenProjectFacade,
       IProgressMonitor monitor, int classpathProperty) {
     Set<IPath> folders = new LinkedHashSet<>();
-    folders.add(new Path("src/test/java"));
-    folders.add(new Path("src/test/resources"));
+    folders.add(IPath.fromOSString("src/test/java"));
+    folders.add(IPath.fromOSString("src/test/resources"));
     addFolders(testClasspath, mavenProjectFacade.getProject(), folders, classpathProperty);
   }
 

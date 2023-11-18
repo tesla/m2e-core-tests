@@ -32,7 +32,7 @@ import org.junit.runner.RunWith;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
@@ -86,10 +86,10 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
 
     assertEquals(Arrays.asList(userClasspath).toString(), 4, userClasspath.length);
-    assertEquals(new Path("/cptest/target/classes"), userClasspath[0].getPath());
+    assertEquals(IPath.fromOSString("/cptest/target/classes"), userClasspath[0].getPath());
     assertEquals("testlib-2.0.jar", userClasspath[1].getPath().lastSegment());
     assertEquals("commons-logging-1.0.2.jar", userClasspath[2].getPath().lastSegment());
-    assertEquals(new Path("/cptest2/target/classes"), userClasspath[3].getPath());
+    assertEquals(IPath.fromOSString("/cptest2/target/classes"), userClasspath[3].getPath());
   }
 
   @Test
@@ -112,8 +112,8 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
 
     assertEquals(Arrays.asList(userClasspath).toString(), 2, userClasspath.length);
-    assertEquals(new Path("/515398/target/test-classes"), userClasspath[0].getPath());
-    assertEquals(new Path("/515398/target/classes"), userClasspath[1].getPath());
+    assertEquals(IPath.fromOSString("/515398/target/test-classes"), userClasspath[0].getPath());
+    assertEquals(IPath.fromOSString("/515398/target/classes"), userClasspath[1].getPath());
   }
 
   @Test
@@ -137,11 +137,11 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
 
     // source path contains project entries
     assertEquals(Arrays.asList(userClasspath).toString(), 4, userClasspath.length);
-    assertEquals(new Path("/cptest"), userClasspath[0].getPath());
+    assertEquals(IPath.fromOSString("/cptest"), userClasspath[0].getPath());
     assertEquals(IRuntimeClasspathEntry.PROJECT, userClasspath[0].getType());
     assertEquals("testlib-2.0.jar", userClasspath[1].getPath().lastSegment());
     assertEquals("commons-logging-1.0.2.jar", userClasspath[2].getPath().lastSegment());
-    assertEquals(new Path("/cptest2"), userClasspath[3].getPath());
+    assertEquals(IPath.fromOSString("/cptest2"), userClasspath[3].getPath());
     assertEquals(IRuntimeClasspathEntry.PROJECT, userClasspath[3].getType());
   }
 
@@ -170,7 +170,7 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
 
     assertEquals(Arrays.asList(userClasspath).toString(), 1, userClasspath.length);
-    assertEquals(new Path("/runtimeclasspath-nofilterresources/target/classes"), userClasspath[0].getPath());
+    assertEquals(IPath.fromOSString("/runtimeclasspath-nofilterresources/target/classes"), userClasspath[0].getPath());
   }
 
   @Test
@@ -205,8 +205,8 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
 
     assertEquals(Arrays.asList(userClasspath).toString(), 3, userClasspath.length);
-    assertEquals(new Path("/runtimeclasspath-junit/target/test-classes"), userClasspath[0].getPath());
-    assertEquals(new Path("/runtimeclasspath-junit/target/classes"), userClasspath[1].getPath());
+    assertEquals(IPath.fromOSString("/runtimeclasspath-junit/target/test-classes"), userClasspath[0].getPath());
+    assertEquals(IPath.fromOSString("/runtimeclasspath-junit/target/classes"), userClasspath[1].getPath());
   }
 
 //  This require TestNG plugin to be present  
@@ -226,8 +226,8 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
 //    IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
 //    
 //    assertEquals(Arrays.asList(userClasspath).toString(), 4, userClasspath.length);
-//    assertEquals(new Path("/runtimeclasspath-testng/target/test-classes"), userClasspath[0].getPath());
-//    assertEquals(new Path("/runtimeclasspath-testng/target/classes"), userClasspath[1].getPath());
+//    assertEquals(IPath.fromOSString("/runtimeclasspath-testng/target/test-classes"), userClasspath[0].getPath());
+//    assertEquals(IPath.fromOSString("/runtimeclasspath-testng/target/classes"), userClasspath[1].getPath());
 //    assertEquals("testng-5.8-jdk15.jar", userClasspath[2].getPath().lastSegment());
 //    assertEquals("junit-3.8.1.jar", userClasspath[3].getPath().lastSegment());
 //  }
@@ -245,7 +245,7 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
 
     assertEquals(Arrays.asList(userClasspath).toString(), 2, userClasspath.length);
-    assertEquals(new Path("/runtimeclasspath-providedscope/target/classes"), userClasspath[0].getPath());
+    assertEquals(IPath.fromOSString("/runtimeclasspath-providedscope/target/classes"), userClasspath[0].getPath());
     assertEquals("junit-4.13.1.jar", userClasspath[1].getPath().lastSegment());
   }
 
@@ -263,8 +263,8 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
 
     assertEquals(Arrays.asList(userClasspath).toString(), 3, userClasspath.length);
-    assertEquals(new Path("/runtimeclasspath-providedscope/target/test-classes"), userClasspath[0].getPath());
-    assertEquals(new Path("/runtimeclasspath-providedscope/target/classes"), userClasspath[1].getPath());
+    assertEquals(IPath.fromOSString("/runtimeclasspath-providedscope/target/test-classes"), userClasspath[0].getPath());
+    assertEquals(IPath.fromOSString("/runtimeclasspath-providedscope/target/classes"), userClasspath[1].getPath());
     assertEquals("junit-4.13.1.jar", userClasspath[2].getPath().lastSegment());
   }
 
@@ -282,8 +282,8 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
 
     assertEquals(Arrays.asList(userClasspath).toString(), 3, userClasspath.length);
-    assertEquals(new Path("/runtimeclasspath-providedscope/target/test-classes"), userClasspath[0].getPath());
-    assertEquals(new Path("/runtimeclasspath-providedscope/target/classes"), userClasspath[1].getPath());
+    assertEquals(IPath.fromOSString("/runtimeclasspath-providedscope/target/test-classes"), userClasspath[0].getPath());
+    assertEquals(IPath.fromOSString("/runtimeclasspath-providedscope/target/classes"), userClasspath[1].getPath());
     assertEquals("junit-4.13.1.jar", userClasspath[2].getPath().lastSegment());
   }
 
@@ -322,7 +322,7 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
 
     assertEquals(Arrays.asList(userClasspath).toString(), 2, userClasspath.length);
-    assertEquals(new Path("/runtimeclasspath-systemscope/target/classes"), userClasspath[0].getPath());
+    assertEquals(IPath.fromOSString("/runtimeclasspath-systemscope/target/classes"), userClasspath[0].getPath());
     assertEquals("log4j-1.2.13.jar", userClasspath[1].getPath().lastSegment());
   }
 
@@ -378,7 +378,7 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
 
     assertEquals(Arrays.asList(userClasspath).toString(), 3, userClasspath.length);
-    assertEquals(new Path("/runtimeclasspath-custombuildpath/target/classes"), userClasspath[0].getPath());
+    assertEquals(IPath.fromOSString("/runtimeclasspath-custombuildpath/target/classes"), userClasspath[0].getPath());
     assertEquals(javaproject.getFullPath(), userClasspath[1].getPath());
     assertEquals("custom.jar", userClasspath[2].getPath().lastSegment());
   }
@@ -400,9 +400,9 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
 
     assertEquals(Arrays.asList(userClasspath).toString(), 3, userClasspath.length);
-    assertEquals(new Path("/runtimeclasspath-testscope02/target/test-classes"), userClasspath[0].getPath());
-    assertEquals(new Path("/runtimeclasspath-testscope02/target/classes"), userClasspath[1].getPath());
-    assertEquals(new Path("/runtimeclasspath-testscope01/target/classes"), userClasspath[2].getPath());
+    assertEquals(IPath.fromOSString("/runtimeclasspath-testscope02/target/test-classes"), userClasspath[0].getPath());
+    assertEquals(IPath.fromOSString("/runtimeclasspath-testscope02/target/classes"), userClasspath[1].getPath());
+    assertEquals(IPath.fromOSString("/runtimeclasspath-testscope01/target/classes"), userClasspath[2].getPath());
   }
 
   @Test
@@ -422,9 +422,9 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
 
     assertEquals(Arrays.asList(userClasspath).toString(), 3, userClasspath.length);
-    assertEquals(new Path("/runtimeclasspath-testscope03/target/test-classes"), userClasspath[0].getPath());
-    assertEquals(new Path("/runtimeclasspath-testscope03/target/classes"), userClasspath[1].getPath());
-    assertEquals(new Path("/runtimeclasspath-testscope01/target/test-classes"), userClasspath[2].getPath());
+    assertEquals(IPath.fromOSString("/runtimeclasspath-testscope03/target/test-classes"), userClasspath[0].getPath());
+    assertEquals(IPath.fromOSString("/runtimeclasspath-testscope03/target/classes"), userClasspath[1].getPath());
+    assertEquals(IPath.fromOSString("/runtimeclasspath-testscope01/target/test-classes"), userClasspath[2].getPath());
   }
 
   @Test
@@ -444,10 +444,10 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
 
     assertEquals(Arrays.asList(userClasspath).toString(), 4, userClasspath.length);
-    assertEquals(new Path("/runtimeclasspath-testscope04/target/test-classes"), userClasspath[0].getPath());
-    assertEquals(new Path("/runtimeclasspath-testscope04/target/classes"), userClasspath[1].getPath());
-    assertEquals(new Path("/runtimeclasspath-testscope01/target/classes"), userClasspath[2].getPath());
-    assertEquals(new Path("/runtimeclasspath-testscope01/target/test-classes"), userClasspath[3].getPath());
+    assertEquals(IPath.fromOSString("/runtimeclasspath-testscope04/target/test-classes"), userClasspath[0].getPath());
+    assertEquals(IPath.fromOSString("/runtimeclasspath-testscope04/target/classes"), userClasspath[1].getPath());
+    assertEquals(IPath.fromOSString("/runtimeclasspath-testscope01/target/classes"), userClasspath[2].getPath());
+    assertEquals(IPath.fromOSString("/runtimeclasspath-testscope01/target/test-classes"), userClasspath[3].getPath());
   }
 
   @Test
@@ -467,10 +467,10 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
     IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
 
     assertEquals(Arrays.asList(userClasspath).toString(), 4, userClasspath.length);
-    assertEquals(new Path("/runtimeclasspath-testscope05/target/test-classes"), userClasspath[0].getPath());
-    assertEquals(new Path("/runtimeclasspath-testscope05/target/classes"), userClasspath[1].getPath());
-    assertEquals(new Path("/runtimeclasspath-testscope01/target/classes"), userClasspath[2].getPath());
-    assertEquals(new Path("/runtimeclasspath-testscope01/target/test-classes"), userClasspath[3].getPath());
+    assertEquals(IPath.fromOSString("/runtimeclasspath-testscope05/target/test-classes"), userClasspath[0].getPath());
+    assertEquals(IPath.fromOSString("/runtimeclasspath-testscope05/target/classes"), userClasspath[1].getPath());
+    assertEquals(IPath.fromOSString("/runtimeclasspath-testscope01/target/classes"), userClasspath[2].getPath());
+    assertEquals(IPath.fromOSString("/runtimeclasspath-testscope01/target/test-classes"), userClasspath[3].getPath());
   }
 
   @Test
@@ -531,9 +531,9 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
       IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
 
       assertEquals("Invalid runtime classpath :" + Arrays.asList(userClasspath).toString(), 3, userClasspath.length);
-      assertEquals(new Path("/runtimeclasspath-testscope06/target/classes"), userClasspath[0].getPath());
-      assertEquals(new Path("/runtimeclasspath-testscope01/src/main/java"), userClasspath[1].getPath());
-      assertEquals(new Path("/runtimeclasspath-testscope01/src/main/resources"), userClasspath[2].getPath());
+      assertEquals(IPath.fromOSString("/runtimeclasspath-testscope06/target/classes"), userClasspath[0].getPath());
+      assertEquals(IPath.fromOSString("/runtimeclasspath-testscope01/src/main/java"), userClasspath[1].getPath());
+      assertEquals(IPath.fromOSString("/runtimeclasspath-testscope01/src/main/resources"), userClasspath[2].getPath());
     }
 
     /*check test classpath*/{
@@ -545,10 +545,10 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
       IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
 
       assertEquals("Invalid test classpath :" + Arrays.asList(userClasspath).toString(), 4, userClasspath.length);
-      assertEquals(new Path("/runtimeclasspath-testscope06/target/test-classes"), userClasspath[0].getPath());
-      assertEquals(new Path("/runtimeclasspath-testscope06/target/classes"), userClasspath[1].getPath());
-      assertEquals(new Path("/runtimeclasspath-testscope01/src/test/java"), userClasspath[2].getPath());
-      assertEquals(new Path("/runtimeclasspath-testscope01/src/test/resources"), userClasspath[3].getPath());
+      assertEquals(IPath.fromOSString("/runtimeclasspath-testscope06/target/test-classes"), userClasspath[0].getPath());
+      assertEquals(IPath.fromOSString("/runtimeclasspath-testscope06/target/classes"), userClasspath[1].getPath());
+      assertEquals(IPath.fromOSString("/runtimeclasspath-testscope01/src/test/java"), userClasspath[2].getPath());
+      assertEquals(IPath.fromOSString("/runtimeclasspath-testscope01/src/test/resources"), userClasspath[3].getPath());
     }
   }
 
@@ -571,7 +571,7 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
       IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
 
       assertEquals("Invalid runtime classpath :" + Arrays.asList(userClasspath).toString(), 1, userClasspath.length);
-      assertEquals(new Path("/runtimeclasspath-testscope07/target/classes"), userClasspath[0].getPath());
+      assertEquals(IPath.fromOSString("/runtimeclasspath-testscope07/target/classes"), userClasspath[0].getPath());
     }
 
     /*check test classpath*/{
@@ -583,8 +583,8 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
       IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
 
       assertEquals("Invalid test classpath :" + Arrays.asList(userClasspath).toString(), 2, userClasspath.length);
-      assertEquals(new Path("/runtimeclasspath-testscope07/target/test-classes"), userClasspath[0].getPath());
-      assertEquals(new Path("/runtimeclasspath-testscope07/target/classes"), userClasspath[1].getPath());
+      assertEquals(IPath.fromOSString("/runtimeclasspath-testscope07/target/test-classes"), userClasspath[0].getPath());
+      assertEquals(IPath.fromOSString("/runtimeclasspath-testscope07/target/classes"), userClasspath[1].getPath());
     }
   }
 

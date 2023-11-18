@@ -20,7 +20,7 @@ import java.io.ByteArrayOutputStream;
 
 import org.junit.Test;
 
-import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathContainer;
@@ -41,28 +41,28 @@ public class MavenClasspathContainerSaveHelperTest {
 
     {
       IAccessRule[] accessRules = new IAccessRule[1];
-      accessRules[0] = JavaCore.newAccessRule(new Path("aa/**"), IAccessRule.K_ACCESSIBLE);
+      accessRules[0] = JavaCore.newAccessRule(IPath.fromOSString("aa/**"), IAccessRule.K_ACCESSIBLE);
 
       IClasspathAttribute[] attributes = new IClasspathAttribute[2];
       attributes[0] = JavaCore.newClasspathAttribute("foo", "11");
       attributes[1] = JavaCore.newClasspathAttribute("moo", "22");
 
-      entries[0] = JavaCore.newProjectEntry(new Path("/foo"), accessRules, true, attributes, false);
+      entries[0] = JavaCore.newProjectEntry(IPath.fromOSString("/foo"), accessRules, true, attributes, false);
     }
 
     {
       IAccessRule[] accessRules = new IAccessRule[1];
-      accessRules[0] = JavaCore.newAccessRule(new Path("bb/**"), IAccessRule.K_DISCOURAGED);
+      accessRules[0] = JavaCore.newAccessRule(IPath.fromOSString("bb/**"), IAccessRule.K_DISCOURAGED);
 
       IClasspathAttribute[] attributes = new IClasspathAttribute[1];
       attributes[0] = JavaCore.newClasspathAttribute("foo", "aa");
 
-      entries[1] = JavaCore.newLibraryEntry(new Path("/foo/moo.jar"), new Path("/foo/moo-sources.jar"), new Path(
+      entries[1] = JavaCore.newLibraryEntry(IPath.fromOSString("/foo/moo.jar"), IPath.fromOSString("/foo/moo-sources.jar"), IPath.fromOSString(
           "/foo/moo-javadoc.jar"), accessRules, attributes, false);
     }
 
     ByteArrayOutputStream os = new ByteArrayOutputStream();
-    helper.writeContainer(new MavenClasspathContainer(new Path(IClasspathManager.CONTAINER_ID), entries), os);
+    helper.writeContainer(new MavenClasspathContainer(IPath.fromOSString(IClasspathManager.CONTAINER_ID), entries), os);
 
     IClasspathContainer container = helper.readContainer(new ByteArrayInputStream(os.toByteArray()));
 
