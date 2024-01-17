@@ -15,8 +15,36 @@
 
 	<properties>
 		<tycho.scmUrl>scm:git:https://github.com/tesla/m2e-core-tests.git</tycho.scmUrl>
+		<tycho.test.platformArgs></tycho.test.platformArgs>
 	</properties>
 	<modules>
 		<module>org.eclipse.m2e.tests</module>
 	</modules>
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.eclipse.tycho</groupId>
+					<artifactId>tycho-surefire-plugin</artifactId>
+					<version>${tycho-version}</version>
+					<configuration>
+						<argLine>${tycho.testArgLine} ${tycho.test.platformArgs}</argLine>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+	<profiles>
+		<profile>
+			<id>macosx</id>
+			<activation>
+				<os>
+					<family>mac</family>
+				</os>
+			</activation>
+			<properties>
+				<tycho.test.platformArgs>-XstartOnFirstThread</tycho.test.platformArgs>
+			</properties>
+		</profile>
+	</profiles>
 </project>
