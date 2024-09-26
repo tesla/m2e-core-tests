@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Red Hat, Inc.
+ * Copyright (c) 2012, 2024 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -18,8 +18,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.util.Hashtable;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import org.eclipse.core.resources.IProject;
@@ -37,20 +35,6 @@ import org.eclipse.m2e.tests.common.FileHelpers;
  * @author Fred Bricon
  */
 public class ProjectConversionTest extends AbstractProjectConversionTestCase {
-
-  @Override
-  @Before
-  public void setUp() throws Exception {
-    super.setUp();
-    System.setProperty("org.eclipse.m2e.jdt.conversion.compiler.version", "2.3.2");
-  }
-
-  @Override
-  @After
-  public void tearDown() throws Exception {
-    System.clearProperty("org.eclipse.m2e.jdt.conversion.compiler.version");
-    super.tearDown();
-  }
 
   @Test
   public void testMavenLayoutProjectConversion() throws Exception {
@@ -93,7 +77,7 @@ public class ProjectConversionTest extends AbstractProjectConversionTestCase {
     // during conversion
     Hashtable<String, String> options = JavaCore.getOptions();
     try {
-      String version = "1.7";
+      String version = "11";
       Hashtable<String, String> newOptions = new Hashtable<>(options);
       newOptions.put(JavaCore.COMPILER_SOURCE, version);
       newOptions.put(JavaCore.COMPILER_COMPLIANCE, version);
