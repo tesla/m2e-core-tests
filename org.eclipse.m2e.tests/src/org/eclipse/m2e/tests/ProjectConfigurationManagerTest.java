@@ -220,8 +220,8 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     });
 
     IJavaProject javaProject = JavaCore.create(project);
-    assertEquals("1.6", javaProject.getOption(JavaCore.COMPILER_SOURCE, true));
-    assertEquals("1.5", javaProject.getOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, true));
+    assertEquals("11", javaProject.getOption(JavaCore.COMPILER_SOURCE, true));
+    assertEquals("11", javaProject.getOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, true));
   }
 
   @Test
