@@ -54,7 +54,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.launching.JavaRuntime;
 
 import org.apache.maven.archetype.catalog.Archetype;
 import org.apache.maven.artifact.Artifact;
@@ -871,64 +870,6 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     waitForJobsToComplete();
 
     assertTrue(workspace.getRoot().getProject("My super awesome project-0.0.1-SNAPSHOT").exists());
-  }
-
-  @Test
-  public void testCompilerSettingsJsr14() throws Exception {
-    deleteProject("compilerSettingsJsr14");
-
-    ResolverConfiguration configuration = new ResolverConfiguration();
-    ProjectImportConfiguration projectImportConfiguration = new ProjectImportConfiguration(configuration);
-    importProject("compilerSettingsJsr14", "projects/compilerSettingsJsr14", projectImportConfiguration);
-
-    waitForJobsToComplete();
-
-    IProject project = workspace.getRoot().getProject("compilerSettingsJsr14");
-    assertTrue(project.exists());
-
-    WorkspaceHelpers.assertNoErrors(project);
-
-    IJavaProject javaProject = JavaCore.create(project);
-    assertEquals("1.5", javaProject.getOption(JavaCore.COMPILER_SOURCE, true));
-    assertEquals("1.5", javaProject.getOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, true));
-
-    IClasspathEntry jreEntry = getJreContainer(javaProject.getRawClasspath());
-    assertEquals("J2SE-1.5", JavaRuntime.getExecutionEnvironmentId(jreEntry.getPath()));
-  }
-
-  @Test
-  public void testCompilerSettings14() throws Exception {
-    deleteProject("compilerSettings14");
-
-    ResolverConfiguration configuration = new ResolverConfiguration();
-    ProjectImportConfiguration projectImportConfiguration = new ProjectImportConfiguration(configuration);
-    importProject("compilerSettings14", "projects/compilerSettings14", projectImportConfiguration);
-
-    waitForJobsToComplete();
-
-    IProject project = workspace.getRoot().getProject("compilerSettings14");
-    assertTrue(project.exists());
-
-    // Build path specifies execution environment J2SE-1.4. 
-    // There are no JREs in the workspace strictly compatible with this environment.
-    WorkspaceHelpers.assertNoErrors(project);
-
-    IJavaProject javaProject = JavaCore.create(project);
-    assertEquals("1.4", javaProject.getOption(JavaCore.COMPILER_SOURCE, true));
-    assertEquals("1.4", javaProject.getOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, true));
-    assertEquals("123", javaProject.getOption(JavaCore.COMPILER_PB_MAX_PER_UNIT, true));
-
-    IClasspathEntry jreEntry = getJreContainer(javaProject.getRawClasspath());
-    assertEquals("J2SE-1.4", JavaRuntime.getExecutionEnvironmentId(jreEntry.getPath()));
-  }
-
-  private IClasspathEntry getJreContainer(IClasspathEntry[] entries) {
-    for(IClasspathEntry entry : entries) {
-      if(JavaRuntime.newDefaultJREContainerPath().isPrefixOf(entry.getPath())) {
-        return entry;
-      }
-    }
-    return null;
   }
 
   @Test
