@@ -55,7 +55,7 @@ jobs:
       with:
        run: mvn clean verify -Pits -Dtycho.p2.baselineMode=warn --batch-mode
     - name: Upload Test Results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: test-results-${{ matrix.os }}
         if-no-files-found: error
@@ -66,7 +66,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Upload
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: Event File
         path: ${{ github.event_path }}
