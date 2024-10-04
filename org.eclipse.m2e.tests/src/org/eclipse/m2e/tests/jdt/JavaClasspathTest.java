@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2021 Sonatype, Inc.
+ * Copyright (c) 2010, 2024 Sonatype, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -355,10 +355,10 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
         .getClasspathEntries();
     assertEquals("" + Arrays.asList(classpathEntries), 6, classpathEntries.length);
     //test dependency
-    assertEquals("junit-4.13.1.jar", classpathEntries[0].getPath().lastSegment());
+    assertEquals("junit-4.13.2.jar", classpathEntries[0].getPath().lastSegment());
     assertTest(classpathEntries[0]);
     //compile dependency
-    assertEquals("commons-io-2.7.jar", classpathEntries[2].getPath().lastSegment());
+    assertEquals("commons-io-2.17.0.jar", classpathEntries[2].getPath().lastSegment());
     assertNotTest(classpathEntries[2]);
     //test + transitive test dependencies
     assertEquals("commons-beanutils-1.9.4.jar", classpathEntries[3].getPath().lastSegment());
@@ -381,7 +381,7 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     assertDoesntExportTests(classpathEntries[0]);
 
     //transitive test dependency
-    assertEquals("commons-io-2.7.jar", classpathEntries[1].getPath().lastSegment());
+    assertEquals("commons-io-2.17.0.jar", classpathEntries[1].getPath().lastSegment());
     assertTest(classpathEntries[1]);
   }
 
@@ -436,7 +436,7 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     assertExportsTests(classpathEntries[0]);
 
     //transitive dependency
-    assertEquals("commons-io-2.7.jar", classpathEntries[1].getPath().lastSegment());
+    assertEquals("commons-io-2.17.0.jar", classpathEntries[1].getPath().lastSegment());
     assertNotTest(classpathEntries[1]);
   }
 
