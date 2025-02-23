@@ -41,6 +41,7 @@ Export-Package: org.eclipse.m2e.tests,
  org.eclipse.m2e.tests.embedder,
  org.eclipse.m2e.tests.scm
 Import-Package: org.apache.maven.archetype.catalog;provider=m2e,
+ org.apache.maven.archetype.metadata;provider=m2e,
  org.eclipse.equinox.p2.metadata,
  org.eclipse.ltk.core.refactoring,
  org.eclipse.m2e.refactoring.exclude,
