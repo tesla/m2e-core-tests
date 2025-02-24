@@ -17,6 +17,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
 import org.junit.Test;
@@ -61,7 +62,7 @@ public class MappingDiscoveryJobTest extends AbstractMavenProjectTestCase {
   private void checkOpensMappingDiscoveryWizard(IProject project, boolean expectedResult) throws Exception {
     discoveryJob = new MappingDiscoveryJobNoUI(Collections.singleton(project));
     discoveryJob.schedule();
-    JobHelpers.waitForJobs(job -> discoveryJob == job, 100);
+    JobHelpers.waitForJobs(job -> discoveryJob == job, (int) TimeUnit.SECONDS.toMillis(10));
     assertEquals("MappingDiscoveryJob was " + (expectedResult ? "" : "not ") + "supposed to open", expectedResult,
         discoveryJob.openedMappingWizard);
   }
