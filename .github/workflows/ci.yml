@@ -26,7 +26,7 @@ jobs:
         fetch-depth: 0
         submodules: false
         repository: 'eclipse-m2e/m2e-core'
-        ref: 'master'
+        ref: 'main'
     - name: Checkout tests
       uses: actions/checkout@v4
       with:
@@ -56,6 +56,7 @@ jobs:
        run: mvn clean verify -Pits -Dtycho.p2.baselineMode=warn --batch-mode
     - name: Upload Test Results
       uses: actions/upload-artifact@v4
+      if: always()
       with:
         name: test-results-${{ matrix.os }}
         if-no-files-found: error
