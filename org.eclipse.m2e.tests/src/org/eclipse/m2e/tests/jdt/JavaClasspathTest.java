@@ -361,7 +361,7 @@ public class JavaClasspathTest extends AbstractMavenProjectTestCase {
     assertEquals("commons-io-2.17.0.jar", classpathEntries[2].getPath().lastSegment());
     assertNotTest(classpathEntries[2]);
     //test + transitive test dependencies
-    assertEquals("commons-beanutils-1.9.4.jar", classpathEntries[3].getPath().lastSegment());
+    assertEquals("commons-beanutils-1.11.0.jar", classpathEntries[3].getPath().lastSegment());
     assertTest(classpathEntries[3]);
   }
 
